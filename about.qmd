@@ -6,14 +6,20 @@ about:
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/shubhamg2208
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://linkedin.com/shubhamgupta2208
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/goodhamgupta
 
 ---
 
-About this blog
+Hi! I'm Shubham Gupta. Through this blog, I aim to talk a little bit about my current work and potential topics I'm interested in learning. Some of my main projects are available here:
+
+* [Snowplow Elixir Tracker](https://github.com/goodhamgupta/snowplow-elixir-tracker)
+* [Paper Reviews](https://github.com/goodhamgupta/paper_reviews)
+* [Doing Bayesian Data Analysis: Notes and Solutions](https://github.com/goodhamgupta/dbda_python)
+
+You can learn more about my work and contribute on [GitHub](https://github.com/goodhamgupta).

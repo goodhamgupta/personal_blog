@@ -1,5 +1,5 @@
 ---
-title: "personal_blog"
+title: "Tech Musings"
 listing:
   contents: posts
   sort: "date desc"

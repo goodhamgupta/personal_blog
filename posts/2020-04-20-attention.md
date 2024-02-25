@@ -50,7 +50,7 @@ Model Architecture
 
     -   Point wise fully connected layer for encoder and decoder
 
-    ![Transformer[]{data-label="fig:transformer"}]({{site.baseurl}}/images/attention/transformer.png)
+    ![Transformer[]{data-label="fig:transformer"}](attention/transformer.png)
 
 
 Encoder and decoder stacks
@@ -87,7 +87,7 @@ Attention
 
 -   Scaled dot-product attention and multi-head attention
 
-    ![Types of Attention[]{data-label="fig:attention"}]({{site.baseurl}}/images/attention/attention_types.png)
+    ![Types of Attention[]{data-label="fig:attention"}](attention/attention_types.png)
 
 -   Attention is calculated as: 
 

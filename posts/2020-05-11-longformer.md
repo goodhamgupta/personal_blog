@@ -9,7 +9,6 @@ categories:
 - longformer
 date: '2020-05-11'
 description: Transformers for loooong documents
-image: images/longformer/training.png
 layout: post
 title: LongFormer
 toc: true
@@ -24,7 +23,7 @@ toc: true
 - [Longformer](https://arxiv.org/abs/2004.05150) by the team at Allen AI aims to address this problem and demonstrate it's application to do transfer learning for large documents.
 - Other approaches to are described in recent work such as [Transformer XL](https://arxiv.org/abs/1901.02860), [Blockwise](https://arxiv.org/abs/1911.02972), [Reformer](https://arxiv.org/abs/2001.04451), etc. Their characteristics are mentioned below:
 
-![Comparison[]{data-label="fig:overview"}]({{site.baseurl}}/images/longformer/comparison.png)
+![Comparison[]{data-label="fig:overview"}](longformer/comparison.png)
 
 # Key Contributions
 
@@ -34,7 +33,7 @@ toc: true
 
 # Attention Patterns
 - The attention patterns implemented are as follows:
-![Attention[]{data-label="fig:overview"}]({{site.baseurl}}/images/longformer/attention.png)
+![Attention[]{data-label="fig:overview"}](longformer/attention.png)
 
 ## Sliding Window Attention
 
@@ -45,7 +44,7 @@ toc: true
   - Yes, it does. This is why we stack multiple layers of self-attention. As shown in the image below, the green neuron learns from the first 3 tokens(Lionel, Messi, is). However, the brown neuron learns from the green, yellow, and red neuron, who together learn from the first 5 tokens. This way, we can apply attention to long sequences(Lionel, Messi, is, the, true).
 - As with the CNN, we will have $l$ layers to this sliding window attention(multi-head attention) implemented to learn low level and high-level features. A balance should be found between the number of layers $l$(efficiency) and the window size $w$(model representation capacity). 
 
-![Sliding Window Attention[]{data-label="fig:overview"}]({{site.baseurl}}/images/longformer/sliding_window.png)
+![Sliding Window Attention[]{data-label="fig:overview"}](longformer/sliding_window.png)
 
 - **Pros**: Reduces computation from $O(n^2)$ to $O(n*w)$ i.e the computation complexity will only scale linearly now.
 
@@ -83,9 +82,9 @@ toc: true
 - We will use two different sets of Q,K and V matrices for sliding window and global attention. 
 - $Q_g$, $K_g$, $V_g$ are initialized with $Q_s$, $K_s$, $V_s$
 
-![Banded Matrix]({{site.baseurl}}/images/longformer/old_matrix.svg)
+![Banded Matrix](longformer/old_matrix.svg)
 <center><b>Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b></center>
-![Compressed Banded Matrix]({{site.baseurl}}/images/longformer/band_matrix.svg)
+![Compressed Banded Matrix](longformer/band_matrix.svg)
 <center><b>Compressed Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b></center>
 
 ### CUDA Kernels
@@ -94,7 +93,7 @@ toc: true
 - Implementing matrix operations for band matrices using native for loops and via frameworks is not easy and optimized.
 - The authors have provided custom CUDA kernels implemented using [TVM](https://github.com/apache/incubator-tvm) for this banded matrix operations.
 - As demonstrated in the image below, the custom CUDA kernels have a significant impact on the time and memory consumption of the model. The kernels and implementation for the longformer are available [here](https://github.com/allenai/longformer).
-![Performance]({{site.baseurl}}/images/longformer/performance.png)
+![Performance](longformer/performance.png)
 <center><b>LongFormer Performance</b></center>
 
 # Autoregressive Language Modelling
@@ -124,7 +123,7 @@ toc: true
 
 ## Results
 
-![Results]({{site.baseurl}}/images/longformer/results.png)
+![Results](longformer/results.png)
 - Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.
 - The large model was only tested on enwik8 due to the computational cost of training.
 - It's also important to note that, while the large model did not achieve SOTA, it performs much better than it's counterparts who have almost 2x more parameters.
@@ -145,13 +144,13 @@ toc: true
 - Apart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, $\frac{1}{3}^{rd}$ Realnews dataset was added with tokens larger than 1200.
 - Both models(small and large) trained with varying gradient updates.
 
-![Copy init]({{site.baseurl}}/images/longformer/copy_init.png)
+![Copy init](longformer/copy_init.png)
 <center><b>MLM BPC for RoBERTA with various model config</b></center>
 
 # Task-Specific Results
 
 - Main results are summarized below:
-![Copy init]({{site.baseurl}}/images/longformer/main_results.png)
+![Copy init](longformer/main_results.png)
 <center><b>LongFormer Task Specific Results</b></center>
 - The performance gain is high for tasks that require long contexts such as WikiHop and Hyperpartisan.
 - For TriviaQA, the improvement is small because the local context is often sufficient to answer the given question.
