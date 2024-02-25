@@ -16,10 +16,8 @@ about:
 
 ---
 
-Hi! I'm Shubham Gupta. Through this blog, I aim to talk a little bit about my current work and potential topics I'm interested in learning. Some of my main projects are available here:
+Hi! I'm Shubham Gupta. I'm a software engineer. I'm from Bengaluru, India, and currently based in Singapore. 
 
-* [Snowplow Elixir Tracker](https://github.com/goodhamgupta/snowplow-elixir-tracker)
-* [Paper Reviews](https://github.com/goodhamgupta/paper_reviews)
-* [Doing Bayesian Data Analysis: Notes and Solutions](https://github.com/goodhamgupta/dbda_python)
+Through this blog, I aim to talk a little bit about my current work and potential topics I'm interested in learning. I'm an active contributor to the [Elixir Ecosystem](https://hex.pm/users/goodhamgupta) and build software, some of which is available on [GitHub](https://github.com/goodhamgupta)
 
-You can learn more about my work and contribute on [GitHub](https://github.com/goodhamgupta).
+I'm always looking to connect with like-minded individuals, discuss ideas and build products. If you'd like to get in touch, Shoot me an email at shubhamg2208 at live dot com.
