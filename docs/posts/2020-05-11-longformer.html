@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Shubham Gupta">
+<meta name="dcterms.date" content="2020-05-11">
+<meta name="description" content="Transformers for loooong documents">
+
+<title>Shubham Gupta - LongFormer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Shubham Gupta</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/goodhamgupta"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/shubhamg2208"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://linkedin.com/in/shubhamgupta2208"> <i class="bi bi-linkedin" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">LongFormer</h1>
+                  <div>
+        <div class="description">
+          Transformers for loooong documents
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">nlp</div>
+                <div class="quarto-category">transformer</div>
+                <div class="quarto-category">review</div>
+                <div class="quarto-category">longformer</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Shubham Gupta </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">May 11, 2020</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#key-contributions" id="toc-key-contributions" class="nav-link" data-scroll-target="#key-contributions">Key Contributions</a></li>
+  <li><a href="#attention-patterns" id="toc-attention-patterns" class="nav-link" data-scroll-target="#attention-patterns">Attention Patterns</a>
+  <ul class="collapse">
+  <li><a href="#sliding-window-attention" id="toc-sliding-window-attention" class="nav-link" data-scroll-target="#sliding-window-attention">Sliding Window Attention</a></li>
+  <li><a href="#dilated-sliding-window" id="toc-dilated-sliding-window" class="nav-link" data-scroll-target="#dilated-sliding-window">Dilated Sliding Window</a></li>
+  <li><a href="#global-attention" id="toc-global-attention" class="nav-link" data-scroll-target="#global-attention">Global Attention</a>
+  <ul class="collapse">
+  <li><a href="#linear-projections" id="toc-linear-projections" class="nav-link" data-scroll-target="#linear-projections">Linear Projections</a></li>
+  <li><a href="#cuda-kernels" id="toc-cuda-kernels" class="nav-link" data-scroll-target="#cuda-kernels">CUDA Kernels</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#autoregressive-language-modelling" id="toc-autoregressive-language-modelling" class="nav-link" data-scroll-target="#autoregressive-language-modelling">Autoregressive Language Modelling</a>
+  <ul class="collapse">
+  <li><a href="#attention-pattern" id="toc-attention-pattern" class="nav-link" data-scroll-target="#attention-pattern">Attention Pattern</a></li>
+  </ul></li>
+  <li><a href="#experimental-setup" id="toc-experimental-setup" class="nav-link" data-scroll-target="#experimental-setup">Experimental Setup</a>
+  <ul class="collapse">
+  <li><a href="#task-and-datasets" id="toc-task-and-datasets" class="nav-link" data-scroll-target="#task-and-datasets">Task and Datasets</a></li>
+  <li><a href="#training-and-evaluation" id="toc-training-and-evaluation" class="nav-link" data-scroll-target="#training-and-evaluation">Training and Evaluation</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  </ul></li>
+  <li><a href="#pretraining-and-finetuning" id="toc-pretraining-and-finetuning" class="nav-link" data-scroll-target="#pretraining-and-finetuning">Pretraining and Finetuning</a>
+  <ul class="collapse">
+  <li><a href="#copy-initialization-trick" id="toc-copy-initialization-trick" class="nav-link" data-scroll-target="#copy-initialization-trick">Copy initialization trick</a></li>
+  <li><a href="#pretraining" id="toc-pretraining" class="nav-link" data-scroll-target="#pretraining">Pretraining</a></li>
+  </ul></li>
+  <li><a href="#task-specific-results" id="toc-task-specific-results" class="nav-link" data-scroll-target="#task-specific-results">Task-Specific Results</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li>The NLP world had its ImageNet moment with the introduction of the Transformer in the paper <strong>Attention is All you Need</strong>.</li>
+<li>The ability to be able to process multiple words/tokens in parallel and train models without labeled data(using self-attention) led to the creation of multiple models which gave us SOTA results on many interesting tasks such as Question Answering, Summarization, etc.</li>
+<li>However, the biggest drawback is the Transformer architecture is the limitation it has on the number of tokens it can process at a once, due to exponentially increasing memory and compute requirements(typically about 512 tokens), causing the performance to deteriorate over large documents.</li>
+<li><a href="https://arxiv.org/abs/2004.05150">Longformer</a> by the team at Allen AI aims to address this problem and demonstrate it’s application to do transfer learning for large documents.</li>
+<li>Other approaches to are described in recent work such as <a href="https://arxiv.org/abs/1901.02860">Transformer XL</a>, <a href="https://arxiv.org/abs/1911.02972">Blockwise</a>, <a href="https://arxiv.org/abs/2001.04451">Reformer</a>, etc. Their characteristics are mentioned below:</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/comparison.png" class="img-fluid figure-img"></p>
+<figcaption>Comparison<span data-label="fig:overview"></span></figcaption>
+</figure>
+</div>
+</section>
+<section id="key-contributions" class="level1">
+<h1>Key Contributions</h1>
+<ul>
+<li>Transformers are expensive because of the massive matrix operations involved in the self-attention step. Since each token can attend to every other token in the given input, we get a runtime of <span class="math inline">\(O(n^2)\)</span>, where <span class="math inline">\(n\)</span> is the sequence length(typically 512 tokens).</li>
+<li>LongFormer aims to solve this using a form of sparse attention and reducing the operational complexity to <span class="math inline">\(O(n)\)</span>. They achieve this using the concept of the sliding window and dilated sliding window.</li>
+<li>The authors also show how this attention pattern can be modified (using dilation and global attention) on a per-task basis, thereby allowing us to use a single model for all tasks rather than creating task-specific architectures.</li>
+</ul>
+</section>
+<section id="attention-patterns" class="level1">
+<h1>Attention Patterns</h1>
+<ul>
+<li>The attention patterns implemented are as follows: <img src="longformer/attention.png" class="img-fluid" alt="Attention"></li>
+</ul>
+<section id="sliding-window-attention" class="level2">
+<h2 class="anchored" data-anchor-id="sliding-window-attention">Sliding Window Attention</h2>
+<ul>
+<li><strong>TLDR</strong> : Similar to kernels for CNN which apply a matrix operation to a set of pixels and move onto the next set, apply attention to tokens in current window <em>only</em>.</li>
+<li>In this, we change the attention objective to only focus on the tokens that occur in a context window <span class="math inline">\(w\)</span>.</li>
+<li>Each token will be able to attend to <span class="math inline">\(\frac{1}{2}w\)</span> number of tokens to it’s left and right.</li>
+<li><strong>Question</strong>: But doesn’t this limit the number of tokens being taken into account to only the tokens in the window?
+<ul>
+<li>Yes, it does. This is why we stack multiple layers of self-attention. As shown in the image below, the green neuron learns from the first 3 tokens(Lionel, Messi, is). However, the brown neuron learns from the green, yellow, and red neuron, who together learn from the first 5 tokens. This way, we can apply attention to long sequences(Lionel, Messi, is, the, true).</li>
+</ul></li>
+<li>As with the CNN, we will have <span class="math inline">\(l\)</span> layers to this sliding window attention(multi-head attention) implemented to learn low level and high-level features. A balance should be found between the number of layers <span class="math inline">\(l\)</span>(efficiency) and the window size <span class="math inline">\(w\)</span>(model representation capacity).</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/sliding_window.png" class="img-fluid figure-img"></p>
+<figcaption>Sliding Window Attention<span data-label="fig:overview"></span></figcaption>
+</figure>
+</div>
+<ul>
+<li><p><strong>Pros</strong>: Reduces computation from <span class="math inline">\(O(n^2)\)</span> to <span class="math inline">\(O(n*w)\)</span> i.e the computation complexity will only scale linearly now.</p></li>
+<li><p><strong>Cons</strong>: To learn dependencies for a large sequence, we would either have to increase the window size <span class="math inline">\(w\)</span> or increase the number of layers <span class="math inline">\(l\)</span>, both of which will cause an increase in the amount of memory and processing power required to train and test the model.</p></li>
+</ul>
+</section>
+<section id="dilated-sliding-window" class="level2">
+<h2 class="anchored" data-anchor-id="dilated-sliding-window">Dilated Sliding Window</h2>
+<ul>
+<li><p><strong>TLDR</strong>: Use dilation instead of window attention i.e for some particular window size, take alternate elements while performing self-attention.</p></li>
+<li><p>To solve the problem for long sequences, the authors propose that instead of considering all tokens in window <span class="math inline">\(w\)</span>, consider alternate(or any number <span class="math inline">\(d\)</span>)tokens instead. The range of tokens will now be <span class="math inline">\(l * d * w\)</span>, which will be large for even a small value of <span class="math inline">\(d\)</span>.</p></li>
+<li><p><strong>Pros</strong>: This small change will allow us to cover a wider range of tokens without significant changes to the architecture.</p></li>
+<li><p><strong>Cons</strong>: Skipping tokens might lead to loss of information in the lower layers which will get propagated to the higher layers. This will lead to unstable training and poor model performance.</p></li>
+</ul>
+</section>
+<section id="global-attention" class="level2">
+<h2 class="anchored" data-anchor-id="global-attention">Global Attention</h2>
+<ul>
+<li><strong>TLDR</strong>: Use full attention for certain tokens depending on the task. This is an engineering choice.</li>
+<li>In BERT style models, optimal representation for input sequence varies by task.
+<ul>
+<li>For MLM, local context is used to predict the masked word</li>
+<li>For classification, [CLS] token is used.</li>
+<li>For QnA, the question is concatenated with the document to help model learn through self-attention.</li>
+</ul></li>
+<li>The windowed and dilated attention is not flexible enough to learn task-specific representations.</li>
+<li>Hence, for some tokens enable global tokens i.e at these tokens, all tokens in the sequence can attend to it. For classification, enable global attention on the [CLS] token.</li>
+<li><strong>Pros</strong>:
+<ul>
+<li>Adding global attention improves performance for specific tasks. Since these tokens are limited in number, the complexity still stays at <span class="math inline">\(O(n)\)</span>.</li>
+<li>It also increases the representational power of the model.</li>
+</ul></li>
+</ul>
+<section id="linear-projections" class="level3">
+<h3 class="anchored" data-anchor-id="linear-projections">Linear Projections</h3>
+<ul>
+<li><p><strong>TLDR</strong>: Use two sets of Q,K and V matrices, one for sliding window attention, one for global attention.</p></li>
+<li><p>Attention is defined as:</p>
+<p><span class="math display">\[
+\begin{aligned}
+Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
+\end{aligned}
+\]</span></p></li>
+<li><p>We will use two different sets of Q,K and V matrices for sliding window and global attention.</p></li>
+<li><p><span class="math inline">\(Q_g\)</span>, <span class="math inline">\(K_g\)</span>, <span class="math inline">\(V_g\)</span> are initialized with <span class="math inline">\(Q_s\)</span>, <span class="math inline">\(K_s\)</span>, <span class="math inline">\(V_s\)</span></p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/old_matrix.svg" class="img-fluid figure-img"></p>
+<figcaption>Banded Matrix</figcaption>
+</figure>
+</div>
+<center>
+<b>Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b>
+</center>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/band_matrix.svg" class="img-fluid figure-img"></p>
+<figcaption>Compressed Banded Matrix</figcaption>
+</figure>
+</div>
+<center>
+<b>Compressed Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b>
+</center>
+</section>
+<section id="cuda-kernels" class="level3">
+<h3 class="anchored" data-anchor-id="cuda-kernels">CUDA Kernels</h3>
+<ul>
+<li>One of the important and interesting contributions of this paper is the implementation of matrix multiplication via CUDA kernels.</li>
+<li>In the dilated sliding window, the matrix formed is called a <strong>band matrix</strong> i.e there are diagonal bands of indices that have values and the other values are 0.</li>
+<li>Implementing matrix operations for band matrices using native for loops and via frameworks is not easy and optimized.</li>
+<li>The authors have provided custom CUDA kernels implemented using <a href="https://github.com/apache/incubator-tvm">TVM</a> for this banded matrix operations.</li>
+<li>As demonstrated in the image below, the custom CUDA kernels have a significant impact on the time and memory consumption of the model. The kernels and implementation for the longformer are available <a href="https://github.com/allenai/longformer">here</a>. <img src="longformer/performance.png" class="img-fluid" alt="Performance">
+<center>
+<b>LongFormer Performance</b>
+</center></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="autoregressive-language-modelling" class="level1">
+<h1>Autoregressive Language Modelling</h1>
+<ul>
+<li>Estimate the probability of a token given its previous tokens/characters in an input sequence.</li>
+<li>It is a fundamental task in natural language and all previous work use this task as their primary evaluation measure.</li>
+</ul>
+<section id="attention-pattern" class="level2">
+<h2 class="anchored" data-anchor-id="attention-pattern">Attention Pattern</h2>
+<ul>
+<li>In multi-head attention, each head computes a different score.</li>
+<li>To get a good representation of all tokens, the authors propose that normal sliding window attention can be used for the lower layers, and dilated sliding window attention can be used the higher layers(top 1-2 layers).</li>
+<li>The reasoning for this approach is that in the lower layers, the local context is more important, and in the upper layers, the global context is more important. Hence, it is acceptable to skip over a few tokens in the upper layers.</li>
+</ul>
+</section>
+</section>
+<section id="experimental-setup" class="level1">
+<h1>Experimental Setup</h1>
+<section id="task-and-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="task-and-datasets">Task and Datasets</h2>
+<ul>
+<li>The authors focus on character level modeling because the sequences are naturally longer than those of word-level language modeling.</li>
+<li>Datasets that were used are <em>text8</em> and <em>enwik8</em>.</li>
+</ul>
+</section>
+<section id="training-and-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="training-and-evaluation">Training and Evaluation</h2>
+<ul>
+<li>The model was trained in multiple phases.
+<ul>
+<li>The window and sequence length was increased in each phase. This is to allow local context from tokens to be learned efficiently.</li>
+<li>Overall five training phases used, starting from the token length of 2048 to 23040 (45x more than vanilla BERT).</li>
+<li>Two models were created for evaluation:
+<ul>
+<li>Small model: 12 layers, 512 hidden size</li>
+<li>Large model: 30 layers, 512 hidden sizes (2.5x larger)</li>
+</ul></li>
+<li>During the model evaluation, the model can run on a sequence length of 32256(63x more than vanilla BERT).</li>
+</ul></li>
+</ul>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p><img src="longformer/results.png" class="img-fluid" alt="Results"> - Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8. - The large model was only tested on enwik8 due to the computational cost of training. - It’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters.</p>
+</section>
+</section>
+<section id="pretraining-and-finetuning" class="level1">
+<h1>Pretraining and Finetuning</h1>
+<ul>
+<li>The LongFormer is trained to solve the tasks of classification, QA, and coreference resolution.</li>
+<li>It is trained with MLM objective.</li>
+</ul>
+<section id="copy-initialization-trick" class="level2">
+<h2 class="anchored" data-anchor-id="copy-initialization-trick">Copy initialization trick</h2>
+<ul>
+<li>Since the MLM objective pretraining objective is expensive, the authors continue to train from the checkpoints of the <a href="https://arxiv.org/abs/1907.11692">RoBERTA</a> model.</li>
+<li>The attention mechanism is replaced with the new attention module.</li>
+<li>For the position embeddings:
+<ul>
+<li>RoBERTA has position embeddings for 512 tokens.</li>
+<li>LongFormer can support position embeddings for 4096 tokens(larger for larger GPU)</li>
+<li>To use the weight checkpoints from RoBERTA, instead of random initialization, copy the 512 position embeddings <strong>multiple times</strong> as analysis of the BERT attention heads showed a strong learned bias to attend to the local context.</li>
+</ul></li>
+</ul>
+</section>
+<section id="pretraining" class="level2">
+<h2 class="anchored" data-anchor-id="pretraining">Pretraining</h2>
+<ul>
+<li>Apart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, <span class="math inline">\(\frac{1}{3}^{rd}\)</span> Realnews dataset was added with tokens larger than 1200.</li>
+<li>Both models(small and large) trained with varying gradient updates.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/copy_init.png" class="img-fluid figure-img"></p>
+<figcaption>Copy init</figcaption>
+</figure>
+</div>
+<center>
+<b>MLM BPC for RoBERTA with various model config</b>
+</center>
+</section>
+</section>
+<section id="task-specific-results" class="level1">
+<h1>Task-Specific Results</h1>
+<ul>
+<li>Main results are summarized below: <img src="longformer/main_results.png" class="img-fluid" alt="Copy init">
+<center>
+<b>LongFormer Task Specific Results</b>
+</center></li>
+<li>The performance gain is high for tasks that require long contexts such as WikiHop and Hyperpartisan.</li>
+<li>For TriviaQA, the improvement is small because the local context is often sufficient to answer the given question.</li>
+<li>Similarly, gains in IMDB and OntoNotes are small(because of majority short reviews for IMDB and low distance between any two mentions for OntoNotes).</li>
+<li>However, the LongFormer large model achieves SOTA on WikiHop and TriviaQA.</li>
+<li>Using the large model also improves performance on HotpotQA.</li>
+</ul>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<ul>
+<li>Overall, this was a fun read. The changes introduced in the attention mechanism are fairly simple but they yield very high-performance gains, paving the path to make these models useful in future applications.</li>
+<li>Personally, and also as noted by the authors, I would like to see the performance of the LongFormer on the summarization task.</li>
+</ul>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ul>
+<li>Fantastic summary by Yannic Kilcher available <a href="https://www.youtube.com/watch?v=_8KNb5iqblE">here</a>.</li>
+<li>LongFormer paper available <a href="https://arxiv.org/abs/2004.05150">here</a></li>
+<li>Dair.ai NLP newsletter available <a href="https://dair.ai/NLP_Newsletter_10_en/">here</a></li>
+<li>Open-sourced longformer code available <a href="https://github.com/allenai/longformer/">here</a></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
