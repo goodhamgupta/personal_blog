@@ -9,7 +9,7 @@ about:
       href: https://twitter.com/shubhamg2208
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com/shubhamgupta2208
+      href: https://linkedin.com/in/shubhamgupta2208
     - icon: github
       text: Github
       href: https://github.com/goodhamgupta
