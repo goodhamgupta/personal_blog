@@ -1,1 +1,1 @@
-Sitemap: https://shubhamg.in/sitemap.xml
+Sitemap: https://goodhamgupta.github.io/personal_blog/sitemap.xml
