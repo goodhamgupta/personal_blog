@@ -261,7 +261,21 @@ window.Quarto = {
 <h1>Proposed method</h1>
 <section id="overview-of-bison" class="level2">
 <h2 class="anchored" data-anchor-id="overview-of-bison">Overview of BISON</h2>
-<p><img src="bison/bison_architecture.png" class="img-fluid" alt="BISON Architecture"> - The framework has 4 important parts: - <strong>Word level BM25</strong>: In this, we prepend the <em>CLS</em> token to the query and use combined fields representation for the documents. - <strong>Token level representation</strong>: As is the norm, we will use the token, position and segment embedding - <strong>BISON Encoder</strong>: This will encode the query <em>q</em> and the document <em>d</em> into semantic spacy by siamese structure making it possible to serve the model online. The architecture consists of 3 stacked BISON layers. - <strong>Scoring</strong>: The documents are scored using the cosine similarity metric.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="bison/bison_architecture.png" class="img-fluid figure-img"></p>
+<figcaption>BISON Architecture</figcaption>
+</figure>
+</div>
+<ul>
+<li>The framework has 4 important parts:
+<ul>
+<li><strong>Word level BM25</strong>: In this, we prepend the <em>CLS</em> token to the query and use combined fields representation for the documents.</li>
+<li><strong>Token level representation</strong>: As is the norm, we will use the token, position and segment embedding</li>
+<li><strong>BISON Encoder</strong>: This will encode the query <em>q</em> and the document <em>d</em> into semantic spacy by siamese structure making it possible to serve the model online. The architecture consists of 3 stacked BISON layers.</li>
+<li><strong>Scoring</strong>: The documents are scored using the cosine similarity metric.</li>
+</ul></li>
+</ul>
 </section>
 <section id="bison-encoder-weighted-self-attention" class="level2">
 <h2 class="anchored" data-anchor-id="bison-encoder-weighted-self-attention">BISON Encoder: Weighted Self Attention</h2>
@@ -269,7 +283,15 @@ window.Quarto = {
 <li>As we know from the original “Attention” paper, attention is computed using the query, key, and value matrices.</li>
 <li>To the above, we will add the importance of tokens via BM25. We will introduce w_i and multiply with above attention to get new attention score i.e Weighted Self Attention <span class="math display">\[ A_{ij}^w = w_j\frac{q_i.k_j^T}{\sqrt{d}} \]</span></li>
 </ul>
-<p><img src="bison/weighted_self_attention.png" class="img-fluid" alt="Weighted Self attention"> - Mathematically, it is represented as:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="bison/weighted_self_attention.png" class="img-fluid figure-img"></p>
+<figcaption>Weighted Self Attention</figcaption>
+</figure>
+</div>
+<ul>
+<li>Mathematically, it is represented as:</li>
+</ul>
 <p><span class="math display">\[WeightedSelfAttention(Q,K,W,V) = softmax(W (.) \frac{QK^T}{\sqrt{d}}V\]</span></p>
 <ul>
 <li>WSA is the main block unit. Multiple such units are tacked to get the multi-head structure.</li>
