@@ -9,13 +9,11 @@ website:
       - about.qmd
       - icon: github
         href: https://github.com/goodhamgupta
-      - icon: twitter
-        href: https://twitter.com/shubhamg2208
-      - icon: linkedin
-        href: https://linkedin.com/in/shubhamgupta2208
 format:
   html:
-    theme: cosmo
+    theme: 
+      light: cosmo
+      dark: darkly
     css: styles.css
 
 
