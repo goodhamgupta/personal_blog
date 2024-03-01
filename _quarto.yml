@@ -9,6 +9,9 @@ website:
       - about.qmd
       - icon: github
         href: https://github.com/goodhamgupta
+  comments:
+    giscus:
+      repo: goodhamgupta/personal-blog
 format:
   html:
     theme: 

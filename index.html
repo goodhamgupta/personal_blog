@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 
-<meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<head>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<meta charset="utf-8" />
+<meta name="generator" content="quarto-1.4.550" />
 
-<meta name="author" content="Shubham Gupta">
-<meta name="dcterms.date" content="2020-04-23">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 
-<title>Shubham Gupta - TagLM</title>
+
+<title>Shubham Gupta – Tech Musings</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -24,25 +24,7 @@ ul.task-list li input[type="checkbox"] {
 }
 </style>
 
-
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<!-- htmldependencies:E3FAD763 -->
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -70,6 +52,35 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script>
+
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -101,32 +112,37 @@ window.Quarto = {
 };
 </script>
 
-<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="styles.css" />
 </head>
 
-<body class="nav-fixed">
+<body>
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+  <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="/index.html">
     <span class="navbar-title">Shubham Gupta</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+  aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"
+  onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../about.html"> 
+    <a class="nav-link" href="/about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/goodhamgupta"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/goodhamgupta"> <i 
+  class="bi bi-github" 
+  role="img" 
+>
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -139,158 +155,357 @@ window.Quarto = {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <div id="quarto-toc-target"></div>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+  <div class="quarto-title-banner">
     <div class="quarto-title column-body">
-      <h1 class="title">TagLM</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">nlp</div>
-                <div class="quarto-category">language_model</div>
-                <div class="quarto-category">review</div>
-              </div>
-                  </div>
+      <h1 class="title">Tech Musings</h1>
+                      </div>
   </div>
     
   
   <div class="quarto-title-meta">
 
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Shubham Gupta </p>
-            </div>
-    </div>
       
-      <div>
-      <div class="quarto-title-meta-heading">Published</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date">April 23, 2020</p>
-      </div>
-    </div>
     
       
     </div>
     
   
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
-<!-- sidebar -->
-<!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
-  <li><a href="#paper-introduction" id="toc-paper-introduction" class="nav-link" data-scroll-target="#paper-introduction">Paper Introduction</a></li>
-  <li><a href="#taglm" id="toc-taglm" class="nav-link" data-scroll-target="#taglm">TagLM</a>
-  <ul class="collapse">
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview">Overview</a></li>
-  <li><a href="#baseline" id="toc-baseline" class="nav-link" data-scroll-target="#baseline">Baseline</a></li>
-  </ul></li>
-  <li><a href="#experiments" id="toc-experiments" class="nav-link" data-scroll-target="#experiments">Experiments</a>
-  <ul class="collapse">
-  <li><a href="#analysis" id="toc-analysis" class="nav-link" data-scroll-target="#analysis">Analysis</a></li>
-  </ul></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
-  </ul>
-</nav>
-    </div>
-<!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content">
+  </header>
 
 
-
-
-
-<section id="introduction" class="level1">
-<h1>Introduction</h1>
-<ul>
-<li><p>This is the TagLM paper mentioned in Lecture 13 in the CS224N course title <strong>Semi-supervised sequence tagging with bidirectional language models</strong></p></li>
-<li><p>This paper demonstrates how we can use context embeddings from BiLSTM models and use it for sequence labelling tasks</p></li>
-</ul>
-</section>
-<section id="paper-introduction" class="level1">
-<h1>Paper Introduction</h1>
-<ul>
-<li><p>Typically, RNN are used only on labelled data to learn the context embeddings of words.</p></li>
-<li><p>Semi supervised approach used in this paper.</p>
-<ul>
-<li><p>Train LM on large unlabelled corpus</p></li>
-<li><p>Compute embedding at each position in the sequence(LM embedding)</p></li>
-<li><p>Use embedding in supervised sequence tagging model</p></li>
-</ul></li>
-<li><p>Using both forward and backward embeddings gives better performance than using forward only LM.</p></li>
-</ul>
-</section>
-<section id="taglm" class="level1">
-<h1>TagLM</h1>
-<section id="overview" class="level2">
-<h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<ul>
-<li><p>Extract word and LM embeddings for every token</p></li>
-<li><p>Prepare embedding by concatinating both embeddings</p></li>
-<li><p>se them in supervised sequence tagging model</p></li>
-</ul>
-</section>
-<section id="baseline" class="level2">
-<h2 class="anchored" data-anchor-id="baseline">Baseline</h2>
-<ul>
-<li><p>Baseline model is hierachical neural tagging model</p></li>
-<li><p>Obtain word and character embeddings. Concatenate them to form final embedding.</p>
-<p><span class="math display">\[ x_k = [c_k;w_k] \]</span></p></li>
-<li><p>Char embedding: Can be obtained via CNN or RNN</p></li>
-<li><p>Word embedding: Use pretrained embeddings</p></li>
-<li><p>Use multiple bidirectional RNN to learn context embedding</p></li>
-<li><p>For every token, concatenate forward and backward hidden states at each layer</p></li>
-<li><p>2nd layer will use the above output and predict next hidden state</p></li>
-<li><p>Use GRU or LSTM depending on task</p></li>
-<li><p>Use output of final layer to predict score for each possible tag using dense layer</p></li>
-<li><p>Better to predict tags for full sequence than for a single token</p></li>
-<li><p>THEREFORE, add another layer with parameters for each label bigram.</p></li>
-<li><p>Compute sentence conditional random field loss(CRF) using forward-backward algorithm.</p></li>
-<li><p>Use Viterbi algorithm to find most likely sequence</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="taglm/overview.png" class="img-fluid figure-img"></p>
-<figcaption>Overview of architecture<span data-label="fig:overview"></span></figcaption>
-</figure>
-</div></li>
-<li><p>LM embedding will be created by concatenating forward and backward embeddings. No parameter sharing between these two embeddings.</p></li>
-</ul>
-</section>
-</section>
-<section id="experiments" class="level1">
-<h1>Experiments</h1>
-<ul>
-<li><p>Evaulation done on CoNLL 2003 NER and CoNLL 2000 chunking</p></li>
-<li><p>Lot of detail around model architecture and training methods. Skipping this for now.</p></li>
-</ul>
-<section id="analysis" class="level2">
-<h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
-<ul>
-<li><p>Second RNN captures interactions between task specific context</p></li>
-<li><p>Backward LM addition has significant performance gains</p></li>
-<li><p>Model size makes a difference. Using bigger CNN model lead to &nbsp;0.3 percent improvement</p></li>
-<li><p>Also tried training the model JUST ON THE CoNLL data. Reduced model size</p></li>
-<li><p>Including embeddings from this model <strong>decreased</strong> performance compared to baseline system.</p></li>
-<li><p>Replacing task specific RNN with using LM embeddings with a dense layer and CRF <strong>reduced</strong> performance</p></li>
-<li><p>Improvement shown by transferring knowledge from other tasks <strong>almost disappers</strong> when the initial model is trained on a large dataset.</p></li>
-</ul>
-</section>
-</section>
-<section id="summary" class="level1">
-<h1>Summary</h1>
-<ul>
-<li>First method to incorporate contextual word embeddings using bidirectional networks.</li>
-<li>Significantly better than other methods at the time that use other forms of transfer learning or joint learning on NER and and Chunking tasks.</li>
-<li>It works well with unlabelled data from a different domain as well.</li>
-</ul>
-
-
-</section>
+<div id="quarto-navigation-envelope" class="hidden">
+<p><span class="hidden" data-render-id="quarto-int-sidebar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar:About">About</span> <span class="hidden" data-render-id="quarto-int-navbar:/about.html">/about.html</span> <span class="hidden" data-render-id="quarto-int-navbar:https://github.com/goodhamgupta">https://github.com/goodhamgupta</span></p>
+</div>
+<div id="quarto-listing-pipeline" class="hidden">
+<p><span class="hidden" data-render-id="quarto-enable-math-inline"><span class="math inline">\(e = mC^2\)</span></span></p>
+<div class="hidden" data-render-id="pipeline-listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="nlp,transformer,review" data-listing-date-sort="1598803200000" data-listing-file-modified-sort="1709254891847" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1372">
+<div class="thumbnail">
+<p><a href="/posts/2020-08-31-bison.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-08-31-bison.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-08-31-bison.md" class="no-external">BERT + BM25 = BISON</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-08-31-bison.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;transformer&#39;); return false;">
+transformer
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-08-31-bison.md" class="no-external">A new framework for information retrieval from documents</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-08-31-bison.md" class="no-external">
+<div class="listing-date">
+Aug 31, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="nlp,transformer,review,longformer" data-listing-date-sort="1589126400000" data-listing-file-modified-sort="1708871620608" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1642">
+<div class="thumbnail">
+<p><a href="/posts/2020-05-11-longformer.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-05-11-longformer.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-05-11-longformer.md" class="no-external">LongFormer</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-05-11-longformer.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;transformer&#39;); return false;">
+transformer
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;longformer&#39;); return false;">
+longformer
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-05-11-longformer.md" class="no-external">Transformers for loooong documents</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-05-11-longformer.md" class="no-external">
+<div class="listing-date">
+May 11, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="nlp,language_model,review" data-listing-date-sort="1587571200000" data-listing-file-modified-sort="1708871112593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="565">
+<div class="thumbnail">
+<p><a href="/posts/2020-04-23-tag-lm.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-04-23-tag-lm.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-04-23-tag-lm.md" class="no-external">TagLM</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-04-23-tag-lm.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;language_model&#39;); return false;">
+language_model
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-04-23-tag-lm.md" class="no-external"><!-- desc(5A0113B34292)[max=175]:posts/2020-04-23-tag-lm.html --></a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-04-23-tag-lm.md" class="no-external">
+<div class="listing-date">
+Apr 23, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="nlp,language_model,review" data-listing-date-sort="1587398400000" data-listing-file-modified-sort="1708870573051" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="633">
+<div class="thumbnail">
+<p><a href="/posts/2020-04-21-knowledge-lm.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-04-21-knowledge-lm.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-04-21-knowledge-lm.md" class="no-external">How much do you know?</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-04-21-knowledge-lm.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;language_model&#39;); return false;">
+language_model
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-04-21-knowledge-lm.md" class="no-external">Measure the amount of information stored in a model</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-04-21-knowledge-lm.md" class="no-external">
+<div class="listing-date">
+Apr 21, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="nlp,attention,review" data-listing-date-sort="1587312000000" data-listing-file-modified-sort="1708871216900" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="854">
+<div class="thumbnail">
+<p><a href="/posts/2020-04-20-attention.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-04-20-attention.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-04-20-attention.md" class="no-external">Attention is all you need</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-04-20-attention.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;attention&#39;); return false;">
+attention
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-04-20-attention.md" class="no-external"><!-- desc(5A0113B34292)[max=175]:posts/2020-04-20-attention.html --></a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-04-20-attention.md" class="no-external">
+<div class="listing-date">
+Apr 20, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="nlp,bert,review" data-listing-date-sort="1584115200000" data-listing-file-modified-sort="1708871299055" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268">
+<div class="thumbnail">
+<p><a href="/posts/2020-03-14-realm.md" class="no-external"></p>
+<p><img src="/posts/realm/training.png" class="thumbnail-image"  ></p>
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-03-14-realm.md" class="no-external">REALM: Retrieval-Augmented Language MOdel Pre-Training</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-03-14-realm.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;nlp&#39;); return false;">
+nlp
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;bert&#39;); return false;">
+bert
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;review&#39;); return false;">
+review
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-03-14-realm.md" class="no-external">A better Q&amp;A system based on knowledge retrieval</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-03-14-realm.md" class="no-external">
+<div class="listing-date">
+Mar 14, 2020
+</div>
+<div class="listing-author">
+Shubham Gupta
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="6" data-categories="jupyter,bayesian,golf_putting" data-listing-date-sort="1583942400000" data-listing-file-modified-sort="1708956222989" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057">
+<div class="thumbnail">
+<p><a href="/posts/2020-03-12-tutorial.ipynb" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-03-12-tutorial.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-03-12-tutorial.ipynb" class="no-external">Bayesian Golf Putting Model</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-03-12-tutorial.ipynb" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;jupyter&#39;); return false;">
+jupyter
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;bayesian&#39;); return false;">
+bayesian
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;golf_putting&#39;); return false;">
+golf_putting
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-03-12-tutorial.ipynb" class="no-external">Are you the next Tiger Woods?</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-03-12-tutorial.ipynb" class="no-external">
+<div class="listing-date">
+Mar 12, 2020
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="7" data-categories="intro" data-listing-date-sort="1578931200000" data-listing-file-modified-sort="1708870573009" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="20">
+<div class="thumbnail">
+<p><a href="/posts/2020-01-14-first-post.md" class="no-external"></p>
+<!-- img(9CEB782EFEE6)[progressive=false, height=]:posts/2020-01-14-first-post.html -->
+<p></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="/posts/2020-01-14-first-post.md" class="no-external">Yo!</a>
+</h3>
+<div class="listing-subtitle">
+<a href="/posts/2020-01-14-first-post.md" class="no-external"></a>
+</div>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory(&#39;intro&#39;); return false;">
+intro
+</div>
+</div>
+<div class="listing-description">
+<a href="/posts/2020-01-14-first-post.md" class="no-external">First post</a>
+</div>
+</div>
+<div class="metadata">
+<a href="/posts/2020-01-14-first-post.md" class="no-external">
+<div class="listing-date">
+Jan 14, 2020
+</div>
+</a>
+</div>
+</div>
+</div>
+<div class="listing-no-matching d-none">
+No matching items
+</div>
+</div>
+</div>
+<div id="quarto-meta-markdown" class="hidden">
+<p><span class="hidden" data-render-id="quarto-metatitle">Shubham Gupta - Tech Musings</span> <span class="hidden" data-render-id="quarto-twittercardtitle">Shubham Gupta - Tech Musings</span> <span class="hidden" data-render-id="quarto-ogcardtitle">Shubham Gupta - Tech Musings</span> <span class="hidden" data-render-id="quarto-metasitename">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-twittercarddesc"></span> <span class="hidden" data-render-id="quarto-ogcardddesc"></span></p>
+</div>
 
 </main> <!-- /main -->
-<script id="quarto-html-after-body" type="application/javascript">
+<script id = "quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
     const mode = bsSheetEl.getAttribute("data-mode");
@@ -821,9 +1036,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<script src="https://giscus.app/client.js"
+        data-repo="goodhamgupta/personal-blog"
+        data-repo-id=""
+        data-category="General"
+        data-category-id=""
+        data-mapping="title"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme="light"
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
 
+</body>
 
-
-
-</body></html>
+</html>
