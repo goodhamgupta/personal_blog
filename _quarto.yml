@@ -4,9 +4,11 @@ project:
 
 website:
   title: "Shubham Gupta"
+  google-analytics: "G-CLKTGRWBQT"
   navbar:
     right:
-      - about.qmd
+      - text: About
+        href: about.qmd
       - icon: github
         href: https://github.com/goodhamgupta
   comments:

@@ -124,6 +124,7 @@ toc: true
 ## Results
 
 ![Results](longformer/results.png)
+
 - Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.
 - The large model was only tested on enwik8 due to the computational cost of training.
 - It's also important to note that, while the large model did not achieve SOTA, it performs much better than it's counterparts who have almost 2x more parameters.

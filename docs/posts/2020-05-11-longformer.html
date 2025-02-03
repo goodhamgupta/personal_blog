@@ -56,7 +56,6 @@ ul.task-list li input[type="checkbox"] {
     "/",
     "s"
   ],
-  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -71,6 +70,15 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
+</script>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -395,7 +403,17 @@ Attention(Q,K,V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
-<p><img src="longformer/results.png" class="img-fluid" alt="Results"> - Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8. - The large model was only tested on enwik8 due to the computational cost of training. - It’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="longformer/results.png" class="img-fluid figure-img"></p>
+<figcaption>Results</figcaption>
+</figure>
+</div>
+<ul>
+<li>Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.</li>
+<li>The large model was only tested on enwik8 due to the computational cost of training.</li>
+<li>It’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters.</li>
+</ul>
 </section>
 </section>
 <section id="pretraining-and-finetuning" class="level1">

@@ -2,9 +2,9 @@
   {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "Shubham Gupta",
     "section": "",
-    "text": "Hi! I’m Shubham Gupta. I’m a software engineer. I’m from Bengaluru, India, and currently based in Singapore.\nThrough this blog, I aim to talk a little bit about my current work and potential topics I’m interested in learning. I’m an active contributor to the Elixir Ecosystem and build software, some of which is available on GitHub\nI’m always looking to connect with like-minded individuals, discuss ideas and build products. If you’d like to get in touch, Shoot me an email at shubhamg2208 at live dot com."
+    "text": "Hi! I’m Shubham, an applied AI engineer in Singapore!\nThrough this blog, I aim to document my learning notes and experience in software development, artificial intelligence and distributed systems.\n\n\n\nProbabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024.\n\n\n\n\n\nI love Elixir, and have been packages for probablisitic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K.\n\n\n\n\nState Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSM’s are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model running on the cloud\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions\n\nStructured Generation in LLMs\n\nPresented common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, and finished in top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data‑driven marketing strategies.\n\n\n\n\n\nI love working through a varitely of platform providing technical challenges, such as:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed the challenges of building Redis and a HTTP Server\n\n\n\n\n\nNational University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
   },
   {
     "objectID": "posts/2020-03-14-realm.html",
@@ -235,7 +235,7 @@
     "href": "posts/2020-05-11-longformer.html#results",
     "title": "LongFormer",
     "section": "Results",
-    "text": "Results\n - Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8. - The large model was only tested on enwik8 due to the computational cost of training. - It’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters."
+    "text": "Results\n\n\n\nResults\n\n\n\nLongformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.\nThe large model was only tested on enwik8 due to the computational cost of training.\nIt’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters."
   },
   {
     "objectID": "posts/2020-05-11-longformer.html#copy-initialization-trick",
@@ -355,5 +355,40 @@
     "title": "Tech Musings",
     "section": "",
     "text": "BERT + BM25 = BISON\n\n\n\n\n\n\nnlp\n\n\ntransformer\n\n\nreview\n\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\n\n\n\n\nnlp\n\n\ntransformer\n\n\nreview\n\n\nlongformer\n\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\nnlp\n\n\nlanguage_model\n\n\nreview\n\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\n\n\n\n\nnlp\n\n\nlanguage_model\n\n\nreview\n\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\nnlp\n\n\nattention\n\n\nreview\n\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\n\n\n\n\nnlp\n\n\nbert\n\n\nreview\n\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\n\n\n\n\njupyter\n\n\nbayesian\n\n\ngolf_putting\n\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\n\n\n\n\nintro\n\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "National University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
+  },
+  {
+    "objectID": "about.html#talks",
+    "href": "about.html#talks",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "Probabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024."
+  },
+  {
+    "objectID": "about.html#presentations",
+    "href": "about.html#presentations",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "State Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSM’s are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model running on the cloud\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions\n\nStructured Generation in LLMs\n\nPresented common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, and finished in top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data‑driven marketing strategies."
+  },
+  {
+    "objectID": "about.html#technical-challenges",
+    "href": "about.html#technical-challenges",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "I love working through a varitely of platform providing technical challenges, such as:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed the challenges of building Redis and a HTTP Server"
+  },
+  {
+    "objectID": "about.html#open-source",
+    "href": "about.html#open-source",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "I love Elixir, and have been packages for probablisitic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K."
   }
 ]

@@ -1,8 +1,7 @@
 ---
-title: "About"
 image: profile.jpg
 about:
-  template: jolla
+  template: trestles
   links:
     - icon: twitter
       text: Twitter
@@ -16,8 +15,68 @@ about:
 
 ---
 
-Hi! I'm Shubham Gupta. I'm a software engineer. I'm from Bengaluru, India, and currently based in Singapore. 
 
-Through this blog, I aim to talk a little bit about my current work and potential topics I'm interested in learning. I'm an active contributor to the [Elixir Ecosystem](https://hex.pm/users/goodhamgupta) and build software, some of which is available on [GitHub](https://github.com/goodhamgupta)
+:::{#hero-heading}
 
-I'm always looking to connect with like-minded individuals, discuss ideas and build products. If you'd like to get in touch, Shoot me an email at shubhamg2208 at live dot com.
+Hi! I'm Shubham, an applied AI engineer in Singapore!
+
+Through this blog, I aim to document my learning notes and experience in software development, artificial intelligence and distributed systems.
+
+## Talks
+
+- [Probabilistic Programming in Elixir with Exstan](https://www.youtube.com/watch?v=HF0hmQPH4Fs&t=2s&ab_channel=CodeSync)
+  - Presented at ElixirConfEU 2024.
+
+## Open-Source
+
+I love [Elixir](https://elixir-lang.org/), and have been packages for probablisitic programming, fast XIRR computation using Newton's method, etc.  The total downloads are [over 250K](https://hex.pm/users/goodhamgupta).
+
+## Presentations
+
+- [State Space Models](https://github.com/goodhamgupta/ssm_101)
+  - Presented at [Machine Learning, Singapore](https://www.meetup.com/machine-learning-singapore/), a top ML community in Singapore.
+  - SSM's are a promising alternative to the Attention mechanism used in Transformers.
+
+- [AI-Driven Patient Engagement in Healthcare](BiT.LY/ON‑DEViCE‑LLM‑HEALTHCARE)
+  - Engineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model
+running on the cloud
+  - Successfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions
+
+- [Structured Generation in LLMs](https://www.figma.com/slides/jW6xIQD8jcE0umtd664Mus/structured_generation?node-id=1-40&t=qkHqP0m6waCzHbJy-0)
+  - Presented common methods used to generate structured output from LLMs.
+
+- [End‑to‑End Attention based Image Captioning](bit.ly/attention)
+  - Implemented as part of a course project at NUS, and finished in top 10% of the leaderboard in the Kaggle contest.
+
+- [Hierachical Bayesian CLV Model](bit.ly/hierachical-clv)
+  - Developed a novel Bayesian hierarchical model for CLV prediction that integrates customer demographics,
+achieving 37% improvement in valuation accuracy and enabling data‑driven marketing strategies.
+
+
+## Technical Challenges
+
+I love working through a varitely of platform providing technical challenges, such as:
+
+- [HackAttic](https://github.com/goodhamgupta/hackattic)
+  - Collection of real-world challenges. Ranked in top 10% of participants.
+- [CodeCrafters](https://codecrafters.io/)
+  - Collection of challenges to build real-world software.
+  - I've completed the challenges of building [Redis](https://github.com/goodhamgupta/codecrafters-redis-python) and a [HTTP Server](https://github.com/goodhamgupta/codecrafters-http-server-python)
+
+
+## Education
+
+**National University of Singapore | Singapore**
+
+Masters in Computer Science, AI Specialisation
+
+Sep 2020 - Dec 2022
+
+**Amrita School of Engineering | Bangalore, India**
+
+Bachelor of Technology in Computer Science
+
+Aug 2012 - May 2016
+
+
+:::
