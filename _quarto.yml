@@ -11,13 +11,10 @@ website:
         href: https://github.com/goodhamgupta
   comments:
     giscus:
-      repo: goodhamgupta/personal-blog
+      repo: goodhamgupta/personal_blog
 format:
   html:
     theme: 
       light: cosmo
       dark: darkly
     css: styles.css
-
-
-
