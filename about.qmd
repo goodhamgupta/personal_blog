@@ -31,6 +31,8 @@ Through this blog, I aim to document my learning notes and experience in softwar
 
 I love [Elixir](https://elixir-lang.org/), and have been packages for probablisitic programming, fast XIRR computation using Newton's method, etc.  The total downloads are [over 250K](https://hex.pm/users/goodhamgupta).
 
+I also actively review AI papers in my spare time, which you can find on my [Github](https://github.com/goodhamgupta/paper_reviews).
+
 ## Presentations
 
 - [State Space Models](https://github.com/goodhamgupta/ssm_101)
