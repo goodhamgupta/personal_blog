@@ -12,6 +12,9 @@ website:
   comments:
     giscus:
       repo: goodhamgupta/personal_blog
+  search:
+    location: navbar
+    type: overlay
 format:
   html:
     theme: 
