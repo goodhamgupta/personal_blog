@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/about.html</loc>
-    <lastmod>2025-03-01T03:01:44.889Z</lastmod>
-  </url>
-  <url>
     <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-03-14-realm.html</loc>
-    <lastmod>2024-02-25T14:28:19.055Z</lastmod>
-  </url>
-  <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-04-20-attention.html</loc>
-    <lastmod>2025-02-03T02:48:32.773Z</lastmod>
-  </url>
-  <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-08-31-bison.html</loc>
-    <lastmod>2024-03-01T01:01:31.847Z</lastmod>
-  </url>
-  <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-05-11-longformer.html</loc>
-    <lastmod>2025-02-03T13:36:52.161Z</lastmod>
+    <lastmod>2025-03-01T03:20:14.564Z</lastmod>
   </url>
   <url>
     <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-04-23-tag-lm.html</loc>
-    <lastmod>2024-02-25T14:25:12.593Z</lastmod>
+    <lastmod>2025-03-01T03:20:14.565Z</lastmod>
   </url>
   <url>
     <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-01-14-first-post.html</loc>
-    <lastmod>2024-02-25T14:16:13.009Z</lastmod>
+    <lastmod>2025-03-01T03:20:14.561Z</lastmod>
   </url>
   <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-03-12-tutorial.html</loc>
-    <lastmod>2024-02-26T14:03:42.989Z</lastmod>
+    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-08-31-bison.html</loc>
+    <lastmod>2025-03-01T03:20:14.565Z</lastmod>
   </url>
   <url>
-    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-04-21-knowledge-lm.html</loc>
-    <lastmod>2024-02-25T14:16:13.051Z</lastmod>
+    <loc>https://goodhamgupta.github.io/personal_blog/about.html</loc>
+    <lastmod>2025-03-01T03:20:14.544Z</lastmod>
   </url>
   <url>
     <loc>https://goodhamgupta.github.io/personal_blog/index.html</loc>
-    <lastmod>2024-02-25T14:34:28.945Z</lastmod>
+    <lastmod>2025-03-01T03:20:14.561Z</lastmod>
+  </url>
+  <url>
+    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-04-20-attention.html</loc>
+    <lastmod>2025-03-01T03:20:14.564Z</lastmod>
+  </url>
+  <url>
+    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-04-21-knowledge-lm.html</loc>
+    <lastmod>2025-03-01T03:20:14.564Z</lastmod>
+  </url>
+  <url>
+    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-03-12-tutorial.html</loc>
+    <lastmod>2025-03-01T03:20:14.564Z</lastmod>
+  </url>
+  <url>
+    <loc>https://goodhamgupta.github.io/personal_blog/posts/2020-05-11-longformer.html</loc>
+    <lastmod>2025-03-01T03:20:14.565Z</lastmod>
   </url>
 </urlset>
