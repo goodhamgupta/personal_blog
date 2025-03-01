@@ -43,10 +43,10 @@ I also actively review AI papers in my spare time, which you can find on my [Git
   - Engineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model
 running on the cloud
   - Successfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions
-- [Introduction to GPUs and CUDA](https://www.figma.com/slides/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=130-806&t=ilUIsr2hUeHvUQ3U-1)
+- [Introduction to GPUs and CUDA](https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=130-806&t=VNzh9p2qKrHNSTJj-1)
   - Demonstrates basic of GPU architecture and CUDA programming.
 
-- [Structured Generation in LLMs](https://www.figma.com/slides/jW6xIQD8jcE0umtd664Mus/structured_generation?node-id=1-40&t=qkHqP0m6waCzHbJy-0)
+- [Structured Generation in LLMs](https://www.figma.com/deck/jW6xIQD8jcE0umtd664Mus/structured_generation?node-id=1-40&t=Q4HPYwD56itXUFAS-1)
   - Presented common methods used to generate structured output from LLMs.
 
 - [End‑to‑End Attention based Image Captioning](bit.ly/attention)
