@@ -39,7 +39,7 @@ I also actively review AI papers in my spare time, which you can find on my [Git
   - Presented at [Machine Learning, Singapore](https://www.meetup.com/machine-learning-singapore/), a top ML community in Singapore.
   - SSM's are a promising alternative to the Attention mechanism used in Transformers.
 
-- [AI-Driven Patient Engagement in Healthcare](BiT.LY/ON‑DEViCE‑LLM‑HEALTHCARE)
+- [AI-Driven Patient Engagement in Healthcare](https://www.figma.com/deck/N9YJ9O26M71njsRmLVA1Dt/da_presentation?node-id=6-455&t=EV4ATUYjdwF4vIBH-1)
   - Engineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model
 running on the cloud
   - Successfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions
