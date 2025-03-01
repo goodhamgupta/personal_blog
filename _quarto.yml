@@ -3,8 +3,6 @@ project:
   output-dir: docs
   resources:
     - CNAME
-  execute:
-    freeze: auto
 
 website:
   title: "Shubham Gupta"
@@ -21,6 +19,7 @@ website:
   search:
     location: navbar
     type: overlay
+
 format:
   html:
     theme: 
