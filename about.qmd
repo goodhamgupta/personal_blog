@@ -18,9 +18,9 @@ about:
 
 :::{#hero-heading}
 
-Hi! I'm Shubham, an applied AI engineer in Singapore!
+Hi! I'm Shubham, an Applied AI engineer in Singapore.
 
-Through this blog, I aim to document my learning notes and experience in software development, artificial intelligence and distributed systems.
+Through this blog, I aim to document my learning notes and experiences in software development, artificial intelligence, and distributed systems.
 
 ## Talks
 
@@ -29,43 +29,41 @@ Through this blog, I aim to document my learning notes and experience in softwar
 
 ## Open-Source
 
-I love [Elixir](https://elixir-lang.org/), and have been packages for probablisitic programming, fast XIRR computation using Newton's method, etc.  The total downloads are [over 250K](https://hex.pm/users/goodhamgupta).
+I love [Elixir](https://elixir-lang.org/), and have been creating packages for probabilistic programming, fast XIRR computation using Newton's method, etc. The total downloads are [over 250K](https://hex.pm/users/goodhamgupta).
 
-I also actively review AI papers in my spare time, which you can find on my [Github](https://github.com/goodhamgupta/paper_reviews).
+I actively review AI papers in my spare time, which you can find on my [Github](https://github.com/goodhamgupta/paper_reviews).
 
 ## Presentations
 
 - [State Space Models](https://github.com/goodhamgupta/ssm_101)
   - Presented at [Machine Learning, Singapore](https://www.meetup.com/machine-learning-singapore/), a top ML community in Singapore.
-  - SSM's are a promising alternative to the Attention mechanism used in Transformers.
+  - SSMs are a promising alternative to the Attention mechanism used in Transformers.
 
 - [AI-Driven Patient Engagement in Healthcare](https://www.figma.com/deck/N9YJ9O26M71njsRmLVA1Dt/da_presentation?node-id=6-455&t=EV4ATUYjdwF4vIBH-1)
-  - Engineered mobile app with optimized on‑device LLM ( 3B params) and confidence‑based cloud fallback, using token logits, to large model
-running on the cloud
-  - Successfully piloted with 100 users, enabling accessible medical guidance in low‑resource regions
+  - Engineered mobile app with optimized on-device LLM (3B params) and confidence-based cloud fallback using token logits to route requests to larger cloud model
+  - Successfully piloted with 100 users, enabling accessible medical guidance in low-resource regions
 - [Introduction to GPUs and CUDA](https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=130-806&t=VNzh9p2qKrHNSTJj-1)
-  - Demonstrates basic of GPU architecture and CUDA programming.
+  - Demonstrates basics of GPU architecture and CUDA programming.
 
 - [Structured Generation in LLMs](https://www.figma.com/deck/jW6xIQD8jcE0umtd664Mus/structured_generation?node-id=1-40&t=Q4HPYwD56itXUFAS-1)
-  - Presented common methods used to generate structured output from LLMs.
+  - Presented on common methods used to generate structured output from LLMs.
 
 - [End‑to‑End Attention based Image Captioning](bit.ly/attention)
-  - Implemented as part of a course project at NUS, and finished in top 10% of the leaderboard in the Kaggle contest.
+  - Implemented as part of a course project at NUS, finishing in the top 10% of the leaderboard in the Kaggle contest.
 
 - [Hierachical Bayesian CLV Model](bit.ly/hierachical-clv)
-  - Developed a novel Bayesian hierarchical model for CLV prediction that integrates customer demographics,
-achieving 37% improvement in valuation accuracy and enabling data‑driven marketing strategies.
+  - Developed a novel Bayesian hierarchical model for CLV (Customer Lifetime Value) prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data-driven marketing strategies.
 
 
 ## Technical Challenges
 
-I love working through a varitely of platform providing technical challenges, such as:
+I enjoy solving technical challenges on various platforms:
 
 - [HackAttic](https://github.com/goodhamgupta/hackattic)
   - Collection of real-world challenges. Ranked in top 10% of participants.
 - [CodeCrafters](https://codecrafters.io/)
   - Collection of challenges to build real-world software.
-  - I've completed the challenges of building [Redis](https://github.com/goodhamgupta/codecrafters-redis-python) and a [HTTP Server](https://github.com/goodhamgupta/codecrafters-http-server-python)
+  - I've completed challenges like building [Redis](https://github.com/goodhamgupta/codecrafters-redis-python) and a [HTTP Server](https://github.com/goodhamgupta/codecrafters-http-server-python)
 
 
 ## Education
