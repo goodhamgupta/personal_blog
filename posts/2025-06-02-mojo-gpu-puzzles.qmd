@@ -1,0 +1,360 @@
+---
+title: "GPU goes brrr with Mojo"
+draft: true
+toc: true
+bibliography: citations/mojo_citations.bib
+csl: citations/ieee.csl
+footnotes-hover: false
+execute:
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-summary: "Solution"
+    syntax-definitions:
+      - mojo_gpu_puzzles/mojo.xml
+---
+
+After a super-long break from writing blogs, I've decided to get back to it this year.
+
+I've always been interested in systems programming, but somehow never _really_ picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [@Google] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving training and inference efficiency using "moar" compute.
+
+I briefly spoke about [GPU computing last year](https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=1-37&t=VNzh9p2qKrHNSTJj-1), and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention.
+
+## Why Mojo?
+
+I've tried learning Rust [multiple](https://github.com/goodhamgupta/rustlings) [times](https://github.com/goodhamgupta/100-exercises-to-learn-rust/), along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.
+
+In early 2023, Modular announced Mojo🔥, a new systems-programming language promising:
+
+- Python-like syntax
+- Support for both CPU and GPU architectures
+- Kernel autofusion
+- Builds on MLIR
+- Traits and bounds checking
+- Interopeability with PTX, Python, C
+
+Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations, so I decided to learn a bit more about how to write these kernels.
+
+## GPUs 101
+
+Not sure what to put in here. Skipping for now.
+
+![](mojo_gpu_puzzles/program_flow.png)
+
+## Infrastructure
+
+If you plan on solving these puzzles, remember to pick a [compatible GPU](https://docs.modular.com/max/faq/#gpu-requirements) and follow the [setup instructions](https://builds.modular.com/puzzles/howto.html)
+
+I completed the puzzles on a instance with a RTX4090 Ti chip, rented via [Prime Intellect](https://www.primeintellect.ai/) at **0.22 $/hr**!
+
+## Part 1: GPU Fundamentals
+
+The Modular team has created beautiful [Manim](https://github.com/ManimCommunity/manim) visualizations for each puzzle, making the concepts much more intuitive. I'll walk through these visualizations as we tackle each problem.
+
+### [Puzzle 1: Map](https://builds.modular.com/puzzles/puzzle_01/puzzle_01.html) {#puzzle-01}
+
+In this puzzle, we aim to add a scalar to a vector. Specifically, we want to use a separate thread for each element in the vector, add the scalar, and write the result to the output memory.
+
+When we create the kernel, the scalar will be effectively "broadcast" or expanded to match the shape of the input vector. This allows each element of the vector to be independently added with the scalar value in parallel by its dedicated thread, following the [broadcasting rules](https://docs.pytorch.org/docs/stable/notes/broadcasting.html).
+
+![](mojo_gpu_puzzles/p01_vector_addition.png){fig-align="middle"}
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename="p01.mojo"}
+fn add_10(out: UnsafePointer[Scalar[dtype]], a: UnsafePointer[Scalar[dtype]]):
+    i = thread_idx.x
+    out[i] = a[i] + 10
+```
+
+```bash
+pixi run p01
+# out: HostBuffer([10.0, 11.0, 12.0, 13.0])
+# expected: HostBuffer([10.0, 11.0, 12.0, 13.0])
+```
+
+</details>
+
+### [Puzzle 2: Zip](https://builds.modular.com/puzzles/puzzle_02/puzzle_02.html) {#puzzle-02}
+
+This is an extension of the map puzzle. Now, we aim to add 2 tensors together.
+
+![](mojo_gpu_puzzles/p02.png)
+
+As in puzzle 1, the aim is to use one individual thread for elements at a specific index in both vectors.
+
+![](mojo_gpu_puzzles/p02_thread.png)
+
+Note that we assume the entire array will fit within a single block, which is why there is no code for boundary checking, edge cases, etc.
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename="p02.mojo"}
+fn add(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    b: UnsafePointer[Scalar[dtype]],
+):
+    i = thread_idx.x
+    out[i] = a[i] + b[i]
+```
+
+```bash
+pixi run p02
+# a: HostBuffer([0.0, 1.0, 2.0, 3.0])
+# b: HostBuffer([0.0, 1.0, 2.0, 3.0])
+# out: HostBuffer([0.0, 2.0, 4.0, 6.0])
+# expected: HostBuffer([0.0, 2.0, 4.0, 6.0])
+```
+
+</details>
+
+### [Puzzle 3: Guards](https://builds.modular.com/puzzles/puzzle_03/puzzle_03.html) {#puzzle-03}
+
+The only difference between this puzzle and [Puzzle 1](#puzzle-01) is that now it's possible that the size of the GPU block is larger than the given input.
+
+In GPU programming, "guards" refer to conditional statements that check if a thread should perform work based on its index. GPUs launch threads in fixed-size groups (blocks), and often these blocks contain more threads than elements in our array.
+
+In this case, we need to check if the current thread index is valid before applying our computation on the vector. Without this guard, threads with indices beyond our array bounds would cause memory access violations.
+
+![](mojo_gpu_puzzles/p03.png)
+
+The image above illustrates how some threads have indices that exceed the array size and must be prevented from accessing memory.
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename="p03.mojo"}
+fn add_10_guard(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    i = thread_idx.x
+    if i < size:
+        out[i] = a[i] + 10
+```
+
+Note that the size of the array is also sent as input to the kernel, as computing it in the kernel would defeat the purpose of parallelisation. While these conditional checks are necessary for correctness, they can introduce some performance overhead due to thread divergence within warps. We'll cover this in more detail shortly.
+
+```bash
+pixi run p03
+# in: HostBuffer([0.0, 1.0, 2.0, 3.0])
+# out: HostBuffer([10.0, 11.0, 12.0, 13.0])
+# expected: HostBuffer([10.0, 11.0, 12.0, 13.0])
+```
+
+</details>
+
+### [Puzzle 4: 2D Map](https://builds.modular.com/puzzles/puzzle_04/puzzle_04.html) {#puzzle-04}
+
+Similar to [Puzzle 2](#puzzle-02), instead of operating on scalars with 1D tensors, we will now use 2D tensors.
+
+Mojo, similar to CUDA, typically uses [row-major](https://en.wikipedia.org/wiki/Row-_and_column-major_order) order for array storage, meaning data is stored sequentially by rows in memory.
+
+![](mojo_gpu_puzzles/p04_row_col_major.png)
+
+Given the row-major format, the elements are accessed using the formula:
+
+$$
+A_{R,C} = R*\text{size\_of\_array} + C
+$$
+
+#### Raw Memory Approach
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename="p04.mojo"}
+fn add_10_2d(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    row = thread_idx.y
+    col = thread_idx.x
+    if row < size and col < size:
+        out[row * size + col] = a[row*size+col] + 10
+
+````
+
+```bash
+pixi run p04
+# in: HostBuffer([0.0, 1.0, 2.0, 3.0]) -- shaped as 2x2 row-major
+# out: HostBuffer([10.0, 11.0, 12.0, 13.0])
+# expected: HostBuffer([10.0, 11.0, 12.0, 13.0])
+````
+
+</details>
+
+#### LayoutTensor
+
+LayoutTensor[@llvmlayouttensor] is Mojo's abstraction to work on a Tensor.
+
+Specifically, LayoutTensor aims to provide:
+
+- High level primitive to perform operations on tiles.
+- Flexible memory layouts, with support for row-based, column-based and tiled organisation of data in memory.
+- Expose functions/parameters to enable auto-tuning or manual experimentation.
+- Access to hardware without inline assembly.
+
+Mojo(and LayoutTensor) follow this "parameter syntax"[@mojotalk], which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don't have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I'm not the only one struggling with it though![@jeffniutriton] .
+
+![](mojo_gpu_puzzles/p04_parameter_syntax.png)
+
+The features that looked most interesting to me are:
+
+- Natural Indexing: Index a element using the format `A[row, col]`
+- Automatic Bounds Checking: I've (ab)used this feature in the upcoming puzzles.
+
+Some examples of [LayoutTensor in practice](https://builds.modular.com/puzzles/puzzle_04/introduction_layout_tensor.html#basic-usage-example):
+
+```{.mojo filename=layout_tensor.mojo}
+from layout import Layout, LayoutTensor
+
+# Define layout
+alias HEIGHT = 2
+alias WIDTH = 3
+alias layout = Layout.row_major(HEIGHT, WIDTH)
+
+# Create tensor
+tensor = LayoutTensor[dtype, layout](buffer.unsafe_ptr())
+
+# Access elements naturally
+tensor[0, 0] = 1.0  # First element
+tensor[1, 2] = 2.0  # Last element
+
+# Column-major layout
+layout_col = Layout.col_major(HEIGHT, WIDTH)
+
+# Tiled layout (for better cache utilization)
+layout_tiled = tensor.tiled[4, 4](HEIGHT, WIDTH)
+```
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename="p04.mojo"}
+fn add_10_2d(
+    out: LayoutTensor[mut=True, dtype, layout],
+    a: LayoutTensor[mut=True, dtype, layout],
+    size: Int,
+):
+    row = thread_idx.y
+    col = thread_idx.x
+    # NOTE: With layout tensor, this is not really necessary, but it helps prevent unwanted memory access
+    if row < size and col < size: 
+        out[row, col] = a[row, col] + 10.0
+
+````
+
+```bash
+pixi run p04_layout_tensor
+# in: HostBuffer([0.0, 1.0, 2.0, 3.0])
+# out shape: 2 x 2
+# out: HostBuffer([10.0, 11.0, 12.0, 13.0])
+# expected: HostBuffer([10.0, 11.0, 12.0, 13.0])
+````
+
+</details>
+
+### [Puzzle 5: Broadcast](https://builds.modular.com/puzzles/puzzle_05/puzzle_05.html) {#puzzle-05}
+
+We aim to broadcast the addition operation over two vectors. Following the [broadcasting rules](https://docs.pytorch.org/docs/stable/notes/broadcasting.html), the result will be an outer-product of the given vectors.
+
+![](mojo_gpu_puzzles/p05_vector_addition.png){fig-align="center" height=600}
+
+#### Raw Memory Version
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename=p05.mojo}
+fn broadcast_add(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    b: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    row = thread_idx.y
+    col = thread_idx.x
+    if row < size and col < size:
+        out[row*size + col] = a[row] + b[col]
+
+````
+
+```bash
+pixi run p05
+# in a: HostBuffer([0.0, 1.0])
+# in b: HostBuffer([0.0, 1.0])
+# out: HostBuffer([0.0, 1.0, 1.0, 2.0])
+# expected: HostBuffer([0.0, 1.0, 1.0, 2.0])
+````
+
+</details>
+
+#### Layout Tensor
+
+Since we know the inputs are 1D vectors, we use only one dimension from each of the vectors, and set the other to 0 i.e the first element.
+
+<details open>
+<summary> **Solution** </summary>
+```{.mojo filename=p05_layout_tensor.mojo}
+fn broadcast_add[
+    out_layout: Layout,
+    a_layout: Layout,
+    b_layout: Layout,
+](
+    out: LayoutTensor[mut=True, dtype, out_layout],
+    a: LayoutTensor[mut=False, dtype, a_layout],
+    b: LayoutTensor[mut=False, dtype, b_layout],
+    size: Int,
+):
+    row = thread_idx.y
+    col = thread_idx.x
+    if row < size and col < size:
+        out[row, col] = a[0, row] + b[col, 0]
+
+````
+
+```bash
+pixi run p05_layout_tensor
+# in a: HostBuffer([0.0, 1.0])
+# in b: HostBuffer([0.0, 1.0])
+# out shape: 2 x 2
+# out: HostBuffer([0.0, 1.0, 1.0, 2.0])
+# expected: HostBuffer([0.0, 1.0, 1.0, 2.0])
+````
+
+</details>
+
+### [Puzzle 6: Blocks](https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html) {#puzzle-06}
+
+Building on Puzzles 4[#puzzle-04] and 5[#puzzle-5], we now aim to add a scalar to a tensor. We also have the addtional restriction around having fewer threads than the elements in our array, per block. This means that now apart from using the local indices of the current thread(`thread_idx.y` and `thread_idx.x`), we now also need to identify the current block, using `block_idx.y` and `block_idx.x`. The formula for calculating the index, in row-major format, is:
+
+$$
+idx = block\_idx.x * block\_dim.x + thread\_idx.x
+$$
+
+![](mojo_gpu_puzzles/p06.png){fig-align="center" height=600}
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p06.mojo}
+alias SIZE = 9
+alias BLOCKS_PER_GRID = (3, 1)
+alias THREADS_PER_BLOCK = (4, 1)
+alias dtype = DType.float32
+
+
+fn add_10_blocks(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    i = block_dim.x * block_idx.x + thread_idx.x
+    if i < size:
+        out[i] = a[i] + 10
+```
+
+</details>
+
+### [Puzzle 7: 2D Blocks](https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html) {#puzzle-07}
