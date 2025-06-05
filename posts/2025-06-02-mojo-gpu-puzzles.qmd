@@ -15,6 +15,10 @@ format:
       - mojo_gpu_puzzles/mojo.xml
 ---
 
+::: {.callout-note}
+This blog will be updated with puzzle solutions as they’re released. Stay tuned for more updates!
+:::
+
 After a super-long break from writing blogs, I've decided to get back to it this year.
 
 I've always been interested in systems programming, but somehow never _really_ picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [@Google] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving training and inference efficiency using "moar" compute.
@@ -36,10 +40,11 @@ In early 2023, Modular announced Mojo🔥, a new systems-programming language pr
 
 Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations, so I decided to learn a bit more about how to write these kernels.
 
-## GPUs 101
+## GPUs 101 {#gpu-memory}
 
 Not sure what to put in here. Skipping for now.
 
+![](mojo_gpu_puzzles/gpu_memory.png) 
 ![](mojo_gpu_puzzles/program_flow.png)
 
 ## Infrastructure
@@ -358,3 +363,126 @@ fn add_10_blocks(
 </details>
 
 ### [Puzzle 7: 2D Blocks](https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html) {#puzzle-07}
+
+As the title suggests, we now have a 2D structure for both blocks and grids, and the number of threads per block is lesser than the total number of elements in the input tensor.
+
+![](mojo_gpu_puzzles/p07.png){fig-align="center"}
+
+#### Raw Memory
+
+<details open>
+<summary> **Solution** </summary>
+
+````{.mojo filename=p07.mojo}
+alias SIZE = 5
+alias BLOCKS_PER_GRID = (2, 2)
+alias THREADS_PER_BLOCK = (3, 3)
+alias dtype = DType.float32
+
+
+fn add_10_blocks_2d(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    row = block_dim.y * block_idx.y + thread_idx.y
+    col = block_dim.x * block_idx.x + thread_idx.x
+    if row < size and col < size:
+        out[row * size + col] = a[row * size + col] + 10.0
+
+```bash
+pixi run p07
+# out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])
+# expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])
+````
+
+````
+
+</details>
+
+#### Layout Tensor
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p07.mojo}
+alias SIZE = 9
+alias BLOCKS_PER_GRID = (3, 1)
+alias THREADS_PER_BLOCK = (4, 1)
+alias dtype = DType.float32
+
+
+fn add_10_blocks(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    i = block_dim.x * block_idx.x + thread_idx.x
+    if i < size:
+        out[i] = a[i] + 10
+````
+
+```bash
+pixi run p07_layout_tensor
+# out: 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# expected: 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+# 11.0 11.0 11.0 11.0 11.0
+```
+
+</details>
+
+### [Puzzle 8: Shared Memory](https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html) {#puzzle-08}
+
+In this puzzle we leverage shared memory (SRAM). Like [Puzzle 7](#puzzle-07), we add a scalar to a 2D tensor, but now each block has fewer threads than there are input elements.
+
+As shown [above](#gpu-memory), SRAM is orders of magnitude faster than DRAM. Accessing global memory directly is slow, so we first load data into shared memory—then perform our computations for much faster access.
+
+Although this input is too small to reveal a noticeable speedup, the advantage of shared memory becomes substantial as array sizes increase.
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p08.mojo}
+alias TPB = 4
+alias SIZE = 8
+alias BLOCKS_PER_GRID = (2, 1)
+alias THREADS_PER_BLOCK = (TPB, 1)
+alias dtype = DType.float32
+
+
+fn add_10_shared(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    shared = stack_allocation[
+        TPB,
+        Scalar[dtype],
+        address_space = AddressSpace.SHARED,
+    ]()
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i = thread_idx.x
+    # local data into shared memory
+    if global_i < size:
+        shared[local_i] = a[global_i]
+
+    # wait for all threads to complete
+    # works within a thread block
+    barrier()
+
+    if global_i < size:
+        out[global_i] = shared[local_i] + 10.0
+```
+
+</details>
+
+## Part 2: GPU Algorithms
+
+pass

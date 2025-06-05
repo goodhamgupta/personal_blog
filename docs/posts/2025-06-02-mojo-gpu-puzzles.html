@@ -224,7 +224,7 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-mojo" id="toc-why-mojo" class="nav-link active" data-scroll-target="#why-mojo">Why Mojo?</a></li>
-  <li><a href="#gpus-101" id="toc-gpus-101" class="nav-link" data-scroll-target="#gpus-101">GPUs 101</a></li>
+  <li><a href="#gpu-memory" id="toc-gpu-memory" class="nav-link" data-scroll-target="#gpu-memory">GPUs 101</a></li>
   <li><a href="#infrastructure" id="toc-infrastructure" class="nav-link" data-scroll-target="#infrastructure">Infrastructure</a></li>
   <li><a href="#part-1-gpu-fundamentals" id="toc-part-1-gpu-fundamentals" class="nav-link" data-scroll-target="#part-1-gpu-fundamentals">Part 1: GPU Fundamentals</a>
   <ul class="collapse">
@@ -235,7 +235,9 @@ window.Quarto = {
   <li><a href="#puzzle-05" id="toc-puzzle-05" class="nav-link" data-scroll-target="#puzzle-05">Puzzle 5: Broadcast</a></li>
   <li><a href="#puzzle-06" id="toc-puzzle-06" class="nav-link" data-scroll-target="#puzzle-06">Puzzle 6: Blocks</a></li>
   <li><a href="#puzzle-07" id="toc-puzzle-07" class="nav-link" data-scroll-target="#puzzle-07">Puzzle 7: 2D Blocks</a></li>
+  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
   </ul></li>
+  <li><a href="#part-2-gpu-algorithms" id="toc-part-2-gpu-algorithms" class="nav-link" data-scroll-target="#part-2-gpu-algorithms">Part 2: GPU Algorithms</a></li>
   </ul>
 </nav>
     </div>
@@ -246,6 +248,19 @@ window.Quarto = {
 
 
 
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This blog will be updated with puzzle solutions as they’re released. Stay tuned for more updates!</p>
+</div>
+</div>
 <p>After a super-long break from writing blogs, I’ve decided to get back to it this year.</p>
 <p>I’ve always been interested in systems programming, but somehow never <em>really</em> picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google <span class="citation" data-cites="Google"><a href="#ref-Google" role="doc-biblioref">[1]</a></span> reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving training and inference efficiency using “moar” compute.</p>
 <p>I briefly spoke about <a href="https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=1-37&amp;t=VNzh9p2qKrHNSTJj-1">GPU computing last year</a>, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention.</p>
@@ -263,10 +278,10 @@ window.Quarto = {
 </ul>
 <p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations, so I decided to learn a bit more about how to write these kernels.</p>
 </section>
-<section id="gpus-101" class="level2">
-<h2 class="anchored" data-anchor-id="gpus-101">GPUs 101</h2>
+<section id="gpu-memory" class="level2">
+<h2 class="anchored" data-anchor-id="gpu-memory">GPUs 101</h2>
 <p>Not sure what to put in here. Skipping for now.</p>
-<p><img src="mojo_gpu_puzzles/program_flow.png" class="img-fluid"></p>
+<p><img src="mojo_gpu_puzzles/gpu_memory.png" class="img-fluid"> <img src="mojo_gpu_puzzles/program_flow.png" class="img-fluid"></p>
 </section>
 <section id="infrastructure" class="level2">
 <h2 class="anchored" data-anchor-id="infrastructure">Infrastructure</h2>
@@ -575,14 +590,136 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 </details>
 </section>
 <section id="puzzle-07" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-07"><a href="https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html">Puzzle 7: 2D Blocks</a></h3>
+<p>As the title suggests, we now have a 2D structure for both blocks and grids, and the number of threads per block is lesser than the total number of elements in the input tensor.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mojo_gpu_puzzles/p07.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+</figure>
+</div>
+<section id="raw-memory" class="level4">
+<h4 class="anchored" data-anchor-id="raw-memory">Raw Memory</h4>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p07.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename="p07.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add_10_blocks_2d(</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    out: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    a: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> block_dim.y <span class="op">*</span> block_idx.y <span class="op">+</span> thread_idx.y</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">&lt;</span> size <span class="kw">and</span> col <span class="op">&lt;</span> size:</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>        out[row <span class="op">*</span> size <span class="op">+</span> col] <span class="op">=</span> a[row <span class="op">*</span> size <span class="op">+</span> col] <span class="op">+</span> <span class="fl">10.0</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="st">```bash</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="er">pixi run p07</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<pre><code>
+&lt;/details&gt;
 
+#### Layout Tensor
+
+&lt;details open&gt;
+&lt;summary&gt; **Solution** &lt;/summary&gt;
+
+```{.mojo filename=p07.mojo}
+alias SIZE = 9
+alias BLOCKS_PER_GRID = (3, 1)
+alias THREADS_PER_BLOCK = (4, 1)
+alias dtype = DType.float32
+
+
+fn add_10_blocks(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    i = block_dim.x * block_idx.x + thread_idx.x
+    if i &lt; size:
+        out[i] = a[i] + 10</code></pre>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p07_layout_tensor</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
+</section>
+<section id="puzzle-08" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-08"><a href="https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html">Puzzle 8: Shared Memory</a></h3>
+<p>In this puzzle we leverage shared memory (SRAM). Like <a href="#puzzle-07">Puzzle 7</a>, we add a scalar to a 2D tensor, but now each block has fewer threads than there are input elements.</p>
+<p>As shown <a href="#gpu-memory">above</a>, SRAM is orders of magnitude faster than DRAM. Accessing global memory directly is slow, so we first load data into shared memory—then perform our computations for much faster access.</p>
+<p>Although this input is too small to reveal a noticeable speedup, the advantage of shared memory becomes substantial as array sizes increase.</p>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p08.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb20" data-filename="p08.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add_10_shared(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    out: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    a: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    shared <span class="op">=</span> stack_allocation[</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        TPB,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>        Scalar[dtype],</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        address_space <span class="op">=</span> AddressSpace.SHARED,</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    ]()</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    local_i <span class="op">=</span> thread_idx.x</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># local data into shared memory</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> size:</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>        shared[local_i] <span class="op">=</span> a[global_i]</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># wait for all threads to complete</span></span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># works within a thread block</span></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> size:</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        out[global_i] <span class="op">=</span> shared[local_i] <span class="op">+</span> <span class="fl">10.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</details>
+</section>
+</section>
+<section id="part-2-gpu-algorithms" class="level2">
+<h2 class="anchored" data-anchor-id="part-2-gpu-algorithms">Part 2: GPU Algorithms</h2>
+<p>pass</p>
 
 
 
 </section>
-</section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">Puzzle 7: 2D Blocks</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-Google" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">Google, <span>“<span>I/O 2025 Keynote</span>.”</span> 2025. Available: <a href="https://blog.google/technology/ai/io-2025-keynote/">https://blog.google/technology/ai/io-2025-keynote/</a></div>
 </div>
