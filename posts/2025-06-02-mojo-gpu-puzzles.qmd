@@ -45,6 +45,9 @@ Modular has since announced Max, their AI inference platform, built on Mojo. The
 Not sure what to put in here. Skipping for now.
 
 ![](mojo_gpu_puzzles/gpu_memory.png)
+
+![](mojo_gpu_puzzles/gpu_flow_hierachy.png){fig-align="center"}
+
 ![](mojo_gpu_puzzles/program_flow.png)
 
 ## Infrastructure
