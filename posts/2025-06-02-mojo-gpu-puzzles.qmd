@@ -451,7 +451,7 @@ Although this input is too small to reveal a noticeable speedup, the advantage o
 
 Now, because our operations depend on all records being available in shared memory, we need to wait for all threads in a block to write data to the shared memory before we can access it. Failure to do this can lead to deadlocks or undefined behaviour. Hence, we need **synchronisation**!
 
-Mojo has support for all the common [synchronisation primitives](https://docs.modular.com/mojo/stdlib/gpu/sync/#functions), similar to [CUDA primitives](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives.html). For this puzzle, we need to use the `barrier` synchronisation, which is the same as `_syncThreads()` in CUDA:  Ensure all threads within a thread block reach the barrier before any can proceed.
+Mojo has support for all the common [synchronisation primitives](https://docs.modular.com/mojo/stdlib/gpu/sync/#functions), similar to [CUDA primitives](https://nvidia.github.io/cccl/libcudacxx/extended_api/synchronization_primitives.html). For this puzzle, we need to use the `barrier` synchronisation, which is the same as `_syncThreads()` in CUDA: Ensure all threads within a thread block reach the barrier before any can proceed.
 
 ![](mojo_gpu_puzzles/p08.png){fig-align="center"}
 
@@ -502,7 +502,7 @@ pixi run p08
 
 #### LayoutTensor
 
-Key difference here is to use [LayoutTensorBuild instead of stack_allocation](https://builds.modular.com/puzzles/puzzle_08/layout_tensor.html#key-differences-from-raw-approach) to allocate shared memory. 
+Key difference here is to use [LayoutTensorBuild instead of stack_allocation](https://builds.modular.com/puzzles/puzzle_08/layout_tensor.html#key-differences-from-raw-approach) to allocate shared memory.
 
 <details open>
 <summary> **Solution** </summary>
@@ -548,4 +548,69 @@ pixi run p08_layout_tensor
 
 ## Part 2: GPU Algorithms
 
-pass
+This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.
+
+### [Puzzle 9: Pooling](https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html) {#puzzle-09}
+
+Pooling is a classic trick in neural networks for shrinking down your data—think of it as a way to "summarize" regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.
+
+This puzzle is a bit different compared to traditional pooling: Instead of having a "kernel", each output element is the running sum of the all the elements in the current window.
+
+![](mojo_gpu_puzzles/p09.png)
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p09.mojo}
+alias TPB = 8
+alias SIZE = 8
+alias BLOCKS_PER_GRID = (1, 1)
+alias THREADS_PER_BLOCK = (TPB, 1)
+alias dtype = DType.float32
+
+
+fn pooling(
+    out: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    shared = stack_allocation[
+        TPB,
+        Scalar[dtype],
+        address_space = AddressSpace.SHARED,
+    ]()
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i = thread_idx.x
+    if global_i < size:
+        shared[local_i] = a[global_i]
+
+    barrier()
+
+    if global_i < size:
+        if local_i - 2 >= 0:
+            out[global_i] = (
+                shared[local_i - 2] + shared[local_i - 1] + shared[local_i]
+            )
+        elif local_i - 1 >= 0:
+            out[global_i] = shared[local_i - 1] + shared[local_i]
+        else:
+            out[global_i] = shared[local_i]
+```
+
+```bash
+pixi run p09
+# out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])
+# expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])
+```
+
+</details>
+
+The LayoutTensor version is nearly identical to the Raw Memory approach, so we'll omit the code here for brevity.
+
+### [Puzzle 10: Dot Product](https://builds.modular.com/puzzles/puzzle_10/puzzle_10.html) {#puzzle-10}
+
+The Dot Product of two vectors $a$ and $b$ is defined as [@wikipediadotproduct]:
+
+$$
+c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
+$$

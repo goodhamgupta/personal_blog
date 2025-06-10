@@ -237,7 +237,11 @@ window.Quarto = {
   <li><a href="#puzzle-07" id="toc-puzzle-07" class="nav-link" data-scroll-target="#puzzle-07">Puzzle 7: 2D Blocks</a></li>
   <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
   </ul></li>
-  <li><a href="#part-2-gpu-algorithms" id="toc-part-2-gpu-algorithms" class="nav-link" data-scroll-target="#part-2-gpu-algorithms">Part 2: GPU Algorithms</a></li>
+  <li><a href="#part-2-gpu-algorithms" id="toc-part-2-gpu-algorithms" class="nav-link" data-scroll-target="#part-2-gpu-algorithms">Part 2: GPU Algorithms</a>
+  <ul class="collapse">
+  <li><a href="#puzzle-09" id="toc-puzzle-09" class="nav-link" data-scroll-target="#puzzle-09">Puzzle 9: Pooling</a></li>
+  <li><a href="#puzzle-10" id="toc-puzzle-10" class="nav-link" data-scroll-target="#puzzle-10">Puzzle 10: Dot Product</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -777,10 +781,70 @@ fn add_10_blocks(
 </section>
 <section id="part-2-gpu-algorithms" class="level2">
 <h2 class="anchored" data-anchor-id="part-2-gpu-algorithms">Part 2: GPU Algorithms</h2>
-<p>pass</p>
+<p>This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.</p>
+<section id="puzzle-09" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-09"><a href="https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html">Puzzle 9: Pooling</a></h3>
+<p>Pooling is a classic trick in neural networks for shrinking down your data—think of it as a way to “summarize” regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.</p>
+<p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
+<p><img src="mojo_gpu_puzzles/p09.png" class="img-fluid"></p>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p09.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb24" data-filename="p09.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> pooling(</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    out: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    a: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    shared <span class="op">=</span> stack_allocation[</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        TPB,</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>        Scalar[dtype],</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>        address_space <span class="op">=</span> AddressSpace.SHARED,</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    ]()</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    local_i <span class="op">=</span> thread_idx.x</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> size:</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>        shared[local_i] <span class="op">=</span> a[global_i]</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> size:</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> local_i <span class="op">-</span> <span class="dv">2</span> <span class="op">&gt;=</span> <span class="dv">0</span>:</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> (</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>                shared[local_i <span class="op">-</span> <span class="dv">2</span>] <span class="op">+</span> shared[local_i <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> shared[local_i]</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> local_i <span class="op">-</span> <span class="dv">1</span> <span class="op">&gt;=</span> <span class="dv">0</span>:</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> shared[local_i <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> shared[local_i]</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> shared[local_i]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p09</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p>The LayoutTensor version is nearly identical to the Raw Memory approach, so we’ll omit the code here for brevity.</p>
+</section>
+<section id="puzzle-10" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-10"><a href="https://builds.modular.com/puzzles/puzzle_10/puzzle_10.html">Puzzle 10: Dot Product</a></h3>
+<p>The Dot Product of two vectors <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> is defined as <span class="citation" data-cites="wikipediadotproduct"><a href="#ref-wikipediadotproduct" role="doc-biblioref">[7]</a></span>:</p>
+<p><span class="math display">\[
+c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
+\]</span></p>
 
 
 
+</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -801,6 +865,9 @@ fn add_10_blocks(
 </div>
 <div id="ref-jeffniutriton" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[6] </div><div class="csl-right-inline">J. Niu, <span>“<span class="nocase">Triton Clone in Mojo</span>.”</span> 2025. Available: <a href="https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu">https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu</a></div>
+</div>
+<div id="ref-wikipediadotproduct" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">Wikipedia, <span>“Dot product.”</span> <a href="https://en.wikipedia.org/wiki/Dot_product" class="uri">https://en.wikipedia.org/wiki/Dot_product</a>, 2024.</div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
