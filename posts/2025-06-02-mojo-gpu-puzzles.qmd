@@ -9,6 +9,7 @@ execute:
   echo: false
 format:
   html:
+    highlight-style: github
     code-fold: true
     code-summary: "Solution"
     syntax-definitions:
@@ -614,3 +615,147 @@ The Dot Product of two vectors $a$ and $b$ is defined as [@wikipediadotproduct]:
 $$
 c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 $$
+
+Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.
+
+![](mojo_gpu_puzzles/p10.png){fig-align='center'}
+
+To implement dot product efficiently on a GPU, we will use **parallel reduction**. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:
+
+- Each thread computes a partial sum of the dot product (multiplying its assigned elements from `a` and `b`).
+- All threads store their partial results in shared memory.
+- In each reduction step:
+  - The number of active threads is halved.
+  - Each active thread adds its value to the value from another thread (usually its "neighbor" at a fixed offset).
+  - A barrier ensures all threads have updated shared memory before the next step.
+- This repeats for log₂(n) steps, until only one thread holds the final result.
+
+This pattern is fast, highly parallel, and used everywhere in GPU programming for reductions (sum, min, max, etc).
+
+::: {layout-nrow=3}
+
+![](mojo_gpu_puzzles/pr_p1.png){fig-align='center' width="500"}
+
+![](mojo_gpu_puzzles/pr_p2.png){fig-align='center' width="500"}
+
+![](mojo_gpu_puzzles/pr_p3.png){fig-align='center' width="500"}
+
+:::
+
+#### Raw Memory
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p10.mojo}
+fn dot_product(
+    output: UnsafePointer[Scalar[dtype]],
+    a: UnsafePointer[Scalar[dtype]],
+    b: UnsafePointer[Scalar[dtype]],
+    size: Int,
+):
+    shared = stack_allocation[
+        TPB, Scalar[dtype], address_space = AddressSpace.SHARED
+    ]()
+
+    global_idx = block_dim.x * block_idx.x + thread_idx.x
+    local_idx = thread_idx.x
+    if global_idx < size:
+        shared[local_idx] = a[global_idx] * b[global_idx]
+
+    barrier()
+
+    stride = TPB // 2
+    while(stride > 0):
+        if local_idx < stride:
+            shared[local_idx] += shared[local_idx + stride]
+        
+        barrier()
+        stride = stride // 2
+    
+    # only allow thread 0 to write result
+    if local_idx == 0:
+        output[0] = shared[0]
+```
+
+</details>
+
+**Note**: Instead of doing the parallel reduction, we could also implement the solution using a loop:
+
+```diff
+-    stride = TPB // 2
+-    while(stride > 0):
+-        if local_idx < stride:
+-            shared[local_idx] += shared[local_idx + stride]
+-        
+-        barrier()
+-        stride = stride // 2
+-    
+-    # only allow thread 0 to write result
+-    if local_idx == 0:
+-        output[0] = shared[0]
++    if global_idx < size:
++        for idx in range(size):
++            output[0] = output[0] + shared[idx]
+```
+
+
+While this approach also gives the correct answer for this puzzle, it has multiple problems:
+
+- **Race conditions**: Multiple threads would simultaneously try to update output[0] without synchronization, causing lost updates.
+- **Thread divergence**: When threads in a warp take different execution paths (some running the loop, others not), the GPU must serialize execution, destroying parallelism.
+- **Redundant computation**: Every qualifying thread would compute the exact same sum over the entire array, wasting compute resources.
+- **Memory bottleneck**: Repeated atomic operations to the same memory location (output[0]) create severe contention.
+
+
+#### LayoutTensor
+
+alias TPB = 8
+alias SIZE = 8
+alias BLOCKS_PER_GRID = (1, 1)
+alias THREADS_PER_BLOCK = (SIZE, 1)
+alias dtype = DType.float32
+alias layout = Layout.row_major(SIZE)
+alias out_layout = Layout.row_major(1)
+
+
+<details open>
+<summary> **Solution** </summary>
+
+
+```{.mojo filename=p10.mojo}
+fn dot_product[
+    in_layout: Layout, out_layout: Layout
+](
+    output: LayoutTensor[mut=True, dtype, out_layout],
+    a: LayoutTensor[mut=True, dtype, in_layout],
+    b: LayoutTensor[mut=True, dtype, in_layout],
+    size: Int,
+):
+    # Use LayoutTensorBuilder instead of stack_allocation
+    shared = tb[dtype]().row_major[TPB]().shared().alloc()
+    global_idx = block_dim.x * block_idx.x + thread_idx.x
+    local_idx = thread_idx.x
+
+    if global_idx < size:
+        shared[local_idx] = a[global_idx] * b[global_idx]
+
+    barrier()
+
+    stride = TPB // 2
+    while(stride > 0):
+        if local_idx < stride:
+            shared[local_idx] += shared[local_idx + stride]
+        
+        barrier()
+        stride = stride // 2
+    
+    # only allow thread 0 to write result
+    if local_idx == 0:
+        output[0] = shared[0]
+
+```
+
+</details>
+
+### [Puzzle 11: 1D Convolution](https://builds.modular.com/puzzles/puzzle_11/puzzle_11.html) {#puzzle-11}
