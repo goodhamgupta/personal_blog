@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Shubham Gupta - GPU goes brrr with Mojo</title>
+<title>Shubham Gupta - GPUs go brrr with Mojo</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -202,7 +202,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">GPU goes brrr with Mojo</h1>
+      <h1 class="title">GPUs go brrr with Mojo</h1>
                       </div>
   </div>
     
@@ -1140,9 +1140,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 • avoid divergent branches and random global reads<br>
 • keep the load pattern fully coalesced</p>
 <p>Naïve global loads meet none of those goals—once a window crosses the block edge the tail threads must issue conditional, <em>straggling</em> reads (i.e.&nbsp;each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).</p>
-<p><strong>The halo idea</strong> Give each block an in-block “fence extension”:</p>
+<p><strong>The halo idea</strong></p>
+<p>Give each block an in-block “fence extension”:</p>
 <pre><code>shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo</code></pre>
 <p>The extra <code>(CONV₂ − 1)</code> slots—the <em>halo</em>—mirror the first <code>(CONV₂ − 1)</code> elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.</p>
+<p>The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as <em>halo cells</em> or <em>skirt cells</em> since they “hang” from the side of the part that is used solely by a single block<span class="citation" data-cites="iitd_parallel_convolution"><a href="#ref-iitd_parallel_convolution" role="doc-biblioref">[13]</a></span>.</p>
 <p>Loading recipe (matches the numbered arrows in the figure):</p>
 <ol type="1">
 <li><strong>Bulk copy</strong> – all <code>TPB</code> threads dump their element:<br>
@@ -1156,7 +1158,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>After step 4 every thread sees:</p>
 <pre><code>      main slice              halo
 [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]</code></pre>
-<p>The actual computation of the kernel on the input remains the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
+<p>The code to perform the actual computation is the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
 <p>One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!</p>
 <details open="">
 <summary>
@@ -1280,6 +1282,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </div>
 <div id="ref-zero_cost_abstractions" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[12] </div><div class="csl-right-inline">saoirse, <span>“Zero cost abstractions.”</span> 2019. Available: <a href="https://without.boats/blog/zero-cost-abstractions/">https://without.boats/blog/zero-cost-abstractions/</a></div>
+</div>
+<div id="ref-iitd_parallel_convolution" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[13] </div><div class="csl-right-inline">R. Sen, <span>“Parallel convolution.”</span> 2022. Available: <a href="https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf">https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

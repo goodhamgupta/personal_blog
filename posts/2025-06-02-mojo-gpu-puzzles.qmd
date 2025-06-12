@@ -1,5 +1,5 @@
 ---
-title: "GPU goes brrr with Mojo"
+title: "GPUs go brrr with Mojo"
 draft: true
 toc: true
 bibliography: citations/mojo_citations.bib
@@ -9,7 +9,7 @@ execute:
   echo: false
 format:
   html:
-    highlight-style: github
+    highlight-style: gruvbox
     code-overflow: wrap
     code-fold: true
     code-summary: "Solution"
@@ -928,11 +928,14 @@ Run a 1-D convolution with a `CONV₂`-tap kernel over an input that is longer t
 Naïve global loads meet none of those goals—once a window crosses the block edge the tail threads must issue conditional, _straggling_ reads (i.e. each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).
 
 **The halo idea**
+
 Give each block an in-block “fence extension”:
 
     shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo
 
 The extra `(CONV₂ − 1)` slots—the *halo*—mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
+
+The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as _halo cells_ or _skirt cells_ since they “hang” from the side of the part that is used solely by a single block[@iitd_parallel_convolution].
 
 Loading recipe (matches the numbered arrows in the figure):
 
@@ -949,7 +952,7 @@ After step 4 every thread sees:
           main slice              halo
     [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]
 
-The actual computation of the kernel on the input remains the same as in [Puzzle 10](#puzzle-10).
+The code to perform the actual computation is the same as in [Puzzle 10](#puzzle-10).
 
 One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!
 
