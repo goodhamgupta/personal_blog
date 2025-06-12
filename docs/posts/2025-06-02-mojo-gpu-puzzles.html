@@ -1016,9 +1016,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <li><strong>Channels generalize it</strong>: You convolve along length, but for each input channel you keep separate weights, sum across channels, and spit out new feature maps. Same trick as 2-D CNNs, just flattened.</li>
 </ul>
 <p>For a better picture, see Ayush’s blog<span class="citation" data-cites="thakur_convolutions"><a href="#ref-thakur_convolutions" role="doc-biblioref">[8]</a></span> on convolutions.</p>
-<p>The convolution operation can be defined as: <span class="math display">\[
+<p>The convolution operation can be defined as: <span id="eq-convolution"><span class="math display">\[
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
-\]</span></p>
+\tag{1}\]</span></span></p>
 <section id="simple-single-block-with-shared-memory" class="level4">
 <h4 class="anchored" data-anchor-id="simple-single-block-with-shared-memory">Simple: Single Block with Shared Memory</h4>
 <p>For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.</p>
@@ -1132,64 +1132,87 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </section>
 <section id="advanced-block-boundary" class="level4">
 <h4 class="anchored" data-anchor-id="advanced-block-boundary">Advanced: Block Boundary</h4>
-<p>In this version, the key change is that the input no longer fits into a single block, and instead needs to be processed using multiple blocks.</p>
-<p>We see that the convolution operation depends on inputs from the previous few elements. Specifically, the last <code>CONV - 1</code> elements in the output will be determined based on the inputs of the</p>
+<p>We not aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N &gt; 1.</p>
+<p>The blue cells are the data <em>owned</em> by the current thread-block; the orange cells are the first few elements of the <em>next</em> block that the convolution window will inevitably peek at.</p>
+<p><img src="mojo_gpu_puzzles/p11_block_boundary.png" class="img-fluid"></p>
+<p><strong>Problem statement</strong> Run a 1-D convolution with a <code>CONV₂</code>-tap kernel over an input that is longer than one block (<code>TPB</code> threads). We want every thread to:</p>
+<p>• pull data from <strong>shared memory only</strong> (once it’s loaded, stay in-block)<br>
+• avoid divergent branches and random global reads<br>
+• keep the load pattern fully coalesced</p>
+<p>Naïve global loads meet none of those goals—tail threads would have to issue conditional, straggling reads once their window crosses the block edge.</p>
+<p><strong>The halo idea</strong> Give each block an in-block “fence extension”:</p>
+<pre><code>shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo</code></pre>
+<p>The extra <code>(CONV₂ − 1)</code> slots—the <em>halo</em>—mirror the first <code>(CONV₂ − 1)</code> elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.</p>
+<p>Loading recipe (matches the numbered arrows in the figure):</p>
+<ol type="1">
+<li><strong>Bulk copy</strong> – all <code>TPB</code> threads dump their element:<br>
+<code>shared_a[t] = a[blockStart + t]</code></li>
+<li><strong>Halo fill</strong> – threads <code>t &lt; (CONV₂ − 1)</code> copy the tail:<br>
+<code>shared_a[TPB + t] = (a[blockStart + TPB + t] if in-range else 0)</code></li>
+<li><strong>Kernel stash</strong> – threads <code>t &lt; CONV₂</code> cache the weights:<br>
+<code>shared_b[t] = b[t]</code></li>
+<li><code>barrier()</code> – everyone syncs</li>
+</ol>
+<p>After step 4 every thread sees:</p>
+<pre><code>      main slice              halo
+[ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]</code></pre>
+<p>The actual computation of the kernel on the input remains the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
+<p>One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>p11_block_boundary.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb32" data-filename="p11_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_2 <span class="op">=</span> <span class="dv">15</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> CONV_2 <span class="op">=</span> <span class="dv">4</span></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2 <span class="op">=</span> (<span class="dv">2</span>, <span class="dv">1</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2 <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> in_2_layout <span class="op">=</span> Layout.row_major(SIZE_2)</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> out_2_layout <span class="op">=</span> Layout.row_major(SIZE_2)</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> conv_2_layout <span class="op">=</span> Layout.row_major(CONV_2)</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> conv_1d_block_boundary[</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout, conv_layout: Layout, dtype: DType</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>](</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
-<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, in_layout],</span>
-<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, conv_layout],</span>
-<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
-<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>    local_i  <span class="op">=</span> thread_idx.x</span>
-<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># input slice + halo</span></span>
-<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>    shared_a <span class="op">=</span> tb[dtype]().row_major[TPB <span class="op">+</span> CONV_2 <span class="op">-</span> <span class="dv">1</span>]().shared().alloc()</span>
-<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># load kernel</span></span>
-<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>    shared_b <span class="op">=</span> tb[dtype]().row_major[CONV_2]().shared().alloc()</span>
-<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE_2:</span>
-<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># coalesced load of main slice</span></span>
-<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>        shared_a[local_i] <span class="op">=</span> a[global_i]                  </span>
-<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only first CONV_2 threads participate</span></span>
-<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_i <span class="op">&lt;</span> CONV_2:</span>
-<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># load kernel into shared memory</span></span>
-<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>        shared_b[local_i] <span class="op">=</span> b[local_i]                   </span>
-<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># threads responsible for halo load</span></span>
-<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_i <span class="op">&lt;</span> CONV_2 <span class="op">-</span> <span class="dv">1</span>:</span>
-<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>        <span class="co"># element that lives in next block</span></span>
-<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> next_idx <span class="op">=</span> global_i <span class="op">+</span> TPB                    </span>
-<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># pad with zeros</span></span>
-<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>        shared_a[local_i <span class="op">+</span> TPB] <span class="op">=</span> a[next_idx] <span class="cf">if</span> next_idx <span class="op">&lt;</span> SIZE_2 <span class="cf">else</span> <span class="fl">0.0</span></span>
-<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
-<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># skip threads mapping past the end</span></span>
-<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE_2:</span>
-<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> local_sum: output.element_type <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span>                                       </span>
-<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(CONV_2):                          </span>
-<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>            <span class="co"># dot product of window &amp; kernel</span></span>
-<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>            local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
-<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb34" data-filename="p11_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_2 <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> CONV_2 <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2 <span class="op">=</span> (<span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2 <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> in_2_layout <span class="op">=</span> Layout.row_major(SIZE_2)</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> out_2_layout <span class="op">=</span> Layout.row_major(SIZE_2)</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> conv_2_layout <span class="op">=</span> Layout.row_major(CONV_2)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> conv_1d_block_boundary[</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout, conv_layout: Layout, dtype: DType</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, in_layout],</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, conv_layout],</span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>    local_i  <span class="op">=</span> thread_idx.x</span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># input slice + halo</span></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>    shared_a <span class="op">=</span> tb[dtype]().row_major[TPB <span class="op">+</span> CONV_2 <span class="op">-</span> <span class="dv">1</span>]().shared().alloc()</span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># load kernel</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>    shared_b <span class="op">=</span> tb[dtype]().row_major[CONV_2]().shared().alloc()</span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE_2:</span>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># coalesced load of main slice</span></span>
+<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>        shared_a[local_i] <span class="op">=</span> a[global_i]                  </span>
+<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only first CONV_2 threads participate</span></span>
+<span id="cb34-30"><a href="#cb34-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_i <span class="op">&lt;</span> CONV_2:</span>
+<span id="cb34-31"><a href="#cb34-31" aria-hidden="true" tabindex="-1"></a>        <span class="co"># load kernel into shared memory</span></span>
+<span id="cb34-32"><a href="#cb34-32" aria-hidden="true" tabindex="-1"></a>        shared_b[local_i] <span class="op">=</span> b[local_i]                   </span>
+<span id="cb34-33"><a href="#cb34-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-34"><a href="#cb34-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># threads responsible for halo load</span></span>
+<span id="cb34-35"><a href="#cb34-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_i <span class="op">&lt;</span> CONV_2 <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb34-36"><a href="#cb34-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># element that lives in next block</span></span>
+<span id="cb34-37"><a href="#cb34-37" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> next_idx <span class="op">=</span> global_i <span class="op">+</span> TPB                    </span>
+<span id="cb34-38"><a href="#cb34-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># pad with zeros</span></span>
+<span id="cb34-39"><a href="#cb34-39" aria-hidden="true" tabindex="-1"></a>        shared_a[local_i <span class="op">+</span> TPB] <span class="op">=</span> a[next_idx] <span class="cf">if</span> next_idx <span class="op">&lt;</span> SIZE_2 <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb34-40"><a href="#cb34-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-41"><a href="#cb34-41" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb34-42"><a href="#cb34-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-43"><a href="#cb34-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># skip threads mapping past the end</span></span>
+<span id="cb34-44"><a href="#cb34-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE_2:</span>
+<span id="cb34-45"><a href="#cb34-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> local_sum: output.element_type <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb34-46"><a href="#cb34-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-47"><a href="#cb34-47" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span>                                       </span>
+<span id="cb34-48"><a href="#cb34-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(CONV_2):                          </span>
+<span id="cb34-49"><a href="#cb34-49" aria-hidden="true" tabindex="-1"></a>            <span class="co"># dot product of window &amp; kernel</span></span>
+<span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>            local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
+<span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>

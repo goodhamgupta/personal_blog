@@ -779,7 +779,7 @@ For a better picture, see Ayush's blog[@thakur_convolutions] on convolutions.
 The convolution operation can be defined as:
 $$
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
-$$
+$$ {#eq-convolution}
 
 #### Simple: Single Block with Shared Memory
 
@@ -912,9 +912,47 @@ performance—ideal for GPU kernels where every cycle and register matters.
 
 #### Advanced: Block Boundary
 
-In this version, the key change is that the input no longer fits into a single block, and instead needs to be processed using multiple blocks. 
+We not aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
 
-We see that the convolution operation depends on inputs from the previous few elements. Specifically, the last `CONV - 1` elements in the output will be determined based on the inputs of the 
+The blue cells are the data *owned* by the current thread-block; the orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
+
+![](mojo_gpu_puzzles/p11_block_boundary.png)
+
+**Problem statement**
+Run a 1-D convolution with a `CONV₂`-tap kernel over an input that is longer than one block (`TPB` threads). We want every thread to:
+
+• pull data from **shared memory only** (once it’s loaded, stay in-block)  
+• avoid divergent branches and random global reads  
+• keep the load pattern fully coalesced
+
+Naïve global loads meet none of those goals—once a window crosses the block edge the tail threads must issue conditional, _straggling_ reads (i.e. each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).
+
+**The halo idea**
+Give each block an in-block “fence extension”:
+
+    shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo
+
+The extra `(CONV₂ − 1)` slots—the *halo*—mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
+
+Loading recipe (matches the numbered arrows in the figure):
+
+1. **Bulk copy** – all `TPB` threads dump their element:  
+   `shared_a[t] = a[blockStart + t]`
+2. **Halo fill** – threads `t < (CONV₂ − 1)` copy the tail:  
+   `shared_a[TPB + t] = (a[blockStart + TPB + t] if in-range else 0)`
+3. **Kernel stash** – threads `t < CONV₂` cache the weights:  
+   `shared_b[t] = b[t]`
+4. `barrier()` – everyone syncs
+
+After step 4 every thread sees:
+
+          main slice              halo
+    [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]
+
+The actual computation of the kernel on the input remains the same as in [Puzzle 10](#puzzle-10).
+
+One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!
+
 
 ```{.mojo filename=p11_block_boundary.mojo}
 alias SIZE_2 = 15
@@ -924,7 +962,6 @@ alias THREADS_PER_BLOCK_2 = (TPB, 1)
 alias in_2_layout = Layout.row_major(SIZE_2)
 alias out_2_layout = Layout.row_major(SIZE_2)
 alias conv_2_layout = Layout.row_major(CONV_2)
-
 
 fn conv_1d_block_boundary[
     in_layout: Layout, out_layout: Layout, conv_layout: Layout, dtype: DType
