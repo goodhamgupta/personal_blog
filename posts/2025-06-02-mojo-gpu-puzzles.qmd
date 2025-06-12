@@ -10,6 +10,7 @@ execute:
 format:
   html:
     highlight-style: github
+    code-overflow: wrap
     code-fold: true
     code-summary: "Solution"
     syntax-definitions:
@@ -759,3 +760,165 @@ fn dot_product[
 </details>
 
 ### [Puzzle 11: 1D Convolution](https://builds.modular.com/puzzles/puzzle_11/puzzle_11.html) {#puzzle-11}
+
+Picture sliding a magnifying glass along a long strip of film.
+That’s exactly what a 1-D convolution does to any 1-D signal—audio samples, DNA bases, even bytes of log data.
+
+- The kernel (a small weight vector) glides over the sequence one step at a time (or more if you set stride > 1).
+- At each stop it multiplies the local window by its weights, sums the result, and drops a single number into the output map.
+- Stack layers and you grow the “what can I see at once?” window (the receptive field) without blowing up parameters.
+
+**Why bother?**
+
+- **Speed**: A conv layer is just a batched matrix-mul—GPU catnip.
+- **Locality first, context later**: Early layers grab short-range patterns (phonemes, k-mers). Deeper layers stitch them into bigger motifs (words, promoters).
+- **Channels generalize it**: You convolve along length, but for each input channel you keep separate weights, sum across channels, and spit out new feature maps. Same trick as 2-D CNNs, just flattened.
+
+For a better picture, see Ayush's blog[@thakur_convolutions] on convolutions.
+
+The convolution operation can be defined as:
+$$
+    (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
+$$
+
+#### Simple: Single Block with Shared Memory
+
+For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.
+
+![](mojo_gpu_puzzles/p11_simple.png)
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p11.mojo}
+alias TPB = 8
+alias SIZE = 6
+alias CONV = 3
+alias BLOCKS_PER_GRID = (1, 1)
+alias THREADS_PER_BLOCK = (TPB, 1)
+alias dtype = DType.float32
+alias in_layout = Layout.row_major(SIZE)
+alias out_layout = Layout.row_major(SIZE)
+alias conv_layout = Layout.row_major(CONV)
+
+
+fn conv_1d_simple[
+    in_layout: Layout, out_layout: Layout, conv_layout: Layout
+](
+    output: LayoutTensor[mut=False, dtype, out_layout],
+    a: LayoutTensor[mut=False, dtype, in_layout],
+    b: LayoutTensor[mut=False, dtype, conv_layout],
+):
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i = thread_idx.x
+    # This is oversized! I've explained it later :)
+    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()
+    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()
+
+    # This can also be optimised, as shown later.
+    if global_i < SIZE:
+        shared_a[local_i] = a[global_i]
+        shared_b[local_i] = b[global_i]
+    
+
+    barrier()
+
+    if global_i < SIZE:
+
+        # Ensure the local var has the same type as the output
+        # to avoid type casting errors.
+        var local_sum: output.element_type = 0
+
+        # Perform loop unrolling.
+        @parameter
+        for j in range(CONV):
+            if local_i + j < SIZE:
+                local_sum += shared_a[local_i + j] * shared_b[j]
+            barrier()
+        
+        output[global_i] = local_sum
+```
+
+</details>
+
+I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn’t needed for correctness—the kernel only touches the first `SIZE`/`CONV` elements—but it nicely demonstrates `LayoutTensor`’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
+
+```diff
+-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()
+-    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()
++    # Allocate exactly SIZE elements → smaller shared-mem footprint
++    shared_a = tb[dtype]().row_major[SIZE]().shared().alloc()
++    # Allocate exactly CONV elements → smaller shared-mem footprint
++    shared_b = tb[dtype]().row_major[CONV]().shared().alloc()
+...
+
+-    if global_i < SIZE:
+-        shared_a[local_i] = a[global_i]
+-        shared_b[local_i] = b[global_i]
++    if global_i < SIZE:
++        shared_a[local_i] = a[global_i]
++    if global_i < CONV:
++        shared_b[local_i] = b[global_i]
+```
+
+#### \@parameter : Loop Unrolling
+
+[`@parameter`](https://docs.modular.com/mojo/manual/decorators/parameter/) is Mojo's implementation of **loop unrolling**. This has the same functionality as `pragma unroll(N)` in CUDA.
+
+When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled[@nvidiapragmaunroll].
+
+`@parameter` isn’t limited to loops/branches—you can slap it on an inner
+function and Mojo will build a **parametric closure**, defined as[@mojoparameter]: 
+
+> A parametric closure is a nested function decorated with `@parameter`.
+> Any values it captures from the surrounding scope are treated as
+> compile-time constants.  The compiler materialises one specialised
+> version of the closure for every distinct set of captured values
+
+Example:
+
+```{.mojo filename=parametric_closure.mojo}
+fn make_shift(off: Int):
+    @parameter            # ← specialised per ‘off’
+    fn shift(x: Int) -> Int:
+        return x + off
+    return shift
+
+let s1 = make_shift(1)    # emits shift-$off=1
+let s4 = make_shift(4)    # emits shift-$off=4
+```
+
+No runtime captures, no heap boxing—the constant `off` is literally
+spliced into the generated IR, so calls to `s1`/`s4` inline like normal
+code and can be further unrolled or constant-folded.
+
+Why is this safe?  Mojo’s *origin* system[@mojo_lifetimes] assigns each compile-time constant its own immutable origin.
+The closure therefore can’t outlive or mutate the thing it captured;
+once the surrounding scope ends those origins die too, guaranteeing that
+the specialised code never touches expired storage.
+
+**Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
+performance—ideal for GPU kernels where every cycle and register matters.
+
+## Citation
+
+Original puzzles by the [Modular](https://www.modular.com/) team; this blog provides personal explanations and solutions.
+
+Please cite this work as:
+
+```
+Gupta, Shubham. “Mojo GPU Puzzles — Solutions & Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles
+```
+
+Or use the BibTeX citation:
+
+```
+@article{gupta2025mojopuzzles,
+  title   = {Mojo GPU Puzzles — Solutions \& Explanations},
+  author  = {Gupta, Shubham},
+  journal = {shubhamg.in},
+  year    = {2025},
+  month   = {June},
+  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
+}
+```

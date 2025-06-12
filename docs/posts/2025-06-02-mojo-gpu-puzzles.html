@@ -241,7 +241,9 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#puzzle-09" id="toc-puzzle-09" class="nav-link" data-scroll-target="#puzzle-09">Puzzle 9: Pooling</a></li>
   <li><a href="#puzzle-10" id="toc-puzzle-10" class="nav-link" data-scroll-target="#puzzle-10">Puzzle 10: Dot Product</a></li>
+  <li><a href="#puzzle-11" id="toc-puzzle-11" class="nav-link" data-scroll-target="#puzzle-11">Puzzle 11: 1D Convolution</a></li>
   </ul></li>
+  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
   </ul>
 </nav>
     </div>
@@ -997,11 +999,148 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </details>
-
-
-
 </section>
 </section>
+<section id="puzzle-11" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-11"><a href="https://builds.modular.com/puzzles/puzzle_11/puzzle_11.html">Puzzle 11: 1D Convolution</a></h3>
+<p>Picture sliding a magnifying glass along a long strip of film. That’s exactly what a 1-D convolution does to any 1-D signal—audio samples, DNA bases, even bytes of log data.</p>
+<ul>
+<li>The kernel (a small weight vector) glides over the sequence one step at a time (or more if you set stride &gt; 1).</li>
+<li>At each stop it multiplies the local window by its weights, sums the result, and drops a single number into the output map.</li>
+<li>Stack layers and you grow the “what can I see at once?” window (the receptive field) without blowing up parameters.</li>
+</ul>
+<p><strong>Why bother?</strong></p>
+<ul>
+<li><strong>Speed</strong>: A conv layer is just a batched matrix-mul—GPU catnip.</li>
+<li><strong>Locality first, context later</strong>: Early layers grab short-range patterns (phonemes, k-mers). Deeper layers stitch them into bigger motifs (words, promoters).</li>
+<li><strong>Channels generalize it</strong>: You convolve along length, but for each input channel you keep separate weights, sum across channels, and spit out new feature maps. Same trick as 2-D CNNs, just flattened.</li>
+</ul>
+<p>For a better picture, see Ayush’s blog<span class="citation" data-cites="thakur_convolutions"><a href="#ref-thakur_convolutions" role="doc-biblioref">[8]</a></span> on convolutions.</p>
+<p>The convolution operation can be defined as: <span class="math display">\[
+    (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
+\]</span></p>
+<section id="simple-single-block-with-shared-memory" class="level4">
+<h4 class="anchored" data-anchor-id="simple-single-block-with-shared-memory">Simple: Single Block with Shared Memory</h4>
+<p>For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.</p>
+<p><img src="mojo_gpu_puzzles/p11_simple.png" class="img-fluid"></p>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p11.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb29" data-filename="p11.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">6</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> CONV <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> in_layout <span class="op">=</span> Layout.row_major(SIZE)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> out_layout <span class="op">=</span> Layout.row_major(SIZE)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> conv_layout <span class="op">=</span> Layout.row_major(CONV)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> conv_1d_simple[</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout, conv_layout: Layout</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, in_layout],</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, conv_layout],</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    local_i <span class="op">=</span> thread_idx.x</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This is oversized! I've explained it later :)</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    shared_a <span class="op">=</span> tb[dtype]().row_major[TPB]().shared().alloc()</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    shared_b <span class="op">=</span> tb[dtype]().row_major[TPB]().shared().alloc()</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This can also be optimised, as shown later.</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE:</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>        shared_a[local_i] <span class="op">=</span> a[global_i]</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>        shared_b[local_i] <span class="op">=</span> b[global_i]</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE:</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Ensure the local var has the same type as the output</span></span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># to avoid type casting errors.</span></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> local_sum: output.element_type <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Perform loop unrolling.</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(CONV):</span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> local_i <span class="op">+</span> j <span class="op">&lt;</span> SIZE:</span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a>                local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a>            barrier()</span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</details>
+<p>I deliberately allocate <code>shared_a</code> and <code>shared_b</code> with the block width (<code>TPB</code>) instead of the input length (<code>SIZE</code>) and filter length (<code>CONV</code>). The extra space isn’t needed for correctness—the kernel only touches the first <code>SIZE</code>/<code>CONV</code> elements—but it nicely demonstrates <code>LayoutTensor</code>’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly SIZE elements → smaller shared-mem footprint</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="va">+    shared_a = tb[dtype]().row_major[SIZE]().shared().alloc()</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly CONV elements → smaller shared-mem footprint</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="va">+    shared_b = tb[dtype]().row_major[CONV]().shared().alloc()</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="st">-    if global_i &lt; SIZE:</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="st">-        shared_a[local_i] = a[global_i]</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="st">-        shared_b[local_i] = b[global_i]</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_i &lt; SIZE:</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_a[local_i] = a[global_i]</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_i &lt; CONV:</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_b[local_i] = b[global_i]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="parameter-loop-unrolling" class="level4">
+<h4 class="anchored" data-anchor-id="parameter-loop-unrolling">@parameter : Loop Unrolling</h4>
+<p><a href="https://docs.modular.com/mojo/manual/decorators/parameter/"><code>@parameter</code></a> is Mojo’s implementation of <strong>loop unrolling</strong>. This has the same functionality as <code>pragma unroll(N)</code> in CUDA.</p>
+<p>When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled<span class="citation" data-cites="nvidiapragmaunroll"><a href="#ref-nvidiapragmaunroll" role="doc-biblioref">[9]</a></span>.</p>
+<p><code>@parameter</code> isn’t limited to loops/branches—you can slap it on an inner function and Mojo will build a <strong>parametric closure</strong>, defined as<span class="citation" data-cites="mojoparameter"><a href="#ref-mojoparameter" role="doc-biblioref">[10]</a></span>:</p>
+<blockquote class="blockquote">
+<p>A parametric closure is a nested function decorated with <code>@parameter</code>. Any values it captures from the surrounding scope are treated as compile-time constants. The compiler materialises one specialised version of the closure for every distinct set of captured values</p>
+</blockquote>
+<p>Example:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>parametric_closure.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb31" data-filename="parametric_closure.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> make_shift(off: Int):</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span>            <span class="co"># ← specialised per ‘off’</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> shift(x: Int) <span class="op">-&gt;</span> Int:</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">+</span> off</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> shift</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s1 <span class="op">=</span> make_shift(<span class="dv">1</span>)    <span class="co"># emits shift-$off=1</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s4 <span class="op">=</span> make_shift(<span class="dv">4</span>)    <span class="co"># emits shift-$off=4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>No runtime captures, no heap boxing—the constant <code>off</code> is literally spliced into the generated IR, so calls to <code>s1</code>/<code>s4</code> inline like normal code and can be further unrolled or constant-folded.</p>
+<p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes"><a href="#ref-mojo_lifetimes" role="doc-biblioref">[11]</a></span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
+<p><strong>Bottom line</strong>: you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[12]</a></span> performance—ideal for GPU kernels where every cycle and register matters.</p>
+</section>
+</section>
+</section>
+<section id="citation" class="level2">
+<h2 class="anchored" data-anchor-id="citation">Citation</h2>
+<p>Original puzzles by the <a href="https://www.modular.com/">Modular</a> team; this blog provides personal explanations and solutions.</p>
+<p>Please cite this work as:</p>
+<pre><code>Gupta, Shubham. “Mojo GPU Puzzles — Solutions &amp; Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles</code></pre>
+<p>Or use the BibTeX citation:</p>
+<pre><code>@article{gupta2025mojopuzzles,
+  title   = {Mojo GPU Puzzles — Solutions \&amp; Explanations},
+  author  = {Gupta, Shubham},
+  journal = {shubhamg.in},
+  year    = {2025},
+  month   = {June},
+  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
+}</code></pre>
+
+
+
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -1025,6 +1164,21 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </div>
 <div id="ref-wikipediadotproduct" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[7] </div><div class="csl-right-inline">Wikipedia, <span>“Dot product.”</span> <a href="https://en.wikipedia.org/wiki/Dot_product" class="uri">https://en.wikipedia.org/wiki/Dot_product</a>, 2024.</div>
+</div>
+<div id="ref-thakur_convolutions" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">A. Thakur, <span>“Intuitive understanding of 1D, 2D, and 3D convolutions in convolutional neural networks.”</span> 2020. Available: <a href="https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA">https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA</a></div>
+</div>
+<div id="ref-nvidiapragmaunroll" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">NVIDIA, <span>“<span class="nocase">#pragma unroll Compiler Directive (CUDA C Programming Guide)</span>.”</span> 2025. Available: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll</a></div>
+</div>
+<div id="ref-mojoparameter" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">Modular, <span>“Parametric closure (<code>@parameter</code>) in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure">https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure</a></div>
+</div>
+<div id="ref-mojo_lifetimes" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">Modular, <span>“Lifetimes in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/values/lifetimes/">https://docs.modular.com/mojo/manual/values/lifetimes/</a></div>
+</div>
+<div id="ref-zero_cost_abstractions" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[12] </div><div class="csl-right-inline">saoirse, <span>“Zero cost abstractions.”</span> 2019. Available: <a href="https://without.boats/blog/zero-cost-abstractions/">https://without.boats/blog/zero-cost-abstractions/</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
