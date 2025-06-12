@@ -954,6 +954,9 @@ The actual computation of the kernel on the input remains the same as in [Puzzle
 One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!
 
 
+<details open>
+<summary> **Solution** </summary>
+
 ```{.mojo filename=p11_block_boundary.mojo}
 alias SIZE_2 = 15
 alias CONV_2 = 4
@@ -1006,7 +1009,15 @@ fn conv_1d_block_boundary[
             # dot product of window & kernel
             local_sum += shared_a[local_i + j] * shared_b[j]
         output[global_i] = local_sum
+
 ```
+
+```bash
+pixi run p11 --block-boundary
+# out: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])
+# expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])
+```
+</details>
 
 ## Citation
 

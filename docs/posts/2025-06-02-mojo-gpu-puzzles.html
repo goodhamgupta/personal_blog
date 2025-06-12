@@ -1139,7 +1139,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>• pull data from <strong>shared memory only</strong> (once it’s loaded, stay in-block)<br>
 • avoid divergent branches and random global reads<br>
 • keep the load pattern fully coalesced</p>
-<p>Naïve global loads meet none of those goals—tail threads would have to issue conditional, straggling reads once their window crosses the block edge.</p>
+<p>Naïve global loads meet none of those goals—once a window crosses the block edge the tail threads must issue conditional, <em>straggling</em> reads (i.e.&nbsp;each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).</p>
 <p><strong>The halo idea</strong> Give each block an in-block “fence extension”:</p>
 <pre><code>shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo</code></pre>
 <p>The extra <code>(CONV₂ − 1)</code> slots—the <em>halo</em>—mirror the first <code>(CONV₂ − 1)</code> elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.</p>
@@ -1158,6 +1158,10 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]</code></pre>
 <p>The actual computation of the kernel on the input remains the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
 <p>One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!</p>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>p11_block_boundary.mojo</strong></pre>
@@ -1214,6 +1218,10 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb34-50"><a href="#cb34-50" aria-hidden="true" tabindex="-1"></a>            local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
 <span id="cb34-51"><a href="#cb34-51" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--block-boundary</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </section>
 </section>
 </section>
