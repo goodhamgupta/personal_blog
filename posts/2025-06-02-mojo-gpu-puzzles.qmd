@@ -787,6 +787,13 @@ For this version, we assume that we only have a single block, and both the input
 
 ![](mojo_gpu_puzzles/p11_simple.png)
 
+The implementation is:
+
+- Intialise shared memory for both the input and the kernel
+- Load data in the shared memory, and use `barrier()` to sync all threads before performing computations.
+- In a loop, multiple the value of input and kernel, and add to a local variable.
+- Assign the local variable to the right output index.
+
 <details open>
 <summary> **Solution** </summary>
 
@@ -842,6 +849,9 @@ fn conv_1d_simple[
 </details>
 
 I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn’t needed for correctness—the kernel only touches the first `SIZE`/`CONV` elements—but it nicely demonstrates `LayoutTensor`’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
+
+
+The _optimal_ allocation of shared memory would be:
 
 ```diff
 -    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()
@@ -899,6 +909,67 @@ the specialised code never touches expired storage.
 
 **Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
 performance—ideal for GPU kernels where every cycle and register matters.
+
+#### Advanced: Block Boundary
+
+In this version, the key change is that the input no longer fits into a single block, and instead needs to be processed using multiple blocks. 
+
+We see that the convolution operation depends on inputs from the previous few elements. Specifically, the last `CONV - 1` elements in the output will be determined based on the inputs of the 
+
+```{.mojo filename=p11_block_boundary.mojo}
+alias SIZE_2 = 15
+alias CONV_2 = 4
+alias BLOCKS_PER_GRID_2 = (2, 1)
+alias THREADS_PER_BLOCK_2 = (TPB, 1)
+alias in_2_layout = Layout.row_major(SIZE_2)
+alias out_2_layout = Layout.row_major(SIZE_2)
+alias conv_2_layout = Layout.row_major(CONV_2)
+
+
+fn conv_1d_block_boundary[
+    in_layout: Layout, out_layout: Layout, conv_layout: Layout, dtype: DType
+](
+    output: LayoutTensor[mut=False, dtype, out_layout],
+    a: LayoutTensor[mut=False, dtype, in_layout],
+    b: LayoutTensor[mut=False, dtype, conv_layout],
+):
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i  = thread_idx.x
+
+    # input slice + halo
+    shared_a = tb[dtype]().row_major[TPB + CONV_2 - 1]().shared().alloc()
+
+    # load kernel
+    shared_b = tb[dtype]().row_major[CONV_2]().shared().alloc()
+
+    if global_i < SIZE_2:
+        # coalesced load of main slice
+        shared_a[local_i] = a[global_i]                  
+
+    # only first CONV_2 threads participate
+    if local_i < CONV_2:
+        # load kernel into shared memory
+        shared_b[local_i] = b[local_i]                   
+
+    # threads responsible for halo load
+    if local_i < CONV_2 - 1:
+        # element that lives in next block
+        var next_idx = global_i + TPB                    
+        # pad with zeros
+        shared_a[local_i + TPB] = a[next_idx] if next_idx < SIZE_2 else 0.0
+
+    barrier()
+
+    # skip threads mapping past the end
+    if global_i < SIZE_2:
+        var local_sum: output.element_type = 0.0
+
+        @parameter                                       
+        for j in range(CONV_2):                          
+            # dot product of window & kernel
+            local_sum += shared_a[local_i + j] * shared_b[j]
+        output[global_i] = local_sum
+```
 
 ## Citation
 
