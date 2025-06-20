@@ -850,16 +850,17 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </figure>
 </div>
 <p>To implement dot product efficiently on a GPU, we will use <strong>parallel reduction</strong>. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:</p>
+<p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[8]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance.</p>
+<p><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid"></p>
 <ul>
-<li>Each thread computes a partial sum of the dot product (multiplying its assigned elements from <code>a</code> and <code>b</code>).</li>
-<li>All threads store their partial results in shared memory.</li>
-<li>In each reduction step:
+<li>Every thread multiplies its assigned <code>a</code> and <code>b</code> elements and writes the partial product into shared memory.</li>
+<li>Each reduction round:
 <ul>
-<li>The number of active threads is halved.</li>
-<li>Each active thread adds its value to the value from another thread (usually its “neighbor” at a fixed offset).</li>
-<li>A barrier ensures all threads have updated shared memory before the next step.</li>
+<li>The active-thread count is cut in half (<code>stride /= 2</code>).</li>
+<li>Each surviving thread adds its value to the partner <code>stride</code> positions away.</li>
+<li>A <code>barrier()</code> guarantees all writes land before the next “half-step.”</li>
 </ul></li>
-<li>This repeats for log₂(n) steps, until only one thread holds the final result.</li>
+<li>After log₂ (n) halvings, Zeno’s finish line is crossed—thread 0 alone holds the final dot-product.</li>
 </ul>
 <p>This pattern is fast, highly parallel, and used everywhere in GPU programming for reductions (sum, min, max, etc).</p>
 <div>
@@ -1015,7 +1016,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <li><strong>Locality first, context later</strong>: Early layers grab short-range patterns (phonemes, k-mers). Deeper layers stitch them into bigger motifs (words, promoters).</li>
 <li><strong>Channels generalize it</strong>: You convolve along length, but for each input channel you keep separate weights, sum across channels, and spit out new feature maps. Same trick as 2-D CNNs, just flattened.</li>
 </ul>
-<p>For a better picture, see Ayush’s blog<span class="citation" data-cites="thakur_convolutions"><a href="#ref-thakur_convolutions" role="doc-biblioref">[8]</a></span> on convolutions.</p>
+<p>For a better picture, see Ayush’s blog<span class="citation" data-cites="thakur_convolutions"><a href="#ref-thakur_convolutions" role="doc-biblioref">[9]</a></span> on convolutions.</p>
 <p>The convolution operation can be defined as: <span id="eq-convolution"><span class="math display">\[
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
 \tag{1}\]</span></span></p>
@@ -1107,8 +1108,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <section id="parameter-loop-unrolling" class="level4">
 <h4 class="anchored" data-anchor-id="parameter-loop-unrolling">@parameter : Loop Unrolling</h4>
 <p><a href="https://docs.modular.com/mojo/manual/decorators/parameter/"><code>@parameter</code></a> is Mojo’s implementation of <strong>loop unrolling</strong>. This has the same functionality as <code>pragma unroll(N)</code> in CUDA.</p>
-<p>When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled<span class="citation" data-cites="nvidiapragmaunroll"><a href="#ref-nvidiapragmaunroll" role="doc-biblioref">[9]</a></span>.</p>
-<p><code>@parameter</code> isn’t limited to loops/branches—you can slap it on an inner function and Mojo will build a <strong>parametric closure</strong>, defined as<span class="citation" data-cites="mojoparameter"><a href="#ref-mojoparameter" role="doc-biblioref">[10]</a></span>:</p>
+<p>When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled<span class="citation" data-cites="nvidiapragmaunroll"><a href="#ref-nvidiapragmaunroll" role="doc-biblioref">[10]</a></span>.</p>
+<p><code>@parameter</code> isn’t limited to loops/branches—you can slap it on an inner function and Mojo will build a <strong>parametric closure</strong>, defined as<span class="citation" data-cites="mojoparameter"><a href="#ref-mojoparameter" role="doc-biblioref">[11]</a></span>:</p>
 <blockquote class="blockquote">
 <p>A parametric closure is a nested function decorated with <code>@parameter</code>. Any values it captures from the surrounding scope are treated as compile-time constants. The compiler materialises one specialised version of the closure for every distinct set of captured values</p>
 </blockquote>
@@ -1127,8 +1128,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s4 <span class="op">=</span> make_shift(<span class="dv">4</span>)    <span class="co"># emits shift-$off=4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>No runtime captures, no heap boxing—the constant <code>off</code> is literally spliced into the generated IR, so calls to <code>s1</code>/<code>s4</code> inline like normal code and can be further unrolled or constant-folded.</p>
-<p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes"><a href="#ref-mojo_lifetimes" role="doc-biblioref">[11]</a></span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
-<p><strong>Bottom line</strong>: you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[12]</a></span> performance—ideal for GPU kernels where every cycle and register matters.</p>
+<p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes"><a href="#ref-mojo_lifetimes" role="doc-biblioref">[12]</a></span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
+<p><strong>Bottom line</strong>: you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[13]</a></span> performance—ideal for GPU kernels where every cycle and register matters.</p>
 </section>
 <section id="advanced-block-boundary" class="level4">
 <h4 class="anchored" data-anchor-id="advanced-block-boundary">Advanced: Block Boundary</h4>
@@ -1144,7 +1145,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Give each block an in-block “fence extension”:</p>
 <pre><code>shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo</code></pre>
 <p>The extra <code>(CONV₂ − 1)</code> slots—the <em>halo</em>—mirror the first <code>(CONV₂ − 1)</code> elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.</p>
-<p>The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as <em>halo cells</em> or <em>skirt cells</em> since they “hang” from the side of the part that is used solely by a single block<span class="citation" data-cites="iitd_parallel_convolution"><a href="#ref-iitd_parallel_convolution" role="doc-biblioref">[13]</a></span>.</p>
+<p>The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as <em>halo cells</em> or <em>skirt cells</em> since they “hang” from the side of the part that is used solely by a single block<span class="citation" data-cites="iitd_parallel_convolution"><a href="#ref-iitd_parallel_convolution" role="doc-biblioref">[14]</a></span>.</p>
 <p>Loading recipe (matches the numbered arrows in the figure):</p>
 <ol type="1">
 <li><strong>Bulk copy</strong> – all <code>TPB</code> threads dump their element:<br>
@@ -1158,7 +1159,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>After step 4 every thread sees:</p>
 <pre><code>      main slice              halo
 [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]</code></pre>
-<p>The code to perform the actual computation is the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
+<p><strong>The</strong> code to perform the actual computation is the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
 <p>One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!</p>
 <details open="">
 <summary>
@@ -1268,23 +1269,26 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div id="ref-wikipediadotproduct" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[7] </div><div class="csl-right-inline">Wikipedia, <span>“Dot product.”</span> <a href="https://en.wikipedia.org/wiki/Dot_product" class="uri">https://en.wikipedia.org/wiki/Dot_product</a>, 2024.</div>
 </div>
+<div id="ref-zeno_dichotomy_paradox" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Wikipedia, <span>“Zeno’s paradoxes — dichotomy paradox.”</span> <a href="https://en.wikipedia.org/wiki/Zeno%27s_paradoxes#Dichotomy_paradox" class="uri">https://en.wikipedia.org/wiki/Zeno%27s_paradoxes#Dichotomy_paradox</a>, 2024.</div>
+</div>
 <div id="ref-thakur_convolutions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[8] </div><div class="csl-right-inline">A. Thakur, <span>“Intuitive understanding of 1D, 2D, and 3D convolutions in convolutional neural networks.”</span> 2020. Available: <a href="https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA">https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA</a></div>
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">A. Thakur, <span>“Intuitive understanding of 1D, 2D, and 3D convolutions in convolutional neural networks.”</span> 2020. Available: <a href="https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA">https://wandb.ai/ayush-thakur/dl-question-bank/reports/Intuitive-understanding-of-1D-2D-and-3D-convolutions-in-convolutional-neural-networks---VmlldzoxOTk2MDA</a></div>
 </div>
 <div id="ref-nvidiapragmaunroll" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[9] </div><div class="csl-right-inline">NVIDIA, <span>“<span class="nocase">#pragma unroll Compiler Directive (CUDA C Programming Guide)</span>.”</span> 2025. Available: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll</a></div>
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">NVIDIA, <span>“<span class="nocase">#pragma unroll Compiler Directive (CUDA C Programming Guide)</span>.”</span> 2025. Available: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html?highlight=unroll#pragma-unroll</a></div>
 </div>
 <div id="ref-mojoparameter" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[10] </div><div class="csl-right-inline">Modular, <span>“Parametric closure (<code>@parameter</code>) in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure">https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure</a></div>
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">Modular, <span>“Parametric closure (<code>@parameter</code>) in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure">https://docs.modular.com/mojo/manual/decorators/parameter/#parametric-closure</a></div>
 </div>
 <div id="ref-mojo_lifetimes" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[11] </div><div class="csl-right-inline">Modular, <span>“Lifetimes in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/values/lifetimes/">https://docs.modular.com/mojo/manual/values/lifetimes/</a></div>
+<div class="csl-left-margin">[12] </div><div class="csl-right-inline">Modular, <span>“Lifetimes in mojo.”</span> 2025. Available: <a href="https://docs.modular.com/mojo/manual/values/lifetimes/">https://docs.modular.com/mojo/manual/values/lifetimes/</a></div>
 </div>
 <div id="ref-zero_cost_abstractions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[12] </div><div class="csl-right-inline">saoirse, <span>“Zero cost abstractions.”</span> 2019. Available: <a href="https://without.boats/blog/zero-cost-abstractions/">https://without.boats/blog/zero-cost-abstractions/</a></div>
+<div class="csl-left-margin">[13] </div><div class="csl-right-inline">saoirse, <span>“Zero cost abstractions.”</span> 2019. Available: <a href="https://without.boats/blog/zero-cost-abstractions/">https://without.boats/blog/zero-cost-abstractions/</a></div>
 </div>
 <div id="ref-iitd_parallel_convolution" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[13] </div><div class="csl-right-inline">R. Sen, <span>“Parallel convolution.”</span> 2022. Available: <a href="https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf">https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf</a></div>
+<div class="csl-left-margin">[14] </div><div class="csl-right-inline">R. Sen, <span>“Parallel convolution.”</span> 2022. Available: <a href="https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf">https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
