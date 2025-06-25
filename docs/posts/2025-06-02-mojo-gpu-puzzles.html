@@ -1328,17 +1328,158 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </section>
 <section id="puzzle-12" class="level3">
 <h3 class="anchored" data-anchor-id="puzzle-12"><a href="https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html">Puzzle 12: Prefix Sum</a></h3>
-<p>One of the most useful building blocks for parallel algoriths, the <code>all-prefix-sum</code>, introduced by Blelloch in 1990 <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[15]</a></span>, defines the operation as:</p>
-<blockquote class="blockquote">
-<p>The all-prefix-sums operation takes a binary associative operator ⊕, and<br>
-an ordered set of n elements</p>
-<pre><code>[a0, a1, ..., an−1]</code></pre>
-<p>and returns the ordered set</p>
-<pre><code>[a0, (a0 ⊕ a1), ..., (a0 ⊕ a1 ⊕ ... ⊕ an−1)]</code></pre>
-</blockquote>
-<p>We will focus on the vector only all-prefix-sum operation, called as <code>scan</code>.</p>
-<p><img src="mojo_gpu_puzzles/p12_up.gif" class="img-fluid"></p>
-<p><img src="mojo_gpu_puzzles/p12_down.gif" class="img-fluid"></p>
+<p>The <strong>prefix sum</strong> (or <em>scan</em>) problem takes an input array <code>[a₀, a₁, …, aₙ₋₁]</code> and produces the running totals</p>
+<pre class="text"><code>[a₀, (a₀ ⊕ a₁), …, (a₀ ⊕ a₁ ⊕ … ⊕ aₙ₋₁)]</code></pre>
+<p>It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<figcaption>Prefix‐Sum Illustration</figcaption>
+</figure>
+</div>
+
+<section id="hillissteele-algorithm" class="level4">
+<h4 class="anchored" data-anchor-id="hillissteele-algorithm">Hillis–Steele Algorithm</h4>
+<p>A straightforward parallel scan is the <em>Hillis–Steele</em> approach: at each distance <code>d = 1, 2, 4, …</code> every element adds in the value from <code>d</code> positions back.</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># inclusive scan, power-of-two length</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hillis_steele_scan(a, ⊕):</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(a)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    temp <span class="op">=</span> a.copy()</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> d <span class="op">&lt;</span> n:</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>            temp[i] <span class="op">=</span> a[i] <span class="cf">if</span> i <span class="op">&lt;</span> d <span class="cf">else</span> a[i <span class="op">-</span> d] ⊕ a[i]</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>        a, temp <span class="op">=</span> temp, a</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>        d <span class="op">*=</span> <span class="dv">2</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In Mojo, this looks as follows:</p>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p12_simple.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb40" data-filename="p12_simple.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_simple[</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    global_i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    local_i <span class="op">=</span> thread_idx.x</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>(Int(log2(Scalar[dtype](TPB)))):</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> local_i <span class="op">&gt;=</span> offset <span class="kw">and</span> local_i <span class="op">&lt;</span> SIZE:</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>            shared[local_i] <span class="op">+=</span> shared[local_i <span class="op">-</span> offset]</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>        offset <span class="op">*=</span> <span class="dv">2</span></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE:</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> shared[local_i]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--simple</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Work: Θ(n log n), Span: Θ(log n).</p>
+</details></section>
+<section id="blellochs-twopass-algorithm" class="level4">
+<h4 class="anchored" data-anchor-id="blellochs-twopass-algorithm">Blelloch’s Two‐Pass Algorithm</h4>
+<p>Blelloch’s variant achieves Θ(n) work by splitting the scan into an <strong>up-sweep</strong> and a <strong>down-sweep</strong> <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[15]</a></span>:</p>
+<ol type="1">
+<li><p><strong>Up-sweep (reduce)</strong><br>
+We build a reduction tree by summing pairs of elements in log₂(n) rounds. At each round, threads work on chunks of size <code>2*step</code>:</p>
+<p>For <code>step = 1; step &lt; n; step *= 2</code>:<br>
+For <code>i</code> in <code>0, 2*step, 4*step, …, n-1</code>:<br>
+<code>a[i + 2*step - 1] = a[i + step - 1] ⊕ a[i + 2*step - 1]</code></p>
+<ul>
+<li><strong>step=1</strong>: sum adjacent pairs → partial sums at indices 1, 3, 5, …<br>
+</li>
+<li><strong>step=2</strong>: combine 4-element blocks, accumulating into indices 3, 7, …<br>
+</li>
+<li>Continue until <strong>step = n/2</strong>; now <code>a[n-1]</code> holds the overall reduction.</li>
+</ul>
+<p><img src="mojo_gpu_puzzles/p12_up.gif" class="img-fluid"> <em>Up-Sweep: combining elements in a binary-tree fashion—build partial sums until the final element holds the total.</em></p></li>
+<li><p><strong>Down-sweep (propagate)</strong><br>
+After the up-sweep leaves <code>a[n-1]</code> containing the overall sum, we walk the tree top-down to scatter prefix sums into every slot:</p>
+<ul>
+<li>Initialize <code>step = n/2</code>.<br>
+</li>
+<li>Repeat while <code>step &gt;= 1</code>:
+<ul>
+<li><p>For each <code>i</code> in <code>0, 2*step, 4*step, …, n-1</code>:</p>
+<pre><code>t                   = a[i + step - 1]        # save left subtree total
+a[i + step - 1]     = a[i + 2*step - 1]      # overwrite left with right subtotal
+a[i + 2*step - 1]   = t ⊕ a[i + 2*step - 1]  # combine for right‐child prefix</code></pre></li>
+<li><p><code>barrier()</code> to sync threads<br>
+</p></li>
+<li><p><code>step //= 2</code></p></li>
+</ul></li>
+</ul>
+<p>In each round, partial sums flow down one level of the binary tree. After log₂(n) rounds, every index holds the sum of all elements before it.</p>
+<p><img src="mojo_gpu_puzzles/p12_down.gif" class="img-fluid quarto-figure quarto-figure-center"><br>
+<em>Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.</em></p></li>
+</ol>
+<p>Time: Θ(log n) Work: Θ(n).</p>
+<p>On a GPU we load the array into shared memory, execute the two phases separated by a <code>barrier()</code>, and scatter the final prefixes to the output.</p>
+<p>and then right after that, drop in the true two-pass Blelloch version:</p>
+<details open="">
+<summary>
+<strong>Solution (Blelloch up-sweep + down-sweep)</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p12_blelloch.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb43" data-filename="p12_blelloch.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_blelloch[</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    out:   LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, layout],</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    a:     LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    size:  Int,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> gi <span class="op">=</span> block_idx.x<span class="op">*</span>block_dim.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> li <span class="op">=</span> thread_idx.x</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    shared <span class="op">=</span> tb[dtype]().row_major[SIZE]().shared().alloc()</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> load</span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> gi <span class="op">&lt;</span> size:</span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>        shared[li] <span class="op">=</span> a[gi]</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Up<span class="op">-</span>sweep (<span class="bu">reduce</span>)</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> stride <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> stride <span class="op">&lt;</span> size:</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> step <span class="op">=</span> stride <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (li <span class="op">%</span> step <span class="op">==</span> step <span class="op">-</span> <span class="dv">1</span>) <span class="op">&amp;&amp;</span> (li <span class="op">&lt;</span> size):</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>            shared[li] <span class="op">+=</span> shared[li <span class="op">-</span> stride]</span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>        stride <span class="op">=</span> step</span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Down<span class="op">-</span>sweep (propagate)</span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> li <span class="op">==</span> size <span class="op">-</span> <span class="dv">1</span>:</span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>        shared[li] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> half <span class="op">=</span> stride <span class="op">&gt;&gt;</span> <span class="dv">1</span></span>
+<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> half <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> step <span class="op">=</span> half <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb43-34"><a href="#cb43-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (li <span class="op">%</span> step <span class="op">==</span> step <span class="op">-</span> <span class="dv">1</span>) <span class="op">&amp;&amp;</span> (li <span class="op">&lt;</span> size):</span>
+<span id="cb43-35"><a href="#cb43-35" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> t <span class="op">=</span> shared[li <span class="op">-</span> half]</span>
+<span id="cb43-36"><a href="#cb43-36" aria-hidden="true" tabindex="-1"></a>            shared[li <span class="op">-</span> half] <span class="op">=</span> shared[li]</span>
+<span id="cb43-37"><a href="#cb43-37" aria-hidden="true" tabindex="-1"></a>            shared[li] <span class="op">+=</span> t</span>
+<span id="cb43-38"><a href="#cb43-38" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
+<span id="cb43-39"><a href="#cb43-39" aria-hidden="true" tabindex="-1"></a>        half <span class="op">=</span> half <span class="op">&gt;&gt;</span> <span class="dv">1</span></span>
+<span id="cb43-40"><a href="#cb43-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-41"><a href="#cb43-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> write</span>
+<span id="cb43-42"><a href="#cb43-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> gi <span class="op">&lt;</span> size:</span>
+<span id="cb43-43"><a href="#cb43-43" aria-hidden="true" tabindex="-1"></a>        out[gi] <span class="op">=</span> shared[li]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--blelloch</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([…prefix sums…])</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([…prefix sums…])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
 </section>
 </section>
 <section id="citation" class="level2">

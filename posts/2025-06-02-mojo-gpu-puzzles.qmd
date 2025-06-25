@@ -1123,27 +1123,167 @@ pixi run p11 --conv-2d
 
 ### [Puzzle 12: Prefix Sum](https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html) {#puzzle-12}
 
-One of the most useful building blocks for parallel algoriths, the `all-prefix-sum`, introduced by Blelloch in 1990 [@blelloch_prefix_sum], defines the operation as:
+The **prefix sum** (or *scan*) problem takes an input array `[a₀, a₁, …, aₙ₋₁]` and produces the running totals
+
+```text
+[a₀, (a₀ ⊕ a₁), …, (a₀ ⊕ a₁ ⊕ … ⊕ aₙ₋₁)]
+```
+
+It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more.
+
+![Prefix‐Sum Illustration](mojo_gpu_puzzles/p12_prefix_scan.png){fig-align='center'}
+
+</details>
+#### Hillis–Steele Algorithm
+
+A straightforward parallel scan is the *Hillis–Steele* approach: at each distance `d = 1, 2, 4, …` every element adds in the value from `d` positions back.
+
+```python
+# inclusive scan, power-of-two length
+def hillis_steele_scan(a, ⊕):
+    n = len(a)
+    temp = a.copy()
+    d = 1
+    while d < n:
+        for i in range(n):
+            temp[i] = a[i] if i < d else a[i - d] ⊕ a[i]
+        a, temp = temp, a
+        d *= 2
+    return a
+```
+
+In Mojo, this looks as follows:
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p12_simple.mojo}
+fn prefix_sum_simple[
+    layout: Layout
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    size: Int,
+):
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i = thread_idx.x
+    for idx in range(Int(log2(Scalar[dtype](TPB)))):
+        if local_i >= offset and local_i < SIZE:
+            shared[local_i] += shared[local_i - offset]
+
+        barrier()
+        offset *= 2
+
+    if global_i < SIZE:
+        output[global_i] = shared[local_i]
+```
+
+```bash
+pixi run p12 --simple
+```
+
+Work: Θ(n log n), Span: Θ(log n).
+
+#### Blelloch’s Two‐Pass Algorithm
+
+Blelloch’s variant achieves Θ(n) work by splitting the scan into an **up-sweep** and a **down-sweep** [@blelloch_prefix_sum]:
+
+1. **Up-sweep (reduce)**  
+   We build a reduction tree by summing pairs of elements in log₂(n) rounds. At each round, threads work on chunks of size `2*step`:
+
+   For `step = 1; step < n; step *= 2`:  
+     For `i` in `0, 2*step, 4*step, …, n-1`:  
+       `a[i + 2*step - 1] = a[i + step - 1] ⊕ a[i + 2*step - 1]`
+
+   - **step=1**: sum adjacent pairs → partial sums at indices 1, 3, 5, …  
+   - **step=2**: combine 4-element blocks, accumulating into indices 3, 7, …  
+   - Continue until **step = n/2**; now `a[n-1]` holds the overall reduction.  
+
+   ![](mojo_gpu_puzzles/p12_up.gif)
+   *Up-Sweep: combining elements in a binary-tree fashion—build partial sums until the final element holds the total.*  
+
+2. **Down-sweep (propagate)**  
+   After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree top-down to scatter prefix sums into every slot:
+
+   - Initialize `step = n/2`.  
+   - Repeat while `step >= 1`:
+     - For each `i` in `0, 2*step, 4*step, …, n-1`:
+       ```
+       t                   = a[i + step - 1]        # save left subtree total
+       a[i + step - 1]     = a[i + 2*step - 1]      # overwrite left with right subtotal
+       a[i + 2*step - 1]   = t ⊕ a[i + 2*step - 1]  # combine for right‐child prefix
+       ```
+     - `barrier()` to sync threads  
+     - `step //= 2`
+
+   In each round, partial sums flow down one level of the binary tree. After log₂(n) rounds, every index holds the sum of all elements before it.  
+
+   ![](mojo_gpu_puzzles/p12_down.gif){fig-align="center"}  
+   *Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.*  
+
+Time: Θ(log n) Work: Θ(n).  
+
+On a GPU we load the array into shared memory, execute the two phases separated by a `barrier()`, and scatter the final prefixes to the output.
 
 
-> The all-prefix-sums operation takes a binary associative operator ⊕, and  
-> an ordered set of n elements  
->
-> ```
-> [a0, a1, ..., an−1]
-> ```
->
-> and returns the ordered set  
->
-> ```
-> [a0, (a0 ⊕ a1), ..., (a0 ⊕ a1 ⊕ ... ⊕ an−1)]
-> ```
+and then right after that, drop in the true two-pass Blelloch version:
 
-We will focus on the vector only all-prefix-sum operation, called as `scan`.
+<details open>
+<summary> **Solution (Blelloch up-sweep + down-sweep)** </summary>
 
-![](mojo_gpu_puzzles/p12_up.gif)
+```{.mojo filename="p12_blelloch.mojo"}
+fn prefix_sum_blelloch[
+    layout: Layout
+](
+    out:   LayoutTensor[mut=True, dtype, layout],
+    a:     LayoutTensor[mut=False, dtype, layout],
+    size:  Int,
+):
+    let gi = block_idx.x*block_dim.x + thread_idx.x
+    let li = thread_idx.x
+    shared = tb[dtype]().row_major[SIZE]().shared().alloc()
 
-![](mojo_gpu_puzzles/p12_down.gif)
+    // load
+    if gi < size:
+        shared[li] = a[gi]
+    barrier()
+
+    // Up-sweep (reduce)
+    var stride = 1
+    while stride < size:
+        let step = stride * 2
+        if (li % step == step - 1) && (li < size):
+            shared[li] += shared[li - stride]
+        barrier()
+        stride = step
+
+    // Down-sweep (propagate)
+    if li == size - 1:
+        shared[li] = 0
+    barrier()
+
+    var half = stride >> 1
+    while half > 0:
+        let step = half * 2
+        if (li % step == step - 1) && (li < size):
+            let t = shared[li - half]
+            shared[li - half] = shared[li]
+            shared[li] += t
+        barrier()
+        half = half >> 1
+
+    // write
+    if gi < size:
+        out[gi] = shared[li]
+```
+
+```bash
+pixi run p12 --blelloch
+# out: HostBuffer([…prefix sums…])
+# expected: HostBuffer([…prefix sums…])
+```
+
+</details>
 
 ## Citation
 
