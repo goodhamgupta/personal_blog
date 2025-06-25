@@ -915,13 +915,14 @@ performance—ideal for GPU kernels where every cycle and register matters.
 
 #### Advanced: Block Boundary
 
-We not aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
+We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
 
 The blue cells are the data *owned* by the current thread-block; the orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
 
 ![](mojo_gpu_puzzles/p11_block_boundary.png)
 
 **Problem statement**
+
 Run a 1-D convolution with a `CONV₂`-tap kernel over an input that is longer than one block (`TPB` threads). We want every thread to:
 
 • pull data from **shared memory only** (once it’s loaded, stay in-block)  
@@ -955,7 +956,7 @@ After step 4 every thread sees:
           main slice              halo
     [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]
 
-**The** code to perform the actual computation is the same as in [Puzzle 10](#puzzle-10).
+Code to perform the actual computation is the same as in [Puzzle 10](#puzzle-10).
 
 One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!
 
@@ -1025,6 +1026,125 @@ pixi run p11 --block-boundary
 ```
 </details>
 
+### Bonus: 2D Convolution
+
+We can extend our implementation for 1D convolution to a 2D convolution.
+
+![Source: [Toast Lab](https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html)](mojo_gpu_puzzles/2d_convolution.gif){fig-align='center'}
+
+Everything is exactly the same idea as 1-D, only now we have two spatial dims:
+
+- We launch a 2D grid of `(ceildiv(WIDTH,TPB_X), ceildiv(HEIGHT,TPB_Y))` blocks of TPB_X×TPB_Y threads.
+- Each block allocates a shared tile of size `(TPB_Y+K−1)×(TPB_X+K−1)` to hold its “main” patch plus a one‐pixel halo on the bottom/right.
+- We also stash the full `K×K` kernel into shared_k.
+- After a single barrier(), each thread does two nested `@parameter` loops over `ky,kx∈[0,K)` to compute a dot‐product.
+
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p11_conv_2d.mojo}
+from math import ceildiv
+...
+
+alias TPB_X = 8
+alias TPB_Y = 8
+alias WIDTH = 16
+alias HEIGHT = 12
+alias K     = 3
+alias BLOCKS_PER_GRID_2D  = (ceildiv(WIDTH, TPB_X),  ceildiv(HEIGHT, TPB_Y))
+alias THREADS_PER_BLOCK_2D = (TPB_X, TPB_Y)
+
+fn conv_2d_halo[
+    in_layout : Layout, out_layout : Layout,
+    k_layout  : Layout, dtype : DType
+](
+    output : LayoutTensor[mut=False, dtype, out_layout],
+    inp    : LayoutTensor[mut=False, dtype, in_layout],
+    kernel : LayoutTensor[mut=False, dtype, k_layout],
+):
+    let gx = block_idx.x * block_dim.x + thread_idx.x
+    let gy = block_idx.y * block_dim.y + thread_idx.y
+    let lx = thread_idx.x
+    let ly = thread_idx.y
+
+    const TILE_W = TPB_X + K - 1
+    const TILE_H = TPB_Y + K - 1
+
+    # allocate (main + halo) + kernel
+    shared_img = tb[dtype]().row_major[TILE_H, TILE_W]().shared().alloc()
+    shared_k   = tb[dtype]().row_major[K,K]().shared().alloc()
+
+    # 1) bulk copy
+    if gx < WIDTH && gy < HEIGHT:
+        shared_img[ly, lx] = inp[gy, gx]
+    else:
+        shared_img[ly, lx] = 0.0
+
+    # 2) halo copy (strided so we cover the whole TILE_H/TILE_W)
+    var hy = ly
+    while hy < TILE_H:
+        var hx = lx
+        let gy2 = block_idx.y * block_dim.y + hy
+        while hx < TILE_W:
+            let gx2 = block_idx.x * block_dim.x + hx
+            shared_img[hy, hx] = (
+                inp[gy2, gx2] if (gy2 < HEIGHT && gx2 < WIDTH) else 0.0
+            )
+            hx += TPB_X
+        hy += TPB_Y
+
+    # 3) stash the kernel
+    if ly < K && lx < K:
+        shared_k[ly, lx] = kernel[ly, lx]
+
+    barrier()  # sync both shared buffers
+
+    # 4) compute 3×3 dot‐product
+    if gx < WIDTH && gy < HEIGHT:
+        var sum: Float32 = 0.0
+        @parameter 
+        for ky in range(K):
+            @parameter 
+            for kx in range(K):
+                sum += shared_img[ly + ky, lx + kx] * shared_k[ky, kx]
+        output[gy, gx] = sum
+```
+
+</details>
+
+After making a [few changes](https://github.com/goodhamgupta/mojo-gpu-puzzles/commit/b7961ce0e5ea8753a866cbf671881ac1bdf4acd9) to the test harness, we get the following result:
+
+```bash
+pixi run p11 --conv-2d
+# out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])
+# expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])
+```
+
+### [Puzzle 12: Prefix Sum](https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html) {#puzzle-12}
+
+One of the most useful building blocks for parallel algoriths, the `all-prefix-sum`, introduced by Blelloch in 1990 [@blelloch_prefix_sum], defines the operation as:
+
+
+> The all-prefix-sums operation takes a binary associative operator ⊕, and  
+> an ordered set of n elements  
+>
+> ```
+> [a0, a1, ..., an−1]
+> ```
+>
+> and returns the ordered set  
+>
+> ```
+> [a0, (a0 ⊕ a1), ..., (a0 ⊕ a1 ⊕ ... ⊕ an−1)]
+> ```
+
+We will focus on the vector only all-prefix-sum operation, called as `scan`.
+
+![](mojo_gpu_puzzles/p12_up.gif)
+
+![](mojo_gpu_puzzles/p12_down.gif)
+
 ## Citation
 
 Original puzzles by the [Modular](https://www.modular.com/) team; this blog provides personal explanations and solutions.
@@ -1038,12 +1158,11 @@ Gupta, Shubham. “Mojo GPU Puzzles — Solutions & Explanations”. shubhamg.in
 Or use the BibTeX citation:
 
 ```
-@article{gupta2025mojopuzzles,
+@article{sguptamojopuzzles,
   title   = {Mojo GPU Puzzles — Solutions \& Explanations},
   author  = {Gupta, Shubham},
   journal = {shubhamg.in},
   year    = {2025},
-  month   = {June},
   url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
 }
 ```

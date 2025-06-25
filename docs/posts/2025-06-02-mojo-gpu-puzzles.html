@@ -242,6 +242,8 @@ window.Quarto = {
   <li><a href="#puzzle-09" id="toc-puzzle-09" class="nav-link" data-scroll-target="#puzzle-09">Puzzle 9: Pooling</a></li>
   <li><a href="#puzzle-10" id="toc-puzzle-10" class="nav-link" data-scroll-target="#puzzle-10">Puzzle 10: Dot Product</a></li>
   <li><a href="#puzzle-11" id="toc-puzzle-11" class="nav-link" data-scroll-target="#puzzle-11">Puzzle 11: 1D Convolution</a></li>
+  <li><a href="#bonus-2d-convolution" id="toc-bonus-2d-convolution" class="nav-link" data-scroll-target="#bonus-2d-convolution">Bonus: 2D Convolution</a></li>
+  <li><a href="#puzzle-12" id="toc-puzzle-12" class="nav-link" data-scroll-target="#puzzle-12">Puzzle 12: Prefix Sum</a></li>
   </ul></li>
   <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
   </ul>
@@ -1133,10 +1135,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </section>
 <section id="advanced-block-boundary" class="level4">
 <h4 class="anchored" data-anchor-id="advanced-block-boundary">Advanced: Block Boundary</h4>
-<p>We not aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N &gt; 1.</p>
+<p>We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N &gt; 1.</p>
 <p>The blue cells are the data <em>owned</em> by the current thread-block; the orange cells are the first few elements of the <em>next</em> block that the convolution window will inevitably peek at.</p>
 <p><img src="mojo_gpu_puzzles/p11_block_boundary.png" class="img-fluid"></p>
-<p><strong>Problem statement</strong> Run a 1-D convolution with a <code>CONV₂</code>-tap kernel over an input that is longer than one block (<code>TPB</code> threads). We want every thread to:</p>
+<p><strong>Problem statement</strong></p>
+<p>Run a 1-D convolution with a <code>CONV₂</code>-tap kernel over an input that is longer than one block (<code>TPB</code> threads). We want every thread to:</p>
 <p>• pull data from <strong>shared memory only</strong> (once it’s loaded, stay in-block)<br>
 • avoid divergent branches and random global reads<br>
 • keep the load pattern fully coalesced</p>
@@ -1159,7 +1162,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>After step 4 every thread sees:</p>
 <pre><code>      main slice              halo
 [ … local_i … TPB − 1 | TPB … TPB+CONV₂−2 ]</code></pre>
-<p><strong>The</strong> code to perform the actual computation is the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
+<p>Code to perform the actual computation is the same as in <a href="#puzzle-10">Puzzle 10</a>.</p>
 <p>One barrier, no branches and 100 % shared-memory hits ensure our kernel is fast and efficient!</p>
 <details open="">
 <summary>
@@ -1227,6 +1230,116 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </details>
 </section>
 </section>
+<section id="bonus-2d-convolution" class="level3">
+<h3 class="anchored" data-anchor-id="bonus-2d-convolution">Bonus: 2D Convolution</h3>
+<p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img"></p>
+<figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
+</figure>
+</div>
+<p>Everything is exactly the same idea as 1-D, only now we have two spatial dims:</p>
+<ul>
+<li>We launch a 2D grid of <code>(ceildiv(WIDTH,TPB_X), ceildiv(HEIGHT,TPB_Y))</code> blocks of TPB_X×TPB_Y threads.</li>
+<li>Each block allocates a shared tile of size <code>(TPB_Y+K−1)×(TPB_X+K−1)</code> to hold its “main” patch plus a one‐pixel halo on the bottom/right.</li>
+<li>We also stash the full <code>K×K</code> kernel into shared_k.</li>
+<li>After a single barrier(), each thread does two nested <code>@parameter</code> loops over <code>ky,kx∈[0,K)</code> to compute a dot‐product.</li>
+</ul>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p11_conv_2d.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb36" data-filename="p11_conv_2d.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> ceildiv</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>...</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB_X <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB_Y <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> WIDTH <span class="op">=</span> <span class="dv">16</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> HEIGHT <span class="op">=</span> <span class="dv">12</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> K     <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2D  <span class="op">=</span> (ceildiv(WIDTH, TPB_X),  ceildiv(HEIGHT, TPB_Y))</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2D <span class="op">=</span> (TPB_X, TPB_Y)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> conv_2d_halo[</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    in_layout : Layout, out_layout : Layout,</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    k_layout  : Layout, dtype : DType</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>    output : LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    inp    : LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, in_layout],</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    kernel : LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, k_layout],</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> gx <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> gy <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> lx <span class="op">=</span> thread_idx.x</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> ly <span class="op">=</span> thread_idx.y</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    const TILE_W <span class="op">=</span> TPB_X <span class="op">+</span> K <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    const TILE_H <span class="op">=</span> TPB_Y <span class="op">+</span> K <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># allocate (main + halo) + kernel</span></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    shared_img <span class="op">=</span> tb[dtype]().row_major[TILE_H, TILE_W]().shared().alloc()</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    shared_k   <span class="op">=</span> tb[dtype]().row_major[K,K]().shared().alloc()</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1) bulk copy</span></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> gx <span class="op">&lt;</span> WIDTH <span class="op">&amp;&amp;</span> gy <span class="op">&lt;</span> HEIGHT:</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>        shared_img[ly, lx] <span class="op">=</span> inp[gy, gx]</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>        shared_img[ly, lx] <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2) halo copy (strided so we cover the whole TILE_H/TILE_W)</span></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> hy <span class="op">=</span> ly</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> hy <span class="op">&lt;</span> TILE_H:</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> hx <span class="op">=</span> lx</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>        <span class="kw">let</span> gy2 <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> hy</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> hx <span class="op">&lt;</span> TILE_W:</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a>            <span class="kw">let</span> gx2 <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> hx</span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a>            shared_img[hy, hx] <span class="op">=</span> (</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>                inp[gy2, gx2] <span class="cf">if</span> (gy2 <span class="op">&lt;</span> HEIGHT <span class="op">&amp;&amp;</span> gx2 <span class="op">&lt;</span> WIDTH) <span class="cf">else</span> <span class="fl">0.0</span></span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>            hx <span class="op">+=</span> TPB_X</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a>        hy <span class="op">+=</span> TPB_Y</span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3) stash the kernel</span></span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ly <span class="op">&lt;</span> K <span class="op">&amp;&amp;</span> lx <span class="op">&lt;</span> K:</span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>        shared_k[ly, lx] <span class="op">=</span> kernel[ly, lx]</span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>    barrier()  <span class="co"># sync both shared buffers</span></span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4) compute 3×3 dot‐product</span></span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> gx <span class="op">&lt;</span> WIDTH <span class="op">&amp;&amp;</span> gy <span class="op">&lt;</span> HEIGHT:</span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> <span class="bu">sum</span>: Float32 <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span> </span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> ky <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>            <span class="at">@parameter</span> </span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> kx <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>                <span class="bu">sum</span> <span class="op">+=</span> shared_img[ly <span class="op">+</span> ky, lx <span class="op">+</span> kx] <span class="op">*</span> shared_k[ky, kx]</span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>        output[gy, gx] <span class="op">=</span> <span class="bu">sum</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</details>
+<p>After making a <a href="https://github.com/goodhamgupta/mojo-gpu-puzzles/commit/b7961ce0e5ea8753a866cbf671881ac1bdf4acd9">few changes</a> to the test harness, we get the following result:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--conv-2d</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="puzzle-12" class="level3">
+<h3 class="anchored" data-anchor-id="puzzle-12"><a href="https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html">Puzzle 12: Prefix Sum</a></h3>
+<p>One of the most useful building blocks for parallel algoriths, the <code>all-prefix-sum</code>, introduced by Blelloch in 1990 <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[15]</a></span>, defines the operation as:</p>
+<blockquote class="blockquote">
+<p>The all-prefix-sums operation takes a binary associative operator ⊕, and<br>
+an ordered set of n elements</p>
+<pre><code>[a0, a1, ..., an−1]</code></pre>
+<p>and returns the ordered set</p>
+<pre><code>[a0, (a0 ⊕ a1), ..., (a0 ⊕ a1 ⊕ ... ⊕ an−1)]</code></pre>
+</blockquote>
+<p>We will focus on the vector only all-prefix-sum operation, called as <code>scan</code>.</p>
+<p><img src="mojo_gpu_puzzles/p12_up.gif" class="img-fluid"></p>
+<p><img src="mojo_gpu_puzzles/p12_down.gif" class="img-fluid"></p>
+</section>
 </section>
 <section id="citation" class="level2">
 <h2 class="anchored" data-anchor-id="citation">Citation</h2>
@@ -1234,12 +1347,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Please cite this work as:</p>
 <pre><code>Gupta, Shubham. “Mojo GPU Puzzles — Solutions &amp; Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles</code></pre>
 <p>Or use the BibTeX citation:</p>
-<pre><code>@article{gupta2025mojopuzzles,
+<pre><code>@article{sguptamojopuzzles,
   title   = {Mojo GPU Puzzles — Solutions \&amp; Explanations},
   author  = {Gupta, Shubham},
   journal = {shubhamg.in},
   year    = {2025},
-  month   = {June},
   url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
 }</code></pre>
 
@@ -1289,6 +1401,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </div>
 <div id="ref-iitd_parallel_convolution" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[14] </div><div class="csl-right-inline">R. Sen, <span>“Parallel convolution.”</span> 2022. Available: <a href="https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf">https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf</a></div>
+</div>
+<div id="ref-blelloch_prefix_sum" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[15] </div><div class="csl-right-inline">G. E. Blelloch, <span>“Prefix sums and their applications,”</span> in <em>Synthesis of parallel algorithms</em>, 1993, pp. 35–60. Available: <a href="https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf">https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
