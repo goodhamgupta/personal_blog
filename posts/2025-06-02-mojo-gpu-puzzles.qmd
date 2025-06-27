@@ -1129,14 +1129,14 @@ The **prefix sum** (or *scan*) problem takes an input array `[a₀, a₁, …, a
 [a₀, (a₀ ⊕ a₁), …, (a₀ ⊕ a₁ ⊕ … ⊕ aₙ₋₁)]
 ```
 
-It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more.
+It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.
 
 ![Prefix‐Sum Illustration](mojo_gpu_puzzles/p12_prefix_scan.png){fig-align='center'}
 
 </details>
 #### Hillis–Steele Algorithm
 
-A straightforward parallel scan is the *Hillis–Steele* approach: at each distance `d = 1, 2, 4, …` every element adds in the value from `d` positions back.
+A straightforward parallel scan is the *Hillis–Steele* approach: at each distance `d = 1, 2, 4, …` every element adds in the value from `d` positions back. This is the same as the method shown in [Puzzle 10](#puzzle-10)
 
 ```python
 # inclusive scan, power-of-two length
@@ -1182,7 +1182,8 @@ fn prefix_sum_simple[
 pixi run p12 --simple
 ```
 
-Work: Θ(n log n), Span: Θ(log n).
+Each of the log₂(n) rounds does up to n parallel additions (one per active element), so total work is $\sum_k n = nlog(n)$.
+Because rounds are serialized by barriers, the longest dependency chain is one add per round i.e $O(log n)$.
 
 #### Blelloch’s Two‐Pass Algorithm
 
@@ -1221,12 +1222,14 @@ Blelloch’s variant achieves Θ(n) work by splitting the scan into an **up-swee
    ![](mojo_gpu_puzzles/p12_down.gif){fig-align="center"}  
    *Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.*  
 
-Time: Θ(log n) Work: Θ(n).  
+Time Complexity: Θ(log₂ n) parallel steps, Work: Θ(n) total operations.
 
-On a GPU we load the array into shared memory, execute the two phases separated by a `barrier()`, and scatter the final prefixes to the output.
+We coalesce-load the input into shared memory, then execute the Blelloch scan in two synchronized phases:
 
-
-and then right after that, drop in the true two-pass Blelloch version:
+1. Up-sweep (reduce) – in log₂ n rounds each thread builds partial sums into a binary tree.
+2. barrier() – sync all threads and reset the root to zero (for an exclusive scan).
+3. Down-sweep (propagate) – in log₂ n rounds threads walk the tree top-down, scattering prefix sums.
+4. Coalesced write – flush the computed prefixes from shared memory back to global memory.
 
 <details open>
 <summary> **Solution (Blelloch up-sweep + down-sweep)** </summary>
@@ -1239,48 +1242,46 @@ fn prefix_sum_blelloch[
     a:     LayoutTensor[mut=False, dtype, layout],
     size:  Int,
 ):
-    let gi = block_idx.x*block_dim.x + thread_idx.x
-    let li = thread_idx.x
+    let global_idx = block_idx.x*block_dim.x + thread_idx.x
+    let local_idx = thread_idx.x
     shared = tb[dtype]().row_major[SIZE]().shared().alloc()
 
     // load
-    if gi < size:
-        shared[li] = a[gi]
+    if global_idx < size:
+        shared[local_idx] = a[global_idx]
     barrier()
 
     // Up-sweep (reduce)
     var stride = 1
     while stride < size:
         let step = stride * 2
-        if (li % step == step - 1) && (li < size):
-            shared[li] += shared[li - stride]
+        if (local_idx % step == step - 1) && (local_idx < size):
+            shared[local_idx] += shared[local_idx - stride]
         barrier()
         stride = step
 
     // Down-sweep (propagate)
-    if li == size - 1:
-        shared[li] = 0
+    if local_idx == size - 1:
+        shared[local_idx] = 0
     barrier()
 
     var half = stride >> 1
     while half > 0:
         let step = half * 2
-        if (li % step == step - 1) && (li < size):
-            let t = shared[li - half]
-            shared[li - half] = shared[li]
-            shared[li] += t
+        if (local_idx % step == step - 1) && (local_idx < size):
+            let t = shared[local_idx - half]
+            shared[local_idx - half] = shared[local_idx]
+            shared[local_idx] += t
         barrier()
         half = half >> 1
 
     // write
-    if gi < size:
-        out[gi] = shared[li]
+    if global_idx < size:
+        out[global_idx] = shared[local_idx]
 ```
 
 ```bash
 pixi run p12 --blelloch
-# out: HostBuffer([…prefix sums…])
-# expected: HostBuffer([…prefix sums…])
 ```
 
 </details>
