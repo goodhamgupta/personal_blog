@@ -2,3 +2,4 @@ venv/*
 _site/*
 
 /.quarto/
+.DS_Store
