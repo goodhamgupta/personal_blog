@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Shubham Gupta - GPUs go brrr with Mojo</title>
+<title>Shubham Gupta - GPUs go brrr with Mojo - Fundamentals</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -205,7 +205,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">GPUs go brrr with Mojo</h1>
+      <h1 class="title">GPUs go brrr with Mojo - Fundamentals</h1>
                       </div>
   </div>
     
@@ -227,10 +227,13 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-mojo" id="toc-why-mojo" class="nav-link active" data-scroll-target="#why-mojo">Why Mojo?</a></li>
-  <li><a href="#gpu-memory" id="toc-gpu-memory" class="nav-link" data-scroll-target="#gpu-memory">GPUs 101</a></li>
-  <li><a href="#infrastructure" id="toc-infrastructure" class="nav-link" data-scroll-target="#infrastructure">Infrastructure</a></li>
-  <li><a href="#part-1-gpu-fundamentals" id="toc-part-1-gpu-fundamentals" class="nav-link" data-scroll-target="#part-1-gpu-fundamentals">Part 1: GPU Fundamentals</a>
+  <li><a href="#gpu-memory" id="toc-gpu-memory" class="nav-link" data-scroll-target="#gpu-memory">GPUs 101</a>
   <ul class="collapse">
+  <li><a href="#gpu-memory-hierarchy" id="toc-gpu-memory-hierarchy" class="nav-link" data-scroll-target="#gpu-memory-hierarchy">GPU Memory Hierarchy</a></li>
+  <li><a href="#execution-hierarchy" id="toc-execution-hierarchy" class="nav-link" data-scroll-target="#execution-hierarchy">Execution Hierarchy</a></li>
+  <li><a href="#kernel-launch-program-flow" id="toc-kernel-launch-program-flow" class="nav-link" data-scroll-target="#kernel-launch-program-flow">Kernel Launch &amp; Program Flow</a></li>
+  </ul></li>
+  <li><a href="#infrastructure" id="toc-infrastructure" class="nav-link" data-scroll-target="#infrastructure">Infrastructure</a></li>
   <li><a href="#puzzle-01" id="toc-puzzle-01" class="nav-link" data-scroll-target="#puzzle-01">Puzzle 1: Map</a></li>
   <li><a href="#puzzle-02" id="toc-puzzle-02" class="nav-link" data-scroll-target="#puzzle-02">Puzzle 2: Zip</a></li>
   <li><a href="#puzzle-03" id="toc-puzzle-03" class="nav-link" data-scroll-target="#puzzle-03">Puzzle 3: Guards</a></li>
@@ -238,9 +241,10 @@ window.Quarto = {
   <li><a href="#puzzle-05" id="toc-puzzle-05" class="nav-link" data-scroll-target="#puzzle-05">Puzzle 5: Broadcast</a></li>
   <li><a href="#puzzle-06" id="toc-puzzle-06" class="nav-link" data-scroll-target="#puzzle-06">Puzzle 6: Blocks</a></li>
   <li><a href="#puzzle-07" id="toc-puzzle-07" class="nav-link" data-scroll-target="#puzzle-07">Puzzle 7: 2D Blocks</a></li>
-  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
+  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a>
+  <ul class="collapse">
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul></li>
-  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
   </ul>
 </nav>
     </div>
@@ -251,19 +255,6 @@ window.Quarto = {
 
 
 
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This blog will be updated with puzzle solutions as they’re released. Stay tuned for more updates!</p>
-</div>
-</div>
 <p>After a super-long break from writing blogs, I’ve decided to get back to it this year.</p>
 <p>I’ve always been interested in systems programming, but somehow never <em>really</em> picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google <span class="citation" data-cites="Google"><a href="#ref-Google" role="doc-biblioref">[1]</a></span> reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving training and inference efficiency using “moar” compute.</p>
 <p>I briefly spoke about <a href="https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=1-37&amp;t=VNzh9p2qKrHNSTJj-1">GPU computing last year</a>, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention.</p>
@@ -279,29 +270,72 @@ Note
 <li>Traits and bounds checking</li>
 <li>Interopeability with PTX, Python, C</li>
 </ul>
-<p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations, so I decided to learn a bit more about how to write these kernels.</p>
+<p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the <a href="https://www.modular.com/democratizing-ai-compute">Democratising AI Compute</a> series by Chris, and thus I decided to learn a bit more about how to write these kernels in Mojo.</p>
 </section>
 <section id="gpu-memory" class="level2">
 <h2 class="anchored" data-anchor-id="gpu-memory">GPUs 101</h2>
-<p>Not sure what to put in here. Skipping for now.</p>
+<p>GPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:</p>
+<ul>
+<li>Lay out data and computation as a grid of thread blocks.</li>
+<li>Launch a <em>kernel</em> from the CPU (host) to run on the GPU (device).</li>
+<li>Exploit thousands of lightweight threads all executing the same code (SIMD).</li>
+</ul>
+<section id="gpu-memory-hierarchy" class="level3">
+<h3 class="anchored" data-anchor-id="gpu-memory-hierarchy">GPU Memory Hierarchy</h3>
 <p><a href="mojo_gpu_puzzles/gpu_memory.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="mojo_gpu_puzzles/gpu_memory.png" class="img-fluid"></a></p>
+<p>Here’s how CPU and GPU memory hierarchies compare:</p>
+<ul>
+<li>CPU: DRAM &gt; Caches (L3, L2, L1) &gt; Registers.<br>
+</li>
+<li>GPU: Global (DRAM) &gt; Shared (SRAM) &gt; Registers.</li>
+</ul>
+<p>From slowest/largest to fastest/smallest:</p>
+<ul>
+<li><strong>Global (DRAM)</strong>: large, high-latency, visible to all threads.<br>
+</li>
+<li><strong>Shared (SRAM)</strong>: per-block scratchpad, low-latency.<br>
+</li>
+<li><strong>Registers</strong>: per-thread storage, fastest access.</li>
+</ul>
+</section>
+<section id="execution-hierarchy" class="level3">
+<h3 class="anchored" data-anchor-id="execution-hierarchy">Execution Hierarchy</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
+<ul>
+<li><strong>Grid</strong>: a collection of blocks distributed across SMs.</li>
+<li><strong>Block</strong>: a group of threads that share <code>shared</code> memory and can synchronize.</li>
+<li><strong>Thread</strong>: the basic execution unit with its own registers.</li>
+</ul>
+<p>Pick your grid/block dimensions to match data shapes and hardware limits.</p>
+</section>
+<section id="kernel-launch-program-flow" class="level3">
+<h3 class="anchored" data-anchor-id="kernel-launch-program-flow">Kernel Launch &amp; Program Flow</h3>
 <p><a href="mojo_gpu_puzzles/program_flow.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="mojo_gpu_puzzles/program_flow.png" class="img-fluid"></a></p>
+<ol type="1">
+<li><strong>Host</strong> allocates and copies data to GPU global memory.<br>
+</li>
+<li>Host launches the <strong>kernel</strong> with a specified grid and block size.<br>
+</li>
+<li><strong>Device</strong> executes the kernel in parallel across threads.<br>
+</li>
+<li>Host retrieves results from GPU memory.</li>
+</ol>
+<p>This host/device split means all control flow (loops, recursion) lives on the CPU, while compute-intensive, data-parallel kernels run on the GPU.</p>
+<p>With these fundamentals in place, we’re ready to dive into our first GPU puzzles!</p>
+</section>
 </section>
 <section id="infrastructure" class="level2">
 <h2 class="anchored" data-anchor-id="infrastructure">Infrastructure</h2>
 <p>If you plan on solving these puzzles, remember to pick a <a href="https://docs.modular.com/max/faq/#gpu-requirements">compatible GPU</a> and follow the <a href="https://builds.modular.com/puzzles/howto.html">setup instructions</a></p>
 <p>I completed the puzzles on a instance with a RTX4090 Ti chip, rented via <a href="https://www.primeintellect.ai/">Prime Intellect</a> at <strong>0.22 $/hr</strong>!</p>
+<p><strong>Note</strong>: The Modular team has created beautiful <a href="https://github.com/ManimCommunity/manim">Manim</a> visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem.</p>
 </section>
-<section id="part-1-gpu-fundamentals" class="level2">
-<h2 class="anchored" data-anchor-id="part-1-gpu-fundamentals">Part 1: GPU Fundamentals</h2>
-<p>The Modular team has created beautiful <a href="https://github.com/ManimCommunity/manim">Manim</a> visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem.</p>
-<section id="puzzle-01" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-01"><a href="https://builds.modular.com/puzzles/puzzle_01/puzzle_01.html">Puzzle 1: Map</a></h3>
+<section id="puzzle-01" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_01/puzzle_01.html">Puzzle 1: Map</a></h1>
 <p>In this puzzle, we aim to add a scalar to a vector. Specifically, we want to use a separate thread for each element in the vector, add the scalar, and write the result to the output memory.</p>
 <p>When we create the kernel, the scalar will be effectively “broadcast” or expanded to match the shape of the input vector. This allows each element of the vector to be independently added with the scalar value in parallel by its dedicated thread, following the <a href="https://docs.pytorch.org/docs/stable/notes/broadcasting.html">broadcasting rules</a>.</p>
 <div class="quarto-figure quarto-figure-middle">
@@ -326,8 +360,8 @@ Note
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="puzzle-02" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-02"><a href="https://builds.modular.com/puzzles/puzzle_02/puzzle_02.html">Puzzle 2: Zip</a></h3>
+<section id="puzzle-02" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_02/puzzle_02.html">Puzzle 2: Zip</a></h1>
 <p>This is an extension of the map puzzle. Now, we aim to add 2 tensors together.</p>
 <p><a href="mojo_gpu_puzzles/p02.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="mojo_gpu_puzzles/p02.png" class="img-fluid"></a></p>
 <p>As in puzzle 1, the aim is to use one individual thread for elements at a specific index in both vectors.</p>
@@ -356,8 +390,8 @@ Note
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 2.0, 4.0, 6.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="puzzle-03" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-03"><a href="https://builds.modular.com/puzzles/puzzle_03/puzzle_03.html">Puzzle 3: Guards</a></h3>
+<section id="puzzle-03" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_03/puzzle_03.html">Puzzle 3: Guards</a></h1>
 <p>The only difference between this puzzle and <a href="#puzzle-01">Puzzle 1</a> is that now it’s possible that the size of the GPU block is larger than the given input.</p>
 <p>In GPU programming, “guards” refer to conditional statements that check if a thread should perform work based on its index. GPUs launch threads in fixed-size groups (blocks), and often these blocks contain more threads than elements in our array.</p>
 <p>In this case, we need to check if the current thread index is valid before applying our computation on the vector. Without this guard, threads with indices beyond our array bounds would cause memory access violations.</p>
@@ -387,8 +421,8 @@ Note
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="puzzle-04" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-04"><a href="https://builds.modular.com/puzzles/puzzle_04/puzzle_04.html">Puzzle 4: 2D Map</a></h3>
+<section id="puzzle-04" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_04/puzzle_04.html">Puzzle 4: 2D Map</a></h1>
 <p>Similar to <a href="#puzzle-02">Puzzle 2</a>, instead of operating on scalars with 1D tensors, we will now use 2D tensors.</p>
 <p>Mojo, similar to CUDA, typically uses <a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order">row-major</a> order for array storage, meaning data is stored sequentially by rows in memory.</p>
 <p><a href="mojo_gpu_puzzles/p04_row_col_major.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="mojo_gpu_puzzles/p04_row_col_major.png" class="img-fluid"></a></p>
@@ -491,8 +525,8 @@ A_{R,C} = R*\text{size\_of\_array} + C
 </details>
 </section>
 </section>
-<section id="puzzle-05" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-05"><a href="https://builds.modular.com/puzzles/puzzle_05/puzzle_05.html">Puzzle 5: Broadcast</a></h3>
+<section id="puzzle-05" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_05/puzzle_05.html">Puzzle 5: Broadcast</a></h1>
 <p>We aim to broadcast the addition operation over two vectors. Following the <a href="https://docs.pytorch.org/docs/stable/notes/broadcasting.html">broadcasting rules</a>, the result will be an outer-product of the given vectors.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -562,8 +596,8 @@ A_{R,C} = R*\text{size\_of\_array} + C
 </details>
 </section>
 </section>
-<section id="puzzle-06" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-06"><a href="https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html">Puzzle 6: Blocks</a></h3>
+<section id="puzzle-06" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html">Puzzle 6: Blocks</a></h1>
 <p>Building on Puzzles 4[#puzzle-04] and 5[#puzzle-5], we now aim to add a scalar to a tensor. We also have the addtional restriction around having fewer threads than the elements in our array, per block. This means that now apart from using the local indices of the current thread(<code>thread_idx.y</code> and <code>thread_idx.x</code>), we now also need to identify the current block, using <code>block_idx.y</code> and <code>block_idx.x</code>. The formula for calculating the index, in row-major format, is:</p>
 <p><span class="math display">\[
 idx = block\_idx.x * block\_dim.x + thread\_idx.x
@@ -598,8 +632,8 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 </div>
 </details>
 </section>
-<section id="puzzle-07" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-07"><a href="https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html">Puzzle 7: 2D Blocks</a></h3>
+<section id="puzzle-07" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html">Puzzle 7: 2D Blocks</a></h1>
 <p>As the title suggests, we now have a 2D structure for both blocks and grids, and the number of threads per block is lesser than the total number of elements in the input tensor.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -674,8 +708,8 @@ fn add_10_blocks(
 </details>
 </section>
 </section>
-<section id="puzzle-08" class="level3">
-<h3 class="anchored" data-anchor-id="puzzle-08"><a href="https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html">Puzzle 8: Shared Memory</a></h3>
+<section id="puzzle-08" class="level1">
+<h1><a href="https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html">Puzzle 8: Shared Memory</a></h1>
 <p>In this puzzle we leverage shared memory (SRAM). Like <a href="#puzzle-07">Puzzle 7</a>, we add a scalar to a 2D tensor, but now each block has fewer threads than there are input elements.</p>
 <p>As shown <a href="#gpu-memory">above</a>, SRAM is orders of magnitude faster than DRAM. Accessing global memory directly is slow, so we first load data into shared memory—then perform our computations for much faster access.</p>
 <p>Although this input is too small to reveal a noticeable speedup, the advantage of shared memory becomes substantial as array sizes increase.</p>
@@ -776,24 +810,14 @@ fn add_10_blocks(
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Mojo lets you map, zip, and manipulate data in parallel with minimal boilerplate. Abstractions like <code>LayoutTensor</code> keep the focus on algorithms, not memory details, similar to the <a href="https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html">CuTe</a> library.</p>
+<p>If you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter. Happy hacking!</p>
+
+
+
 </section>
-</section>
-<section id="citation" class="level2">
-<h2 class="anchored" data-anchor-id="citation">Citation</h2>
-<p>Original puzzles by the <a href="https://www.modular.com/">Modular</a> team; this blog provides personal explanations and solutions.</p>
-<p>Please cite this work as:</p>
-<pre><code>Gupta, Shubham. “Mojo GPU Puzzles — Solutions &amp; Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles</code></pre>
-<p>Or use the BibTeX citation:</p>
-<pre><code>@article{sguptamojopuzzles,
-  title   = {Mojo GPU Puzzles — Solutions \&amp; Explanations},
-  author  = {Gupta, Shubham},
-  journal = {shubhamg.in},
-  year    = {2025},
-  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
-}</code></pre>
-
-
-
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -1340,7 +1364,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"descPosition":"bottom","openEffect":"zoom","loop":false,"selector":".lightbox","closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","loop":false,"descPosition":"bottom","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

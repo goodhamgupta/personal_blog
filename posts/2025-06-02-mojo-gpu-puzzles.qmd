@@ -1,7 +1,6 @@
 ---
-title: "GPUs go brrr with Mojo"
+title: "GPUs go brrr with Mojo - Fundamentals"
 lightbox: true
-draft: true
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
@@ -17,10 +16,6 @@ format:
     syntax-definitions:
       - mojo_gpu_puzzles/mojo.xml
 ---
-
-::: {.callout-note}
-This blog will be updated with puzzle solutions as they’re released. Stay tuned for more updates!
-:::
 
 After a super-long break from writing blogs, I've decided to get back to it this year.
 
@@ -41,17 +36,53 @@ In early 2023, Modular announced Mojo🔥, a new systems-programming language pr
 - Traits and bounds checking
 - Interopeability with PTX, Python, C
 
-Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations, so I decided to learn a bit more about how to write these kernels.
+Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the [Democratising AI Compute](https://www.modular.com/democratizing-ai-compute) series by Chris, and thus I decided to learn a bit more about how to write these kernels in Mojo.
 
 ## GPUs 101 {#gpu-memory}
 
-Not sure what to put in here. Skipping for now.
+GPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:
+
+- Lay out data and computation as a grid of thread blocks.
+- Launch a *kernel* from the CPU (host) to run on the GPU (device).
+- Exploit thousands of lightweight threads all executing the same code (SIMD).
+
+### GPU Memory Hierarchy
 
 ![](mojo_gpu_puzzles/gpu_memory.png)
 
+Here's how CPU and GPU memory hierarchies compare:
+
+- CPU: DRAM > Caches (L3, L2, L1) > Registers.  
+- GPU: Global (DRAM) > Shared (SRAM) > Registers.
+
+From slowest/largest to fastest/smallest:
+
+- **Global (DRAM)**: large, high-latency, visible to all threads.  
+- **Shared (SRAM)**: per-block scratchpad, low-latency.  
+- **Registers**: per-thread storage, fastest access.  
+
+### Execution Hierarchy
+
 ![](mojo_gpu_puzzles/gpu_flow_hierachy.png){fig-align="center"}
 
+- **Grid**: a collection of blocks distributed across SMs.
+- **Block**: a group of threads that share `shared` memory and can synchronize.
+- **Thread**: the basic execution unit with its own registers.
+
+Pick your grid/block dimensions to match data shapes and hardware limits.
+
+### Kernel Launch & Program Flow
+
 ![](mojo_gpu_puzzles/program_flow.png)
+
+1. **Host** allocates and copies data to GPU global memory.  
+2. Host launches the **kernel** with a specified grid and block size.  
+3. **Device** executes the kernel in parallel across threads.  
+4. Host retrieves results from GPU memory.
+
+This host/device split means all control flow (loops, recursion) lives on the CPU, while compute-intensive, data-parallel kernels run on the GPU.
+
+With these fundamentals in place, we’re ready to dive into our first GPU puzzles!
 
 ## Infrastructure
 
@@ -59,11 +90,9 @@ If you plan on solving these puzzles, remember to pick a [compatible GPU](https:
 
 I completed the puzzles on a instance with a RTX4090 Ti chip, rented via [Prime Intellect](https://www.primeintellect.ai/) at **0.22 $/hr**!
 
-## Part 1: GPU Fundamentals
+**Note**: The Modular team has created beautiful [Manim](https://github.com/ManimCommunity/manim) visualizations for each puzzle, making the concepts much more intuitive. I'll walk through these visualizations as we tackle each problem.
 
-The Modular team has created beautiful [Manim](https://github.com/ManimCommunity/manim) visualizations for each puzzle, making the concepts much more intuitive. I'll walk through these visualizations as we tackle each problem.
-
-### [Puzzle 1: Map](https://builds.modular.com/puzzles/puzzle_01/puzzle_01.html) {#puzzle-01}
+# [Puzzle 1: Map](https://builds.modular.com/puzzles/puzzle_01/puzzle_01.html) {#puzzle-01}
 
 In this puzzle, we aim to add a scalar to a vector. Specifically, we want to use a separate thread for each element in the vector, add the scalar, and write the result to the output memory.
 
@@ -87,7 +116,7 @@ pixi run p01
 
 </details>
 
-### [Puzzle 2: Zip](https://builds.modular.com/puzzles/puzzle_02/puzzle_02.html) {#puzzle-02}
+# [Puzzle 2: Zip](https://builds.modular.com/puzzles/puzzle_02/puzzle_02.html) {#puzzle-02}
 
 This is an extension of the map puzzle. Now, we aim to add 2 tensors together.
 
@@ -121,7 +150,7 @@ pixi run p02
 
 </details>
 
-### [Puzzle 3: Guards](https://builds.modular.com/puzzles/puzzle_03/puzzle_03.html) {#puzzle-03}
+# [Puzzle 3: Guards](https://builds.modular.com/puzzles/puzzle_03/puzzle_03.html) {#puzzle-03}
 
 The only difference between this puzzle and [Puzzle 1](#puzzle-01) is that now it's possible that the size of the GPU block is larger than the given input.
 
@@ -157,7 +186,7 @@ pixi run p03
 
 </details>
 
-### [Puzzle 4: 2D Map](https://builds.modular.com/puzzles/puzzle_04/puzzle_04.html) {#puzzle-04}
+# [Puzzle 4: 2D Map](https://builds.modular.com/puzzles/puzzle_04/puzzle_04.html) {#puzzle-04}
 
 Similar to [Puzzle 2](#puzzle-02), instead of operating on scalars with 1D tensors, we will now use 2D tensors.
 
@@ -267,7 +296,7 @@ pixi run p04_layout_tensor
 
 </details>
 
-### [Puzzle 5: Broadcast](https://builds.modular.com/puzzles/puzzle_05/puzzle_05.html) {#puzzle-05}
+# [Puzzle 5: Broadcast](https://builds.modular.com/puzzles/puzzle_05/puzzle_05.html) {#puzzle-05}
 
 We aim to broadcast the addition operation over two vectors. Following the [broadcasting rules](https://docs.pytorch.org/docs/stable/notes/broadcasting.html), the result will be an outer-product of the given vectors.
 
@@ -336,7 +365,7 @@ pixi run p05_layout_tensor
 
 </details>
 
-### [Puzzle 6: Blocks](https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html) {#puzzle-06}
+# [Puzzle 6: Blocks](https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html) {#puzzle-06}
 
 Building on Puzzles 4[#puzzle-04] and 5[#puzzle-5], we now aim to add a scalar to a tensor. We also have the addtional restriction around having fewer threads than the elements in our array, per block. This means that now apart from using the local indices of the current thread(`thread_idx.y` and `thread_idx.x`), we now also need to identify the current block, using `block_idx.y` and `block_idx.x`. The formula for calculating the index, in row-major format, is:
 
@@ -368,7 +397,7 @@ fn add_10_blocks(
 
 </details>
 
-### [Puzzle 7: 2D Blocks](https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html) {#puzzle-07}
+# [Puzzle 7: 2D Blocks](https://builds.modular.com/puzzles/puzzle_07/puzzle_07.html) {#puzzle-07}
 
 As the title suggests, we now have a 2D structure for both blocks and grids, and the number of threads per block is lesser than the total number of elements in the input tensor.
 
@@ -444,7 +473,7 @@ pixi run p07_layout_tensor
 
 </details>
 
-### [Puzzle 8: Shared Memory](https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html) {#puzzle-08}
+# [Puzzle 8: Shared Memory](https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html) {#puzzle-08}
 
 In this puzzle we leverage shared memory (SRAM). Like [Puzzle 7](#puzzle-07), we add a scalar to a 2D tensor, but now each block has fewer threads than there are input elements.
 
@@ -549,25 +578,8 @@ pixi run p08_layout_tensor
 
 </details>
 
+## Conclusion
 
-## Citation
+We covered simple algorithms such as map, zip using Mojo, and did some initial work with their  `LayoutTensor` abstraction, which similar to the [CuTe](https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html) library.
 
-Original puzzles by the [Modular](https://www.modular.com/) team; this blog provides personal explanations and solutions.
-
-Please cite this work as:
-
-```
-Gupta, Shubham. “Mojo GPU Puzzles — Solutions & Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles
-```
-
-Or use the BibTeX citation:
-
-```
-@article{sguptamojopuzzles,
-  title   = {Mojo GPU Puzzles — Solutions \& Explanations},
-  author  = {Gupta, Shubham},
-  journal = {shubhamg.in},
-  year    = {2025},
-  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
-}
-```
+If you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!

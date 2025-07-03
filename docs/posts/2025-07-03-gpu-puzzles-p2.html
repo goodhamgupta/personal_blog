@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Shubham Gupta - GPUs go brrr with Mojo: Part 2</title>
+<title>Shubham Gupta - GPUs go brrr with Mojo: Algorithms</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -205,7 +205,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">GPUs go brrr with Mojo: Part 2</h1>
+      <h1 class="title">GPUs go brrr with Mojo: Algorithms</h1>
                       </div>
   </div>
     
@@ -236,7 +236,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#simple-single-block-with-shared-memory" id="toc-simple-single-block-with-shared-memory" class="nav-link" data-scroll-target="#simple-single-block-with-shared-memory">Simple: Single Block with Shared Memory</a>
   <ul class="collapse">
-  <li><a href="#parameter-loop-unrolling" id="toc-parameter-loop-unrolling" class="nav-link" data-scroll-target="#parameter-loop-unrolling">@parameter : Loop Unrolling</a></li>
+  <li><a href="#loop-unrolling" id="toc-loop-unrolling" class="nav-link" data-scroll-target="#loop-unrolling">Loop Unrolling</a></li>
   </ul></li>
   <li><a href="#advanced-block-boundary" id="toc-advanced-block-boundary" class="nav-link" data-scroll-target="#advanced-block-boundary">Advanced: Block Boundary</a></li>
   </ul></li>
@@ -247,7 +247,7 @@ window.Quarto = {
   <li><a href="#blellochs-twopass-algorithm" id="toc-blellochs-twopass-algorithm" class="nav-link" data-scroll-target="#blellochs-twopass-algorithm">Blelloch’s Two‐Pass Algorithm</a></li>
   <li><a href="#complete-version" id="toc-complete-version" class="nav-link" data-scroll-target="#complete-version">Complete Version</a></li>
   </ul></li>
-  <li><a href="#citation" id="toc-citation" class="nav-link" data-scroll-target="#citation">Citation</a></li>
+  <li><a href="#puzzle-13-axis-sum" id="toc-puzzle-13-axis-sum" class="nav-link" data-scroll-target="#puzzle-13-axis-sum">Puzzle 13: Axis Sum</a></li>
   </ul>
 </nav>
     </div>
@@ -579,8 +579,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_a[local_i] = a[global_i]</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_i &lt; CONV:</span></span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_b[local_i] = b[global_i]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="parameter-loop-unrolling" class="level3">
-<h3 class="anchored" data-anchor-id="parameter-loop-unrolling">@parameter : Loop Unrolling</h3>
+<section id="loop-unrolling" class="level3">
+<h3 class="anchored" data-anchor-id="loop-unrolling">Loop Unrolling</h3>
 <p><a href="https://docs.modular.com/mojo/manual/decorators/parameter/"><code>@parameter</code></a> is Mojo’s implementation of <strong>loop unrolling</strong>. This has the same functionality as <code>pragma unroll(N)</code> in CUDA.</p>
 <p>When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled<span class="citation" data-cites="nvidiapragmaunroll"><a href="#ref-nvidiapragmaunroll" role="doc-biblioref">[4]</a></span>.</p>
 <p><code>@parameter</code> isn’t limited to loops/branches—you can slap it on an inner function and Mojo will build a <strong>parametric closure</strong>, defined as<span class="citation" data-cites="mojoparameter"><a href="#ref-mojoparameter" role="doc-biblioref">[5]</a></span>:</p>
@@ -708,7 +708,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -806,7 +806,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -1037,19 +1037,9 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 </details>
 </section>
 </section>
-<section id="citation" class="level1">
-<h1>Citation</h1>
-<p>Original puzzles by the <a href="https://www.modular.com/">Modular</a> team; this blog provides personal explanations and solutions.</p>
-<p>Please cite this work as:</p>
-<pre><code>Gupta, Shubham. “Mojo GPU Puzzles — Solutions &amp; Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles</code></pre>
-<p>Or use the BibTeX citation:</p>
-<pre><code>@article{sguptamojopuzzles,
-  title   = {Mojo GPU Puzzles — Solutions \&amp; Explanations},
-  author  = {Gupta, Shubham},
-  journal = {shubhamg.in},
-  year    = {2025},
-  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
-}</code></pre>
+<section id="puzzle-13-axis-sum" class="level1">
+<h1><a href="https://puzzles.modular.com/puzzle_13/puzzle_13.html" id="puzzle-13">Puzzle 13: Axis Sum</a></h1>
+<p>pass</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -1612,7 +1602,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","loop":false,"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom"});
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","closeEffect":"zoom","loop":false,"selector":".lightbox","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

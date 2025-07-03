@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/404.html",
       "/posts/2020-08-31-bison.html",
       "/posts/2020-05-11-longformer.html",
       "/posts/2020-04-23-tag-lm.html",

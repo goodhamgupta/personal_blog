@@ -1,5 +1,5 @@
 ---
-title: "GPUs go brrr with Mojo: Part 2"
+title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
 draft: true
 toc: true
@@ -345,7 +345,7 @@ The _optimal_ allocation of shared memory would be:
 +        shared_b[local_i] = b[global_i]
 ```
 
-### \@parameter : Loop Unrolling
+### Loop Unrolling
 
 [`@parameter`](https://docs.modular.com/mojo/manual/decorators/parameter/) is Mojo's implementation of **loop unrolling**. This has the same functionality as `pragma unroll(N)` in CUDA.
 
@@ -843,25 +843,6 @@ pixi run p12
 ```
 </details>
 
+# [Puzzle 13: Axis Sum](https://puzzles.modular.com/puzzle_13/puzzle_13.html){#puzzle-13}
 
-# Citation
-
-Original puzzles by the [Modular](https://www.modular.com/) team; this blog provides personal explanations and solutions.
-
-Please cite this work as:
-
-```
-Gupta, Shubham. “Mojo GPU Puzzles — Solutions & Explanations”. shubhamg.in (June 2025). https://shubhamg.in/posts/mojo-gpu-puzzles
-```
-
-Or use the BibTeX citation:
-
-```
-@article{sguptamojopuzzles,
-  title   = {Mojo GPU Puzzles — Solutions \& Explanations},
-  author  = {Gupta, Shubham},
-  journal = {shubhamg.in},
-  year    = {2025},
-  url     = {https://shubhamg.in/posts/mojo-gpu-puzzles},
-}
-```
+pass
