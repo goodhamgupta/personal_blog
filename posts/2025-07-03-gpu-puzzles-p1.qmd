@@ -15,6 +15,10 @@ format:
     code-summary: "Solution"
     syntax-definitions:
       - mojo_gpu_puzzles/mojo.xml
+categories:
+- programming
+- gpu
+- mojo
 ---
 
 After a super-long break from writing blogs, I've decided to get back to it this year.
