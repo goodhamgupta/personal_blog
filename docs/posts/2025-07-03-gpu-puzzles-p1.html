@@ -260,8 +260,8 @@ window.Quarto = {
 
 
 
-<p>After a super-long break from writing blogs, I’ve decided to get back to it this year.</p>
-<p>I’ve always been interested in systems programming, but somehow never <em>really</em> picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google <span class="citation" data-cites="Google"><a href="#ref-Google" role="doc-biblioref">[1]</a></span> reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving training and inference efficiency using “moar” compute.</p>
+<p>Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my <a href="https://github.com/goodhamgupta/paper_reviews">GitHub</a>) to diving deep into hands-on implementations.</p>
+<p>I’ve always been interested in systems programming, but somehow never <em>really</em> picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google <span class="citation" data-cites="Google"><a href="#ref-Google" role="doc-biblioref">[1]</a></span> reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving occasionallytraining and inference efficiency using “moar” compute.</p>
 <p>I briefly spoke about <a href="https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=1-37&amp;t=VNzh9p2qKrHNSTJj-1">GPU computing last year</a>, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention.</p>
 <section id="why-mojo" class="level2">
 <h2 class="anchored" data-anchor-id="why-mojo">Why Mojo?</h2>
@@ -275,7 +275,7 @@ window.Quarto = {
 <li>Traits and bounds checking</li>
 <li>Interopeability with PTX, Python, C</li>
 </ul>
-<p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the <a href="https://www.modular.com/democratizing-ai-compute">Democratising AI Compute</a> series by Chris, and thus I decided to learn a bit more about how to write these kernels in Mojo.</p>
+<p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”<span class="citation" data-cites="modular_democratizing_ai_compute"><a href="#ref-modular_democratizing_ai_compute" role="doc-biblioref">[4]</a></span> series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.</p>
 </section>
 <section id="gpu-memory" class="level2">
 <h2 class="anchored" data-anchor-id="gpu-memory">GPUs 101</h2>
@@ -463,7 +463,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 </section>
 <section id="layouttensor" class="level4">
 <h4 class="anchored" data-anchor-id="layouttensor">LayoutTensor</h4>
-<p>LayoutTensor<span class="citation" data-cites="llvmlayouttensor"><a href="#ref-llvmlayouttensor" role="doc-biblioref">[4]</a></span> is Mojo’s abstraction to work on a Tensor.</p>
+<p>LayoutTensor<span class="citation" data-cites="llvmlayouttensor"><a href="#ref-llvmlayouttensor" role="doc-biblioref">[5]</a></span> is Mojo’s abstraction to work on a Tensor.</p>
 <p>Specifically, LayoutTensor aims to provide:</p>
 <ul>
 <li>High level primitive to perform operations on tiles.</li>
@@ -471,7 +471,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <li>Expose functions/parameters to enable auto-tuning or manual experimentation.</li>
 <li>Access to hardware without inline assembly.</li>
 </ul>
-<p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[5]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[6]</a></span> .</p>
+<p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[6]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[7]</a></span> .</p>
 <p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid"></a></p>
 <p>The features that looked most interesting to me are:</p>
 <ul>
@@ -676,29 +676,33 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
 <span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<pre><code>
-&lt;/details&gt;
-
-#### Layout Tensor
-
-&lt;details open&gt;
-&lt;summary&gt; **Solution** &lt;/summary&gt;
-
-```{.mojo filename=p07.mojo}
-alias SIZE = 9
-alias BLOCKS_PER_GRID = (3, 1)
-alias THREADS_PER_BLOCK = (4, 1)
-alias dtype = DType.float32
-
-
-fn add_10_blocks(
-    out: UnsafePointer[Scalar[dtype]],
-    a: UnsafePointer[Scalar[dtype]],
-    size: Int,
-):
-    i = block_dim.x * block_idx.x + thread_idx.x
-    if i &lt; size:
-        out[i] = a[i] + 10</code></pre>
+</details>
+</section>
+<section id="layout-tensor-1" class="level4">
+<h4 class="anchored" data-anchor-id="layout-tensor-1">Layout Tensor</h4>
+<details open="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p07.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb18" data-filename="p07.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">1</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> add_10_blocks(</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    out: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    a: UnsafePointer[Scalar[dtype]],</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    i <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> i <span class="op">&lt;</span> size:</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        out[i] <span class="op">=</span> a[i] <span class="op">+</span> <span class="dv">10</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p07_layout_tensor</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: 11.0 11.0 11.0 11.0 11.0</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 11.0 11.0 11.0 11.0 11.0</span></span>
@@ -835,14 +839,17 @@ fn add_10_blocks(
 <div id="ref-GPUPuzzles" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[3] </div><div class="csl-right-inline">S. Rush, <span>“<span>GPU Puzzles</span>.”</span> 2023. Available: <a href="https://github.com/srush/GPU-Puzzles">https://github.com/srush/GPU-Puzzles</a></div>
 </div>
+<div id="ref-modular_democratizing_ai_compute" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">C. Lattner and Modular, <span>“Democratizing AI compute.”</span> 2023. Available: <a href="https://www.modular.com/democratizing-ai-compute">https://www.modular.com/democratizing-ai-compute</a></div>
+</div>
 <div id="ref-llvmlayouttensor" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Taei, <span>“<span class="nocase">Simplifying GPU Programming with Parametric Tile-Level Tensors In Mojo</span>.”</span> 2024. Available: <a href="https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf">https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf</a></div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Taei, <span>“<span class="nocase">Simplifying GPU Programming with Parametric Tile-Level Tensors In Mojo</span>.”</span> 2024. Available: <a href="https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf">https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf</a></div>
 </div>
 <div id="ref-mojotalk" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Modular, <span>“<span class="nocase">Mojo: The Future of Systems Programming</span>.”</span> 2025. Available: <a href="https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731">https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731</a></div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Modular, <span>“<span class="nocase">Mojo: The Future of Systems Programming</span>.”</span> 2025. Available: <a href="https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731">https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731</a></div>
 </div>
 <div id="ref-jeffniutriton" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">J. Niu, <span>“<span class="nocase">Triton Clone in Mojo</span>.”</span> 2025. Available: <a href="https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu">https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu</a></div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">J. Niu, <span>“<span class="nocase">Triton Clone in Mojo</span>.”</span> 2025. Available: <a href="https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu">https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1369,7 +1376,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","loop":false,"selector":".lightbox"});
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","loop":false,"openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
