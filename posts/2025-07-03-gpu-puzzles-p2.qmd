@@ -2,6 +2,7 @@
 title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
 draft: true
+draft-mode: unlinked
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
