@@ -432,5 +432,40 @@
     "title": "GPUs go brrr with Mojo - Fundamentals",
     "section": "Conclusion",
     "text": "Conclusion\nWe covered simple algorithms such as map, zip using Mojo, and did some initial work with their LayoutTensor abstraction, which similar to the CuTe library.\nIf you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\nGPU Execution Hierachy"
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "",
+    "text": "Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my GitHub) to diving deep into hands-on implementations.\nI’ve always been interested in systems programming, but somehow never really picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [1] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using “moar” compute.\nI briefly spoke about GPU computing last year, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "Why Mojo?",
+    "text": "Why Mojo?\nI’ve tried learning Rust multiple times, along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.\nIn early 2023, Modular announced Mojo🔥, a new systems-programming language promising:\n\nPython-like syntax\nSupport for both CPU and GPU architectures\nKernel autofusion\nBuilds on MLIR\nTraits and bounds checking\nInteropeability with PTX, Python, C\n\nModular has since announced Max, their AI inference platform, built on Mojo. The released all kernels available as part of the platform, along with their own version[2] of Sasha Rush’s GPU Puzzles [3] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”[4] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "GPU 101",
+    "text": "GPU 101\nGPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:\n\nLay out data and computation as a grid of thread blocks.\nLaunch a kernel from the CPU (host) to run on the GPU (device).\nExploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).\n\nModern chips had two ways to spend their billions of transistors:\n\nCPUs invest them in large caches, branch predictors and out-of-order logic to minimize latency for one or a few threads.\nGPUs invest them in thousands of simple cores and huge register files to maximize throughput for many threads, assuming those threads can tolerate latency by waiting in parallel.\n\nThe rest of this section unpacks how that single design choice shows up in memory, execution and program flow.\n\n1. Memory hierarchy – hide latency with tons of threads\nCPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.\nGPU memory hierarchy (slowest/largest to fastest/smallest):\n\nGlobal (HBM): High Bandwidth Memory—the GPU’s main memory, large but high-latency, visible to all threads\n\nShared (SRAM): fast on-chip memory, ~100x faster than HBM\n\nRegisters: per-thread storage, fastest access, ~1000x faster than HBM\n\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\n\n\nThe key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.\n\n\n2. Execution hierarchy – launch enough warps to hide stalls\n\n\n\nGPU Execution Hierachy\n\n\nBuilding from the bottom up:\n\nThread: the basic execution unit with its own registers\nWarp: 32 threads executing the same instruction together (the basic unit of GPU scheduling)\n\nBlock: a group of threads that share shared memory and can synchronize\n\nGrid: a collection of blocks distributed across SMs\n\nGPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.\n\n\n3. Program flow – CPU launches, GPU streams\n\nThe CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the same instruction (SIMT). Divergent branches disable some lanes and waste those cores.\n\nHost allocates and copies data to GPU global memory\n\nHost launches the kernel with a specified grid and block size\n\nDevice executes the kernel in parallel across threads\n\nHost retrieves results from GPU memory\n\n\n\nPutting it together\nFast GPU kernels keep cores busy by: - Staging hot data in shared or registers - Launching enough threads to mask global-memory latency - Writing branch-free, data-parallel code\nWe will cover the practical implications of the above topics as we go through the puzzles."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "Infrastructure",
+    "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#conclusion",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#conclusion",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "Conclusion",
+    "text": "Conclusion\nWe covered simple algorithms such as map, zip using Mojo, and did some initial work with their LayoutTensor abstraction, which similar to the CuTe library.\nIf you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\nGPU Execution Hierachy\nMojo Parameter Syntax"
   }
 ]

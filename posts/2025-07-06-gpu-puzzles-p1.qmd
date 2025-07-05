@@ -261,7 +261,7 @@ Specifically, LayoutTensor aims to provide:
 
 Mojo(and LayoutTensor) follow this "parameter syntax"[@mojotalk], which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don't have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I'm not the only one struggling with it though![@jeffniutriton] .
 
-![](mojo_gpu_puzzles/p04_parameter_syntax.png)
+![Mojo Parameter Syntax](mojo_gpu_puzzles/p04_parameter_syntax.png)
 
 The features that looked most interesting to me are:
 
