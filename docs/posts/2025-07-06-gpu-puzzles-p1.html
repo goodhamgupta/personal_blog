@@ -6,6 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Shubham Gupta">
+<meta name="dcterms.date" content="2025-07-06">
 
 <title>Shubham Gupta - GPUs go brrr with Mojo - Fundamentals</title>
 <style>
@@ -217,7 +219,19 @@ window.Quarto = {
   
   <div class="quarto-title-meta">
 
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Shubham Gupta </p>
+            </div>
+    </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 6, 2025</p>
+      </div>
+    </div>
     
       
     </div>
@@ -305,7 +319,7 @@ window.Quarto = {
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
+<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
 <figcaption>Source: FlashAttention <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[5]</a></span>. Metrics shown are for an NVIDIA A100 GPU.</figcaption>
 </figure>
 </div>
@@ -315,7 +329,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="execution-hierarchy-launch-enough-warps-to-hide-stalls">2. Execution hierarchy – launch enough warps to hide stalls</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
+<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
 <figcaption>GPU Execution Hierachy</figcaption>
 </figure>
 </div>
@@ -491,7 +505,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[7]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[8]</a></span> .</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
+<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
 <figcaption>Mojo Parameter Syntax</figcaption>
 </figure>
 </div>
@@ -1407,7 +1421,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"loop":false,"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","loop":false,"closeEffect":"zoom","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

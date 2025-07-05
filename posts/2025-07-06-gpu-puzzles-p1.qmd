@@ -1,5 +1,7 @@
 ---
 title: "GPUs go brrr with Mojo - Fundamentals"
+author: Shubham Gupta
+date: '2025-07-06'
 lightbox: true
 toc: true
 bibliography: citations/mojo_citations.bib
