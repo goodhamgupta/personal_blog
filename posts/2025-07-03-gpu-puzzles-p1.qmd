@@ -40,53 +40,72 @@ In early 2023, Modular announced Mojo🔥, a new systems-programming language pr
 - Traits and bounds checking
 - Interopeability with PTX, Python, C
 
-Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the "Democratising AI Compute"[@modular_democratizing_ai_compute] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.
+Modulay has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the "Democratising AI Compute"[@modular_democratizing_ai_compute] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.
 
-## GPUs 101 {#gpu-memory}
+## GPUs 101 — Why the Architecture Looks the Way It Does {#gpu-memory}
 
 GPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:
 
 - Lay out data and computation as a grid of thread blocks.
 - Launch a *kernel* from the CPU (host) to run on the GPU (device).
-- Exploit thousands of lightweight threads all executing the same code (SIMD).
+- Exploit thousands of lightweight threads all executing the same code (SIMT).
 
-### GPU Memory Hierarchy
+Modern chips had two ways to spend their billions of transistors:
 
-![](mojo_gpu_puzzles/gpu_memory.png)
+1. **CPUs** invest them in large caches, branch predictors and out-of-order logic to minimize *latency* for one or a few threads.
+2. **GPUs** invest them in thousands of simple cores and huge register files to maximize *throughput* for many threads, assuming those threads can tolerate latency by waiting in parallel.
+
+The rest of this section unpacks how that single design choice shows up in memory, execution and program flow.
+
+### 1. Memory hierarchy – hiding latency with *many* threads
+
+![Source: [CUDA C Programming Guide](https://docs.nvidia.com/cuda/archive/12.2.2/cuda-c-programming-guide/index.html)](mojo_gpu_puzzles/gpu_memory.png)
+
+Because GPUs don't buy huge caches, DRAM latency is ~400-800 cycles. They hide that cost by keeping tens of thousands of registers (*per SM*) and rapidly swapping warps in and out while one warp waits on memory.
 
 Here's how CPU and GPU memory hierarchies compare:
 
-- CPU: DRAM > Caches (L3, L2, L1) > Registers.  
-- GPU: Global (DRAM) > Shared (SRAM) > Registers.
+- **CPU**: DRAM > Caches (L3, L2, L1) > Registers  
+- **GPU**: Global (DRAM) > Shared (SRAM) > Registers
 
 From slowest/largest to fastest/smallest:
 
-- **Global (DRAM)**: large, high-latency, visible to all threads.  
-- **Shared (SRAM)**: per-block scratchpad, low-latency.  
-- **Registers**: per-thread storage, fastest access.  
+- **Global (DRAM)**: large, high-latency, visible to all threads  
+- **Shared (SRAM)**: per-block scratchpad, low-latency  
+- **Registers**: per-thread storage, fastest access
 
-### Execution Hierarchy
+
+### 2. Execution hierarchy – scheduling enough warps to cover stall time
+
+
+GPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.
 
 ![](mojo_gpu_puzzles/gpu_flow_hierachy.png){fig-align="center"}
 
-- **Grid**: a collection of blocks distributed across SMs.
-- **Block**: a group of threads that share `shared` memory and can synchronize.
-- **Thread**: the basic execution unit with its own registers.
+- **Grid**: a collection of blocks distributed across SMs  
+- **Block**: a group of threads that share `shared` memory and can synchronize  
+- **Warp**: 32 threads executing the same instruction (SIMT [@wikipedia_simt])  
+- **Thread**: the basic execution unit with its own registers
 
-Pick your grid/block dimensions to match data shapes and hardware limits.
-
-### Kernel Launch & Program Flow
+### 3. Program flow – a split brain (CPU orchestrates, GPU streams)
 
 ![](mojo_gpu_puzzles/program_flow.png)
 
-1. **Host** allocates and copies data to GPU global memory.  
-2. Host launches the **kernel** with a specified grid and block size.  
-3. **Device** executes the kernel in parallel across threads.  
-4. Host retrieves results from GPU memory.
+The CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the *same instruction* (SIMT). Divergent branches disable some lanes and waste those cores.
 
-This host/device split means all control flow (loops, recursion) lives on the CPU, while compute-intensive, data-parallel kernels run on the GPU.
+1. **Host** allocates and copies data to GPU global memory  
+2. Host launches the **kernel** with a specified grid and block size  
+3. **Device** executes the kernel in parallel across threads  
+4. Host retrieves results from GPU memory
 
-With these fundamentals in place, we’re ready to dive into our first GPU puzzles!
+### Putting it together
+
+Fast GPU kernels keep cores busy by 
+- Staging hot data in `shared` or registers
+- Launching enough threads to mask global-memory latencyw
+- Writing branch-free, data-parallel code.
+
+We will cover the practical implications of the above topics as we go through the puzzles.
 
 ## Infrastructure
 

@@ -232,11 +232,12 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-mojo" id="toc-why-mojo" class="nav-link active" data-scroll-target="#why-mojo">Why Mojo?</a></li>
-  <li><a href="#gpu-memory" id="toc-gpu-memory" class="nav-link" data-scroll-target="#gpu-memory">GPUs 101</a>
+  <li><a href="#gpu-memory" id="toc-gpu-memory" class="nav-link" data-scroll-target="#gpu-memory">GPUs 101 — Why the Architecture Looks the Way It Does</a>
   <ul class="collapse">
-  <li><a href="#gpu-memory-hierarchy" id="toc-gpu-memory-hierarchy" class="nav-link" data-scroll-target="#gpu-memory-hierarchy">GPU Memory Hierarchy</a></li>
-  <li><a href="#execution-hierarchy" id="toc-execution-hierarchy" class="nav-link" data-scroll-target="#execution-hierarchy">Execution Hierarchy</a></li>
-  <li><a href="#kernel-launch-program-flow" id="toc-kernel-launch-program-flow" class="nav-link" data-scroll-target="#kernel-launch-program-flow">Kernel Launch &amp; Program Flow</a></li>
+  <li><a href="#memory-hierarchy-hiding-latency-with-many-threads" id="toc-memory-hierarchy-hiding-latency-with-many-threads" class="nav-link" data-scroll-target="#memory-hierarchy-hiding-latency-with-many-threads">1. Memory hierarchy – hiding latency with <em>many</em> threads</a></li>
+  <li><a href="#execution-hierarchy-scheduling-enough-warps-to-cover-stall-time" id="toc-execution-hierarchy-scheduling-enough-warps-to-cover-stall-time" class="nav-link" data-scroll-target="#execution-hierarchy-scheduling-enough-warps-to-cover-stall-time">2. Execution hierarchy – scheduling enough warps to cover stall time</a></li>
+  <li><a href="#program-flow-a-split-brain-cpu-orchestrates-gpu-streams" id="toc-program-flow-a-split-brain-cpu-orchestrates-gpu-streams" class="nav-link" data-scroll-target="#program-flow-a-split-brain-cpu-orchestrates-gpu-streams">3. Program flow – a split brain (CPU orchestrates, GPU streams)</a></li>
+  <li><a href="#putting-it-together" id="toc-putting-it-together" class="nav-link" data-scroll-target="#putting-it-together">Putting it together</a></li>
   </ul></li>
   <li><a href="#infrastructure" id="toc-infrastructure" class="nav-link" data-scroll-target="#infrastructure">Infrastructure</a></li>
   <li><a href="#puzzle-01" id="toc-puzzle-01" class="nav-link" data-scroll-target="#puzzle-01">Puzzle 1: Map</a></li>
@@ -275,62 +276,82 @@ window.Quarto = {
 <li>Traits and bounds checking</li>
 <li>Interopeability with PTX, Python, C</li>
 </ul>
-<p>Modular has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”<span class="citation" data-cites="modular_democratizing_ai_compute"><a href="#ref-modular_democratizing_ai_compute" role="doc-biblioref">[4]</a></span> series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.</p>
+<p>Modulay has since announced Max, their AI inference platform, built on Mojo. The released <a href="https://github.com/modular/modular/tree/main/max/kernels">all kernels</a> available as part of the platform, along with their own version<span class="citation" data-cites="modularpuzzles"><a href="#ref-modularpuzzles" role="doc-biblioref">[2]</a></span> of Sasha Rush’s GPU Puzzles <span class="citation" data-cites="GPUPuzzles"><a href="#ref-GPUPuzzles" role="doc-biblioref">[3]</a></span> in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”<span class="citation" data-cites="modular_democratizing_ai_compute"><a href="#ref-modular_democratizing_ai_compute" role="doc-biblioref">[4]</a></span> series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.</p>
 </section>
 <section id="gpu-memory" class="level2">
-<h2 class="anchored" data-anchor-id="gpu-memory">GPUs 101</h2>
+<h2 class="anchored" data-anchor-id="gpu-memory">GPUs 101 — Why the Architecture Looks the Way It Does</h2>
 <p>GPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:</p>
 <ul>
 <li>Lay out data and computation as a grid of thread blocks.</li>
 <li>Launch a <em>kernel</em> from the CPU (host) to run on the GPU (device).</li>
-<li>Exploit thousands of lightweight threads all executing the same code (SIMD).</li>
+<li>Exploit thousands of lightweight threads all executing the same code (SIMT).</li>
 </ul>
-<section id="gpu-memory-hierarchy" class="level3">
-<h3 class="anchored" data-anchor-id="gpu-memory-hierarchy">GPU Memory Hierarchy</h3>
-<p><a href="mojo_gpu_puzzles/gpu_memory.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="mojo_gpu_puzzles/gpu_memory.png" class="img-fluid"></a></p>
+<p>Modern chips had two ways to spend their billions of transistors:</p>
+<ol type="1">
+<li><strong>CPUs</strong> invest them in large caches, branch predictors and out-of-order logic to minimize <em>latency</em> for one or a few threads.</li>
+<li><strong>GPUs</strong> invest them in thousands of simple cores and huge register files to maximize <em>throughput</em> for many threads, assuming those threads can tolerate latency by waiting in parallel.</li>
+</ol>
+<p>The rest of this section unpacks how that single design choice shows up in memory, execution and program flow.</p>
+<section id="memory-hierarchy-hiding-latency-with-many-threads" class="level3">
+<h3 class="anchored" data-anchor-id="memory-hierarchy-hiding-latency-with-many-threads">1. Memory hierarchy – hiding latency with <em>many</em> threads</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/gpu_memory.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: CUDA C Programming Guide"><img src="mojo_gpu_puzzles/gpu_memory.png" class="img-fluid figure-img" alt="Source: CUDA C Programming Guide"></a></p>
+<figcaption>Source: <a href="https://docs.nvidia.com/cuda/archive/12.2.2/cuda-c-programming-guide/index.html">CUDA C Programming Guide</a></figcaption>
+</figure>
+</div>
+<p>Because GPUs don’t buy huge caches, DRAM latency is ~400-800 cycles. They hide that cost by keeping tens of thousands of registers (<em>per SM</em>) and rapidly swapping warps in and out while one warp waits on memory.</p>
 <p>Here’s how CPU and GPU memory hierarchies compare:</p>
 <ul>
-<li>CPU: DRAM &gt; Caches (L3, L2, L1) &gt; Registers.<br>
+<li><strong>CPU</strong>: DRAM &gt; Caches (L3, L2, L1) &gt; Registers<br>
 </li>
-<li>GPU: Global (DRAM) &gt; Shared (SRAM) &gt; Registers.</li>
+<li><strong>GPU</strong>: Global (DRAM) &gt; Shared (SRAM) &gt; Registers</li>
 </ul>
 <p>From slowest/largest to fastest/smallest:</p>
 <ul>
-<li><strong>Global (DRAM)</strong>: large, high-latency, visible to all threads.<br>
+<li><strong>Global (DRAM)</strong>: large, high-latency, visible to all threads<br>
 </li>
-<li><strong>Shared (SRAM)</strong>: per-block scratchpad, low-latency.<br>
+<li><strong>Shared (SRAM)</strong>: per-block scratchpad, low-latency<br>
 </li>
-<li><strong>Registers</strong>: per-thread storage, fastest access.</li>
+<li><strong>Registers</strong>: per-thread storage, fastest access</li>
 </ul>
 </section>
-<section id="execution-hierarchy" class="level3">
-<h3 class="anchored" data-anchor-id="execution-hierarchy">Execution Hierarchy</h3>
+<section id="execution-hierarchy-scheduling-enough-warps-to-cover-stall-time" class="level3">
+<h3 class="anchored" data-anchor-id="execution-hierarchy-scheduling-enough-warps-to-cover-stall-time">2. Execution hierarchy – scheduling enough warps to cover stall time</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
 </figure>
 </div>
+<p>GPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.</p>
 <ul>
-<li><strong>Grid</strong>: a collection of blocks distributed across SMs.</li>
-<li><strong>Block</strong>: a group of threads that share <code>shared</code> memory and can synchronize.</li>
-<li><strong>Thread</strong>: the basic execution unit with its own registers.</li>
+<li><strong>Grid</strong>: a collection of blocks distributed across SMs<br>
+</li>
+<li><strong>Block</strong>: a group of threads that share <code>shared</code> memory and can synchronize<br>
+</li>
+<li><strong>Warp</strong>: 32 threads executing the same instruction (SIMT)<br>
+</li>
+<li><strong>Thread</strong>: the basic execution unit with its own registers</li>
 </ul>
-<p>Pick your grid/block dimensions to match data shapes and hardware limits.</p>
 </section>
-<section id="kernel-launch-program-flow" class="level3">
-<h3 class="anchored" data-anchor-id="kernel-launch-program-flow">Kernel Launch &amp; Program Flow</h3>
+<section id="program-flow-a-split-brain-cpu-orchestrates-gpu-streams" class="level3">
+<h3 class="anchored" data-anchor-id="program-flow-a-split-brain-cpu-orchestrates-gpu-streams">3. Program flow – a split brain (CPU orchestrates, GPU streams)</h3>
 <p><a href="mojo_gpu_puzzles/program_flow.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="mojo_gpu_puzzles/program_flow.png" class="img-fluid"></a></p>
+<p>The CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the <em>same instruction</em> (SIMT <span class="citation" data-cites="wikipedia_simt"><a href="#ref-wikipedia_simt" role="doc-biblioref">[5]</a></span>). Divergent branches disable some lanes and waste those cores.</p>
 <ol type="1">
-<li><strong>Host</strong> allocates and copies data to GPU global memory.<br>
+<li><strong>Host</strong> allocates and copies data to GPU global memory<br>
 </li>
-<li>Host launches the <strong>kernel</strong> with a specified grid and block size.<br>
+<li>Host launches the <strong>kernel</strong> with a specified grid and block size<br>
 </li>
-<li><strong>Device</strong> executes the kernel in parallel across threads.<br>
+<li><strong>Device</strong> executes the kernel in parallel across threads<br>
 </li>
-<li>Host retrieves results from GPU memory.</li>
+<li>Host retrieves results from GPU memory</li>
 </ol>
-<p>This host/device split means all control flow (loops, recursion) lives on the CPU, while compute-intensive, data-parallel kernels run on the GPU.</p>
-<p>With these fundamentals in place, we’re ready to dive into our first GPU puzzles!</p>
+</section>
+<section id="putting-it-together" class="level3">
+<h3 class="anchored" data-anchor-id="putting-it-together">Putting it together</h3>
+<p>Fast GPU kernels keep cores busy by - Staging hot data in <code>shared</code> or registers - Launching enough threads to mask global-memory latencyw - Writing branch-free, data-parallel code.</p>
+<p>We will cover the practical implications of the above topics as we go through the puzzles.</p>
 </section>
 </section>
 <section id="infrastructure" class="level2">
@@ -463,7 +484,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 </section>
 <section id="layouttensor" class="level4">
 <h4 class="anchored" data-anchor-id="layouttensor">LayoutTensor</h4>
-<p>LayoutTensor<span class="citation" data-cites="llvmlayouttensor"><a href="#ref-llvmlayouttensor" role="doc-biblioref">[5]</a></span> is Mojo’s abstraction to work on a Tensor.</p>
+<p>LayoutTensor<span class="citation" data-cites="llvmlayouttensor"><a href="#ref-llvmlayouttensor" role="doc-biblioref">[6]</a></span> is Mojo’s abstraction to work on a Tensor.</p>
 <p>Specifically, LayoutTensor aims to provide:</p>
 <ul>
 <li>High level primitive to perform operations on tiles.</li>
@@ -471,7 +492,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <li>Expose functions/parameters to enable auto-tuning or manual experimentation.</li>
 <li>Access to hardware without inline assembly.</li>
 </ul>
-<p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[6]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[7]</a></span> .</p>
+<p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[7]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[8]</a></span> .</p>
 <p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid"></a></p>
 <p>The features that looked most interesting to me are:</p>
 <ul>
@@ -825,6 +846,9 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <p>If you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!</p>
 
 
+<div class="hidden" aria-hidden="true">
+<span class="glightbox-desc lightbox-desc-1">Source: <a href="https://docs.nvidia.com/cuda/archive/12.2.2/cuda-c-programming-guide/index.html">CUDA C Programming Guide</a></span>
+</div>
 
 </section>
 </section>
@@ -840,16 +864,19 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <div class="csl-left-margin">[3] </div><div class="csl-right-inline">S. Rush, <span>“<span>GPU Puzzles</span>.”</span> 2023. Available: <a href="https://github.com/srush/GPU-Puzzles">https://github.com/srush/GPU-Puzzles</a></div>
 </div>
 <div id="ref-modular_democratizing_ai_compute" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">C. Lattner and Modular, <span>“Democratizing AI compute.”</span> 2023. Available: <a href="https://www.modular.com/democratizing-ai-compute">https://www.modular.com/democratizing-ai-compute</a></div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">C. Lattner and Modular, <span>“Democratizing AI compute.”</span> 2025. Available: <a href="https://www.modular.com/democratizing-ai-compute">https://www.modular.com/democratizing-ai-compute</a></div>
+</div>
+<div id="ref-wikipedia_simt" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Wikipedia, <span>“Single instruction, multiple threads.”</span> <a href="https://en.wikipedia.org/wiki/Single_instruction,_multiple_threads" class="uri">https://en.wikipedia.org/wiki/Single_instruction,_multiple_threads</a>.</div>
 </div>
 <div id="ref-llvmlayouttensor" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">Taei, <span>“<span class="nocase">Simplifying GPU Programming with Parametric Tile-Level Tensors In Mojo</span>.”</span> 2024. Available: <a href="https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf">https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf</a></div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Taei, <span>“<span class="nocase">Simplifying GPU Programming with Parametric Tile-Level Tensors In Mojo</span>.”</span> 2024. Available: <a href="https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf">https://llvm.org/devmtg/2024-10/slides/techtalk/Taei-Simplifying-GPU-Programming-with-Parametric-Tile-Level-Tensors-In-Mojo.pdf</a></div>
 </div>
 <div id="ref-mojotalk" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Modular, <span>“<span class="nocase">Mojo: The Future of Systems Programming</span>.”</span> 2025. Available: <a href="https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731">https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731</a></div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">Modular, <span>“<span class="nocase">Mojo: The Future of Systems Programming</span>.”</span> 2025. Available: <a href="https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731">https://youtu.be/5gPG7SXoBag?si=H_kbkzbqfZHvNQSy&amp;t=1731</a></div>
 </div>
 <div id="ref-jeffniutriton" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">J. Niu, <span>“<span class="nocase">Triton Clone in Mojo</span>.”</span> 2025. Available: <a href="https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu">https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu</a></div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">J. Niu, <span>“<span class="nocase">Triton Clone in Mojo</span>.”</span> 2025. Available: <a href="https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu">https://youtu.be/zUwyO2PZisw?si=QLdX_cAXDBcJH4mu</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1376,7 +1403,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","loop":false,"openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"openEffect":"zoom","closeEffect":"zoom","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
