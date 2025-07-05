@@ -23,7 +23,7 @@ categories:
 
 Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my [GitHub](https://github.com/goodhamgupta/paper_reviews)) to diving deep into hands-on implementations.
 
-I've always been interested in systems programming, but somehow never _really_ picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [@Google] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources interest in making these Large Language Modelsas fast and cheap as possible, by improving occasionallytraining and inference efficiency using "moar" compute.
+I've always been interested in systems programming, but somehow never _really_ picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [@Google] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using "moar" compute.
 
 I briefly spoke about [GPU computing last year](https://www.figma.com/deck/Sq9frEEoTFgFWthOJ4EM5w/intro_gpu_cuda?node-id=1-37&t=VNzh9p2qKrHNSTJj-1), and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention.
 
@@ -40,15 +40,15 @@ In early 2023, Modular announced Mojo🔥, a new systems-programming language pr
 - Traits and bounds checking
 - Interopeability with PTX, Python, C
 
-Modulay has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the "Democratising AI Compute"[@modular_democratizing_ai_compute] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.
+Modular has since announced Max, their AI inference platform, built on Mojo. The released [all kernels](https://github.com/modular/modular/tree/main/max/kernels) available as part of the platform, along with their own version[@modularpuzzles] of Sasha Rush's GPU Puzzles [@GPUPuzzles] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the "Democratising AI Compute"[@modular_democratizing_ai_compute] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo.
 
-## GPUs 101 — Why the Architecture Looks the Way It Does {#gpu-memory}
+## GPU 101 {#gpu-memory}
 
 GPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:
 
 - Lay out data and computation as a grid of thread blocks.
 - Launch a *kernel* from the CPU (host) to run on the GPU (device).
-- Exploit thousands of lightweight threads all executing the same code (SIMT).
+- Exploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).
 
 Modern chips had two ways to spend their billions of transistors:
 
@@ -57,37 +57,36 @@ Modern chips had two ways to spend their billions of transistors:
 
 The rest of this section unpacks how that single design choice shows up in memory, execution and program flow.
 
-### 1. Memory hierarchy – hiding latency with *many* threads
-
-![Source: [CUDA C Programming Guide](https://docs.nvidia.com/cuda/archive/12.2.2/cuda-c-programming-guide/index.html)](mojo_gpu_puzzles/gpu_memory.png)
-
-Because GPUs don't buy huge caches, DRAM latency is ~400-800 cycles. They hide that cost by keeping tens of thousands of registers (*per SM*) and rapidly swapping warps in and out while one warp waits on memory.
-
-Here's how CPU and GPU memory hierarchies compare:
-
-- **CPU**: DRAM > Caches (L3, L2, L1) > Registers  
-- **GPU**: Global (DRAM) > Shared (SRAM) > Registers
-
-From slowest/largest to fastest/smallest:
-
-- **Global (DRAM)**: large, high-latency, visible to all threads  
-- **Shared (SRAM)**: per-block scratchpad, low-latency  
-- **Registers**: per-thread storage, fastest access
+### 1. Memory hierarchy – hide latency with tons of threads
 
 
-### 2. Execution hierarchy – scheduling enough warps to cover stall time
+CPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.
 
+GPU memory hierarchy (slowest/largest to fastest/smallest):
+
+- **Global (HBM)**: High Bandwidth Memory—the GPU's main memory, large but high-latency, visible to all threads  
+- **Shared (SRAM)**: fast on-chip memory, ~100x faster than HBM  
+- **Registers**: per-thread storage, fastest access, ~1000x faster than HBM
+
+![Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU.](mojo_gpu_puzzles/memory_hierachy_fa.png){width=60%}
+
+The key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.
+
+
+### 2. Execution hierarchy – launch enough warps to hide stalls
+
+![GPU Execution Hierachy](mojo_gpu_puzzles/gpu_flow_hierachy.png){fig-align="center" width=60%}
+
+Building from the bottom up:
+
+- **Thread**: the basic execution unit with its own registers
+- **Warp**: 32 threads executing the same instruction together (the basic unit of GPU scheduling)  
+- **Block**: a group of threads that share `shared` memory and can synchronize  
+- **Grid**: a collection of blocks distributed across SMs  
 
 GPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.
 
-![](mojo_gpu_puzzles/gpu_flow_hierachy.png){fig-align="center"}
-
-- **Grid**: a collection of blocks distributed across SMs  
-- **Block**: a group of threads that share `shared` memory and can synchronize  
-- **Warp**: 32 threads executing the same instruction (SIMT [@wikipedia_simt])  
-- **Thread**: the basic execution unit with its own registers
-
-### 3. Program flow – a split brain (CPU orchestrates, GPU streams)
+### 3. Program flow – CPU launches, GPU streams
 
 ![](mojo_gpu_puzzles/program_flow.png)
 
@@ -100,10 +99,10 @@ The CPU launches kernels asynchronously and goes back to other work. Inside the 
 
 ### Putting it together
 
-Fast GPU kernels keep cores busy by 
+Fast GPU kernels keep cores busy by:
 - Staging hot data in `shared` or registers
-- Launching enough threads to mask global-memory latencyw
-- Writing branch-free, data-parallel code.
+- Launching enough threads to mask global-memory latency
+- Writing branch-free, data-parallel code
 
 We will cover the practical implications of the above topics as we go through the puzzles.
 
@@ -390,7 +389,7 @@ pixi run p05_layout_tensor
 
 # [Puzzle 6: Blocks](https://builds.modular.com/puzzles/puzzle_06/puzzle_06.html) {#puzzle-06}
 
-Building on Puzzles 4[#puzzle-04] and 5[#puzzle-5], we now aim to add a scalar to a tensor. We also have the addtional restriction around having fewer threads than the elements in our array, per block. This means that now apart from using the local indices of the current thread(`thread_idx.y` and `thread_idx.x`), we now also need to identify the current block, using `block_idx.y` and `block_idx.x`. The formula for calculating the index, in row-major format, is:
+Building on Puzzles [4](#puzzle-04) and [5](#puzzle-05), we now aim to add a scalar to a tensor. We also have the additional restriction around having fewer threads than the elements in our array, per block. This means that now apart from using the local indices of the current thread(`thread_idx.y` and `thread_idx.x`), we now also need to identify the current block, using `block_idx.y` and `block_idx.x`. The formula for calculating the index, in row-major format, is:
 
 $$
 idx = block\_idx.x * block\_dim.x + thread\_idx.x
@@ -495,6 +494,8 @@ pixi run p07_layout_tensor
 </details>
 
 # [Puzzle 8: Shared Memory](https://builds.modular.com/puzzles/puzzle_08/puzzle_08.html) {#puzzle-08}
+
+This puzzle introduces shared memory—the on-chip SRAM that makes GPUs fast. Instead of each thread reading from slow global memory, we'll load data into shared memory once and let all threads in a block access it quickly.
 
 In this puzzle we leverage shared memory (SRAM). Like [Puzzle 7](#puzzle-07), we add a scalar to a 2D tensor, but now each block has fewer threads than there are input elements.
 
