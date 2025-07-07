@@ -1057,13 +1057,19 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
-<p>pass</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid figure-img" alt="Row Sum"></a></p>
+<figcaption>Row Sum</figcaption>
+</figure>
+</div>
 
 
 <div class="hidden" aria-hidden="true">
 <span class="glightbox-desc lightbox-desc-9">Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></span>
 <span class="glightbox-desc lightbox-desc-10">Prefix‐Sum Illustration</span>
 <span class="glightbox-desc lightbox-desc-12">Axis Sum</span>
+<span class="glightbox-desc lightbox-desc-13">Row Sum</span>
 </div>
 
 </section>
@@ -1621,7 +1627,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","closeEffect":"zoom","descPosition":"bottom","loop":false});
+<script>var lightboxQuarto = GLightbox({"openEffect":"zoom","loop":false,"descPosition":"bottom","closeEffect":"zoom","selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
