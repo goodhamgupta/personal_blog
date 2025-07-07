@@ -95,7 +95,8 @@ Similar to the previous puzzles, we can implement the dot-product by copying dat
 
 To implement dot product efficiently on a GPU, we will use **parallel reduction**. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:
 
-Picture Zeno’s “half-way” paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance.
+Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you're done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. **Unlike Zeno's infinite halvings though**, we stop at a concrete point: when only thread 0 remains active (`stride` becomes 0).
+
 
 ![](mojo_gpu_puzzles/zeno_paradox.png)
 

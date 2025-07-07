@@ -606,4 +606,6 @@ pixi run p08_layout_tensor
 
 We covered simple algorithms such as map, zip using Mojo, and did some initial work with their  `LayoutTensor` abstraction, which similar to the [CuTe](https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html) library.
 
-If you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!
+Stay tuned for more posts—I'll be diving into more advanced GPU puzzles and Mojo tricks soon!
+
+If you spot mistakes or have better/faster Mojo code, open a PR or ping me on [Twitter/X](https://twitter.com/shubhamg2208). Happy hacking!
