@@ -200,7 +200,7 @@
     "href": "posts/2025-07-06-gpu-puzzles-p1.html#conclusion",
     "title": "GPUs go brrr with Mojo - Fundamentals",
     "section": "Conclusion",
-    "text": "Conclusion\nWe covered simple algorithms such as map, zip using Mojo, and did some initial work with their LayoutTensor abstraction, which similar to the CuTe library.\nIf you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!"
+    "text": "Conclusion\nWe covered simple algorithms such as map, zip using Mojo, and did some initial work with their LayoutTensor abstraction, which similar to the CuTe library.\nStay tuned for more posts—I’ll be diving into more advanced GPU puzzles and Mojo tricks soon!\nIf you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!"
   },
   {
     "objectID": "posts/2020-01-14-first-post.html",
