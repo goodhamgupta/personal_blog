@@ -196,13 +196,6 @@
     "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
   },
   {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#conclusion",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#conclusion",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "Conclusion",
-    "text": "Conclusion\nWe covered simple algorithms such as map, zip using Mojo, and did some initial work with their LayoutTensor abstraction, which similar to the CuTe library.\nStay tuned for more posts—I’ll be diving into more advanced GPU puzzles and Mojo tricks soon!\nIf you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!"
-  },
-  {
     "objectID": "posts/2020-01-14-first-post.html",
     "href": "posts/2020-01-14-first-post.html",
     "title": "Yo!",

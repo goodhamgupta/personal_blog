@@ -427,10 +427,8 @@ window.Quarto = {
   <li><a href="#puzzle-05" id="toc-puzzle-05" class="nav-link" data-scroll-target="#puzzle-05">Puzzle 5: Broadcast</a></li>
   <li><a href="#puzzle-06" id="toc-puzzle-06" class="nav-link" data-scroll-target="#puzzle-06">Puzzle 6: Blocks</a></li>
   <li><a href="#puzzle-07" id="toc-puzzle-07" class="nav-link" data-scroll-target="#puzzle-07">Puzzle 7: 2D Blocks</a></li>
-  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a>
-  <ul class="collapse">
+  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -1027,15 +1025,15 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
 <p>We covered simple algorithms such as map, zip using Mojo, and did some initial work with their <code>LayoutTensor</code> abstraction, which similar to the <a href="https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html">CuTe</a> library.</p>
 <p>Stay tuned for more posts—I’ll be diving into more advanced GPU puzzles and Mojo tricks soon!</p>
 <p>If you spot mistakes or have better/faster Mojo code, open a PR or ping me on <a href="https://twitter.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 
 
 
-</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">

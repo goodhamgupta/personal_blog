@@ -1212,7 +1212,24 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 </section>
 <section id="puzzle-13-axis-sum" class="level1">
 <h1><a href="https://puzzles.modular.com/puzzle_13/puzzle_13.html" id="puzzle-13">Puzzle 13: Axis Sum</a></h1>
-<p>pass</p>
+<p>Axis sum is the 2-D sibling of the dot‐product/prefix puzzles: take a matrix <code>A</code> and collapse one dimension by summing over it.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{axis}=0 &amp;\;\Longrightarrow\;
+\text{column-sum:}\;\;
+out[j] &amp; = \sum_{k} A_{k,j}, \qquad j = 0,\dots,N-1 \\[4pt]
+\text{axis}=1 &amp;\;\Longrightarrow\;
+\text{row-sum:}\;\;
+out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
+\end{aligned}
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid figure-img" alt="Axis Sum"></a></p>
+<figcaption>Axis Sum</figcaption>
+</figure>
+</div>
+<p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 
 
 
