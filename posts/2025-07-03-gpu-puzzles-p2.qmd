@@ -847,4 +847,20 @@ pixi run p12
 
 # [Puzzle 13: Axis Sum](https://puzzles.modular.com/puzzle_13/puzzle_13.html){#puzzle-13}
 
-pass
+Axis sum is the 2-D sibling of the dot‐product/prefix puzzles: take a matrix `A` and collapse one dimension by summing over it.
+
+$$
+\begin{aligned}
+\text{axis}=0 &\;\Longrightarrow\;
+\text{column-sum:}\;\;
+out[j] & = \sum_{k} A_{k,j}, \qquad j = 0,\dots,N-1 \\[4pt]
+\text{axis}=1 &\;\Longrightarrow\;
+\text{row-sum:}\;\;
+out[i] & = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
+\end{aligned}
+$$
+
+
+![Axis Sum](mojo_gpu_puzzles/p13_intro.png)
+
+Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.

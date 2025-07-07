@@ -325,7 +325,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </figure>
 </div>
 <p>To implement dot product efficiently on a GPU, we will use <strong>parallel reduction</strong>. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:</p>
-<p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</strong></p>
+<p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid"></a></p>
 <ul>
 <li>Every thread multiplies its assigned <code>a</code> and <code>b</code> elements and writes the partial product into shared memory.</li>
@@ -1039,12 +1039,31 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 </section>
 <section id="puzzle-13-axis-sum" class="level1">
 <h1><a href="https://puzzles.modular.com/puzzle_13/puzzle_13.html" id="puzzle-13">Puzzle 13: Axis Sum</a></h1>
+<p>Axis sum is the 2-D sibling of the dot‐product/prefix puzzles: take a matrix <code>A</code> and collapse one dimension by summing over it.</p>
+<p><span class="math display">\[
+\begin{aligned}
+\text{axis}=0 &amp;\;\Longrightarrow\;
+\text{column-sum:}\;\;
+out[j] &amp; = \sum_{k} A_{k,j}, \qquad j = 0,\dots,N-1 \\[4pt]
+\text{axis}=1 &amp;\;\Longrightarrow\;
+\text{row-sum:}\;\;
+out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
+\end{aligned}
+\]</span></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid figure-img" alt="Axis Sum"></a></p>
+<figcaption>Axis Sum</figcaption>
+</figure>
+</div>
+<p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <p>pass</p>
 
 
 <div class="hidden" aria-hidden="true">
 <span class="glightbox-desc lightbox-desc-9">Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></span>
 <span class="glightbox-desc lightbox-desc-10">Prefix‐Sum Illustration</span>
+<span class="glightbox-desc lightbox-desc-12">Axis Sum</span>
 </div>
 
 </section>
@@ -1602,7 +1621,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","loop":false,"descPosition":"bottom","openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","closeEffect":"zoom","descPosition":"bottom","loop":false});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

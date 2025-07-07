@@ -261,10 +261,8 @@ window.Quarto = {
   <li><a href="#puzzle-05" id="toc-puzzle-05" class="nav-link" data-scroll-target="#puzzle-05">Puzzle 5: Broadcast</a></li>
   <li><a href="#puzzle-06" id="toc-puzzle-06" class="nav-link" data-scroll-target="#puzzle-06">Puzzle 6: Blocks</a></li>
   <li><a href="#puzzle-07" id="toc-puzzle-07" class="nav-link" data-scroll-target="#puzzle-07">Puzzle 7: 2D Blocks</a></li>
-  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a>
-  <ul class="collapse">
+  <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  </ul></li>
   </ul>
 </nav>
     </div>
@@ -319,7 +317,7 @@ window.Quarto = {
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
+<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
 <figcaption>Source: FlashAttention <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[5]</a></span>. Metrics shown are for an NVIDIA A100 GPU.</figcaption>
 </figure>
 </div>
@@ -329,7 +327,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="execution-hierarchy-launch-enough-warps-to-hide-stalls">2. Execution hierarchy – launch enough warps to hide stalls</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
+<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
 <figcaption>GPU Execution Hierachy</figcaption>
 </figure>
 </div>
@@ -505,7 +503,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[7]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[8]</a></span> .</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
+<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
 <figcaption>Mojo Parameter Syntax</figcaption>
 </figure>
 </div>
@@ -856,10 +854,12 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
-<section id="conclusion" class="level2">
-<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
 <p>We covered simple algorithms such as map, zip using Mojo, and did some initial work with their <code>LayoutTensor</code> abstraction, which similar to the <a href="https://docs.nvidia.com/cutlass/media/docs/cpp/cute/00_quickstart.html">CuTe</a> library.</p>
-<p>If you spot mistakes or have better/faster Mojo code, open a PR or ping me on Twitter/X. Happy hacking!</p>
+<p>Stay tuned for more posts—I’ll be diving into more advanced GPU puzzles and Mojo tricks soon!</p>
+<p>If you spot mistakes or have better/faster Mojo code, open a PR or ping me on <a href="https://twitter.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -868,7 +868,6 @@ idx = block\_idx.x * block\_dim.x + thread\_idx.x
 <span class="glightbox-desc lightbox-desc-9">Mojo Parameter Syntax</span>
 </div>
 
-</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -1421,7 +1420,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","selector":".lightbox","descPosition":"bottom","loop":false,"openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"loop":false,"openEffect":"zoom","selector":".lightbox","closeEffect":"zoom","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
