@@ -496,6 +496,97 @@ pixi run p11 --block-boundary
 ```
 </details>
 
+
+# 2D Indexing: From Lines to Chessboards {#indexing}
+
+The 1D convolution examples above used simple linear indexing, but many GPU algorithms—2D convolution, matrix multiplication, image processing—naturally work with 2D data structures. Let's build intuition for how CUDA/Mojo organizes threads, blocks, and grids in two spatial dimensions, which forms the foundation for all 2D GPU operations.
+
+### The 2D Hierarchy
+
+The GPU execution model extends naturally to 2D:
+
+- **Grid** = the whole launch, like a city laid out in streets (x) and avenues (y)
+- **Block** = one square of that city; all threads inside can share fast memory  
+- **Thread** = a house in that square
+
+![2D Block Layout](mojo_gpu_puzzles/p13_block.png)
+
+Inside one block (blockDim.x × blockDim.y threads):
+
+![2D Thread Layout](mojo_gpu_puzzles/p13_thread.png)
+
+### Computing Global Matrix Indices
+
+The key insight is that every thread computes its global position using the same formula:
+
+```mojo
+let col = block_idx.x * block_dim.x + thread_idx.x  # column index
+let row = block_idx.y * block_dim.y + thread_idx.y  # row index
+```
+
+This maps the thread hierarchy directly to matrix coordinates:
+
+![Matrix Indexing](mojo_gpu_puzzles/p13_matrix_position.png)
+
+For an M×N output matrix, you typically launch:
+
+```mojo
+alias TILE_X = 16  # threads per block in x dimension
+alias TILE_Y = 16  # threads per block in y dimension
+alias BLOCKS_X = ceildiv(N, TILE_X)  # columns
+alias BLOCKS_Y = ceildiv(M, TILE_Y)  # rows
+alias BLOCKS_PER_GRID = (BLOCKS_X, BLOCKS_Y)
+alias THREADS_PER_BLOCK = (TILE_X, TILE_Y)
+```
+
+### Why Square Tiles?
+
+For matrices, we almost always use square (or rectangular) tiles like 16×16 rather than 1D strips:
+
+- **Memory coalescing**: Consecutive threads in both x and y dimensions can read whole 2D tiles with coalesced bursts
+- **Shared memory tiling**: A block can stage its TILE_Y×TILE_X patch into fast shared memory and reuse it many times
+- **Balanced occupancy**: 16×16 = 256 threads is a common starting point that balances warp efficiency (8 warps) with register/shared memory pressure
+
+### Bounds Checking
+
+Since matrix dimensions are rarely exact multiples of tile size, always guard against out-of-bounds access:
+
+```mojo
+if row < M and col < N:
+    # safe to access matrix[row, col]
+```
+
+<details>
+<summary>**Worked Example: 40×50 Matrix with 16×16 Tiles**</summary>
+
+For a 40×50 matrix with 16×16 tiles:
+
+```
+        col 0……15 16……31 32……47
+ row
+ 0…15    Blk(0,0)  Blk(1,0)  Blk(2,0)
+16…31    Blk(0,1)  Blk(1,1)  Blk(2,1)
+32…39    Blk(0,2)  Blk(1,2)  Blk(2,2)
+```
+
+Each thread in Block(1,1) computes one element where row ∈ [16,31] and col ∈ [16,31]. Note that Block(2,2) only processes 8×16 elements due to the matrix boundaries.
+
+</details>
+
+### Copy-Paste Indexing Pattern
+
+```mojo
+# Essential 2D indexing pattern
+let row = block_idx.y * block_dim.y + thread_idx.y
+let col = block_idx.x * block_dim.x + thread_idx.x
+if row < M and col < N:
+    # Process matrix[row, col]
+```
+
+This indexing pattern appears in every 2D GPU kernel—matrix multiplication, 2D convolution, transpose, etc. 
+
+> **Note**: Mojo/CUDA grids and blocks can also have a third dimension (`block_idx.z`, `thread_idx.z`) for problems like 3D volume processing or batch operations. We'll cover that when we encounter 3D kernels; for matrix multiplication the 2D form is sufficient.
+
 # Bonus: 2D Convolution
 
 We can extend our implementation for 1D convolution to a 2D convolution.
@@ -912,3 +1003,60 @@ We can also perform column-sum(axis=0) with a trivial change:
 +    if local_i < SIZE:
 +        shared[local_i] = a[local_i, batch]
 ```
+
+
+# [Puzzle 14: Matmul](https://puzzles.modular.com/puzzle_14/puzzle_14.html){#puzzle-14}
+
+Arguably the single most important operation in GPU computing, the humble General Matrix Multiplication (GEMM) operation is the computational workhorse behind literally all deep learning models—from simple linear layers to massive transformer architectures.
+
+
+
+$$
+C_{i,j} = \sum_{k=1}^{K} A_{i,k} \cdot B_{k,j}
+$$
+
+> **Requirement:** For matrix multiplication $C = AB$ to be valid, the number of columns in $A$ must equal the number of rows in $B$.  
+> That is, if $A$ is shape $(M, K)$ and $B$ is shape $(K, N)$, then $C$ will be shape $(M, N)$.  
+
+GEMM's ubiquity stems from its perfect match with GPU architecture: thousands of independent multiply-add operations that can be parallelized across thousands of cores. Yet this apparent simplicity masks a deep optimization challenge. Memory bandwidth, cache hierarchies, and thread synchronization all conspire to make naive implementations crawl while hand-tuned libraries like cuBLAS achieve near-theoretical peak performance.
+
+Matmul tuning is a rabbit hole - see the OG Simon Boehm's deep-dive [@siboehm_cuda_mmm] for how wild it gets.
+
+For now, we'll focus on the core techniques demonstrated by the official puzzle—shared memory tiling and thread cooperation—to build intuition for how high-performance GEMM kernels actually work.
+
+## Naive Version with Global Memory
+
+Based on what we learnt in the [2D Indexing section](#indexing), the implementation here looks as follows:
+
+
+<details open>
+<summary> Solution </summary>
+
+```{.mojo filename=p13_naive.mojo}
+fn naive_matmul[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    row = block_dim.y * block_idx.y + thread_idx.y
+    col = block_dim.x * block_idx.x + thread_idx.x
+
+    if row < SIZE and col < SIZE:
+        # Need this to ensure the mojo compiler knows
+        # the type of `running_sum`, otherwise it will
+        # complain
+        var running_sum: output.element_type = 0
+
+        @parameter
+        for k in range(SIZE):
+            running_sum += a[row, k] * b[k, col]
+        output[row, col] = running_sum
+```
+
+```bash
+pixi run p14 --naive
+```
+
+</details>
