@@ -234,11 +234,11 @@ window.Quarto = {
   </ul></li>
   <li><a href="#puzzle-11" id="toc-puzzle-11" class="nav-link" data-scroll-target="#puzzle-11">Puzzle 11: 1D Convolution</a>
   <ul class="collapse">
-  <li><a href="#simple-single-block-with-shared-memory" id="toc-simple-single-block-with-shared-memory" class="nav-link" data-scroll-target="#simple-single-block-with-shared-memory">Simple: Single Block with Shared Memory</a>
+  <li><a href="#single-block-with-shared-memory" id="toc-single-block-with-shared-memory" class="nav-link" data-scroll-target="#single-block-with-shared-memory">Single Block with Shared Memory</a>
   <ul class="collapse">
   <li><a href="#loop-unrolling" id="toc-loop-unrolling" class="nav-link" data-scroll-target="#loop-unrolling">Loop Unrolling</a></li>
   </ul></li>
-  <li><a href="#advanced-block-boundary" id="toc-advanced-block-boundary" class="nav-link" data-scroll-target="#advanced-block-boundary">Advanced: Block Boundary</a></li>
+  <li><a href="#block-boundary" id="toc-block-boundary" class="nav-link" data-scroll-target="#block-boundary">Block Boundary</a></li>
   </ul></li>
   <li><a href="#indexing" id="toc-indexing" class="nav-link" data-scroll-target="#indexing">2D Indexing: From Lines to Chessboards</a>
   <ul class="collapse">
@@ -253,7 +253,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#hillissteele-algorithm" id="toc-hillissteele-algorithm" class="nav-link" data-scroll-target="#hillissteele-algorithm">Hillis–Steele Algorithm</a></li>
   <li><a href="#blellochs-twopass-algorithm" id="toc-blellochs-twopass-algorithm" class="nav-link" data-scroll-target="#blellochs-twopass-algorithm">Blelloch’s Two‐Pass Algorithm</a></li>
-  <li><a href="#complete-version" id="toc-complete-version" class="nav-link" data-scroll-target="#complete-version">Complete Version</a></li>
+  <li><a href="#block-boundary-1" id="toc-block-boundary-1" class="nav-link" data-scroll-target="#block-boundary-1">Block Boundary</a></li>
   </ul></li>
   <li><a href="#puzzle-13-axis-sum" id="toc-puzzle-13-axis-sum" class="nav-link" data-scroll-target="#puzzle-13-axis-sum">Puzzle 13: Axis Sum</a></li>
   <li><a href="#puzzle-14-matmul" id="toc-puzzle-14-matmul" class="nav-link" data-scroll-target="#puzzle-14-matmul">Puzzle 14: Matmul</a>
@@ -275,7 +275,12 @@ window.Quarto = {
 <h1><a href="https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html">Puzzle 9: Pooling</a></h1>
 <p>Pooling is a classic trick in neural networks for shrinking down your data—think of it as a way to “summarize” regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.</p>
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid"></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<figcaption>Pooling</figcaption>
+</figure>
+</div>
 <details open="">
 <summary>
 <strong>Solution</strong>
@@ -333,12 +338,18 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<figcaption>Dot Product</figcaption>
 </figure>
 </div>
 <p>To implement dot product efficiently on a GPU, we will use <strong>parallel reduction</strong>. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:</p>
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid"></a></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<figcaption>Zeno Paradox</figcaption>
+</figure>
+</div>
 <ul>
 <li>Every thread multiplies its assigned <code>a</code> and <code>b</code> elements and writes the partial product into shared memory.</li>
 <li>Each reduction round:
@@ -507,8 +518,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>The convolution operation can be defined as: <span id="eq-convolution"><span class="math display">\[
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
 \tag{1}\]</span></span></p>
-<section id="simple-single-block-with-shared-memory" class="level2">
-<h2 class="anchored" data-anchor-id="simple-single-block-with-shared-memory">Simple: Single Block with Shared Memory</h2>
+<section id="single-block-with-shared-memory" class="level2">
+<h2 class="anchored" data-anchor-id="single-block-with-shared-memory">Single Block with Shared Memory</h2>
 <p>For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.</p>
 <p><a href="mojo_gpu_puzzles/p11_simple.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="mojo_gpu_puzzles/p11_simple.png" class="img-fluid"></a></p>
 <p>The implementation is:</p>
@@ -618,8 +629,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p><strong>Bottom line</strong>: you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[7]</a></span> performance—ideal for GPU kernels where every cycle and register matters.</p>
 </section>
 </section>
-<section id="advanced-block-boundary" class="level2">
-<h2 class="anchored" data-anchor-id="advanced-block-boundary">Advanced: Block Boundary</h2>
+<section id="block-boundary" class="level2">
+<h2 class="anchored" data-anchor-id="block-boundary">Block Boundary</h2>
 <p>We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N &gt; 1.</p>
 <p>The blue cells are the data <em>owned</em> by the current thread-block; the orange cells are the first few elements of the <em>next</em> block that the convolution window will inevitably peek at.</p>
 <p><a href="mojo_gpu_puzzles/p11_block_boundary.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="mojo_gpu_puzzles/p11_block_boundary.png" class="img-fluid"></a></p>
@@ -727,9 +738,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </li>
 <li><strong>Thread</strong> = a house in that square</li>
 </ul>
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
@@ -1063,8 +1074,8 @@ After the up-sweep leaves <code>a[n-1]</code> containing the overall sum, we wal
 </details>
 <p>This is not the most efficient implementation, but I hope this provides some intuition about the algorithm!</p>
 </section>
-<section id="complete-version" class="level2">
-<h2 class="anchored" data-anchor-id="complete-version">Complete Version</h2>
+<section id="block-boundary-1" class="level2">
+<h2 class="anchored" data-anchor-id="block-boundary-1">Block Boundary</h2>
 <p>The key difference in this version is that now we have an input array that is larger than the size of a single block.</p>
 <p>We split the global scan into two bite-sized passes:</p>
 <p><strong>Phase 1 – Local Scan</strong> 1. Each block copies its slice into shared memory.<br>
@@ -1150,14 +1161,14 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid figure-img" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -1256,6 +1267,9 @@ Solution
 
 
 <div class="hidden" aria-hidden="true">
+<span class="glightbox-desc lightbox-desc-1">Pooling</span>
+<span class="glightbox-desc lightbox-desc-2">Dot Product</span>
+<span class="glightbox-desc lightbox-desc-3">Zeno Paradox</span>
 <span class="glightbox-desc lightbox-desc-9">2D Block Layout</span>
 <span class="glightbox-desc lightbox-desc-10">2D Thread Layout</span>
 <span class="glightbox-desc lightbox-desc-11">Matrix Indexing</span>
@@ -1824,7 +1838,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","selector":".lightbox","descPosition":"bottom","loop":false,"openEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

@@ -27,7 +27,7 @@ Pooling is a classic trick in neural networks for shrinking down your data—thi
 
 This puzzle is a bit different compared to traditional pooling: Instead of having a "kernel", each output element is the running sum of the all the elements in the current window.
 
-![](mojo_gpu_puzzles/p09.png)
+![Pooling](mojo_gpu_puzzles/p09.png){fig-align='center'}
 
 <details open>
 <summary> **Solution** </summary>
@@ -88,14 +88,14 @@ $$
 
 Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.
 
-![](mojo_gpu_puzzles/p10.png){fig-align='center'}
+![Dot Product](mojo_gpu_puzzles/p10.png){fig-align='center'}
 
 To implement dot product efficiently on a GPU, we will use **parallel reduction**. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:
 
 Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you're done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. **Unlike Zeno's infinite halvings though**, we stop at a concrete point: when only thread 0 remains active (`stride` becomes 0).
 
 
-![](mojo_gpu_puzzles/zeno_paradox.png)
+![Zeno Paradox](mojo_gpu_puzzles/zeno_paradox.png)
 
 - Every thread multiplies its assigned `a` and `b` elements and writes the partial product into shared memory.
 - Each reduction round:
@@ -254,7 +254,7 @@ $$
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
 $$ {#eq-convolution}
 
-## Simple: Single Block with Shared Memory
+## Single Block with Shared Memory
 
 For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.
 
@@ -383,7 +383,7 @@ the specialised code never touches expired storage.
 **Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
 performance—ideal for GPU kernels where every cycle and register matters.
 
-## Advanced: Block Boundary
+## Block Boundary
 
 We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
 
@@ -509,7 +509,7 @@ The GPU execution model extends naturally to 2D:
 - **Block** = one square of that city; all threads inside can share fast memory  
 - **Thread** = a house in that square
 
-![2D Block Layout](mojo_gpu_puzzles/p13_block.png)
+![2D Block Layout](mojo_gpu_puzzles/p13_block.png){fig-align='left'}
 
 Inside one block (blockDim.x × blockDim.y threads):
 
@@ -854,7 +854,7 @@ pixi run p12 --blelloch
 
 This is not the most efficient implementation, but I hope this provides some intuition about the algorithm! 
 
-## Complete Version
+## Block Boundary
 
 The key difference in this version is that now we have an input array that is larger than the size of a single block.
 
@@ -949,11 +949,11 @@ out[i] & = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 $$
 
 
-![Axis Sum](mojo_gpu_puzzles/p13_intro.png)
+![Axis Sum](mojo_gpu_puzzles/p13_intro.png){fig-align='center' width=50%}
 
 Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.
 
-![Row Sum](mojo_gpu_puzzles/p13_row_sum.png)
+![Row Sum](mojo_gpu_puzzles/p13_row_sum.png){fig-align='center'}
 
 <details open>
 <summary> Solution </summary>
