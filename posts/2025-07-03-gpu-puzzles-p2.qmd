@@ -17,9 +17,6 @@ format:
     code-summary: "Solution"
     syntax-definitions:
       - mojo_gpu_puzzles/mojo.xml
-website:
-  repo-url: https://github.com/goodhamgupta/personal_blog
-  repo-actions: [edit, source, issue]
 ---
 
 This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.
