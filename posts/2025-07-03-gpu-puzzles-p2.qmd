@@ -3,6 +3,8 @@ title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
 draft: true
 draft-mode: unlinked
+date: '2025-07-08'
+description: "Mojo-fueled GPU mind-benders: slide-n-sum pooling, tile-flipping convs & warp-speed scans—so quick your CPU files a complaint!"
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
@@ -387,7 +389,7 @@ performance—ideal for GPU kernels where every cycle and register matters.
 
 We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
 
-The blue cells are the data *owned* by the current thread-block; the orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
+The blue cells are the data *owned* by the current thread-block. The orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
 
 ![](mojo_gpu_puzzles/p11_block_boundary.png)
 
@@ -544,8 +546,8 @@ alias THREADS_PER_BLOCK = (TILE_X, TILE_Y)
 For matrices, we almost always use square (or rectangular) tiles like 16×16 rather than 1D strips:
 
 - **Memory coalescing**: Consecutive threads in both x and y dimensions can read whole 2D tiles with coalesced bursts
-- **Shared memory tiling**: A block can stage its TILE_Y×TILE_X patch into fast shared memory and reuse it many times
-- **Balanced occupancy**: 16×16 = 256 threads is a common starting point that balances warp efficiency (8 warps) with register/shared memory pressure
+- **Shared memory tiling**: A block can stage its `TILE_Y×TILE_X` patch into fast shared memory and reuse it many times
+- **Balanced occupancy**: `16×16 = 256` threads is a common starting point that balances warp efficiency (8 warps) with register/shared memory pressure
 
 ### Bounds Checking
 
@@ -585,7 +587,7 @@ if row < M and col < N:
 
 This indexing pattern appears in every 2D GPU kernel—matrix multiplication, 2D convolution, transpose, etc. 
 
-> **Note**: Mojo/CUDA grids and blocks can also have a third dimension (`block_idx.z`, `thread_idx.z`) for problems like 3D volume processing or batch operations. We'll cover that when we encounter 3D kernels; for matrix multiplication the 2D form is sufficient.
+> **Note**: Mojo/CUDA grids and blocks can also have a third dimension (`block_idx.z`, `thread_idx.z`) for problems like 3D volume processing or batch operations. We'll cover that when we encounter 3D kernels.
 
 # Bonus: 2D Convolution
 
@@ -1024,15 +1026,14 @@ Matmul tuning is a rabbit hole - see the OG Simon Boehm's deep-dive [@siboehm_cu
 
 For now, we'll focus on the core techniques demonstrated by the official puzzle—shared memory tiling and thread cooperation—to build intuition for how high-performance GEMM kernels actually work.
 
-## Naive Version with Global Memory
+## Global Memory Version
 
-Based on what we learnt in the [2D Indexing section](#indexing), the implementation here looks as follows:
-
+Based on the [2D indexing](#indexing) section, each thread computes one C[row, col] by loading A[row, k] and B[k, col] from global memory, multiplying and accumulating over k. We unroll the k‐loop to cut loop overhead and boost throughput.
 
 <details open>
 <summary> Solution </summary>
 
-```{.mojo filename=p13_naive.mojo}
+```{.mojo filename=p14_naive.mojo}
 fn naive_matmul[
     layout: Layout, size: Int
 ](
@@ -1057,6 +1058,55 @@ fn naive_matmul[
 
 ```bash
 pixi run p14 --naive
+# out: 
+# expected: 
 ```
 
 </details>
+
+## Shared Memory Version
+
+The previous version suffers from repeated global memory reads. We can optimize this using shared memory: 
+
+- Load matrix tiles once
+- Synchronize threads
+- Compute using the cached data.
+
+
+<details open>
+<summary> Solution </summary>
+
+```{.mojo filename=p14_shared.mojo}
+fn single_block_matmul[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    row = block_dim.y * block_idx.y + thread_idx.y
+    col = block_dim.x * block_idx.x + thread_idx.x
+    local_row = thread_idx.y
+    local_col = thread_idx.x
+    shared_a = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    shared_b = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    if row < size and col < size and local_row < size and local_col < size:
+        shared_a[local_row, local_col] = a[row, col]
+        shared_b[local_row, local_col] = b[row, col]
+
+    barrier()
+    if row < size and col < size and local_row < size and local_col < size:
+        var running_sum: output.element_type = 0.0
+
+        @parameter
+        for k in range(size):
+            running_sum += a[local_row, k] * b[k, local_col]
+
+        output[row, col] = running_sum
+```
+
+```bash
+pixi run p14 --naive
+# out: 
+# expected: 
+```
