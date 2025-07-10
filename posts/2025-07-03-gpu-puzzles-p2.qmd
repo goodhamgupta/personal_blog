@@ -4,7 +4,8 @@ lightbox: true
 draft: true
 draft-mode: unlinked
 date: '2025-07-08'
-description: "Mojo-fueled GPU mind-benders: slide-n-sum pooling, tile-flipping convs & warp-speed scans—so quick your CPU files a complaint!"
+author: Shubham Gupta
+description: "Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs & warp-speed scans"
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
@@ -21,7 +22,7 @@ format:
       - mojo_gpu_puzzles/mojo.xml
 ---
 
-This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.
+Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms—sliding-window pools, tile-wise convolutions, warp-level scans, and more.
 
 # [Puzzle 9: Pooling](https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html) {#puzzle-09}
 
@@ -558,6 +559,8 @@ if row < M and col < N:
     # safe to access matrix[row, col]
 ```
 
+Mojo doesn't provide automatic bound checking when writing to shared memory [@mojo_layouttensor_setitem]. 
+
 <details>
 <summary>**Worked Example: 40×50 Matrix with 16×16 Tiles**</summary>
 
@@ -759,15 +762,15 @@ Why prefer it over the classic Hillis–Steele (Algorithm 1)?
 
 1. Hardware reality.  
    Hillis–Steele assumes one processor per element and updates the array *in-place* every round.  
-   A real GPU doesn’t grant that luxury: a “1 024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+   A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost.  
-   Avoiding the overwrite requires a barrier after **every** addition—log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
+   Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
 3. Blelloch’s fix.  
    • Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.  
    • Only two global barriers are needed (one between the phases, one at the end).  
-   • Work drops to Θ(n) and correctness is guaranteed even when the array is far larger than a warp.
+   • Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.
 
 The result is a scan that is both faster and safer on modern GPUs.
 
@@ -863,6 +866,7 @@ The key difference in this version is that now we have an input array that is la
 We split the global scan into two bite-sized passes:
 
 **Phase 1 – Local Scan**
+
 1. Each block copies its slice into shared memory.  
 2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.  
 3. The last thread of the block stashes the block’s total **after** the scan into an auxiliary slot at the tail of `output`:  
@@ -872,7 +876,7 @@ We split the global scan into two bite-sized passes:
    #  [   prefix sums   ][ block totals ]
    ```  
 
-**Phase 2 – propagate block totals**
+**Phase 2 – Propagate block totals**
 
 1. Every thread grabs the aggregate from the *previous* block (`totals[block_id-1]`) and adds it to its own prefix.    
    Now every element holds the inclusive scan over the *whole* array.
@@ -881,7 +885,7 @@ We split the global scan into two bite-sized passes:
 
 We launch the above phases as two separate kernels.
 
-A host-side synchronisation sits between the launches. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them.  Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.
+**A host-side synchronisation sits between the launches**. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them.  Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.
 
 <details open>
 <summary> **Solution (Block Boundary Version)** </summary>
@@ -1030,6 +1034,7 @@ For now, we'll focus on the core techniques demonstrated by the official puzzle�
 
 Based on the [2D indexing](#indexing) section, each thread computes one C[row, col] by loading A[row, k] and B[k, col] from global memory, multiplying and accumulating over k. We unroll the k‐loop to cut loop overhead and boost throughput.
 
+
 <details open>
 <summary> Solution </summary>
 
@@ -1071,6 +1076,8 @@ The previous version suffers from repeated global memory reads. We can optimize 
 - Load matrix tiles once
 - Synchronize threads
 - Compute using the cached data.
+
+![Matmul with shared memory](mojo_gpu_puzzles/p14_shared_mem.png){fig-align='center'}
 
 
 <details open>

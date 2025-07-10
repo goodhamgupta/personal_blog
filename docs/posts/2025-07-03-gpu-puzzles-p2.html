@@ -6,6 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Shubham Gupta">
+<meta name="dcterms.date" content="2025-07-08">
+<meta name="description" content="Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans">
 
 <title>Shubham Gupta - GPUs go brrr with Mojo: Algorithms</title>
 <style>
@@ -206,13 +209,30 @@ window.Quarto = {
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">GPUs go brrr with Mojo: Algorithms</h1>
-                      </div>
+                  <div>
+        <div class="description">
+          Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans
+        </div>
+      </div>
+                </div>
   </div>
     
   
   <div class="quarto-title-meta">
 
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Shubham Gupta </p>
+            </div>
+    </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 8, 2025</p>
+      </div>
+    </div>
     
       
     </div>
@@ -271,14 +291,14 @@ window.Quarto = {
 
 
 
-<p>This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.</p>
+<p>Picking up right where the the <a href="../posts/2025-07-06-gpu-puzzles-p1.html">last post</a> left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms—sliding-window pools, tile-wise convolutions, warp-level scans, and more.</p>
 <section id="puzzle-09" class="level1">
 <h1><a href="https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html">Puzzle 9: Pooling</a></h1>
 <p>Pooling is a classic trick in neural networks for shrinking down your data—think of it as a way to “summarize” regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.</p>
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
 <figcaption>Pooling</figcaption>
 </figure>
 </div>
@@ -339,7 +359,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
@@ -347,7 +367,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
 <figcaption>Zeno Paradox</figcaption>
 </figure>
 </div>
@@ -741,14 +761,14 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </ul>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
 <p>Inside one block (blockDim.x × blockDim.y threads):</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
 <figcaption>2D Thread Layout</figcaption>
 </figure>
 </div>
@@ -761,7 +781,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" data-glightbox="description: .lightbox-desc-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
 <figcaption>Matrix Indexing</figcaption>
 </figure>
 </div>
@@ -787,6 +807,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Since matrix dimensions are rarely exact multiples of tile size, always guard against out-of-bounds access:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># safe to access matrix[row, col]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Mojo doesn’t provide automatic bound checking when writing to shared memory <span class="citation" data-cites="mojo_layouttensor_setitem"><a href="#ref-mojo_layouttensor_setitem" role="doc-biblioref">[9]</a></span>.</p>
 <details>
 <summary>
 <strong>Worked Example: 40×50 Matrix with 16×16 Tiles</strong>
@@ -818,7 +839,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-12" data-glightbox="description: .lightbox-desc-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -916,7 +937,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" data-glightbox="description: .lightbox-desc-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -970,18 +991,18 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </details></section>
 <section id="blellochs-twopass-algorithm" class="level2">
 <h2 class="anchored" data-anchor-id="blellochs-twopass-algorithm">Blelloch’s Two‐Pass Algorithm</h2>
-<p>Blelloch’s two-pass scan does Θ(n) work by splitting the job into an <strong>up-sweep</strong> (build a reduction tree) and a <strong>down-sweep</strong> (propagate prefixes) <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[9]</a></span>.</p>
+<p>Blelloch’s two-pass scan does Θ(n) work by splitting the job into an <strong>up-sweep</strong> (build a reduction tree) and a <strong>down-sweep</strong> (propagate prefixes) <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[10]</a></span>.</p>
 <p>Why prefer it over the classic Hillis–Steele (Algorithm 1)?</p>
 <ol type="1">
 <li><p>Hardware reality.<br>
 Hillis–Steele assumes one processor per element and updates the array <em>in-place</em> every round.<br>
-A real GPU doesn’t grant that luxury: a “1 024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
+A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
 <li><p>Synchronisation cost.<br>
-Avoiding the overwrite requires a barrier after <strong>every</strong> addition—log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.</p></li>
+Avoiding the overwrite requires a barrier after <strong>every</strong> addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.</p></li>
 <li><p>Blelloch’s fix.<br>
 • Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.<br>
 • Only two global barriers are needed (one between the phases, one at the end).<br>
-• Work drops to Θ(n) and correctness is guaranteed even when the array is far larger than a warp.</p></li>
+• Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.</p></li>
 </ol>
 <p>The result is a scan that is both faster and safer on modern GPUs.</p>
 <ol type="1">
@@ -1079,19 +1100,24 @@ After the up-sweep leaves <code>a[n-1]</code> containing the overall sum, we wal
 <h2 class="anchored" data-anchor-id="block-boundary-1">Block Boundary</h2>
 <p>The key difference in this version is that now we have an input array that is larger than the size of a single block.</p>
 <p>We split the global scan into two bite-sized passes:</p>
-<p><strong>Phase 1 – Local Scan</strong> 1. Each block copies its slice into shared memory.<br>
-2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.<br>
-3. The last thread of the block stashes the block’s total <strong>after</strong> the scan into an auxiliary slot at the tail of <code>output</code>:</p>
+<p><strong>Phase 1 – Local Scan</strong></p>
+<ol type="1">
+<li><p>Each block copies its slice into shared memory.<br>
+</p></li>
+<li><p>Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.<br>
+</p></li>
+<li><p>The last thread of the block stashes the block’s total <strong>after</strong> the scan into an auxiliary slot at the tail of <code>output</code>:</p>
 <pre><code>#  |&lt;---  SIZE_2  ---&gt;|&lt;-- #blocks --&gt;|
-#  [   prefix sums   ][ block totals ]</code></pre>
-<p><strong>Phase 2 – propagate block totals</strong></p>
+#  [   prefix sums   ][ block totals ]</code></pre></li>
+</ol>
+<p><strong>Phase 2 – Propagate block totals</strong></p>
 <ol type="1">
 <li>Every thread grabs the aggregate from the <em>previous</em> block (<code>totals[block_id-1]</code>) and adds it to its own prefix.<br>
 Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 </ol>
 <p><a href="mojo_gpu_puzzles/p12_block_boundary.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14"><img src="mojo_gpu_puzzles/p12_block_boundary.png" class="img-fluid"></a></p>
 <p>We launch the above phases as two separate kernels.</p>
-<p>A host-side synchronisation sits between the launches. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them. Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.</p>
+<p><strong>A host-side synchronisation sits between the launches</strong>. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them. Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.</p>
 <details open="">
 <summary>
 <strong>Solution (Block Boundary Version)</strong>
@@ -1162,14 +1188,14 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-15" data-gallery="quarto-lightbox-gallery-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-16" data-gallery="quarto-lightbox-gallery-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -1229,7 +1255,7 @@ C_{i,j} = \sum_{k=1}^{K} A_{i,k} \cdot B_{k,j}
 That is, if <span class="math inline">\(A\)</span> is shape <span class="math inline">\((M, K)\)</span> and <span class="math inline">\(B\)</span> is shape <span class="math inline">\((K, N)\)</span>, then <span class="math inline">\(C\)</span> will be shape <span class="math inline">\((M, N)\)</span>.</p>
 </blockquote>
 <p>GEMM’s ubiquity stems from its perfect match with GPU architecture: thousands of independent multiply-add operations that can be parallelized across thousands of cores. Yet this apparent simplicity masks a deep optimization challenge. Memory bandwidth, cache hierarchies, and thread synchronization all conspire to make naive implementations crawl while hand-tuned libraries like cuBLAS achieve near-theoretical peak performance.</p>
-<p>Matmul tuning is a rabbit hole - see the OG Simon Boehm’s deep-dive <span class="citation" data-cites="siboehm_cuda_mmm"><a href="#ref-siboehm_cuda_mmm" role="doc-biblioref">[10]</a></span> for how wild it gets.</p>
+<p>Matmul tuning is a rabbit hole - see the OG Simon Boehm’s deep-dive <span class="citation" data-cites="siboehm_cuda_mmm"><a href="#ref-siboehm_cuda_mmm" role="doc-biblioref">[11]</a></span> for how wild it gets.</p>
 <p>For now, we’ll focus on the core techniques demonstrated by the official puzzle—shared memory tiling and thread cooperation—to build intuition for how high-performance GEMM kernels actually work.</p>
 <section id="global-memory-version" class="level2">
 <h2 class="anchored" data-anchor-id="global-memory-version">Global Memory Version</h2>
@@ -1276,6 +1302,12 @@ Solution
 <li>Synchronize threads</li>
 <li>Compute using the cached data.</li>
 </ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" data-glightbox="description: .lightbox-desc-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
+<figcaption>Matmul with shared memory</figcaption>
+</figure>
+</div>
 <details open="">
 <summary>
 Solution
@@ -1327,6 +1359,7 @@ Solution
 <span class="glightbox-desc lightbox-desc-13">Prefix‐Sum Illustration</span>
 <span class="glightbox-desc lightbox-desc-15">Axis Sum</span>
 <span class="glightbox-desc lightbox-desc-16">Row Sum</span>
+<span class="glightbox-desc lightbox-desc-17">Matmul with shared memory</span>
 </div>
 
 </details></section>
@@ -1357,11 +1390,14 @@ Solution
 <div id="ref-iitd_parallel_convolution" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[8] </div><div class="csl-right-inline">R. Sen, <span>“Parallel convolution.”</span> 2022. Available: <a href="https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf">https://www.cse.iitd.ac.in/~rijurekha/col730_2022/parallelconvolution_aug29.pdf</a></div>
 </div>
+<div id="ref-mojo_layouttensor_setitem" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">Inc. Modular, <span>“LayoutTensor.__setitem__ API reference.”</span> 2024. Available: <a href="https://docs.modular.com/mojo/kernels/layout/layout_tensor/LayoutTensor/#__setitem__">https://docs.modular.com/mojo/kernels/layout/layout_tensor/LayoutTensor/#__setitem__</a></div>
+</div>
 <div id="ref-blelloch_prefix_sum" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[9] </div><div class="csl-right-inline">G. E. Blelloch, <span>“Prefix sums and their applications,”</span> in <em>Synthesis of parallel algorithms</em>, 1993, pp. 35–60. Available: <a href="https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf">https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf</a></div>
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">G. E. Blelloch, <span>“Prefix sums and their applications,”</span> in <em>Synthesis of parallel algorithms</em>, 1993, pp. 35–60. Available: <a href="https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf">https://www.cs.cmu.edu/~guyb/papers/Ble93.pdf</a></div>
 </div>
 <div id="ref-siboehm_cuda_mmm" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[10] </div><div class="csl-right-inline">S. Boehm, <span>“CUDA matrix multiplication madness.”</span> 2022. Available: <a href="https://siboehm.com/articles/22/CUDA-MMM">https://siboehm.com/articles/22/CUDA-MMM</a></div>
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">S. Boehm, <span>“CUDA matrix multiplication madness.”</span> 2022. Available: <a href="https://siboehm.com/articles/22/CUDA-MMM">https://siboehm.com/articles/22/CUDA-MMM</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1888,7 +1924,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"openEffect":"zoom","descPosition":"bottom","closeEffect":"zoom","selector":".lightbox"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom","loop":false});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
