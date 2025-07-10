@@ -3,6 +3,9 @@ title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
 draft: true
 draft-mode: unlinked
+date: '2025-07-08'
+author: Shubham Gupta
+description: "Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs & warp-speed scans"
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
@@ -17,12 +20,9 @@ format:
     code-summary: "Solution"
     syntax-definitions:
       - mojo_gpu_puzzles/mojo.xml
-website:
-  repo-url: https://github.com/goodhamgupta/personal_blog
-  repo-actions: [edit, source, issue]
 ---
 
-This section primarily aims to implement basic algorithms used in building models, such as pooling, convolutions, etc.
+Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms—sliding-window pools, tile-wise convolutions, warp-level scans, and more.
 
 # [Puzzle 9: Pooling](https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html) {#puzzle-09}
 
@@ -30,7 +30,7 @@ Pooling is a classic trick in neural networks for shrinking down your data—thi
 
 This puzzle is a bit different compared to traditional pooling: Instead of having a "kernel", each output element is the running sum of the all the elements in the current window.
 
-![](mojo_gpu_puzzles/p09.png)
+![Pooling](mojo_gpu_puzzles/p09.png){fig-align='center'}
 
 <details open>
 <summary> **Solution** </summary>
@@ -91,14 +91,14 @@ $$
 
 Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.
 
-![](mojo_gpu_puzzles/p10.png){fig-align='center'}
+![Dot Product](mojo_gpu_puzzles/p10.png){fig-align='center'}
 
 To implement dot product efficiently on a GPU, we will use **parallel reduction**. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:
 
 Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you're done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. **Unlike Zeno's infinite halvings though**, we stop at a concrete point: when only thread 0 remains active (`stride` becomes 0).
 
 
-![](mojo_gpu_puzzles/zeno_paradox.png)
+![Zeno Paradox](mojo_gpu_puzzles/zeno_paradox.png)
 
 - Every thread multiplies its assigned `a` and `b` elements and writes the partial product into shared memory.
 - Each reduction round:
@@ -257,7 +257,7 @@ $$
     (input\_signal\_a * kernel\_b)[i] = \sum_{j=0}^{\text{kernel\_size}-1} input\_signal\_a[i + j] * kernel\_b[j]
 $$ {#eq-convolution}
 
-## Simple: Single Block with Shared Memory
+## Single Block with Shared Memory
 
 For this version, we assume that we only have a single block, and both the input data and the kernel fit within a block.
 
@@ -386,11 +386,11 @@ the specialised code never touches expired storage.
 **Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
 performance—ideal for GPU kernels where every cycle and register matters.
 
-## Advanced: Block Boundary
+## Block Boundary
 
 We now aim to perform convolution over an input that is larger than a single block. Due to the nature of convolution operation, this introduces interesting boundary conditions. Specifically, the output of block N now depends on block N - 1, when N > 1.
 
-The blue cells are the data *owned* by the current thread-block; the orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
+The blue cells are the data *owned* by the current thread-block. The orange cells are the first few elements of the *next* block that the convolution window will inevitably peek at.
 
 ![](mojo_gpu_puzzles/p11_block_boundary.png)
 
@@ -498,6 +498,99 @@ pixi run p11 --block-boundary
 # expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])
 ```
 </details>
+
+
+# 2D Indexing: From Lines to Chessboards {#indexing}
+
+The 1D convolution examples above used simple linear indexing, but many GPU algorithms—2D convolution, matrix multiplication, image processing—naturally work with 2D data structures. Let's build intuition for how CUDA/Mojo organizes threads, blocks, and grids in two spatial dimensions, which forms the foundation for all 2D GPU operations.
+
+### The 2D Hierarchy
+
+The GPU execution model extends naturally to 2D:
+
+- **Grid** = the whole launch, like a city laid out in streets (x) and avenues (y)
+- **Block** = one square of that city; all threads inside can share fast memory  
+- **Thread** = a house in that square
+
+![2D Block Layout](mojo_gpu_puzzles/p13_block.png){fig-align='left'}
+
+Inside one block (blockDim.x × blockDim.y threads):
+
+![2D Thread Layout](mojo_gpu_puzzles/p13_thread.png)
+
+### Computing Global Matrix Indices
+
+The key insight is that every thread computes its global position using the same formula:
+
+```mojo
+let col = block_idx.x * block_dim.x + thread_idx.x  # column index
+let row = block_idx.y * block_dim.y + thread_idx.y  # row index
+```
+
+This maps the thread hierarchy directly to matrix coordinates:
+
+![Matrix Indexing](mojo_gpu_puzzles/p13_matrix_position.png)
+
+For an M×N output matrix, you typically launch:
+
+```mojo
+alias TILE_X = 16  # threads per block in x dimension
+alias TILE_Y = 16  # threads per block in y dimension
+alias BLOCKS_X = ceildiv(N, TILE_X)  # columns
+alias BLOCKS_Y = ceildiv(M, TILE_Y)  # rows
+alias BLOCKS_PER_GRID = (BLOCKS_X, BLOCKS_Y)
+alias THREADS_PER_BLOCK = (TILE_X, TILE_Y)
+```
+
+### Why Square Tiles?
+
+For matrices, we almost always use square (or rectangular) tiles like 16×16 rather than 1D strips:
+
+- **Memory coalescing**: Consecutive threads in both x and y dimensions can read whole 2D tiles with coalesced bursts
+- **Shared memory tiling**: A block can stage its `TILE_Y×TILE_X` patch into fast shared memory and reuse it many times
+- **Balanced occupancy**: `16×16 = 256` threads is a common starting point that balances warp efficiency (8 warps) with register/shared memory pressure
+
+### Bounds Checking
+
+Since matrix dimensions are rarely exact multiples of tile size, always guard against out-of-bounds access:
+
+```mojo
+if row < M and col < N:
+    # safe to access matrix[row, col]
+```
+
+Mojo doesn't provide automatic bound checking when writing to shared memory [@mojo_layouttensor_setitem]. 
+
+<details>
+<summary>**Worked Example: 40×50 Matrix with 16×16 Tiles**</summary>
+
+For a 40×50 matrix with 16×16 tiles:
+
+```
+        col 0……15 16……31 32……47
+ row
+ 0…15    Blk(0,0)  Blk(1,0)  Blk(2,0)
+16…31    Blk(0,1)  Blk(1,1)  Blk(2,1)
+32…39    Blk(0,2)  Blk(1,2)  Blk(2,2)
+```
+
+Each thread in Block(1,1) computes one element where row ∈ [16,31] and col ∈ [16,31]. Note that Block(2,2) only processes 8×16 elements due to the matrix boundaries.
+
+</details>
+
+### Copy-Paste Indexing Pattern
+
+```mojo
+# Essential 2D indexing pattern
+let row = block_idx.y * block_dim.y + thread_idx.y
+let col = block_idx.x * block_dim.x + thread_idx.x
+if row < M and col < N:
+    # Process matrix[row, col]
+```
+
+This indexing pattern appears in every 2D GPU kernel—matrix multiplication, 2D convolution, transpose, etc. 
+
+> **Note**: Mojo/CUDA grids and blocks can also have a third dimension (`block_idx.z`, `thread_idx.z`) for problems like 3D volume processing or batch operations. We'll cover that when we encounter 3D kernels.
 
 # Bonus: 2D Convolution
 
@@ -669,15 +762,15 @@ Why prefer it over the classic Hillis–Steele (Algorithm 1)?
 
 1. Hardware reality.  
    Hillis–Steele assumes one processor per element and updates the array *in-place* every round.  
-   A real GPU doesn’t grant that luxury: a “1 024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+   A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost.  
-   Avoiding the overwrite requires a barrier after **every** addition—log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
+   Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
 3. Blelloch’s fix.  
    • Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.  
    • Only two global barriers are needed (one between the phases, one at the end).  
-   • Work drops to Θ(n) and correctness is guaranteed even when the array is far larger than a warp.
+   • Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.
 
 The result is a scan that is both faster and safer on modern GPUs.
 
@@ -766,13 +859,14 @@ pixi run p12 --blelloch
 
 This is not the most efficient implementation, but I hope this provides some intuition about the algorithm! 
 
-## Complete Version
+## Block Boundary
 
 The key difference in this version is that now we have an input array that is larger than the size of a single block.
 
 We split the global scan into two bite-sized passes:
 
 **Phase 1 – Local Scan**
+
 1. Each block copies its slice into shared memory.  
 2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.  
 3. The last thread of the block stashes the block’s total **after** the scan into an auxiliary slot at the tail of `output`:  
@@ -782,7 +876,7 @@ We split the global scan into two bite-sized passes:
    #  [   prefix sums   ][ block totals ]
    ```  
 
-**Phase 2 – propagate block totals**
+**Phase 2 – Propagate block totals**
 
 1. Every thread grabs the aggregate from the *previous* block (`totals[block_id-1]`) and adds it to its own prefix.    
    Now every element holds the inclusive scan over the *whole* array.
@@ -791,7 +885,7 @@ We split the global scan into two bite-sized passes:
 
 We launch the above phases as two separate kernels.
 
-A host-side synchronisation sits between the launches. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them.  Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.
+**A host-side synchronisation sits between the launches**. That call flushes the work queue and waits until Phase 1 has fully committed its writes to global memory, ensuring the per-block totals are complete and visible before Phase 2 starts consuming them.  Skip the sync and the driver is free to overlap or reorder the kernels, letting Phase 2 read garbage.
 
 <details open>
 <summary> **Solution (Block Boundary Version)** </summary>
@@ -861,6 +955,165 @@ out[i] & = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 $$
 
 
-![Axis Sum](mojo_gpu_puzzles/p13_intro.png)
+![Axis Sum](mojo_gpu_puzzles/p13_intro.png){fig-align='center' width=50%}
 
 Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.
+
+![Row Sum](mojo_gpu_puzzles/p13_row_sum.png){fig-align='center'}
+
+<details open>
+<summary> Solution </summary>
+
+```{.mojo filename="p13.mojo"}
+fn axis_sum[
+    in_layout: Layout, out_layout: Layout
+](
+    output: LayoutTensor[mut=False, dtype, out_layout],
+    a: LayoutTensor[mut=False, dtype, in_layout],
+    size: Int,
+):
+    local_i = thread_idx.x
+    batch = block_idx.y
+    shared = tb[dtype]().row_major[TPB]().shared().alloc()
+
+    if local_i < SIZE:
+        shared[local_i] = a[batch, local_i]
+
+    barrier()
+
+    var stride = TPB // 2
+    while stride > 0:
+        if local_i < stride and local_i + stride < SIZE:
+            shared[local_i] += shared[local_i + stride]
+        barrier()
+        stride //= 2
+
+    # Use first thread to write result
+    if local_i == 0:
+        # Output shape is [batch_size, 1]
+        # which we why we need the last dimension
+        output[batch, 0] = shared[0]
+```
+
+```bash
+pixi run p13
+```
+
+</details>
+
+We can also perform column-sum(axis=0) with a trivial change:
+
+```diff
+-    if local_i < SIZE:
+-        shared[local_i] = a[batch, local_i]
++    if local_i < SIZE:
++        shared[local_i] = a[local_i, batch]
+```
+
+
+# [Puzzle 14: Matmul](https://puzzles.modular.com/puzzle_14/puzzle_14.html){#puzzle-14}
+
+Arguably the single most important operation in GPU computing, the humble General Matrix Multiplication (GEMM) operation is the computational workhorse behind literally all deep learning models—from simple linear layers to massive transformer architectures.
+
+
+
+$$
+C_{i,j} = \sum_{k=1}^{K} A_{i,k} \cdot B_{k,j}
+$$
+
+> **Requirement:** For matrix multiplication $C = AB$ to be valid, the number of columns in $A$ must equal the number of rows in $B$.  
+> That is, if $A$ is shape $(M, K)$ and $B$ is shape $(K, N)$, then $C$ will be shape $(M, N)$.  
+
+GEMM's ubiquity stems from its perfect match with GPU architecture: thousands of independent multiply-add operations that can be parallelized across thousands of cores. Yet this apparent simplicity masks a deep optimization challenge. Memory bandwidth, cache hierarchies, and thread synchronization all conspire to make naive implementations crawl while hand-tuned libraries like cuBLAS achieve near-theoretical peak performance.
+
+Matmul tuning is a rabbit hole - see the OG Simon Boehm's deep-dive [@siboehm_cuda_mmm] for how wild it gets.
+
+For now, we'll focus on the core techniques demonstrated by the official puzzle—shared memory tiling and thread cooperation—to build intuition for how high-performance GEMM kernels actually work.
+
+## Global Memory Version
+
+Based on the [2D indexing](#indexing) section, each thread computes one C[row, col] by loading A[row, k] and B[k, col] from global memory, multiplying and accumulating over k. We unroll the k‐loop to cut loop overhead and boost throughput.
+
+
+<details open>
+<summary> Solution </summary>
+
+```{.mojo filename=p14_naive.mojo}
+fn naive_matmul[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    row = block_dim.y * block_idx.y + thread_idx.y
+    col = block_dim.x * block_idx.x + thread_idx.x
+
+    if row < SIZE and col < SIZE:
+        # Need this to ensure the mojo compiler knows
+        # the type of `running_sum`, otherwise it will
+        # complain
+        var running_sum: output.element_type = 0
+
+        @parameter
+        for k in range(SIZE):
+            running_sum += a[row, k] * b[k, col]
+        output[row, col] = running_sum
+```
+
+```bash
+pixi run p14 --naive
+# out: 
+# expected: 
+```
+
+</details>
+
+## Shared Memory Version
+
+The previous version suffers from repeated global memory reads. We can optimize this using shared memory: 
+
+- Load matrix tiles once
+- Synchronize threads
+- Compute using the cached data.
+
+![Matmul with shared memory](mojo_gpu_puzzles/p14_shared_mem.png){fig-align='center'}
+
+
+<details open>
+<summary> Solution </summary>
+
+```{.mojo filename=p14_shared.mojo}
+fn single_block_matmul[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    row = block_dim.y * block_idx.y + thread_idx.y
+    col = block_dim.x * block_idx.x + thread_idx.x
+    local_row = thread_idx.y
+    local_col = thread_idx.x
+    shared_a = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    shared_b = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    if row < size and col < size and local_row < size and local_col < size:
+        shared_a[local_row, local_col] = a[row, col]
+        shared_b[local_row, local_col] = b[row, col]
+
+    barrier()
+    if row < size and col < size and local_row < size and local_col < size:
+        var running_sum: output.element_type = 0.0
+
+        @parameter
+        for k in range(size):
+            running_sum += a[local_row, k] * b[k, local_col]
+
+        output[row, col] = running_sum
+```
+
+```bash
+pixi run p14 --naive
+# out: 
+# expected: 
+```
