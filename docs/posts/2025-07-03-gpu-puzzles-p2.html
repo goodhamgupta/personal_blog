@@ -280,6 +280,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#global-memory-version" id="toc-global-memory-version" class="nav-link" data-scroll-target="#global-memory-version">Global Memory Version</a></li>
   <li><a href="#shared-memory-version" id="toc-shared-memory-version" class="nav-link" data-scroll-target="#shared-memory-version">Shared Memory Version</a></li>
+  <li><a href="#roofline-model" id="toc-roofline-model" class="nav-link" data-scroll-target="#roofline-model">Roofline Model</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
@@ -298,7 +299,7 @@ window.Quarto = {
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
 <figcaption>Pooling</figcaption>
 </figure>
 </div>
@@ -359,7 +360,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
@@ -367,7 +368,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
 <figcaption>Zeno Paradox</figcaption>
 </figure>
 </div>
@@ -761,14 +762,14 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </ul>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
 <p>Inside one block (blockDim.x × blockDim.y threads):</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
 <figcaption>2D Thread Layout</figcaption>
 </figure>
 </div>
@@ -781,7 +782,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" data-glightbox="description: .lightbox-desc-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
 <figcaption>Matrix Indexing</figcaption>
 </figure>
 </div>
@@ -839,7 +840,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-12" data-glightbox="description: .lightbox-desc-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -937,7 +938,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" data-glightbox="description: .lightbox-desc-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -1188,14 +1189,14 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-15" data-gallery="quarto-lightbox-gallery-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-16" data-gallery="quarto-lightbox-gallery-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -1290,8 +1291,8 @@ Solution
 <span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="sourceCode" id="cb33"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: </span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </section>
 <section id="shared-memory-version" class="level2">
@@ -1304,7 +1305,7 @@ Solution
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" data-glightbox="description: .lightbox-desc-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-glightbox="description: .lightbox-desc-17" data-gallery="quarto-lightbox-gallery-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
 <figcaption>Matmul with shared memory</figcaption>
 </figure>
 </div>
@@ -1344,8 +1345,83 @@ Solution
 <span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: </span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Okay, so what’s the real-world speed-up? And how do we actually gauge a kernel’s efficiency? The answer is the Roofline Performance Model—a handy chart that shows where your code lands relative to the GPU’s compute and memory ceilings.</p>
+</details></section>
+<section id="roofline-model" class="level2">
+<h2 class="anchored" data-anchor-id="roofline-model">Roofline Model</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/simple-roofline-loop.svg" class="lightbox" data-glightbox="description: .lightbox-desc-18" data-gallery="quarto-lightbox-gallery-18" title="A one-page mental model behind the Roofline chart. Left: we collapse an entire GPU into two numbers—peak FLOP/s (P_peak) and sustained DRAM bandwidth (b_s). Right: we reduce an arbitrarily complicated loop nest to two numbers—total floating-point work (N flops) and bytes moved (V). The ratio I = N/V is the loop’s operational intensity. Everything in the upcoming table is a reminder of what this cartoon forgets."><img src="mojo_gpu_puzzles/simple-roofline-loop.svg" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="A one-page mental model behind the Roofline chart. Left: we collapse an entire GPU into two numbers—peak FLOP/s (P_peak) and sustained DRAM bandwidth (b_s). Right: we reduce an arbitrarily complicated loop nest to two numbers—total floating-point work (N flops) and bytes moved (V). The ratio I = N/V is the loop’s operational intensity. Everything in the upcoming table is a reminder of what this cartoon forgets."></a></p>
+<figcaption>A one-page mental model behind the Roofline chart. Left: we collapse an entire GPU into two numbers—peak FLOP/s (P_peak) and sustained DRAM bandwidth (b_s). Right: we reduce an arbitrarily complicated loop nest to two numbers—total floating-point work (N flops) and bytes moved (V). The ratio I = N/V is the loop’s operational intensity. Everything in the upcoming table is a reminder of what this cartoon forgets.</figcaption>
+</figure>
+</div>
+<p>The roofline picture is fairly intuitive — one slanted “memory” line, one flat “compute” line, and a little dot that tells you where your kernel lives.<br>
+<em>That clarity, however, comes from some heroic assumptions.</em> If any of them are violated, the dot drifts and the roof starts leaking. The next table lists the most common pitfalls and how they show up on a GPU:</p>
+<table class="table">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 34%">
+<col style="width: 36%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Assumption (often implicit)</th>
+<th>What it really means on a GPU</th>
+<th>When it breaks down</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Sustained <strong>peak bandwidth</strong> is reachable</td>
+<td>A large, perfectly-streaming copy benchmark can hit the quoted GB/s <strong>(b_s side of figure)</strong></td>
+<td>Irregular or strided loads, bank conflicts, or small datasets throttle BW</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Sustained <strong>peak FLOP/s</strong> is reachable</td>
+<td>All ALUs (or tensor cores) are busy every cycle <strong>(P_peak side of figure)</strong></td>
+<td>Control-flow divergence, register pressure, or occupancy limits leave lanes idle</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><strong>Compute and memory overlap</strong> perfectly</td>
+<td>Loads are double-buffered; arithmetic hides latency</td>
+<td>Short kernels or long latency ops (e.g., texture fetches) expose stalls</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><strong>Operational intensity is uniform</strong></td>
+<td>Bytes per FLOP stays constant throughout execution <strong>(I = N/V side)</strong></td>
+<td>Multi-phase kernels (e.g., setup vs main loop) violate the steady-state assumption</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>The <strong>memory hierarchy collapses</strong> to one bandwidth number</td>
+<td>Only DRAM traffic matters <strong>(b_s abstracts away caches)</strong></td>
+<td>Shared-memory or L2 ceilings can dominate, calling for a <em>hierarchical</em> roofline</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><strong>Launch/transfer overheads</strong> are negligible</td>
+<td>Kernel runs long enough to amortize them</td>
+<td>Tiny problem sizes or chained launches inflate the “non-roofline” time</td>
+</tr>
+</tbody>
+</table>
+<p>Why emphasize these? Because most Mojo snippets you write for puzzles are <em>small</em> and <em>didactic</em>: they often trip over Assumptions 3 and 6, while real-world workloads suffer from 1, 2, and 5. In other words, the classic roofline is an <em>optimistic upper bound</em>. Your job as an optimizer is to:</p>
+<ol type="1">
+<li>Measure <em>attained</em> bandwidth/FLOP/s with Nsight, rocprof, or Mojo’s upcoming profiler.<br>
+</li>
+<li>Re-plot the roof with <strong>empirical ceilings</strong> (e.g., “L2 roof”, “Tensor-core roof”).<br>
+</li>
+<li>Move your dot by increasing operational intensity (tiling, shared memory, Tensor cores) or by widening the ceilings (better occupancy, fewer stalls).</li>
+</ol>
+<p>The next sections will show exactly how those tactics play out in Mojo code, but keep the table above handy—every optimization you try is really an attempt to restore one of these assumptions.</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -1360,9 +1436,10 @@ Solution
 <span class="glightbox-desc lightbox-desc-15">Axis Sum</span>
 <span class="glightbox-desc lightbox-desc-16">Row Sum</span>
 <span class="glightbox-desc lightbox-desc-17">Matmul with shared memory</span>
+<span class="glightbox-desc lightbox-desc-18">A one-page mental model behind the Roofline chart. Left: we collapse an entire GPU into two numbers—peak FLOP/s (P_peak) and sustained DRAM bandwidth (b_s). Right: we reduce an arbitrarily complicated loop nest to two numbers—total floating-point work (N flops) and bytes moved (V). The ratio I = N/V is the loop’s operational intensity. Everything in the upcoming table is a reminder of what this cartoon forgets.</span>
 </div>
 
-</details></section>
+</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -1924,7 +2001,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom","loop":false});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"openEffect":"zoom","descPosition":"bottom","closeEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

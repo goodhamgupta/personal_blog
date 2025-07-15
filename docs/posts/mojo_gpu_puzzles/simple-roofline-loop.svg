@@ -1,0 +1,56 @@
+<svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 24px; font-weight: bold; fill: #2c3e50; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; fill: #34495e; }
+      .text { font-family: Arial, sans-serif; font-size: 14px; fill: #2c3e50; }
+      .code { font-family: 'Courier New', monospace; font-size: 12px; fill: white; }
+      .formula { font-family: Arial, sans-serif; font-size: 16px; fill: #2c3e50; }
+      .hardware-box { fill: #7fb3d3; stroke: #5a9bd3; stroke-width: 2; }
+      .software-box { fill: #7fb3d3; stroke: #5a9bd3; stroke-width: 2; }
+      .data-box { fill: #cd853f; stroke: #b8860b; stroke-width: 2; }
+      .arrow { fill: #7f8c8d; stroke: #7f8c8d; stroke-width: 2; }
+    </style>
+  </defs>
+  
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">A simple performance model for loops</text>
+  
+  <!-- Left side: Hardware -->
+  <text x="200" y="70" text-anchor="middle" class="subtitle">Simplistic view of the hardware:</text>
+  
+  <!-- Execution units box -->
+  <rect x="100" y="100" width="200" height="80" rx="5" class="hardware-box"/>
+  <text x="200" y="130" text-anchor="middle" class="text" fill="white">Execution units</text>
+  <text x="200" y="150" text-anchor="middle" class="text" fill="white">max. performance</text>
+  <text x="200" y="170" text-anchor="middle" class="text" fill="white" font-style="italic">P_peak</text>
+  
+  <!-- Arrows -->
+  <polygon points="200,200 220,220 200,240 180,220" class="arrow"/>
+  <polygon points="200,240 220,220 200,200 180,220" class="arrow"/>
+  
+  <!-- Data path text -->
+  <text x="320" y="210" class="text">Data path,</text>
+  <text x="320" y="230" class="text">bandwidth b_s</text>
+  <text x="320" y="250" class="text">→ Unit: byte/s</text>
+  
+  <!-- Data source/sink box -->
+  <rect x="100" y="260" width="200" height="60" rx="5" class="data-box"/>
+  <text x="200" y="295" text-anchor="middle" class="text" fill="white">Data source/sink</text>
+  
+  <!-- Right side: Software -->
+  <text x="600" y="70" text-anchor="middle" class="subtitle">Simplistic view of the software:</text>
+  
+  <!-- Code box -->
+  <rect x="450" y="100" width="300" height="140" rx="5" class="software-box"/>
+  <text x="460" y="120" class="code">! may be multiple levels</text>
+  <text x="460" y="140" class="code">do i = 1,&lt;sufficient&gt;</text>
+  <text x="460" y="160" class="code">  &lt;complicated stuff doing</text>
+  <text x="460" y="180" class="code">    N flops causing</text>
+  <text x="460" y="200" class="code">    V bytes of data transfer&gt;</text>
+  <text x="460" y="220" class="code">enddo</text>
+  
+  <!-- Computational Intensity formula -->
+  <text x="600" y="280" text-anchor="middle" class="formula">Computational Intensity I = N/V</text>
+  <text x="600" y="300" text-anchor="middle" class="text">→ Unit: flop/byte</text>
+</svg>

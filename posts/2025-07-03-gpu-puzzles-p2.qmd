@@ -22,11 +22,11 @@ format:
       - mojo_gpu_puzzles/mojo.xml
 ---
 
-Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms—sliding-window pools, tile-wise convolutions, warp-level scans, and more.
+Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms-sliding-window pools, tile-wise convolutions, warp-level scans, and more.
 
 # [Puzzle 9: Pooling](https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html) {#puzzle-09}
 
-Pooling is a classic trick in neural networks for shrinking down your data—think of it as a way to "summarize" regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.
+Pooling is a classic trick in neural networks for shrinking down your data-think of it as a way to "summarize" regions of an image or tensor. Instead of looking at every single pixel, pooling (like max or average pooling) slides a window over your data and grabs just the most important info from each patch. On GPUs, pooling is a perfect fit: each thread can independently process a window, so you get massive parallelism and a big speedup compared to CPUs.
 
 This puzzle is a bit different compared to traditional pooling: Instead of having a "kernel", each output element is the running sum of the all the elements in the current window.
 
@@ -95,7 +95,7 @@ Similar to the previous puzzles, we can implement the dot-product by copying dat
 
 To implement dot product efficiently on a GPU, we will use **parallel reduction**. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:
 
-Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you're done. A parallel reduction does the same—each round halves the number of active threads instead of the distance. **Unlike Zeno's infinite halvings though**, we stop at a concrete point: when only thread 0 remains active (`stride` becomes 0).
+Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving the leftover distance until you're done. A parallel reduction does the same-each round halves the number of active threads instead of the distance. **Unlike Zeno's infinite halvings though**, we stop at a concrete point: when only thread 0 remains active (`stride` becomes 0).
 
 
 ![Zeno Paradox](mojo_gpu_puzzles/zeno_paradox.png)
@@ -105,7 +105,7 @@ Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving th
   - The active-thread count is cut in half (`stride /= 2`).
   - Each surviving thread adds its value to the partner `stride` positions away.
   - A `barrier()` guarantees all writes land before the next “half-step.”
-- After log₂ (n) halvings, Zeno’s finish line is crossed—thread 0 alone holds the final dot-product.
+- After log₂ (n) halvings, Zeno’s finish line is crossed-thread 0 alone holds the final dot-product.
 
 This pattern is fast, highly parallel, and used everywhere in GPU programming for reductions (sum, min, max, etc).
 
@@ -238,7 +238,7 @@ fn dot_product[
 # [Puzzle 11: 1D Convolution](https://builds.modular.com/puzzles/puzzle_11/puzzle_11.html) {#puzzle-11}
 
 Picture sliding a magnifying glass along a long strip of film.
-That’s exactly what a 1-D convolution does to any 1-D signal—audio samples, DNA bases, even bytes of log data.
+That’s exactly what a 1-D convolution does to any 1-D signal-audio samples, DNA bases, even bytes of log data.
 
 - The kernel (a small weight vector) glides over the sequence one step at a time (or more if you set stride > 1).
 - At each stop it multiplies the local window by its weights, sums the result, and drops a single number into the output map.
@@ -246,7 +246,7 @@ That’s exactly what a 1-D convolution does to any 1-D signal—audio samples, 
 
 **Why bother?**
 
-- **Speed**: A conv layer is just a batched matrix-mul—GPU catnip.
+- **Speed**: A conv layer is just a batched matrix-mul-GPU catnip.
 - **Locality first, context later**: Early layers grab short-range patterns (phonemes, k-mers). Deeper layers stitch them into bigger motifs (words, promoters).
 - **Channels generalize it**: You convolve along length, but for each input channel you keep separate weights, sum across channels, and spit out new feature maps. Same trick as 2-D CNNs, just flattened.
 
@@ -324,7 +324,7 @@ fn conv_1d_simple[
 
 </details>
 
-I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn’t needed for correctness—the kernel only touches the first `SIZE`/`CONV` elements—but it nicely demonstrates `LayoutTensor`’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
+I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn’t needed for correctness-the kernel only touches the first `SIZE`/`CONV` elements-but it nicely demonstrates `LayoutTensor`’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
 
 
 The _optimal_ allocation of shared memory would be:
@@ -353,7 +353,7 @@ The _optimal_ allocation of shared memory would be:
 
 When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled[@nvidiapragmaunroll].
 
-`@parameter` isn’t limited to loops/branches—you can slap it on an inner
+`@parameter` isn’t limited to loops/branches-you can slap it on an inner
 function and Mojo will build a **parametric closure**, defined as[@mojoparameter]: 
 
 > A parametric closure is a nested function decorated with `@parameter`.
@@ -374,7 +374,7 @@ let s1 = make_shift(1)    # emits shift-$off=1
 let s4 = make_shift(4)    # emits shift-$off=4
 ```
 
-No runtime captures, no heap boxing—the constant `off` is literally
+No runtime captures, no heap boxing-the constant `off` is literally
 spliced into the generated IR, so calls to `s1`/`s4` inline like normal
 code and can be further unrolled or constant-folded.
 
@@ -384,7 +384,7 @@ once the surrounding scope ends those origins die too, guaranteeing that
 the specialised code never touches expired storage.
 
 **Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
-performance—ideal for GPU kernels where every cycle and register matters.
+performance-ideal for GPU kernels where every cycle and register matters.
 
 ## Block Boundary
 
@@ -402,7 +402,7 @@ Run a 1-D convolution with a `CONV₂`-tap kernel over an input that is longer t
 • avoid divergent branches and random global reads  
 • keep the load pattern fully coalesced
 
-Naïve global loads meet none of those goals—once a window crosses the block edge the tail threads must issue conditional, _straggling_ reads (i.e. each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).
+Naïve global loads meet none of those goals-once a window crosses the block edge the tail threads must issue conditional, _straggling_ reads (i.e. each thread grabs a lone, scattered element from global memory instead of part of one tidy, coalesced burst).
 
 **The halo idea**
 
@@ -410,7 +410,7 @@ Give each block an in-block “fence extension”:
 
     shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo
 
-The extra `(CONV₂ − 1)` slots—the *halo*—mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
+The extra `(CONV₂ − 1)` slots-the *halo*-mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
 
 The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as _halo cells_ or _skirt cells_ since they “hang” from the side of the part that is used solely by a single block[@iitd_parallel_convolution].
 
@@ -502,7 +502,7 @@ pixi run p11 --block-boundary
 
 # 2D Indexing: From Lines to Chessboards {#indexing}
 
-The 1D convolution examples above used simple linear indexing, but many GPU algorithms—2D convolution, matrix multiplication, image processing—naturally work with 2D data structures. Let's build intuition for how CUDA/Mojo organizes threads, blocks, and grids in two spatial dimensions, which forms the foundation for all 2D GPU operations.
+The 1D convolution examples above used simple linear indexing, but many GPU algorithms-2D convolution, matrix multiplication, image processing-naturally work with 2D data structures. Let's build intuition for how CUDA/Mojo organizes threads, blocks, and grids in two spatial dimensions, which forms the foundation for all 2D GPU operations.
 
 ### The 2D Hierarchy
 
@@ -588,7 +588,7 @@ if row < M and col < N:
     # Process matrix[row, col]
 ```
 
-This indexing pattern appears in every 2D GPU kernel—matrix multiplication, 2D convolution, transpose, etc. 
+This indexing pattern appears in every 2D GPU kernel-matrix multiplication, 2D convolution, transpose, etc. 
 
 > **Note**: Mojo/CUDA grids and blocks can also have a third dimension (`block_idx.z`, `thread_idx.z`) for problems like 3D volume processing or batch operations. We'll cover that when we encounter 3D kernels.
 
@@ -695,7 +695,7 @@ The **prefix sum** (or *scan*) problem takes an input array `[a₀, a₁, …, a
 [a₀, (a₀ ⊕ a₁), …, (a₀ ⊕ a₁ ⊕ … ⊕ aₙ₋₁)]
 ```
 
-It’s a foundational primitive in parallel computing—used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.
+It’s a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.
 
 ![Prefix‐Sum Illustration](mojo_gpu_puzzles/p12_prefix_scan.png){fig-align='center'}
 
@@ -782,7 +782,7 @@ The result is a scan that is both faster and safer on modern GPUs.
    - After the final round, a[n-1] holds the overall total
 
    ![](mojo_gpu_puzzles/p12_up.gif)
-   *Up-Sweep: combining elements in a binary-tree fashion—build partial sums until the final element holds the total.*  
+   *Up-Sweep: combining elements in a binary-tree fashion-build partial sums until the final element holds the total.*  
 
 2. **Down-sweep (propagate)**  
    After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree top-down to scatter prefix sums into every slot:
@@ -1013,7 +1013,7 @@ We can also perform column-sum(axis=0) with a trivial change:
 
 # [Puzzle 14: Matmul](https://puzzles.modular.com/puzzle_14/puzzle_14.html){#puzzle-14}
 
-Arguably the single most important operation in GPU computing, the humble General Matrix Multiplication (GEMM) operation is the computational workhorse behind literally all deep learning models—from simple linear layers to massive transformer architectures.
+Arguably the single most important operation in GPU computing, the humble General Matrix Multiplication (GEMM) operation is the computational workhorse behind literally all deep learning models-from simple linear layers to massive transformer architectures.
 
 
 
@@ -1028,7 +1028,7 @@ GEMM's ubiquity stems from its perfect match with GPU architecture: thousands of
 
 Matmul tuning is a rabbit hole - see the OG Simon Boehm's deep-dive [@siboehm_cuda_mmm] for how wild it gets.
 
-For now, we'll focus on the core techniques demonstrated by the official puzzle—shared memory tiling and thread cooperation—to build intuition for how high-performance GEMM kernels actually work.
+For now, we'll focus on the core techniques demonstrated by the official puzzle-shared memory tiling and thread cooperation-to build intuition for how high-performance GEMM kernels actually work.
 
 ## Global Memory Version
 
@@ -1063,8 +1063,8 @@ fn naive_matmul[
 
 ```bash
 pixi run p14 --naive
-# out: 
-# expected: 
+# out: HostBuffer([4.0, 6.0, 12.0, 22.0])
+# expected: HostBuffer([4.0, 6.0, 12.0, 22.0])
 ```
 
 </details>
@@ -1114,6 +1114,32 @@ fn single_block_matmul[
 
 ```bash
 pixi run p14 --naive
-# out: 
-# expected: 
+# out: HostBuffer([4.0, 6.0, 12.0, 22.0])
+# expected: HostBuffer([4.0, 6.0, 12.0, 22.0])
 ```
+
+To judge a kernel's real-world speed-up, use the Roofline Model-a chart that places your code between the GPU's compute and memory limits. 
+
+## Roofline Model
+
+![A cartoon Roofline: two hardware numbers (peak FLOP/s P_peak, sustained DRAM BW b_s) meet two kernel numbers (N flops, V bytes). Their ratio I = N/V is operational intensity.](mojo_gpu_puzzles/simple-roofline-loop.svg){fig-align='center'}
+
+The roofline shows a slanted memory line, a flat compute line, and a dot for your kernel.  
+That clarity hides several bold assumptions. Break one and the dot drifts. The table below names the usual suspects and their GPU symptoms:
+
+| #  | Assumption (often implicit) | What it really means on a GPU | When it breaks down |
+|----|-----------------------------|-------------------------------|---------------------|
+| 1  | Sustained **peak bandwidth** is reachable | Only a large, perfectly streaming copy can hit the quoted GB/s **(b_s side of figure)** | Irregular loads, bank conflicts, or small datasets throttle BW |
+| 2  | Sustained **peak FLOP/s** is reachable | Every ALU / tensor core is busy each cycle **(P_peak side of figure)** | Divergence, register pressure, or low occupancy leave lanes idle |
+| 3  | **Compute and memory overlap** perfectly | Loads are double-buffered; arithmetic hides latency | Short kernels or long latency ops (e.g., texture fetches) expose stalls |
+| 4  | **Operational intensity is uniform** | Bytes per FLOP stays constant throughout execution **(I = N/V side)** | Multi-phase kernels (e.g., setup vs main loop) violate the steady-state assumption |
+| 5  | The **memory hierarchy collapses** to one bandwidth number | Only DRAM bandwidth matters **(b_s hides caches)** | Shared-mem or L2 ceilings can dominate; a *hierarchical* roofline helps |
+| 6  | **Launch/transfer overheads** are negligible | Kernel runs long enough to amortize them | Tiny problem sizes or chained launches inflate the "non-roofline" time |
+
+Why the fuss? Puzzle-sized Mojo kernels usually break 3 and 6; production workloads hit 1, 2, 5. The classic roofline is therefore optimistic. As an optimizer you should:
+
+1. Measure *attained* bandwidth/FLOP/s with Nsight, rocprof, or Mojo's upcoming profiler.  
+2. Re-plot the roof with **empirical ceilings** (e.g., "L2 roof", "Tensor-core roof").  
+3. Move your dot by increasing operational intensity (tiling, shared memory, Tensor cores) or by widening the ceilings (better occupancy, fewer stalls).
+
+The next sections show these tactics in Mojo; each one restores a broken assumption.
