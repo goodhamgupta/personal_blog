@@ -1602,105 +1602,90 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardware specifications</span></span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>peak_compute <span class="op">=</span> <span class="fl">26.7</span> <span class="op">*</span> <span class="dv">1000</span>  <span class="co"># Convert to GFLOPS</span></span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>peak_bandwidth <span class="op">=</span> <span class="dv">360</span>  <span class="co"># GB/s</span></span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>critical_intensity <span class="op">=</span> peak_compute <span class="op">/</span> peak_bandwidth</span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Kernel data points</span></span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>kernels <span class="op">=</span> [</span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Naive 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.25</span>, <span class="st">"performance"</span>: <span class="dv">90</span>, <span class="st">"color"</span>: <span class="st">"#f39c12"</span>},</span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Shared 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.45</span>, <span class="st">"performance"</span>: <span class="dv">162</span>, <span class="st">"color"</span>: <span class="st">"#27ae60"</span>}</span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate roofline data</span></span>
-<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_roofline_data():</span>
-<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Memory-bound region</span></span>
-<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    memory_intensities <span class="op">=</span> np.arange(<span class="fl">0.01</span>, critical_intensity, <span class="fl">0.05</span>)</span>
-<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    memory_performance <span class="op">=</span> memory_intensities <span class="op">*</span> peak_bandwidth</span>
-<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute-bound region</span></span>
-<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    compute_intensities <span class="op">=</span> np.arange(critical_intensity, <span class="dv">1000</span>, <span class="dv">5</span>)</span>
-<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>    compute_performance <span class="op">=</span> np.full_like(compute_intensities, peak_compute)</span>
-<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> memory_intensities, memory_performance, compute_intensities, compute_performance</span>
-<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
-<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">6.5</span>))</span>
-<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicitly set both axes to log_10 scale</span></span>
-<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>peak_compute <span class="op">=</span> <span class="fl">26.7</span> <span class="op">*</span> <span class="dv">1000</span>  <span class="co"># Convert to GFLOPS</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>peak_bandwidth <span class="op">=</span> <span class="dv">360</span>  <span class="co"># GB/s</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>critical_intensity <span class="op">=</span> peak_compute <span class="op">/</span> peak_bandwidth</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>kernels <span class="op">=</span> [</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Naive 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.25</span>, <span class="st">"performance"</span>: <span class="dv">90</span>, <span class="st">"color"</span>: <span class="st">"#f39c12"</span>},</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Shared 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.45</span>, <span class="st">"performance"</span>: <span class="dv">162</span>, <span class="st">"color"</span>: <span class="st">"#27ae60"</span>}</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_roofline_data():</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Memory-bound region</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>    memory_intensities <span class="op">=</span> np.arange(<span class="fl">0.01</span>, critical_intensity, <span class="fl">0.05</span>)</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>    memory_performance <span class="op">=</span> memory_intensities <span class="op">*</span> peak_bandwidth</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute-bound region</span></span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    compute_intensities <span class="op">=</span> np.arange(critical_intensity, <span class="dv">1000</span>, <span class="dv">5</span>)</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>    compute_performance <span class="op">=</span> np.full_like(compute_intensities, peak_compute)</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> memory_intensities, memory_performance, compute_intensities, compute_performance</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">6.5</span>))</span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a>mem_i, mem_p, comp_i, comp_p <span class="op">=</span> generate_roofline_data()</span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>ax.loglog(mem_i, mem_p, color<span class="op">=</span><span class="st">"#e74c3c"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Memory-bound"</span>)</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>ax.loglog(comp_i, comp_p, color<span class="op">=</span><span class="st">"#3498db"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Compute-bound"</span>)</span>
 <span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate roofline data</span></span>
-<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>mem_i, mem_p, comp_i, comp_p <span class="op">=</span> generate_roofline_data()</span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span>peak_compute, color<span class="op">=</span><span class="st">"#3498db"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>ax.axvline(x<span class="op">=</span>critical_intensity, color<span class="op">=</span><span class="st">"#999"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot roofline curves</span></span>
-<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>ax.loglog(mem_i, mem_p, color<span class="op">=</span><span class="st">"#e74c3c"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Memory-bound"</span>)</span>
-<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>ax.loglog(comp_i, comp_p, color<span class="op">=</span><span class="st">"#3498db"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Compute-bound"</span>)</span>
-<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Guide lines</span></span>
-<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span>peak_compute, color<span class="op">=</span><span class="st">"#3498db"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>ax.axvline(x<span class="op">=</span>critical_intensity, color<span class="op">=</span><span class="st">"#999"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot kernel points</span></span>
-<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
-<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>    ax.loglog(kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>],</span>
-<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>             <span class="st">'o'</span>, color<span class="op">=</span>kernel[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>             markeredgecolor<span class="op">=</span><span class="st">"#333"</span>, markeredgewidth<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add kernel labels with better positioning to avoid overlap</span></span>
-<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> kernel[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Naive 3×3"</span>:</span>
-<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">0.7</span>  <span class="co"># Move left</span></span>
-<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">0.65</span>  <span class="co"># Move down</span></span>
-<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># Shared 3×3</span></span>
-<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">1.4</span>  <span class="co"># Move right</span></span>
-<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">1.3</span>  <span class="co"># Move up</span></span>
-<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>    ax.annotate(kernel[<span class="st">"name"</span>],</span>
-<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a>               (kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>]),</span>
-<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>               xytext<span class="op">=</span>(offset_x, offset_y),</span>
-<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>               fontsize<span class="op">=</span><span class="dv">11</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>,</span>
-<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>               bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"round,pad=0.3"</span>, facecolor<span class="op">=</span><span class="st">"white"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>    ax.loglog(kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>],</span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>             <span class="st">'o'</span>, color<span class="op">=</span>kernel[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a>             markeredgecolor<span class="op">=</span><span class="st">"#333"</span>, markeredgewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add kernel labels with better positioning to avoid overlap</span></span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> kernel[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Naive 3×3"</span>:</span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">0.7</span>  <span class="co"># Move left</span></span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">0.65</span>  <span class="co"># Move down</span></span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># Shared 3×3</span></span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">1.4</span>  <span class="co"># Move right</span></span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">1.3</span>  <span class="co"># Move up</span></span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a>    ax.annotate(kernel[<span class="st">"name"</span>],</span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>               (kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>]),</span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>               xytext<span class="op">=</span>(offset_x, offset_y),</span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>               fontsize<span class="op">=</span><span class="dv">11</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>               bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"round,pad=0.3"</span>, facecolor<span class="op">=</span><span class="st">"white"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">1.5</span>, peak_bandwidth <span class="op">*</span> <span class="fl">1.5</span>, <span class="st">"Memory-bound"</span>,</span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#e74c3c"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">200</span>, peak_compute <span class="op">*</span> <span class="fl">0.8</span>, <span class="st">"Compute-bound"</span>,</span>
+<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#3498db"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>ax.text(critical_intensity <span class="op">*</span> <span class="fl">1.3</span>, peak_compute <span class="op">*</span> <span class="fl">1.1</span>,</span>
+<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"I_crit = </span><span class="sc">{</span>critical_intensity<span class="sc">:.1f}</span><span class="ss">"</span>,</span>
+<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#f39c12"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
 <span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Region labels - move Memory-bound to center and away from kernel dots</span></span>
-<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">1.5</span>, peak_bandwidth <span class="op">*</span> <span class="fl">1.5</span>, <span class="st">"Memory-bound"</span>,</span>
-<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#e74c3c"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
-<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">200</span>, peak_compute <span class="op">*</span> <span class="fl">0.8</span>, <span class="st">"Compute-bound"</span>,</span>
-<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#3498db"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.1</span>, <span class="dv">1000</span>)</span>
+<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">10</span>, <span class="dv">30000</span>)</span>
+<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Operational Intensity (FLOP/byte) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Performance (GFLOP/s) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
 <span id="cb36-78"><a href="#cb36-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Critical intensity annotation</span></span>
-<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a>ax.text(critical_intensity <span class="op">*</span> <span class="fl">1.3</span>, peak_compute <span class="op">*</span> <span class="fl">1.1</span>,</span>
-<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"I_crit = </span><span class="sc">{</span>critical_intensity<span class="sc">:.1f}</span><span class="ss">"</span>,</span>
-<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#f39c12"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
-<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting</span></span>
-<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.1</span>, <span class="dv">1000</span>)</span>
-<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">10</span>, <span class="dv">30000</span>)</span>
-<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Operational Intensity (FLOP/byte) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Performance (GFLOP/s) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
-<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
-<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a><span class="co"># Create custom legend for kernels</span></span>
-<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>legend_elements <span class="op">=</span> [plt.Line2D([<span class="dv">0</span>], [<span class="dv">0</span>], marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'w'</span>,</span>
-<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>                             markerfacecolor<span class="op">=</span>k[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>                             label<span class="op">=</span>k[<span class="st">"name"</span>], markeredgecolor<span class="op">=</span><span class="st">"#333"</span>)</span>
-<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> k <span class="kw">in</span> kernels]</span>
-<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>ax.legend(handles<span class="op">=</span>legend_elements, loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
-<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.show()</span></span>
-<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'./mojo_gpu_puzzles/p14_roofline_naive_and_shared.png'</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
-<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Print performance metrics</span></span>
-<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Performance Analysis:"</span>)</span>
-<span id="cb36-104"><a href="#cb36-104" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">40</span>)</span>
-<span id="cb36-105"><a href="#cb36-105" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
-<span id="cb36-106"><a href="#cb36-106" aria-hidden="true" tabindex="-1"></a>    efficiency <span class="op">=</span> (kernel[<span class="st">"performance"</span>] <span class="op">/</span> peak_compute) <span class="op">*</span> <span class="dv">100</span></span>
-<span id="cb36-107"><a href="#cb36-107" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>kernel[<span class="st">'name'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
-<span id="cb36-108"><a href="#cb36-108" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Intensity: </span><span class="sc">{</span>kernel[<span class="st">'intensity'</span>]<span class="sc">}</span><span class="ss"> FLOP/byte"</span>)</span>
-<span id="cb36-109"><a href="#cb36-109" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Performance: </span><span class="sc">{</span>kernel[<span class="st">'performance'</span>]<span class="sc">}</span><span class="ss"> GFLOP/s"</span>)</span>
-<span id="cb36-110"><a href="#cb36-110" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a>legend_elements <span class="op">=</span> [plt.Line2D([<span class="dv">0</span>], [<span class="dv">0</span>], marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'w'</span>,</span>
+<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a>                             markerfacecolor<span class="op">=</span>k[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>                             label<span class="op">=</span>k[<span class="st">"name"</span>], markeredgecolor<span class="op">=</span><span class="st">"#333"</span>)</span>
+<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> k <span class="kw">in</span> kernels]</span>
+<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a>ax.legend(handles<span class="op">=</span>legend_elements, loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'./mojo_gpu_puzzles/p14_roofline_naive_and_shared.png'</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Performance Analysis:"</span>)</span>
+<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">40</span>)</span>
+<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
+<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a>    efficiency <span class="op">=</span> (kernel[<span class="st">"performance"</span>] <span class="op">/</span> peak_compute) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>kernel[<span class="st">'name'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Intensity: </span><span class="sc">{</span>kernel[<span class="st">'intensity'</span>]<span class="sc">}</span><span class="ss"> FLOP/byte"</span>)</span>
+<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Performance: </span><span class="sc">{</span>kernel[<span class="st">'performance'</span>]<span class="sc">}</span><span class="ss"> GFLOP/s"</span>)</span>
+<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </details>
 </section>
@@ -1711,7 +1696,6 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <li><strong>Small kernels are bandwidth-bound</strong> — Even perfect caching can’t reach the 74 FLOP/byte crossover until <span class="math inline">\(N \approx 300\)</span></li>
 <li><strong>Shared memory helps, but only up to the ridge</strong> — Further speedups require compute-side tuning (tensor cores, ILP, etc.)</li>
 </ol>
-<p>This 3×3 case illustrates the arithmetic-vs-bandwidth trade-off without drowning in large-matrix algebra.</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -2301,7 +2285,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","loop":false,"descPosition":"bottom","closeEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
