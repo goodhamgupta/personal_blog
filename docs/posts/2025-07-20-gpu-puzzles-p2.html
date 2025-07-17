@@ -136,8 +136,6 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 </script>
-<script type="module" src="../site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
-<link href="../site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -314,7 +312,7 @@ window.Quarto = {
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
 <figcaption>Pooling</figcaption>
 </figure>
 </div>
@@ -375,7 +373,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
@@ -383,7 +381,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same-each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
 <figcaption>Zeno Paradox</figcaption>
 </figure>
 </div>
@@ -777,14 +775,14 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </ul>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
 <p>Inside one block (blockDim.x × blockDim.y threads):</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
 <figcaption>2D Thread Layout</figcaption>
 </figure>
 </div>
@@ -797,7 +795,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" data-glightbox="description: .lightbox-desc-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
 <figcaption>Matrix Indexing</figcaption>
 </figure>
 </div>
@@ -855,7 +853,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-12" data-glightbox="description: .lightbox-desc-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -953,7 +951,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>It’s a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" data-glightbox="description: .lightbox-desc-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -1204,14 +1202,14 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-15" data-gallery="quarto-lightbox-gallery-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-16" data-gallery="quarto-lightbox-gallery-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -1320,7 +1318,7 @@ Solution
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" data-glightbox="description: .lightbox-desc-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-glightbox="description: .lightbox-desc-17" data-gallery="quarto-lightbox-gallery-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
 <figcaption>Matmul with shared memory</figcaption>
 </figure>
 </div>
@@ -1376,7 +1374,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <p>Classic roofline assumes ideal hardware with perfect overlap:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" data-glightbox="description: .lightbox-desc-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[12]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-glightbox="description: .lightbox-desc-18" data-gallery="quarto-lightbox-gallery-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[12]"></a></p>
 <figcaption>Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></figcaption>
 </figure>
 </div>
@@ -1390,7 +1388,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <h3 class="anchored" data-anchor-id="software-model">Software Model</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" data-glightbox="description: .lightbox-desc-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[12]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-glightbox="description: .lightbox-desc-19" data-gallery="quarto-lightbox-gallery-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[12]"></a></p>
 <figcaption>Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></figcaption>
 </figure>
 </div>
@@ -1503,7 +1501,7 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" data-glightbox="description: .lightbox-desc-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-glightbox="description: .lightbox-desc-20" data-gallery="quarto-lightbox-gallery-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
 <figcaption>Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</figcaption>
 </figure>
 </div>
@@ -1571,297 +1569,141 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 <p><strong>New operational intensity:</strong></p>
 <p><span class="math display">\[I_{shared} = \frac{27 \text{ FLOPs}}{60 \text{ bytes}} = 0.45 \text{ FLOP/byte}\]</span></p>
 <p><strong>Predicted performance:</strong></p>
-<p><span class="math display">\[P_{shared} = \min(26.7 \text{ TFLOPS}, 0.45 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 162 \text{ GFLOPS}) = \boxed{162 \text{ GFLOPS}}\]</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) \\
+                &amp; = \min(26.7~\text{TFLOPS},\; 162~\text{GFLOPS}) \\
+                &amp; = \boxed{162~\text{GFLOPS}}
+\end{aligned}
+\]</span></p>
 <p>This gives us a <strong>1.8× speedup</strong> from shared memory optimization, but we’re still memory-bound.</p>
-<div class="cell">
-<details class="code-fold hidden">
-<summary>Solution</summary>
-<div class="sourceCode cell-code hidden" id="cb36" data-startfrom="1267" data-source-offset="-104"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 1266;"><span id="cb36-1267"><a href="#cb36-1267" aria-hidden="true" tabindex="-1"></a>d3Full <span class="op">=</span> <span class="pp">require</span>(<span class="st">"d3@7"</span>)</span>
-<span id="cb36-1268"><a href="#cb36-1268" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1269"><a href="#cb36-1269" aria-hidden="true" tabindex="-1"></a><span class="co">// Hardware specifications</span></span>
-<span id="cb36-1270"><a href="#cb36-1270" aria-hidden="true" tabindex="-1"></a>peak_compute <span class="op">=</span> <span class="fl">26.7</span> <span class="op">*</span> <span class="dv">1000</span> <span class="co">// Convert to GFLOPS</span></span>
-<span id="cb36-1271"><a href="#cb36-1271" aria-hidden="true" tabindex="-1"></a>peak_bandwidth <span class="op">=</span> <span class="dv">360</span> <span class="co">// GB/s</span></span>
-<span id="cb36-1272"><a href="#cb36-1272" aria-hidden="true" tabindex="-1"></a>critical_intensity <span class="op">=</span> peak_compute <span class="op">/</span> peak_bandwidth</span>
-<span id="cb36-1273"><a href="#cb36-1273" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1274"><a href="#cb36-1274" aria-hidden="true" tabindex="-1"></a><span class="co">// Kernel data points</span></span>
-<span id="cb36-1275"><a href="#cb36-1275" aria-hidden="true" tabindex="-1"></a>kernels <span class="op">=</span> [</span>
-<span id="cb36-1276"><a href="#cb36-1276" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">name</span><span class="op">:</span> <span class="st">"Naive 3×3"</span><span class="op">,</span> <span class="dt">intensity</span><span class="op">:</span> <span class="fl">0.25</span><span class="op">,</span> <span class="dt">performance</span><span class="op">:</span> <span class="dv">90</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span> <span class="st">"#f39c12"</span>}<span class="op">,</span></span>
-<span id="cb36-1277"><a href="#cb36-1277" aria-hidden="true" tabindex="-1"></a>  {<span class="dt">name</span><span class="op">:</span> <span class="st">"Shared 3×3"</span><span class="op">,</span> <span class="dt">intensity</span><span class="op">:</span> <span class="fl">0.45</span><span class="op">,</span> <span class="dt">performance</span><span class="op">:</span> <span class="dv">162</span><span class="op">,</span> <span class="dt">color</span><span class="op">:</span> <span class="st">"#27ae60"</span>}</span>
-<span id="cb36-1278"><a href="#cb36-1278" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb36-1279"><a href="#cb36-1279" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1280"><a href="#cb36-1280" aria-hidden="true" tabindex="-1"></a><span class="co">// Generate roofline data</span></span>
-<span id="cb36-1281"><a href="#cb36-1281" aria-hidden="true" tabindex="-1"></a>roofline_data <span class="op">=</span> {</span>
-<span id="cb36-1282"><a href="#cb36-1282" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> crit <span class="op">=</span> peak_compute <span class="op">/</span> peak_bandwidth<span class="op">;</span></span>
-<span id="cb36-1283"><a href="#cb36-1283" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> [</span>
-<span id="cb36-1284"><a href="#cb36-1284" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>d3<span class="op">.</span><span class="fu">range</span>(<span class="fl">0.01</span><span class="op">,</span> crit<span class="op">,</span> <span class="fl">0.05</span>)<span class="op">.</span><span class="fu">map</span>(i <span class="kw">=&gt;</span> ({i<span class="op">,</span> <span class="dt">p</span><span class="op">:</span> i <span class="op">*</span> peak_bandwidth<span class="op">,</span> <span class="dt">region</span><span class="op">:</span> <span class="st">"memory"</span>}))<span class="op">,</span></span>
-<span id="cb36-1285"><a href="#cb36-1285" aria-hidden="true" tabindex="-1"></a>    <span class="op">...</span>d3<span class="op">.</span><span class="fu">range</span>(crit<span class="op">,</span> <span class="dv">1000</span><span class="op">,</span> <span class="dv">5</span>)<span class="op">.</span><span class="fu">map</span>(i <span class="kw">=&gt;</span> ({i<span class="op">,</span> <span class="dt">p</span><span class="op">:</span> peak_compute<span class="op">,</span> <span class="dt">region</span><span class="op">:</span> <span class="st">"compute"</span>}))</span>
-<span id="cb36-1286"><a href="#cb36-1286" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">;</span></span>
-<span id="cb36-1287"><a href="#cb36-1287" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb36-1288"><a href="#cb36-1288" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1289"><a href="#cb36-1289" aria-hidden="true" tabindex="-1"></a><span class="co">// Collision-free kernel labels using force simulation</span></span>
-<span id="cb36-1290"><a href="#cb36-1290" aria-hidden="true" tabindex="-1"></a>kernelLabels <span class="op">=</span> {</span>
-<span id="cb36-1291"><a href="#cb36-1291" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> labels <span class="op">=</span> kernels<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> ({<span class="op">...</span>d}))<span class="op">;</span></span>
-<span id="cb36-1292"><a href="#cb36-1292" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> xScale <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLog</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="fl">0.1</span><span class="op">,</span> <span class="dv">1000</span>])<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">600</span>])<span class="op">;</span></span>
-<span id="cb36-1293"><a href="#cb36-1293" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> yScale <span class="op">=</span> d3<span class="op">.</span><span class="fu">scaleLog</span>()<span class="op">.</span><span class="fu">domain</span>([<span class="dv">10</span><span class="op">,</span> <span class="dv">30000</span>])<span class="op">.</span><span class="fu">range</span>([<span class="dv">400</span><span class="op">,</span> <span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb36-1294"><a href="#cb36-1294" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-1295"><a href="#cb36-1295" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> simulation <span class="op">=</span> d3Full<span class="op">.</span><span class="fu">forceSimulation</span>(labels)</span>
-<span id="cb36-1296"><a href="#cb36-1296" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">force</span>(<span class="st">"x"</span><span class="op">,</span> d3Full<span class="op">.</span><span class="fu">forceX</span>(d <span class="kw">=&gt;</span> <span class="fu">xScale</span>(d<span class="op">.</span><span class="at">intensity</span>))<span class="op">.</span><span class="fu">strength</span>(<span class="fl">0.3</span>))</span>
-<span id="cb36-1297"><a href="#cb36-1297" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">force</span>(<span class="st">"y"</span><span class="op">,</span> d3Full<span class="op">.</span><span class="fu">forceY</span>(d <span class="kw">=&gt;</span> <span class="fu">yScale</span>(d<span class="op">.</span><span class="at">performance</span>) <span class="op">-</span> <span class="dv">20</span>)<span class="op">.</span><span class="fu">strength</span>(<span class="fl">0.3</span>))</span>
-<span id="cb36-1298"><a href="#cb36-1298" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">force</span>(<span class="st">"collide"</span><span class="op">,</span> d3Full<span class="op">.</span><span class="fu">forceCollide</span>(<span class="dv">15</span>))</span>
-<span id="cb36-1299"><a href="#cb36-1299" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">stop</span>()<span class="op">;</span></span>
-<span id="cb36-1300"><a href="#cb36-1300" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1301"><a href="#cb36-1301" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">300</span><span class="op">;</span> <span class="op">++</span>i) simulation<span class="op">.</span><span class="fu">tick</span>()<span class="op">;</span></span>
-<span id="cb36-1302"><a href="#cb36-1302" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> labels<span class="op">;</span></span>
-<span id="cb36-1303"><a href="#cb36-1303" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb36-1304"><a href="#cb36-1304" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1305"><a href="#cb36-1305" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb36-1306"><a href="#cb36-1306" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">700</span><span class="op">,</span></span>
-<span id="cb36-1307"><a href="#cb36-1307" aria-hidden="true" tabindex="-1"></a>  <span class="dt">height</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span></span>
-<span id="cb36-1308"><a href="#cb36-1308" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">80</span><span class="op">,</span></span>
-<span id="cb36-1309"><a href="#cb36-1309" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
-<span id="cb36-1310"><a href="#cb36-1310" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span><span class="op">:</span> <span class="st">"RTX 4000 Ada Roofline: 3×3 Matrix Multiplication"</span><span class="op">,</span></span>
-<span id="cb36-1311"><a href="#cb36-1311" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> {</span>
-<span id="cb36-1312"><a href="#cb36-1312" aria-hidden="true" tabindex="-1"></a>    <span class="dt">type</span><span class="op">:</span> <span class="st">"log"</span><span class="op">,</span></span>
-<span id="cb36-1313"><a href="#cb36-1313" aria-hidden="true" tabindex="-1"></a>    <span class="dt">domain</span><span class="op">:</span> [<span class="fl">0.1</span><span class="op">,</span> <span class="dv">1000</span>]<span class="op">,</span></span>
-<span id="cb36-1314"><a href="#cb36-1314" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Operational Intensity (FLOP/byte)"</span><span class="op">,</span></span>
-<span id="cb36-1315"><a href="#cb36-1315" aria-hidden="true" tabindex="-1"></a>    <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb36-1316"><a href="#cb36-1316" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb36-1317"><a href="#cb36-1317" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> {</span>
-<span id="cb36-1318"><a href="#cb36-1318" aria-hidden="true" tabindex="-1"></a>    <span class="dt">type</span><span class="op">:</span> <span class="st">"log"</span><span class="op">,</span> </span>
-<span id="cb36-1319"><a href="#cb36-1319" aria-hidden="true" tabindex="-1"></a>    <span class="dt">domain</span><span class="op">:</span> [<span class="dv">10</span><span class="op">,</span> <span class="dv">30000</span>]<span class="op">,</span></span>
-<span id="cb36-1320"><a href="#cb36-1320" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Performance (GFLOP/s)"</span><span class="op">,</span></span>
-<span id="cb36-1321"><a href="#cb36-1321" aria-hidden="true" tabindex="-1"></a>    <span class="dt">grid</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb36-1322"><a href="#cb36-1322" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb36-1323"><a href="#cb36-1323" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb36-1324"><a href="#cb36-1324" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Memory-bound roof</span></span>
-<span id="cb36-1325"><a href="#cb36-1325" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(roofline_data<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">region</span> <span class="op">===</span> <span class="st">"memory"</span>)<span class="op">,</span> {</span>
-<span id="cb36-1326"><a href="#cb36-1326" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"i"</span><span class="op">,</span></span>
-<span id="cb36-1327"><a href="#cb36-1327" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="st">"p"</span><span class="op">,</span> </span>
-<span id="cb36-1328"><a href="#cb36-1328" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#e74c3c"</span><span class="op">,</span></span>
-<span id="cb36-1329"><a href="#cb36-1329" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">3</span></span>
-<span id="cb36-1330"><a href="#cb36-1330" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1331"><a href="#cb36-1331" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1332"><a href="#cb36-1332" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Compute-bound roof</span></span>
-<span id="cb36-1333"><a href="#cb36-1333" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">line</span>(roofline_data<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">region</span> <span class="op">===</span> <span class="st">"compute"</span>)<span class="op">,</span> {</span>
-<span id="cb36-1334"><a href="#cb36-1334" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"i"</span><span class="op">,</span></span>
-<span id="cb36-1335"><a href="#cb36-1335" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="st">"p"</span><span class="op">,</span></span>
-<span id="cb36-1336"><a href="#cb36-1336" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#3498db"</span><span class="op">,</span> </span>
-<span id="cb36-1337"><a href="#cb36-1337" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">3</span></span>
-<span id="cb36-1338"><a href="#cb36-1338" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1339"><a href="#cb36-1339" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1340"><a href="#cb36-1340" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Guide lines</span></span>
-<span id="cb36-1341"><a href="#cb36-1341" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([peak_compute]<span class="op">,</span> {</span>
-<span id="cb36-1342"><a href="#cb36-1342" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#3498db"</span><span class="op">,</span> </span>
-<span id="cb36-1343"><a href="#cb36-1343" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"4,4"</span><span class="op">,</span></span>
-<span id="cb36-1344"><a href="#cb36-1344" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeOpacity</span><span class="op">:</span> <span class="fl">0.7</span></span>
-<span id="cb36-1345"><a href="#cb36-1345" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1346"><a href="#cb36-1346" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([critical_intensity]<span class="op">,</span> {</span>
-<span id="cb36-1347"><a href="#cb36-1347" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#999"</span><span class="op">,</span> </span>
-<span id="cb36-1348"><a href="#cb36-1348" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeDasharray</span><span class="op">:</span> <span class="st">"4,4"</span><span class="op">,</span></span>
-<span id="cb36-1349"><a href="#cb36-1349" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeOpacity</span><span class="op">:</span> <span class="fl">0.7</span></span>
-<span id="cb36-1350"><a href="#cb36-1350" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1351"><a href="#cb36-1351" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1352"><a href="#cb36-1352" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Cross-hair pointer interaction</span></span>
-<span id="cb36-1353"><a href="#cb36-1353" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">pointerX</span>(roofline_data<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#aaa"</span><span class="op">,</span> <span class="dt">strokeOpacity</span><span class="op">:</span> <span class="fl">0.5</span>})<span class="op">,</span></span>
-<span id="cb36-1354"><a href="#cb36-1354" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">pointerY</span>(roofline_data<span class="op">,</span> {<span class="dt">stroke</span><span class="op">:</span> <span class="st">"#aaa"</span><span class="op">,</span> <span class="dt">strokeOpacity</span><span class="op">:</span> <span class="fl">0.5</span>})<span class="op">,</span></span>
-<span id="cb36-1355"><a href="#cb36-1355" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1356"><a href="#cb36-1356" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Kernel points with tooltips</span></span>
-<span id="cb36-1357"><a href="#cb36-1357" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">dot</span>(kernels<span class="op">,</span> {</span>
-<span id="cb36-1358"><a href="#cb36-1358" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"intensity"</span><span class="op">,</span></span>
-<span id="cb36-1359"><a href="#cb36-1359" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="st">"performance"</span><span class="op">,</span></span>
-<span id="cb36-1360"><a href="#cb36-1360" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"color"</span><span class="op">,</span></span>
-<span id="cb36-1361"><a href="#cb36-1361" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#333"</span><span class="op">,</span></span>
-<span id="cb36-1362"><a href="#cb36-1362" aria-hidden="true" tabindex="-1"></a>      <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
-<span id="cb36-1363"><a href="#cb36-1363" aria-hidden="true" tabindex="-1"></a>      <span class="dt">r</span><span class="op">:</span> <span class="dv">6</span><span class="op">,</span></span>
-<span id="cb36-1364"><a href="#cb36-1364" aria-hidden="true" tabindex="-1"></a>      <span class="dt">title</span><span class="op">:</span> d <span class="kw">=&gt;</span> <span class="vs">`</span><span class="sc">${</span>d<span class="op">.</span><span class="at">name</span><span class="sc">}</span></span>
-<span id="cb36-1365"><a href="#cb36-1365" aria-hidden="true" tabindex="-1"></a><span class="vs">I = </span><span class="sc">${</span>d<span class="op">.</span><span class="at">intensity</span><span class="sc">}</span><span class="vs"> FLOP/byte</span></span>
-<span id="cb36-1366"><a href="#cb36-1366" aria-hidden="true" tabindex="-1"></a><span class="vs">Performance = </span><span class="sc">${</span>d<span class="op">.</span><span class="at">performance</span><span class="sc">}</span><span class="vs"> GFLOP/s</span></span>
-<span id="cb36-1367"><a href="#cb36-1367" aria-hidden="true" tabindex="-1"></a><span class="vs">Efficiency = </span><span class="sc">${</span>(d<span class="op">.</span><span class="at">performance</span><span class="op">/</span>peak_compute<span class="op">*</span><span class="dv">100</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">% of peak`</span></span>
-<span id="cb36-1368"><a href="#cb36-1368" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1369"><a href="#cb36-1369" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1370"><a href="#cb36-1370" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Collision-free kernel labels</span></span>
-<span id="cb36-1371"><a href="#cb36-1371" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>(kernelLabels<span class="op">,</span> {</span>
-<span id="cb36-1372"><a href="#cb36-1372" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">x</span><span class="op">,</span></span>
-<span id="cb36-1373"><a href="#cb36-1373" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">y</span><span class="op">,</span></span>
-<span id="cb36-1374"><a href="#cb36-1374" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">name</span><span class="op">,</span></span>
-<span id="cb36-1375"><a href="#cb36-1375" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#333"</span><span class="op">,</span></span>
-<span id="cb36-1376"><a href="#cb36-1376" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">11</span><span class="op">,</span></span>
-<span id="cb36-1377"><a href="#cb36-1377" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span></span>
-<span id="cb36-1378"><a href="#cb36-1378" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span></span>
-<span id="cb36-1379"><a href="#cb36-1379" aria-hidden="true" tabindex="-1"></a>      <span class="dt">px</span><span class="op">:</span> <span class="kw">true</span></span>
-<span id="cb36-1380"><a href="#cb36-1380" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1381"><a href="#cb36-1381" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1382"><a href="#cb36-1382" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Region labels</span></span>
-<span id="cb36-1383"><a href="#cb36-1383" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([</span>
-<span id="cb36-1384"><a href="#cb36-1384" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">x</span><span class="op">:</span> <span class="fl">0.3</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> peak_bandwidth <span class="op">*</span> <span class="fl">0.4</span><span class="op">,</span> <span class="dt">txt</span><span class="op">:</span> <span class="st">"Memory-bound"</span>}<span class="op">,</span></span>
-<span id="cb36-1385"><a href="#cb36-1385" aria-hidden="true" tabindex="-1"></a>      {<span class="dt">x</span><span class="op">:</span> <span class="dv">200</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> peak_compute <span class="op">*</span> <span class="fl">0.8</span><span class="op">,</span> <span class="dt">txt</span><span class="op">:</span> <span class="st">"Compute-bound"</span>}</span>
-<span id="cb36-1386"><a href="#cb36-1386" aria-hidden="true" tabindex="-1"></a>    ]<span class="op">,</span> {</span>
-<span id="cb36-1387"><a href="#cb36-1387" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span></span>
-<span id="cb36-1388"><a href="#cb36-1388" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span></span>
-<span id="cb36-1389"><a href="#cb36-1389" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> <span class="st">"txt"</span><span class="op">,</span></span>
-<span id="cb36-1390"><a href="#cb36-1390" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">txt</span><span class="op">.</span><span class="fu">includes</span>(<span class="st">"Memory"</span>) <span class="op">?</span> <span class="st">"#e74c3c"</span> <span class="op">:</span> <span class="st">"#3498db"</span><span class="op">,</span></span>
-<span id="cb36-1391"><a href="#cb36-1391" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">14</span><span class="op">,</span></span>
-<span id="cb36-1392"><a href="#cb36-1392" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span></span>
-<span id="cb36-1393"><a href="#cb36-1393" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb36-1394"><a href="#cb36-1394" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-1395"><a href="#cb36-1395" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Critical intensity annotation</span></span>
-<span id="cb36-1396"><a href="#cb36-1396" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([{<span class="dt">x</span><span class="op">:</span> critical_intensity <span class="op">*</span> <span class="fl">1.3</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> peak_compute <span class="op">*</span> <span class="fl">1.1</span><span class="op">,</span> <span class="dt">txt</span><span class="op">:</span> <span class="vs">`I_crit = </span><span class="sc">${</span>critical_intensity<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">`</span>}]<span class="op">,</span> {</span>
-<span id="cb36-1397"><a href="#cb36-1397" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="st">"x"</span><span class="op">,</span></span>
-<span id="cb36-1398"><a href="#cb36-1398" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="st">"y"</span><span class="op">,</span> </span>
-<span id="cb36-1399"><a href="#cb36-1399" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> <span class="st">"txt"</span><span class="op">,</span></span>
-<span id="cb36-1400"><a href="#cb36-1400" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#f39c12"</span><span class="op">,</span></span>
-<span id="cb36-1401"><a href="#cb36-1401" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">12</span><span class="op">,</span></span>
-<span id="cb36-1402"><a href="#cb36-1402" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span></span>
-<span id="cb36-1403"><a href="#cb36-1403" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb36-1404"><a href="#cb36-1404" aria-hidden="true" tabindex="-1"></a>  ]</span>
-<span id="cb36-1405"><a href="#cb36-1405" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb36-1406"><a href="#cb36-1406" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-1407"><a href="#cb36-1407" aria-hidden="true" tabindex="-1"></a><span class="co">// Legend</span></span>
-<span id="cb36-1408"><a href="#cb36-1408" aria-hidden="true" tabindex="-1"></a>legend <span class="op">=</span> Plot<span class="op">.</span><span class="fu">legend</span>({</span>
-<span id="cb36-1409"><a href="#cb36-1409" aria-hidden="true" tabindex="-1"></a>  <span class="dt">color</span><span class="op">:</span> {</span>
-<span id="cb36-1410"><a href="#cb36-1410" aria-hidden="true" tabindex="-1"></a>    <span class="dt">domain</span><span class="op">:</span> kernels<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">name</span>)<span class="op">,</span></span>
-<span id="cb36-1411"><a href="#cb36-1411" aria-hidden="true" tabindex="-1"></a>    <span class="dt">range</span><span class="op">:</span> kernels<span class="op">.</span><span class="fu">map</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">color</span>)</span>
-<span id="cb36-1412"><a href="#cb36-1412" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb36-1413"><a href="#cb36-1413" aria-hidden="true" tabindex="-1"></a>  <span class="dt">columns</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
-<span id="cb36-1414"><a href="#cb36-1414" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">20</span></span>
-<span id="cb36-1415"><a href="#cb36-1415" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="lightbox" data-glightbox="description: .lightbox-desc-21" data-gallery="quarto-lightbox-gallery-21" title="RTX 4000 Ada Roofline for Matmul"><img src="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="img-fluid figure-img" alt="RTX 4000 Ada Roofline for Matmul"></a></p>
+<figcaption>RTX 4000 Ada Roofline for Matmul</figcaption>
+</figure>
+</div>
+<details closed="">
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>roofline_plot.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb36" data-filename="roofline_plot.py"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /// script</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># dependencies = [</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   "matplotlib",</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   "numpy",</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ]</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ///</span></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Run using uv run roofline_plot.py</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardware specifications</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>peak_compute <span class="op">=</span> <span class="fl">26.7</span> <span class="op">*</span> <span class="dv">1000</span>  <span class="co"># Convert to GFLOPS</span></span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>peak_bandwidth <span class="op">=</span> <span class="dv">360</span>  <span class="co"># GB/s</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>critical_intensity <span class="op">=</span> peak_compute <span class="op">/</span> peak_bandwidth</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Kernel data points</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>kernels <span class="op">=</span> [</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Naive 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.25</span>, <span class="st">"performance"</span>: <span class="dv">90</span>, <span class="st">"color"</span>: <span class="st">"#f39c12"</span>},</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>    {<span class="st">"name"</span>: <span class="st">"Shared 3×3"</span>, <span class="st">"intensity"</span>: <span class="fl">0.45</span>, <span class="st">"performance"</span>: <span class="dv">162</span>, <span class="st">"color"</span>: <span class="st">"#27ae60"</span>}</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate roofline data</span></span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_roofline_data():</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Memory-bound region</span></span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>    memory_intensities <span class="op">=</span> np.arange(<span class="fl">0.01</span>, critical_intensity, <span class="fl">0.05</span>)</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>    memory_performance <span class="op">=</span> memory_intensities <span class="op">*</span> peak_bandwidth</span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute-bound region</span></span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    compute_intensities <span class="op">=</span> np.arange(critical_intensity, <span class="dv">1000</span>, <span class="dv">5</span>)</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>    compute_performance <span class="op">=</span> np.full_like(compute_intensities, peak_compute)</span>
+<span id="cb36-32"><a href="#cb36-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-33"><a href="#cb36-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> memory_intensities, memory_performance, compute_intensities, compute_performance</span>
+<span id="cb36-34"><a href="#cb36-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-35"><a href="#cb36-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb36-36"><a href="#cb36-36" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="fl">6.5</span>))</span>
+<span id="cb36-37"><a href="#cb36-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-38"><a href="#cb36-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Explicitly set both axes to log_10 scale</span></span>
+<span id="cb36-39"><a href="#cb36-39" aria-hidden="true" tabindex="-1"></a>ax.set_xscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb36-40"><a href="#cb36-40" aria-hidden="true" tabindex="-1"></a>ax.set_yscale(<span class="st">'log'</span>, base<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb36-41"><a href="#cb36-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-42"><a href="#cb36-42" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate roofline data</span></span>
+<span id="cb36-43"><a href="#cb36-43" aria-hidden="true" tabindex="-1"></a>mem_i, mem_p, comp_i, comp_p <span class="op">=</span> generate_roofline_data()</span>
+<span id="cb36-44"><a href="#cb36-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-45"><a href="#cb36-45" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot roofline curves</span></span>
+<span id="cb36-46"><a href="#cb36-46" aria-hidden="true" tabindex="-1"></a>ax.loglog(mem_i, mem_p, color<span class="op">=</span><span class="st">"#e74c3c"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Memory-bound"</span>)</span>
+<span id="cb36-47"><a href="#cb36-47" aria-hidden="true" tabindex="-1"></a>ax.loglog(comp_i, comp_p, color<span class="op">=</span><span class="st">"#3498db"</span>, linewidth<span class="op">=</span><span class="dv">3</span>, label<span class="op">=</span><span class="st">"Compute-bound"</span>)</span>
+<span id="cb36-48"><a href="#cb36-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-49"><a href="#cb36-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Guide lines</span></span>
+<span id="cb36-50"><a href="#cb36-50" aria-hidden="true" tabindex="-1"></a>ax.axhline(y<span class="op">=</span>peak_compute, color<span class="op">=</span><span class="st">"#3498db"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb36-51"><a href="#cb36-51" aria-hidden="true" tabindex="-1"></a>ax.axvline(x<span class="op">=</span>critical_intensity, color<span class="op">=</span><span class="st">"#999"</span>, linestyle<span class="op">=</span><span class="st">"--"</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb36-52"><a href="#cb36-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-53"><a href="#cb36-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot kernel points</span></span>
+<span id="cb36-54"><a href="#cb36-54" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
+<span id="cb36-55"><a href="#cb36-55" aria-hidden="true" tabindex="-1"></a>    ax.loglog(kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>],</span>
+<span id="cb36-56"><a href="#cb36-56" aria-hidden="true" tabindex="-1"></a>             <span class="st">'o'</span>, color<span class="op">=</span>kernel[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb36-57"><a href="#cb36-57" aria-hidden="true" tabindex="-1"></a>             markeredgecolor<span class="op">=</span><span class="st">"#333"</span>, markeredgewidth<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb36-58"><a href="#cb36-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-59"><a href="#cb36-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add kernel labels with better positioning to avoid overlap</span></span>
+<span id="cb36-60"><a href="#cb36-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> kernel[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Naive 3×3"</span>:</span>
+<span id="cb36-61"><a href="#cb36-61" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">0.7</span>  <span class="co"># Move left</span></span>
+<span id="cb36-62"><a href="#cb36-62" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">0.65</span>  <span class="co"># Move down</span></span>
+<span id="cb36-63"><a href="#cb36-63" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:  <span class="co"># Shared 3×3</span></span>
+<span id="cb36-64"><a href="#cb36-64" aria-hidden="true" tabindex="-1"></a>        offset_x <span class="op">=</span> kernel[<span class="st">"intensity"</span>] <span class="op">*</span> <span class="fl">1.4</span>  <span class="co"># Move right</span></span>
+<span id="cb36-65"><a href="#cb36-65" aria-hidden="true" tabindex="-1"></a>        offset_y <span class="op">=</span> kernel[<span class="st">"performance"</span>] <span class="op">*</span> <span class="fl">1.3</span>  <span class="co"># Move up</span></span>
+<span id="cb36-66"><a href="#cb36-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-67"><a href="#cb36-67" aria-hidden="true" tabindex="-1"></a>    ax.annotate(kernel[<span class="st">"name"</span>],</span>
+<span id="cb36-68"><a href="#cb36-68" aria-hidden="true" tabindex="-1"></a>               (kernel[<span class="st">"intensity"</span>], kernel[<span class="st">"performance"</span>]),</span>
+<span id="cb36-69"><a href="#cb36-69" aria-hidden="true" tabindex="-1"></a>               xytext<span class="op">=</span>(offset_x, offset_y),</span>
+<span id="cb36-70"><a href="#cb36-70" aria-hidden="true" tabindex="-1"></a>               fontsize<span class="op">=</span><span class="dv">11</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>,</span>
+<span id="cb36-71"><a href="#cb36-71" aria-hidden="true" tabindex="-1"></a>               bbox<span class="op">=</span><span class="bu">dict</span>(boxstyle<span class="op">=</span><span class="st">"round,pad=0.3"</span>, facecolor<span class="op">=</span><span class="st">"white"</span>, alpha<span class="op">=</span><span class="fl">0.8</span>))</span>
+<span id="cb36-72"><a href="#cb36-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-73"><a href="#cb36-73" aria-hidden="true" tabindex="-1"></a><span class="co"># Region labels - move Memory-bound to center and away from kernel dots</span></span>
+<span id="cb36-74"><a href="#cb36-74" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="fl">1.5</span>, peak_bandwidth <span class="op">*</span> <span class="fl">1.5</span>, <span class="st">"Memory-bound"</span>,</span>
+<span id="cb36-75"><a href="#cb36-75" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#e74c3c"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>, ha<span class="op">=</span><span class="st">"center"</span>)</span>
+<span id="cb36-76"><a href="#cb36-76" aria-hidden="true" tabindex="-1"></a>ax.text(<span class="dv">200</span>, peak_compute <span class="op">*</span> <span class="fl">0.8</span>, <span class="st">"Compute-bound"</span>,</span>
+<span id="cb36-77"><a href="#cb36-77" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#3498db"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb36-78"><a href="#cb36-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-79"><a href="#cb36-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Critical intensity annotation</span></span>
+<span id="cb36-80"><a href="#cb36-80" aria-hidden="true" tabindex="-1"></a>ax.text(critical_intensity <span class="op">*</span> <span class="fl">1.3</span>, peak_compute <span class="op">*</span> <span class="fl">1.1</span>,</span>
+<span id="cb36-81"><a href="#cb36-81" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"I_crit = </span><span class="sc">{</span>critical_intensity<span class="sc">:.1f}</span><span class="ss">"</span>,</span>
+<span id="cb36-82"><a href="#cb36-82" aria-hidden="true" tabindex="-1"></a>        color<span class="op">=</span><span class="st">"#f39c12"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">"bold"</span>)</span>
+<span id="cb36-83"><a href="#cb36-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-84"><a href="#cb36-84" aria-hidden="true" tabindex="-1"></a><span class="co"># Formatting</span></span>
+<span id="cb36-85"><a href="#cb36-85" aria-hidden="true" tabindex="-1"></a>ax.set_xlim(<span class="fl">0.1</span>, <span class="dv">1000</span>)</span>
+<span id="cb36-86"><a href="#cb36-86" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">10</span>, <span class="dv">30000</span>)</span>
+<span id="cb36-87"><a href="#cb36-87" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Operational Intensity (FLOP/byte) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb36-88"><a href="#cb36-88" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Performance (GFLOP/s) - Log_10 Scale"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb36-89"><a href="#cb36-89" aria-hidden="true" tabindex="-1"></a>ax.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb36-90"><a href="#cb36-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-91"><a href="#cb36-91" aria-hidden="true" tabindex="-1"></a><span class="co"># Create custom legend for kernels</span></span>
+<span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>legend_elements <span class="op">=</span> [plt.Line2D([<span class="dv">0</span>], [<span class="dv">0</span>], marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">'w'</span>,</span>
+<span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>                             markerfacecolor<span class="op">=</span>k[<span class="st">"color"</span>], markersize<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>                             label<span class="op">=</span>k[<span class="st">"name"</span>], markeredgecolor<span class="op">=</span><span class="st">"#333"</span>)</span>
+<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> k <span class="kw">in</span> kernels]</span>
+<span id="cb36-96"><a href="#cb36-96" aria-hidden="true" tabindex="-1"></a>ax.legend(handles<span class="op">=</span>legend_elements, loc<span class="op">=</span><span class="st">"lower right"</span>)</span>
+<span id="cb36-97"><a href="#cb36-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-98"><a href="#cb36-98" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb36-99"><a href="#cb36-99" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.show()</span></span>
+<span id="cb36-100"><a href="#cb36-100" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">'./mojo_gpu_puzzles/p14_roofline_naive_and_shared.png'</span>, bbox_inches<span class="op">=</span><span class="st">'tight'</span>)</span>
+<span id="cb36-101"><a href="#cb36-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-102"><a href="#cb36-102" aria-hidden="true" tabindex="-1"></a><span class="co"># Print performance metrics</span></span>
+<span id="cb36-103"><a href="#cb36-103" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Performance Analysis:"</span>)</span>
+<span id="cb36-104"><a href="#cb36-104" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"-"</span> <span class="op">*</span> <span class="dv">40</span>)</span>
+<span id="cb36-105"><a href="#cb36-105" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> kernel <span class="kw">in</span> kernels:</span>
+<span id="cb36-106"><a href="#cb36-106" aria-hidden="true" tabindex="-1"></a>    efficiency <span class="op">=</span> (kernel[<span class="st">"performance"</span>] <span class="op">/</span> peak_compute) <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb36-107"><a href="#cb36-107" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>kernel[<span class="st">'name'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
+<span id="cb36-108"><a href="#cb36-108" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Intensity: </span><span class="sc">{</span>kernel[<span class="st">'intensity'</span>]<span class="sc">}</span><span class="ss"> FLOP/byte"</span>)</span>
+<span id="cb36-109"><a href="#cb36-109" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Performance: </span><span class="sc">{</span>kernel[<span class="st">'performance'</span>]<span class="sc">}</span><span class="ss"> GFLOP/s"</span>)</span>
+<span id="cb36-110"><a href="#cb36-110" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span>
+<span id="cb36-111"><a href="#cb36-111" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </details>
-<div id="fig-ojs-cell-1" class="cell quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-ojs-cell-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-1" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-1" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(a)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-2" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-2" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(b)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-3" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-3" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(c)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-4" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-4" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(d)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-5" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-5" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(e)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-6" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-6" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(f)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-7" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-7" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(g)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-8" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-8" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(h)
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="cell-output cell-output-display">
-<div id="fig-ojs-cell-1-9" class="quarto-figure quarto-figure-center quarto-float anchored">
-<figure class="quarto-float quarto-subfloat-fig figure">
-<div aria-describedby="fig-ojs-cell-1-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div id="ojs-cell-1-9" data-nodetype="declaration">
-
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ojs-cell-1-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-(i)
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ojs-cell-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: RTX 4000 Ada roofline showing 3×3 matrix multiplication performance
-</figcaption>
-</figure>
-</div>
-</div>
 </section>
 <section id="key-insights" class="level3">
 <h3 class="anchored" data-anchor-id="key-insights">Key Insights</h3>
@@ -1888,6 +1730,7 @@ Figure&nbsp;1: RTX 4000 Ada roofline showing 3×3 matrix multiplication performa
 <span class="glightbox-desc lightbox-desc-18">Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></span>
 <span class="glightbox-desc lightbox-desc-19">Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></span>
 <span class="glightbox-desc lightbox-desc-20">Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</span>
+<span class="glightbox-desc lightbox-desc-21">RTX 4000 Ada Roofline for Matmul</span>
 </div>
 
 </section>
@@ -1935,17 +1778,6 @@ Figure&nbsp;1: RTX 4000 Ada roofline showing 3×3 matrix multiplication performa
 <div class="csl-left-margin">[13] </div><div class="csl-right-inline">N. Corporation, <span>“NVIDIA RTX 4000 ada generation datasheet.”</span> 2023. Available: <a href="https://resources.nvidia.com/en-us-briefcase-for-datasheets/rtx-4000-ada-datashe-1?ncid=no-ncid">https://resources.nvidia.com/en-us-briefcase-for-datasheets/rtx-4000-ada-datashe-1?ncid=no-ncid</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
-<script type="ojs-module-contents">
-eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6IlxuLy8gTG9hZCB0aGUgZnVsbCBEMyBidW5kbGUgKGluY2x1ZGVzIGQzLWZvcmNlKSB1bmRlciBhIGRpZmZlcmVudCBuYW1lIHRvIGF2b2lkIGNvbmZsaWN0IHdpdGggUGxvdCdzIGQzXG5kM0Z1bGwgPSByZXF1aXJlKFwiZDNAN1wiKVxuXG4vLyBIYXJkd2FyZSBzcGVjaWZpY2F0aW9uc1xucGVha19jb21wdXRlID0gMjYuNyAqIDEwMDAgLy8gQ29udmVydCB0byBHRkxPUFNcbnBlYWtfYmFuZHdpZHRoID0gMzYwIC8vIEdCL3NcbmNyaXRpY2FsX2ludGVuc2l0eSA9IHBlYWtfY29tcHV0ZSAvIHBlYWtfYmFuZHdpZHRoXG5cbi8vIEtlcm5lbCBkYXRhIHBvaW50c1xua2VybmVscyA9IFtcbiAge25hbWU6IFwiTmFpdmUgM8OXM1wiLCBpbnRlbnNpdHk6IDAuMjUsIHBlcmZvcm1hbmNlOiA5MCwgY29sb3I6IFwiI2YzOWMxMlwifSxcbiAge25hbWU6IFwiU2hhcmVkIDPDlzNcIiwgaW50ZW5zaXR5OiAwLjQ1LCBwZXJmb3JtYW5jZTogMTYyLCBjb2xvcjogXCIjMjdhZTYwXCJ9XG5dXG5cbi8vIEdlbmVyYXRlIHJvb2ZsaW5lIGRhdGFcbnJvb2ZsaW5lX2RhdGEgPSB7XG4gIGNvbnN0IGNyaXQgPSBwZWFrX2NvbXB1dGUgLyBwZWFrX2JhbmR3aWR0aDtcbiAgcmV0dXJuIFtcbiAgICAuLi5kMy5yYW5nZSgwLjAxLCBjcml0LCAwLjA1KS5tYXAoaSA9PiAoe2ksIHA6IGkgKiBwZWFrX2JhbmR3aWR0aCwgcmVnaW9uOiBcIm1lbW9yeVwifSkpLFxuICAgIC4uLmQzLnJhbmdlKGNyaXQsIDEwMDAsIDUpLm1hcChpID0+ICh7aSwgcDogcGVha19jb21wdXRlLCByZWdpb246IFwiY29tcHV0ZVwifSkpXG4gIF07XG59XG5cbi8vIENvbGxpc2lvbi1mcmVlIGtlcm5lbCBsYWJlbHMgdXNpbmcgZm9yY2Ugc2ltdWxhdGlvblxua2VybmVsTGFiZWxzID0ge1xuICBjb25zdCBsYWJlbHMgPSBrZXJuZWxzLm1hcChkID0+ICh7Li4uZH0pKTtcbiAgY29uc3QgeFNjYWxlID0gZDMuc2NhbGVMb2coKS5kb21haW4oWzAuMSwgMTAwMF0pLnJhbmdlKFswLCA2MDBdKTtcbiAgY29uc3QgeVNjYWxlID0gZDMuc2NhbGVMb2coKS5kb21haW4oWzEwLCAzMDAwMF0pLnJhbmdlKFs0MDAsIDBdKTtcbiAgXG4gIGNvbnN0IHNpbXVsYXRpb24gPSBkM0Z1bGwuZm9yY2VTaW11bGF0aW9uKGxhYmVscylcbiAgICAuZm9yY2UoXCJ4XCIsIGQzRnVsbC5mb3JjZVgoZCA9PiB4U2NhbGUoZC5pbnRlbnNpdHkpKS5zdHJlbmd0aCgwLjMpKVxuICAgIC5mb3JjZShcInlcIiwgZDNGdWxsLmZvcmNlWShkID0+IHlTY2FsZShkLnBlcmZvcm1hbmNlKSAtIDIwKS5zdHJlbmd0aCgwLjMpKVxuICAgIC5mb3JjZShcImNvbGxpZGVcIiwgZDNGdWxsLmZvcmNlQ29sbGlkZSgxNSkpXG4gICAgLnN0b3AoKTtcblxuICBmb3IgKGxldCBpID0gMDsgaSA8IDMwMDsgKytpKSBzaW11bGF0aW9uLnRpY2soKTtcbiAgcmV0dXJuIGxhYmVscztcbn1cblxucGxvdCA9IFBsb3QucGxvdCh7XG4gIHdpZHRoOiA3MDAsXG4gIGhlaWdodDogNDUwLFxuICBtYXJnaW5MZWZ0OiA4MCxcbiAgbWFyZ2luQm90dG9tOiA2MCxcbiAgdGl0bGU6IFwiUlRYIDQwMDAgQWRhIFJvb2ZsaW5lOiAzw5czIE1hdHJpeCBNdWx0aXBsaWNhdGlvblwiLFxuICB4OiB7XG4gICAgdHlwZTogXCJsb2dcIixcbiAgICBkb21haW46IFswLjEsIDEwMDBdLFxuICAgIGxhYmVsOiBcIk9wZXJhdGlvbmFsIEludGVuc2l0eSAoRkxPUC9ieXRlKVwiLFxuICAgIGdyaWQ6IHRydWVcbiAgfSxcbiAgeToge1xuICAgIHR5cGU6IFwibG9nXCIsIFxuICAgIGRvbWFpbjogWzEwLCAzMDAwMF0sXG4gICAgbGFiZWw6IFwiUGVyZm9ybWFuY2UgKEdGTE9QL3MpXCIsXG4gICAgZ3JpZDogdHJ1ZVxuICB9LFxuICBtYXJrczogW1xuICAgIC8vIE1lbW9yeS1ib3VuZCByb29mXG4gICAgUGxvdC5saW5lKHJvb2ZsaW5lX2RhdGEuZmlsdGVyKGQgPT4gZC5yZWdpb24gPT09IFwibWVtb3J5XCIpLCB7XG4gICAgICB4OiBcImlcIixcbiAgICAgIHk6IFwicFwiLCBcbiAgICAgIHN0cm9rZTogXCIjZTc0YzNjXCIsXG4gICAgICBzdHJva2VXaWR0aDogM1xuICAgIH0pLFxuICAgIFxuICAgIC8vIENvbXB1dGUtYm91bmQgcm9vZlxuICAgIFBsb3QubGluZShyb29mbGluZV9kYXRhLmZpbHRlcihkID0+IGQucmVnaW9uID09PSBcImNvbXB1dGVcIiksIHtcbiAgICAgIHg6IFwiaVwiLFxuICAgICAgeTogXCJwXCIsXG4gICAgICBzdHJva2U6IFwiIzM0OThkYlwiLCBcbiAgICAgIHN0cm9rZVdpZHRoOiAzXG4gICAgfSksXG4gICAgXG4gICAgLy8gR3VpZGUgbGluZXNcbiAgICBQbG90LnJ1bGVZKFtwZWFrX2NvbXB1dGVdLCB7XG4gICAgICBzdHJva2U6IFwiIzM0OThkYlwiLCBcbiAgICAgIHN0cm9rZURhc2hhcnJheTogXCI0LDRcIixcbiAgICAgIHN0cm9rZU9wYWNpdHk6IDAuN1xuICAgIH0pLFxuICAgIFBsb3QucnVsZVgoW2NyaXRpY2FsX2ludGVuc2l0eV0sIHtcbiAgICAgIHN0cm9rZTogXCIjOTk5XCIsIFxuICAgICAgc3Ryb2tlRGFzaGFycmF5OiBcIjQsNFwiLFxuICAgICAgc3Ryb2tlT3BhY2l0eTogMC43XG4gICAgfSksXG4gICAgXG4gICAgLy8gQ3Jvc3MtaGFpciBwb2ludGVyIGludGVyYWN0aW9uXG4gICAgUGxvdC5wb2ludGVyWChyb29mbGluZV9kYXRhLCB7c3Ryb2tlOiBcIiNhYWFcIiwgc3Ryb2tlT3BhY2l0eTogMC41fSksXG4gICAgUGxvdC5wb2ludGVyWShyb29mbGluZV9kYXRhLCB7c3Ryb2tlOiBcIiNhYWFcIiwgc3Ryb2tlT3BhY2l0eTogMC41fSksXG4gICAgXG4gICAgLy8gS2VybmVsIHBvaW50cyB3aXRoIHRvb2x0aXBzXG4gICAgUGxvdC5kb3Qoa2VybmVscywge1xuICAgICAgeDogXCJpbnRlbnNpdHlcIixcbiAgICAgIHk6IFwicGVyZm9ybWFuY2VcIixcbiAgICAgIGZpbGw6IFwiY29sb3JcIixcbiAgICAgIHN0cm9rZTogXCIjMzMzXCIsXG4gICAgICBzdHJva2VXaWR0aDogMixcbiAgICAgIHI6IDYsXG4gICAgICB0aXRsZTogZCA9PiBgJHtkLm5hbWV9XG5JID0gJHtkLmludGVuc2l0eX0gRkxPUC9ieXRlXG5QZXJmb3JtYW5jZSA9ICR7ZC5wZXJmb3JtYW5jZX0gR0ZMT1Avc1xuRWZmaWNpZW5jeSA9ICR7KGQucGVyZm9ybWFuY2UvcGVha19jb21wdXRlKjEwMCkudG9GaXhlZCgxKX0lIG9mIHBlYWtgXG4gICAgfSksXG4gICAgXG4gICAgLy8gQ29sbGlzaW9uLWZyZWUga2VybmVsIGxhYmVsc1xuICAgIFBsb3QudGV4dChrZXJuZWxMYWJlbHMsIHtcbiAgICAgIHg6IGQgPT4gZC54LFxuICAgICAgeTogZCA9PiBkLnksXG4gICAgICB0ZXh0OiBkID0+IGQubmFtZSxcbiAgICAgIGZpbGw6IFwiIzMzM1wiLFxuICAgICAgZm9udFNpemU6IDExLFxuICAgICAgZm9udFdlaWdodDogXCJib2xkXCIsXG4gICAgICB0ZXh0QW5jaG9yOiBcIm1pZGRsZVwiLFxuICAgICAgcHg6IHRydWVcbiAgICB9KSxcbiAgICBcbiAgICAvLyBSZWdpb24gbGFiZWxzXG4gICAgUGxvdC50ZXh0KFtcbiAgICAgIHt4OiAwLjMsIHk6IHBlYWtfYmFuZHdpZHRoICogMC40LCB0eHQ6IFwiTWVtb3J5LWJvdW5kXCJ9LFxuICAgICAge3g6IDIwMCwgeTogcGVha19jb21wdXRlICogMC44LCB0eHQ6IFwiQ29tcHV0ZS1ib3VuZFwifVxuICAgIF0sIHtcbiAgICAgIHg6IFwieFwiLFxuICAgICAgeTogXCJ5XCIsXG4gICAgICB0ZXh0OiBcInR4dFwiLFxuICAgICAgZmlsbDogZCA9PiBkLnR4dC5pbmNsdWRlcyhcIk1lbW9yeVwiKSA/IFwiI2U3NGMzY1wiIDogXCIjMzQ5OGRiXCIsXG4gICAgICBmb250U2l6ZTogMTQsXG4gICAgICBmb250V2VpZ2h0OiBcImJvbGRcIlxuICAgIH0pLFxuICAgIFxuICAgIC8vIENyaXRpY2FsIGludGVuc2l0eSBhbm5vdGF0aW9uXG4gICAgUGxvdC50ZXh0KFt7eDogY3JpdGljYWxfaW50ZW5zaXR5ICogMS4zLCB5OiBwZWFrX2NvbXB1dGUgKiAxLjEsIHR4dDogYElfY3JpdCA9ICR7Y3JpdGljYWxfaW50ZW5zaXR5LnRvRml4ZWQoMSl9YH1dLCB7XG4gICAgICB4OiBcInhcIixcbiAgICAgIHk6IFwieVwiLCBcbiAgICAgIHRleHQ6IFwidHh0XCIsXG4gICAgICBmaWxsOiBcIiNmMzljMTJcIixcbiAgICAgIGZvbnRTaXplOiAxMixcbiAgICAgIGZvbnRXZWlnaHQ6IFwiYm9sZFwiXG4gICAgfSlcbiAgXVxufSlcblxuLy8gTGVnZW5kXG5sZWdlbmQgPSBQbG90LmxlZ2VuZCh7XG4gIGNvbG9yOiB7XG4gICAgZG9tYWluOiBrZXJuZWxzLm1hcChkID0+IGQubmFtZSksXG4gICAgcmFuZ2U6IGtlcm5lbHMubWFwKGQgPT4gZC5jb2xvcilcbiAgfSxcbiAgY29sdW1uczogMSxcbiAgbWFyZ2luTGVmdDogMjBcbn0pXG4ifV19
-</script>
-<script type="module">
-if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
-window._ojs.paths.runtimeToDoc = "../../posts";
-window._ojs.paths.runtimeToRoot = "../..";
-window._ojs.paths.docToRoot = "..";
-window._ojs.selfContained = false;
-window._ojs.runtime.interpretFromScriptTags();
-</script>
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -2470,7 +2302,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","loop":false});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","selector":".lightbox","loop":false,"descPosition":"bottom","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

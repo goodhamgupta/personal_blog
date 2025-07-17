@@ -1255,165 +1255,134 @@ $$I_{shared} = \frac{27 \text{ FLOPs}}{60 \text{ bytes}} = 0.45 \text{ FLOP/byte
 
 **Predicted performance:**
 
-$$P_{shared} = \min(26.7 \text{ TFLOPS}, 0.45 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 162 \text{ GFLOPS}) = \boxed{162 \text{ GFLOPS}}$$
+$$
+\begin{aligned}
+P_{shared} \;\; & = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) \\
+                & = \min(26.7~\text{TFLOPS},\; 162~\text{GFLOPS}) \\
+                & = \boxed{162~\text{GFLOPS}}
+\end{aligned}
+$$
 
 This gives us a **1.8× speedup** from shared memory optimization, but we're still memory-bound.
 
-```{ojs}
-//| echo: false
-//| fig-cap: "RTX 4000 Ada roofline showing 3×3 matrix multiplication performance"
+![RTX 4000 Ada Roofline for Matmul](mojo_gpu_puzzles/p14_roofline_naive_and_shared.png)
 
-// Load the full D3 bundle (includes d3-force) under a different name to avoid conflict with Plot's d3
-d3Full = require("d3@7")
+<details closed>
+<summary> **Solution** </summary>
+```{.py filename="roofline_plot.py"}
+# /// script
+# dependencies = [
+#   "matplotlib",
+#   "numpy",
+# ]
+# ///
 
-// Hardware specifications
-peak_compute = 26.7 * 1000 // Convert to GFLOPS
-peak_bandwidth = 360 // GB/s
+# Run using uv run roofline_plot.py
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Hardware specifications
+peak_compute = 26.7 * 1000  # Convert to GFLOPS
+peak_bandwidth = 360  # GB/s
 critical_intensity = peak_compute / peak_bandwidth
 
-// Kernel data points
+# Kernel data points
 kernels = [
-  {name: "Naive 3×3", intensity: 0.25, performance: 90, color: "#f39c12"},
-  {name: "Shared 3×3", intensity: 0.45, performance: 162, color: "#27ae60"}
+    {"name": "Naive 3×3", "intensity": 0.25, "performance": 90, "color": "#f39c12"},
+    {"name": "Shared 3×3", "intensity": 0.45, "performance": 162, "color": "#27ae60"}
 ]
 
-// Generate roofline data
-roofline_data = {
-  const crit = peak_compute / peak_bandwidth;
-  return [
-    ...d3.range(0.01, crit, 0.05).map(i => ({i, p: i * peak_bandwidth, region: "memory"})),
-    ...d3.range(crit, 1000, 5).map(i => ({i, p: peak_compute, region: "compute"}))
-  ];
-}
+# Generate roofline data
+def generate_roofline_data():
+    # Memory-bound region
+    memory_intensities = np.arange(0.01, critical_intensity, 0.05)
+    memory_performance = memory_intensities * peak_bandwidth
 
-// Collision-free kernel labels using force simulation
-kernelLabels = {
-  const labels = kernels.map(d => ({...d}));
-  const xScale = d3.scaleLog().domain([0.1, 1000]).range([0, 600]);
-  const yScale = d3.scaleLog().domain([10, 30000]).range([400, 0]);
-  
-  const simulation = d3Full.forceSimulation(labels)
-    .force("x", d3Full.forceX(d => xScale(d.intensity)).strength(0.3))
-    .force("y", d3Full.forceY(d => yScale(d.performance) - 20).strength(0.3))
-    .force("collide", d3Full.forceCollide(15))
-    .stop();
+    # Compute-bound region
+    compute_intensities = np.arange(critical_intensity, 1000, 5)
+    compute_performance = np.full_like(compute_intensities, peak_compute)
 
-  for (let i = 0; i < 300; ++i) simulation.tick();
-  return labels;
-}
+    return memory_intensities, memory_performance, compute_intensities, compute_performance
 
-plot = Plot.plot({
-  width: 700,
-  height: 450,
-  marginLeft: 80,
-  marginBottom: 60,
-  title: "RTX 4000 Ada Roofline: 3×3 Matrix Multiplication",
-  x: {
-    type: "log",
-    domain: [0.1, 1000],
-    label: "Operational Intensity (FLOP/byte)",
-    grid: true
-  },
-  y: {
-    type: "log", 
-    domain: [10, 30000],
-    label: "Performance (GFLOP/s)",
-    grid: true
-  },
-  marks: [
-    // Memory-bound roof
-    Plot.line(roofline_data.filter(d => d.region === "memory"), {
-      x: "i",
-      y: "p", 
-      stroke: "#e74c3c",
-      strokeWidth: 3
-    }),
-    
-    // Compute-bound roof
-    Plot.line(roofline_data.filter(d => d.region === "compute"), {
-      x: "i",
-      y: "p",
-      stroke: "#3498db", 
-      strokeWidth: 3
-    }),
-    
-    // Guide lines
-    Plot.ruleY([peak_compute], {
-      stroke: "#3498db", 
-      strokeDasharray: "4,4",
-      strokeOpacity: 0.7
-    }),
-    Plot.ruleX([critical_intensity], {
-      stroke: "#999", 
-      strokeDasharray: "4,4",
-      strokeOpacity: 0.7
-    }),
-    
-    // Cross-hair pointer interaction
-    Plot.pointerX(roofline_data, {stroke: "#aaa", strokeOpacity: 0.5}),
-    Plot.pointerY(roofline_data, {stroke: "#aaa", strokeOpacity: 0.5}),
-    
-    // Kernel points with tooltips
-    Plot.dot(kernels, {
-      x: "intensity",
-      y: "performance",
-      fill: "color",
-      stroke: "#333",
-      strokeWidth: 2,
-      r: 6,
-      title: d => `${d.name}
-I = ${d.intensity} FLOP/byte
-Performance = ${d.performance} GFLOP/s
-Efficiency = ${(d.performance/peak_compute*100).toFixed(1)}% of peak`
-    }),
-    
-    // Collision-free kernel labels
-    Plot.text(kernelLabels, {
-      x: d => d.x,
-      y: d => d.y,
-      text: d => d.name,
-      fill: "#333",
-      fontSize: 11,
-      fontWeight: "bold",
-      textAnchor: "middle",
-      px: true
-    }),
-    
-    // Region labels
-    Plot.text([
-      {x: 0.3, y: peak_bandwidth * 0.4, txt: "Memory-bound"},
-      {x: 200, y: peak_compute * 0.8, txt: "Compute-bound"}
-    ], {
-      x: "x",
-      y: "y",
-      text: "txt",
-      fill: d => d.txt.includes("Memory") ? "#e74c3c" : "#3498db",
-      fontSize: 14,
-      fontWeight: "bold"
-    }),
-    
-    // Critical intensity annotation
-    Plot.text([{x: critical_intensity * 1.3, y: peak_compute * 1.1, txt: `I_crit = ${critical_intensity.toFixed(1)}`}], {
-      x: "x",
-      y: "y", 
-      text: "txt",
-      fill: "#f39c12",
-      fontSize: 12,
-      fontWeight: "bold"
-    })
-  ]
-})
+# Create the plot
+fig, ax = plt.subplots(figsize=(10, 6.5))
 
-// Legend
-legend = Plot.legend({
-  color: {
-    domain: kernels.map(d => d.name),
-    range: kernels.map(d => d.color)
-  },
-  columns: 1,
-  marginLeft: 20
-})
+# Explicitly set both axes to log_10 scale
+ax.set_xscale('log', base=10)
+ax.set_yscale('log', base=10)
+
+# Generate roofline data
+mem_i, mem_p, comp_i, comp_p = generate_roofline_data()
+
+# Plot roofline curves
+ax.loglog(mem_i, mem_p, color="#e74c3c", linewidth=3, label="Memory-bound")
+ax.loglog(comp_i, comp_p, color="#3498db", linewidth=3, label="Compute-bound")
+
+# Guide lines
+ax.axhline(y=peak_compute, color="#3498db", linestyle="--", alpha=0.7, linewidth=1)
+ax.axvline(x=critical_intensity, color="#999", linestyle="--", alpha=0.7, linewidth=1)
+
+# Plot kernel points
+for kernel in kernels:
+    ax.loglog(kernel["intensity"], kernel["performance"],
+             'o', color=kernel["color"], markersize=8,
+             markeredgecolor="#333", markeredgewidth=2)
+
+    # Add kernel labels with better positioning to avoid overlap
+    if kernel["name"] == "Naive 3×3":
+        offset_x = kernel["intensity"] * 0.7  # Move left
+        offset_y = kernel["performance"] * 0.65  # Move down
+    else:  # Shared 3×3
+        offset_x = kernel["intensity"] * 1.4  # Move right
+        offset_y = kernel["performance"] * 1.3  # Move up
+
+    ax.annotate(kernel["name"],
+               (kernel["intensity"], kernel["performance"]),
+               xytext=(offset_x, offset_y),
+               fontsize=11, fontweight="bold", ha="center",
+               bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.8))
+
+# Region labels - move Memory-bound to center and away from kernel dots
+ax.text(1.5, peak_bandwidth * 1.5, "Memory-bound",
+        color="#e74c3c", fontsize=14, fontweight="bold", ha="center")
+ax.text(200, peak_compute * 0.8, "Compute-bound",
+        color="#3498db", fontsize=14, fontweight="bold")
+
+# Critical intensity annotation
+ax.text(critical_intensity * 1.3, peak_compute * 1.1,
+        f"I_crit = {critical_intensity:.1f}",
+        color="#f39c12", fontsize=12, fontweight="bold")
+
+# Formatting
+ax.set_xlim(0.1, 1000)
+ax.set_ylim(10, 30000)
+ax.set_xlabel("Operational Intensity (FLOP/byte) - Log_10 Scale", fontsize=12)
+ax.set_ylabel("Performance (GFLOP/s) - Log_10 Scale", fontsize=12)
+ax.grid(True, alpha=0.3)
+
+# Create custom legend for kernels
+legend_elements = [plt.Line2D([0], [0], marker='o', color='w',
+                             markerfacecolor=k["color"], markersize=8,
+                             label=k["name"], markeredgecolor="#333")
+                  for k in kernels]
+ax.legend(handles=legend_elements, loc="lower right")
+
+plt.tight_layout()
+# plt.show()
+plt.savefig('./mojo_gpu_puzzles/p14_roofline_naive_and_shared.png', bbox_inches='tight')
+
+# Print performance metrics
+print("Performance Analysis:")
+print("-" * 40)
+for kernel in kernels:
+    efficiency = (kernel["performance"] / peak_compute) * 100
+    print(f"{kernel['name']}:")
+    print(f"  Intensity: {kernel['intensity']} FLOP/byte")
+    print(f"  Performance: {kernel['performance']} GFLOP/s")
+    print(f"  Efficiency: {efficiency:.1f}% of peak")
 ```
+
+</details>
 
 ### Key Insights
 
