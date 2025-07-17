@@ -23,7 +23,7 @@ format:
       - mojo_gpu_puzzles/mojo.xml
 ---
 
-Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We’ll implement and benchmark core algorithms-sliding-window pools, tile-wise convolutions, warp-level scans, and more.
+Picking up right where the the [last post](./2025-07-06-gpu-puzzles-p1.qmd) left off, this follow-up dives into the bread-and-butter building blocks of deep-learning kernels. We'll implement and benchmark core algorithms-sliding-window pools, tile-wise convolutions, warp-level scans, and more.
 
 # [Puzzle 9: Pooling](https://builds.modular.com/puzzles/puzzle_09/puzzle_09.html) {#puzzle-09}
 
@@ -106,7 +106,7 @@ Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving th
   - The active-thread count is cut in half (`stride /= 2`).
   - Each surviving thread adds its value to the partner `stride` positions away.
   - A `barrier()` guarantees all writes land before the next “half-step.”
-- After log₂ (n) halvings, Zeno’s finish line is crossed-thread 0 alone holds the final dot-product.
+- After log₂ (n) halvings, Zeno's finish line is crossed-thread 0 alone holds the final dot-product.
 
 This pattern is fast, highly parallel, and used everywhere in GPU programming for reductions (sum, min, max, etc).
 
@@ -239,7 +239,7 @@ fn dot_product[
 # [Puzzle 11: 1D Convolution](https://builds.modular.com/puzzles/puzzle_11/puzzle_11.html) {#puzzle-11}
 
 Picture sliding a magnifying glass along a long strip of film.
-That’s exactly what a 1-D convolution does to any 1-D signal-audio samples, DNA bases, even bytes of log data.
+That's exactly what a 1-D convolution does to any 1-D signal-audio samples, DNA bases, even bytes of log data.
 
 - The kernel (a small weight vector) glides over the sequence one step at a time (or more if you set stride > 1).
 - At each stop it multiplies the local window by its weights, sums the result, and drops a single number into the output map.
@@ -325,7 +325,7 @@ fn conv_1d_simple[
 
 </details>
 
-I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn’t needed for correctness-the kernel only touches the first `SIZE`/`CONV` elements-but it nicely demonstrates `LayoutTensor`’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
+I deliberately allocate `shared_a` and `shared_b` with the block width (`TPB`) instead of the input length (`SIZE`) and filter length (`CONV`). The extra space isn't needed for correctness-the kernel only touches the first `SIZE`/`CONV` elements-but it nicely demonstrates `LayoutTensor`'s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.  
 
 
 The _optimal_ allocation of shared memory would be:
@@ -354,7 +354,7 @@ The _optimal_ allocation of shared memory would be:
 
 When unroll is in effect, the optimizer determines and applies the best unrolling factor for each loop; in some cases, the loop control might be modified to avoid unnecessary branching. The compiler remains the final arbiter of whether the loop is unrolled[@nvidiapragmaunroll].
 
-`@parameter` isn’t limited to loops/branches-you can slap it on an inner
+`@parameter` isn't limited to loops/branches-you can slap it on an inner
 function and Mojo will build a **parametric closure**, defined as[@mojoparameter]: 
 
 > A parametric closure is a nested function decorated with `@parameter`.
@@ -366,7 +366,7 @@ Example:
 
 ```{.mojo filename=parametric_closure.mojo}
 fn make_shift(off: Int):
-    @parameter            # ← specialised per ‘off’
+    @parameter            # ← specialised per ‘off'
     fn shift(x: Int) -> Int:
         return x + off
     return shift
@@ -379,8 +379,8 @@ No runtime captures, no heap boxing-the constant `off` is literally
 spliced into the generated IR, so calls to `s1`/`s4` inline like normal
 code and can be further unrolled or constant-folded.
 
-Why is this safe?  Mojo’s *origin* system[@mojo_lifetimes] assigns each compile-time constant its own immutable origin.
-The closure therefore can’t outlive or mutate the thing it captured;
+Why is this safe?  Mojo's *origin* system[@mojo_lifetimes] assigns each compile-time constant its own immutable origin.
+The closure therefore can't outlive or mutate the thing it captured;
 once the surrounding scope ends those origins die too, guaranteeing that
 the specialised code never touches expired storage.
 
@@ -398,7 +398,7 @@ The blue cells are the data *owned* by the current thread-block. The orange cell
 
 Run a 1-D convolution with a `CONV₂`-tap kernel over an input that is longer than one block (`TPB` threads). We want every thread to:
 
-• pull data from **shared memory only** (once it’s loaded, stay in-block)  
+• pull data from **shared memory only** (once it's loaded, stay in-block)  
 • avoid divergent branches and random global reads  
 • keep the load pattern fully coalesced
 
@@ -410,7 +410,7 @@ Give each block an in-block “fence extension”:
 
     shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo
 
-The extra `(CONV₂ − 1)` slots-the *halo*-mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we’re already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
+The extra `(CONV₂ − 1)` slots-the *halo*-mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we're already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
 
 The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as _halo cells_ or _skirt cells_ since they “hang” from the side of the part that is used solely by a single block[@iitd_parallel_convolution].
 
@@ -695,7 +695,7 @@ The **prefix sum** (or *scan*) problem takes an input array `[a₀, a₁, …, a
 [a₀, (a₀ ⊕ a₁), …, (a₀ ⊕ a₁ ⊕ … ⊕ aₙ₋₁)]
 ```
 
-It’s a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.
+It's a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.
 
 ![Prefix‐Sum Illustration](mojo_gpu_puzzles/p12_prefix_scan.png){fig-align='center'}
 
@@ -754,20 +754,20 @@ pixi run p12 --simple
 Each of the log₂(n) rounds does up to n parallel additions (one per active element), so total work is $\sum_k n = nlog(n)$.
 Because rounds are serialized by barriers, the longest dependency chain is one add per round i.e $O(log n)$.
 
-## Blelloch’s Two‐Pass Algorithm
+## Blelloch's Two‐Pass Algorithm
 
-Blelloch’s two-pass scan does Θ(n) work by splitting the job into an **up-sweep** (build a reduction tree) and a **down-sweep** (propagate prefixes) [@blelloch_prefix_sum].
+Blelloch's two-pass scan does Θ(n) work by splitting the job into an **up-sweep** (build a reduction tree) and a **down-sweep** (propagate prefixes) [@blelloch_prefix_sum].
 
 Why prefer it over the classic Hillis–Steele (Algorithm 1)?
 
 1. Hardware reality.  
    Hillis–Steele assumes one processor per element and updates the array *in-place* every round.  
-   A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+   A real GPU doesn't grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost.  
    Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
-3. Blelloch’s fix.  
+3. Blelloch's fix.  
    • Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.  
    • Only two global barriers are needed (one between the phases, one at the end).  
    • Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.
@@ -869,7 +869,7 @@ We split the global scan into two bite-sized passes:
 
 1. Each block copies its slice into shared memory.  
 2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.  
-3. The last thread of the block stashes the block’s total **after** the scan into an auxiliary slot at the tail of `output`:  
+3. The last thread of the block stashes the block's total **after** the scan into an auxiliary slot at the tail of `output`:  
 
    ```
    #  |<---  SIZE_2  --->|<-- #blocks -->|
@@ -1119,11 +1119,11 @@ pixi run p14 --naive
 ```
 
 The Roofline Model offers a first-order answer to a GPU performance question: is my kernel limited by arithmetic throughput or by memory bandwidth?  
-It does so by plotting operational intensity (FLOPs per byte) against two ceilings—the hardware’s peak FLOP/s and peak DRAM bandwidth—so you can see at a glance which resource is the bottleneck.
+It does so by plotting operational intensity (FLOPs per byte) against two ceilings - the hardware's peak FLOP/s and peak DRAM bandwidth—so you can see at a glance which resource is the bottleneck.
 
 ## [Roofline Model](https://builds.modular.com/puzzles/puzzle_14/roofline.html)
 
-> Note: The Modular GPU Puzzles [guide](https://builds.modular.com/puzzles/puzzle_14/roofline.html) already walks through the full roofline derivation, but we’ll repeat it here so that you can follow along without leaving this post.
+> Note: The Modular GPU Puzzles [guide](https://builds.modular.com/puzzles/puzzle_14/roofline.html) already walks through the full roofline derivation, but we'll repeat it here so that you can follow along without leaving this post.
 
 The first step is abstracting the hardware-software complexity into a tractable model.
 
@@ -1169,7 +1169,7 @@ This ratio is all that survives of the algorithm - prologue/epilogue work, contr
 | S2 | Single operational intensity | Steady-state loop | Real kernels mix phases | Gather/scatter, epilogue code |
 | S3 | Launch/transfer overhead small | Long kernel runs | Amortised over many iterations | Micro-benchmarks, chaining |
 
-### The Roofline Equation
+### Naive Roofline Model
 
 With these assumptions, hardware and software collapse to one parameter—the operational intensity $I$—and attainable performance becomes
 
@@ -1197,6 +1197,228 @@ What actually works:
 2. **Redraw the roofline** using measured ceilings—L2 roof, Tensor-core roof, not just DRAM and peak FLOPs
 3. **Adjust your kernel**: boost $I$ (tiling, shared memory, tensor ops) or raise the ceilings (improve occupancy, reduce stalls)
 
-> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-ters). I’ll fix it and share a profiler deep-dive soon. Stay tuned!
+> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-ters). I'll fix it and share a profiler deep-dive soon. Stay tuned!
 
 The textbook roofline is a guide, not reality. Measure, adapt, and push your kernel as close to the real limits as you can.
+
+## Roofline Estimation
+
+Let's apply the roofline model to a 3×3 matrix multiplication, which is still small enough to hand-calculate.
+
+### Hardware Specs
+
+The RTX 4000 Ada provides[@rtx_ada_specs]:
+
+- **Peak compute**: 26.7 TFLOPS (single-precision)  
+- **Peak DRAM bandwidth**: 360 GB/s  
+- **Critical intensity**: $I_{crit} = \frac{26.7 \times 10^{12}}{360 \times 10^9} = 74.2$ FLOP/byte
+
+### Naive 3×3 MatMul Analysis
+
+For $C = A \times B$ where all matrices are 3×3:
+
+**Compute work:**
+
+- Each output element is a dot product of length 3
+- 3 fused multiply-adds → 3 FLOPs per output element
+- 9 elements → 27 FLOPs total
+
+**DRAM traffic:**
+
+- Load matrix A: 9 floats × 4 bytes = 36 bytes
+- Load matrix B: 9 floats × 4 bytes = 36 bytes  
+- Store matrix C: 9 floats × 4 bytes = 36 bytes
+- Total: **108 bytes**
+
+**Operational intensity:**
+$$I_{naive} = \frac{27 \text{ FLOPs}}{108 \text{ bytes}} = 0.25 \text{ FLOP/byte}$$
+
+Since $I_{naive} = 0.25 \ll I_{crit} = 74.2$, this kernel is **memory-bound**.
+
+**Predicted performance:**
+
+$$P_{naive} = \min(26.7 \text{ TFLOPS}, 0.25 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 90 \text{ GFLOPS}) = \boxed{90 \text{ GFLOPS}}$$
+
+### Shared Memory Optimization
+
+By staging 3×3 tiles of A and B in shared memory, each element feeds all three required dot products instead of being fetched repeatedly from DRAM.
+
+**Improved traffic pattern:**
+
+- DRAM loads for A and B drop by ≈3×
+- Stores remain unchanged (36 bytes)
+- Approximate traffic: $(36+36)/3 + 36 = 60$ bytes
+
+**New operational intensity:**
+
+$$I_{shared} = \frac{27 \text{ FLOPs}}{60 \text{ bytes}} = 0.45 \text{ FLOP/byte}$$
+
+**Predicted performance:**
+
+$$P_{shared} = \min(26.7 \text{ TFLOPS}, 0.45 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 162 \text{ GFLOPS}) = \boxed{162 \text{ GFLOPS}}$$
+
+This gives us a **1.8× speedup** from shared memory optimization, but we're still memory-bound.
+
+```{ojs}
+//| echo: false
+//| fig-cap: "RTX 4000 Ada roofline showing 3×3 matrix multiplication performance"
+
+// Load the full D3 bundle (includes d3-force) under a different name to avoid conflict with Plot's d3
+d3Full = require("d3@7")
+
+// Hardware specifications
+peak_compute = 26.7 * 1000 // Convert to GFLOPS
+peak_bandwidth = 360 // GB/s
+critical_intensity = peak_compute / peak_bandwidth
+
+// Kernel data points
+kernels = [
+  {name: "Naive 3×3", intensity: 0.25, performance: 90, color: "#f39c12"},
+  {name: "Shared 3×3", intensity: 0.45, performance: 162, color: "#27ae60"}
+]
+
+// Generate roofline data
+roofline_data = {
+  const crit = peak_compute / peak_bandwidth;
+  return [
+    ...d3.range(0.01, crit, 0.05).map(i => ({i, p: i * peak_bandwidth, region: "memory"})),
+    ...d3.range(crit, 1000, 5).map(i => ({i, p: peak_compute, region: "compute"}))
+  ];
+}
+
+// Collision-free kernel labels using force simulation
+kernelLabels = {
+  const labels = kernels.map(d => ({...d}));
+  const xScale = d3.scaleLog().domain([0.1, 1000]).range([0, 600]);
+  const yScale = d3.scaleLog().domain([10, 30000]).range([400, 0]);
+  
+  const simulation = d3Full.forceSimulation(labels)
+    .force("x", d3Full.forceX(d => xScale(d.intensity)).strength(0.3))
+    .force("y", d3Full.forceY(d => yScale(d.performance) - 20).strength(0.3))
+    .force("collide", d3Full.forceCollide(15))
+    .stop();
+
+  for (let i = 0; i < 300; ++i) simulation.tick();
+  return labels;
+}
+
+plot = Plot.plot({
+  width: 700,
+  height: 450,
+  marginLeft: 80,
+  marginBottom: 60,
+  title: "RTX 4000 Ada Roofline: 3×3 Matrix Multiplication",
+  x: {
+    type: "log",
+    domain: [0.1, 1000],
+    label: "Operational Intensity (FLOP/byte)",
+    grid: true
+  },
+  y: {
+    type: "log", 
+    domain: [10, 30000],
+    label: "Performance (GFLOP/s)",
+    grid: true
+  },
+  marks: [
+    // Memory-bound roof
+    Plot.line(roofline_data.filter(d => d.region === "memory"), {
+      x: "i",
+      y: "p", 
+      stroke: "#e74c3c",
+      strokeWidth: 3
+    }),
+    
+    // Compute-bound roof
+    Plot.line(roofline_data.filter(d => d.region === "compute"), {
+      x: "i",
+      y: "p",
+      stroke: "#3498db", 
+      strokeWidth: 3
+    }),
+    
+    // Guide lines
+    Plot.ruleY([peak_compute], {
+      stroke: "#3498db", 
+      strokeDasharray: "4,4",
+      strokeOpacity: 0.7
+    }),
+    Plot.ruleX([critical_intensity], {
+      stroke: "#999", 
+      strokeDasharray: "4,4",
+      strokeOpacity: 0.7
+    }),
+    
+    // Cross-hair pointer interaction
+    Plot.pointerX(roofline_data, {stroke: "#aaa", strokeOpacity: 0.5}),
+    Plot.pointerY(roofline_data, {stroke: "#aaa", strokeOpacity: 0.5}),
+    
+    // Kernel points with tooltips
+    Plot.dot(kernels, {
+      x: "intensity",
+      y: "performance",
+      fill: "color",
+      stroke: "#333",
+      strokeWidth: 2,
+      r: 6,
+      title: d => `${d.name}
+I = ${d.intensity} FLOP/byte
+Performance = ${d.performance} GFLOP/s
+Efficiency = ${(d.performance/peak_compute*100).toFixed(1)}% of peak`
+    }),
+    
+    // Collision-free kernel labels
+    Plot.text(kernelLabels, {
+      x: d => d.x,
+      y: d => d.y,
+      text: d => d.name,
+      fill: "#333",
+      fontSize: 11,
+      fontWeight: "bold",
+      textAnchor: "middle",
+      px: true
+    }),
+    
+    // Region labels
+    Plot.text([
+      {x: 0.3, y: peak_bandwidth * 0.4, txt: "Memory-bound"},
+      {x: 200, y: peak_compute * 0.8, txt: "Compute-bound"}
+    ], {
+      x: "x",
+      y: "y",
+      text: "txt",
+      fill: d => d.txt.includes("Memory") ? "#e74c3c" : "#3498db",
+      fontSize: 14,
+      fontWeight: "bold"
+    }),
+    
+    // Critical intensity annotation
+    Plot.text([{x: critical_intensity * 1.3, y: peak_compute * 1.1, txt: `I_crit = ${critical_intensity.toFixed(1)}`}], {
+      x: "x",
+      y: "y", 
+      text: "txt",
+      fill: "#f39c12",
+      fontSize: 12,
+      fontWeight: "bold"
+    })
+  ]
+})
+
+// Legend
+legend = Plot.legend({
+  color: {
+    domain: kernels.map(d => d.name),
+    range: kernels.map(d => d.color)
+  },
+  columns: 1,
+  marginLeft: 20
+})
+```
+
+### Key Insights
+
+1. **Intensity grows with matrix size** — For naive $N \times N$ GEMM: $I = \frac{N^3}{4N^2} = \frac{N}{4}$ FLOP/byte
+2. **Small kernels are bandwidth-bound** — Even perfect caching can't reach the 74 FLOP/byte crossover until $N \approx 300$
+3. **Shared memory helps, but only up to the ridge** — Further speedups require compute-side tuning (tensor cores, ILP, etc.)
+
+This 3×3 case illustrates the arithmetic-vs-bandwidth trade-off without drowning in large-matrix algebra.
