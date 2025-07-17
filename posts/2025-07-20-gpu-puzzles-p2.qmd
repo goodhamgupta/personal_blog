@@ -1268,7 +1268,7 @@ This gives us a **1.8× speedup** from shared memory optimization, but we're sti
 ![RTX 4000 Ada Roofline for Matmul](mojo_gpu_puzzles/p14_roofline_naive_and_shared.png)
 
 <details closed>
-<summary> **Solution** </summary>
+<summary> **Plot Code** </summary>
 ```{.py filename="roofline_plot.py"}
 # /// script
 # dependencies = [
