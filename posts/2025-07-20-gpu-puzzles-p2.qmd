@@ -3,7 +3,8 @@ title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
 draft: true
 draft-mode: unlinked
-date: '2025-07-08'
+image: mojo_gpu_puzzles/p11_block_boundary.png
+date: '2025-07-20'
 author: Shubham Gupta
 description: "Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs & warp-speed scans"
 toc: true
@@ -1196,6 +1197,6 @@ What actually works:
 2. **Redraw the roofline** using measured ceilings—L2 roof, Tensor-core roof, not just DRAM and peak FLOPs
 3. **Adjust your kernel**: boost $I$ (tiling, shared memory, tensor ops) or raise the ceilings (improve occupancy, reduce stalls)
 
-> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters). I’ll fix it and share a profiler deep-dive soon. Stay tuned!
+> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-ters). I’ll fix it and share a profiler deep-dive soon. Stay tuned!
 
 The textbook roofline is a guide, not reality. Measure, adapt, and push your kernel as close to the real limits as you can.
