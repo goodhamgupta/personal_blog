@@ -383,8 +383,7 @@ The closure therefore can’t outlive or mutate the thing it captured;
 once the surrounding scope ends those origins die too, guaranteeing that
 the specialised code never touches expired storage.
 
-**Bottom line**: you get closure ergonomics plus “zero-cost abstraction”[@zero_cost_abstractions]
-performance-ideal for GPU kernels where every cycle and register matters.
+In summary, you get closure ergonomics plus "zero-cost abstraction"[@zero_cost_abstractions] performance-ideal for GPU kernels where every cycle and register matters.
 
 ## Block Boundary
 
@@ -1125,20 +1124,35 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 
 > Note: The Modular GPU Puzzles [guide](https://builds.modular.com/puzzles/puzzle_14/roofline.html) already walks through the full roofline derivation, but we’ll repeat it here so that you can follow along without leaving this post.
 
-As the walkthrough video[@nhrfau_roofline_model] shows, the first step in analysing a kernel is to abstract the messy hardware–software dance into a lean, tractable model. 
+The first step is abstracting the hardware-software complexity into a tractable model.
 
-### Hardware Model Assumptions
+### Hardware Model
 
-Classic roofline assumes ideal hardware and perfect overlap:
+Classic roofline assumes ideal hardware with perfect overlap:
 
 ![Source: NHR at FAU[@nhrfau_roofline_model]](mojo_gpu_puzzles/p14_hardware.png){fig-align="center" width=40%}
 
-The roofline reduces the entire processor to just two idealised resources:
+The cartoon GPU has only two levers:
 
-- **Compute engine** — can execute at most $P_{peak}$ operations per second (FLOP/s, integer ops/s, etc.).  
-- **Memory datapath** — can supply/return data at most $b_s$ bytes per second.
+- **Compute engine** — peak rate $P_{peak}$ (FLOP/s, integer ops/s, etc.)
+- **Memory datapath** — peak bandwidth $b_s$ (bytes/s)
 
-In this cartoon the whole GPU collapses to just two levers, $P_{peak} and $b_s$. That only works if three optimistic assumptions hold:
+### Software Model
+
+![Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]](mojo_gpu_puzzles/p14_software.png){fig-align="center" width=60%}
+
+We collapse the kernel's steady-state loop to:
+
+- $N$ floating-point operations per iteration
+- $V$ bytes moved per iteration
+
+The **operational intensity** is defined as:
+
+$$I = \frac{N}{V} \text{ flop/byte}$$
+
+This ratio is all that survives of the algorithm - prologue/epilogue work, control flow, and synchronizations are swept aside.
+
+**Hardware Assumptions:**
 
 | # | Assumption | Works because… | Reality | Breaks when… |
 |---|------------|----------------|---------|--------------|
@@ -1146,18 +1160,7 @@ In this cartoon the whole GPU collapses to just two levers, $P_{peak} and $b_s$.
 | H2 | Peak FLOP/s reachable | Full FMA rate | All ALUs busy every cycle | Divergence, low occupancy |
 | H3 | One bandwidth number is enough | DRAM dominates | L1/L2/SMEM add separate roofs | Lower-level choke points |
 
-### Software Model Assumptions 
-
-![Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]](mojo_gpu_puzzles/p14_software.png){fig-align="center" width=60%}
-
-We turn the kernel into a single steady-state loop that issues N flops and moves V bytes per trip:
-
-• Every trip around the loop streams V bytes to/from memory.  
-• Every trip performs N floating-point operations.  
-
-That single ratio I = N / V (flops per byte) is all that survives of the algorithm; prologue/epilogue work, control flow, synchronisations, and small-constant terms are deliberately swept aside.
-
-For that caricature to be predictive we quietly assume:
+**Software Assumptions:**
 
 | # | Assumption | Works because… | Reality | Breaks when… |
 |---|------------|----------------|---------|--------------|
@@ -1165,9 +1168,9 @@ For that caricature to be predictive we quietly assume:
 | S2 | Single operational intensity | Steady-state loop | Real kernels mix phases | Gather/scatter, epilogue code |
 | S3 | Launch/transfer overhead small | Long kernel runs | Amortised over many iterations | Micro-benchmarks, chaining |
 
-### Naïve Roofline — the "ideal-case" limit
+### The Roofline Equation
 
-With the six rosy assumptions (H1-H3, S1-S3) in place, all of hardware × software collapses to one scalar knob—the operational intensity I = N/V [flop/byte]—and the attainable performance becomes
+With these assumptions, hardware and software collapse to one parameter—the operational intensity $I$—and attainable performance becomes
 
 $$
 \begin{aligned}
@@ -1176,17 +1179,23 @@ I_{\text{crit}} &= \frac{P_{\text{peak}}}{b_s}
 \end{aligned}
 $$
 
-At the critical intensity I_crit the bandwidth roof intersects the compute roof, cleanly splitting kernels into two classes:
+At the critical intensity $I_{crit}$, the bandwidth and compute roofs intersect, splitting kernels into two classes:
 
-- **Memory-bound** (I < I_crit) → P rises linearly with slope b_s.  
-- **Compute-bound** (I ≥ I_crit) → P plateaus at P_peak.
+- **Memory-bound** ($I < I_{crit}$) → Performance rises linearly with $I$
+- **Compute-bound** ($I \geq I_{crit}$) → Performance plateaus at $P_{peak}$
 
-![Naïve roofline: slanted red BW roof, flat blue compute roof, kernel dot.](mojo_gpu_puzzles/p14_roofline.png){fig-align="center" width=60%}
+![Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel's operational intensity marked as a dot.](mojo_gpu_puzzles/p14_roofline.png){fig-align="center" width=60%}
 
-Why care? In tiny puzzle kernels S1 & S3 already wobble; in production workloads H1-H3 break down too, so the "ideal" roof is optimistic. Practical fix:
+### Where the Roofline Model Fails
 
-1. Measure real ceilings (Nsight, rocprof).  
-2. Re-plot with those numbers (e.g., "L2 roof", "Tensor-core roof").  
-3. Move your dot: raise I (tiling, SMEM, Tensor) or lift the ceilings (occupancy, stall cuts).
+Even in small puzzle kernels, these assumptions falter. In real workloads, they break down completely.
 
-Next we'll relax the assumptions one by one.
+What actually works:
+
+1. **Measure real limits** with tools like Nsight or rocprof
+2. **Redraw the roofline** using measured ceilings—L2 roof, Tensor-core roof, not just DRAM and peak FLOPs
+3. **Adjust your kernel**: boost $I$ (tiling, shared memory, tensor ops) or raise the ceilings (improve occupancy, reduce stalls)
+
+> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters). I’ll fix it and share a profiler deep-dive soon. Stay tuned!
+
+The textbook roofline is a guide, not reality. Measure, adapt, and push your kernel as close to the real limits as you can.

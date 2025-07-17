@@ -282,9 +282,10 @@ window.Quarto = {
   <li><a href="#shared-memory-version" id="toc-shared-memory-version" class="nav-link" data-scroll-target="#shared-memory-version">Shared Memory Version</a></li>
   <li><a href="#roofline-model" id="toc-roofline-model" class="nav-link" data-scroll-target="#roofline-model">Roofline Model</a>
   <ul class="collapse">
-  <li><a href="#hardware-model-assumptions" id="toc-hardware-model-assumptions" class="nav-link" data-scroll-target="#hardware-model-assumptions">Hardware Model Assumptions</a></li>
-  <li><a href="#software-model-assumptions" id="toc-software-model-assumptions" class="nav-link" data-scroll-target="#software-model-assumptions">Software Model Assumptions</a></li>
-  <li><a href="#naïve-roofline-the-ideal-case-limit" id="toc-naïve-roofline-the-ideal-case-limit" class="nav-link" data-scroll-target="#naïve-roofline-the-ideal-case-limit">Naïve Roofline — the “ideal-case” limit</a></li>
+  <li><a href="#hardware-model" id="toc-hardware-model" class="nav-link" data-scroll-target="#hardware-model">Hardware Model</a></li>
+  <li><a href="#software-model" id="toc-software-model" class="nav-link" data-scroll-target="#software-model">Software Model</a></li>
+  <li><a href="#the-roofline-equation" id="toc-the-roofline-equation" class="nav-link" data-scroll-target="#the-roofline-equation">The Roofline Equation</a></li>
+  <li><a href="#where-the-roofline-model-fails" id="toc-where-the-roofline-model-fails" class="nav-link" data-scroll-target="#where-the-roofline-model-fails">Where the Roofline Model Fails</a></li>
   </ul></li>
   </ul></li>
   </ul>
@@ -653,7 +654,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </div>
 <p>No runtime captures, no heap boxing-the constant <code>off</code> is literally spliced into the generated IR, so calls to <code>s1</code>/<code>s4</code> inline like normal code and can be further unrolled or constant-folded.</p>
 <p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes"><a href="#ref-mojo_lifetimes" role="doc-biblioref">[6]</a></span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
-<p><strong>Bottom line</strong>: you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[7]</a></span> performance-ideal for GPU kernels where every cycle and register matters.</p>
+<p>In summary, you get closure ergonomics plus “zero-cost abstraction”<span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[7]</a></span> performance-ideal for GPU kernels where every cycle and register matters.</p>
 </section>
 </section>
 <section id="block-boundary" class="level2">
@@ -1360,23 +1361,39 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <blockquote class="blockquote">
 <p>Note: The Modular GPU Puzzles <a href="https://builds.modular.com/puzzles/puzzle_14/roofline.html">guide</a> already walks through the full roofline derivation, but we’ll repeat it here so that you can follow along without leaving this post.</p>
 </blockquote>
-<p>As the walkthrough video<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span> shows, the first step in analysing a kernel is to abstract the messy hardware–software dance into a lean, tractable model.</p>
-<section id="hardware-model-assumptions" class="level3">
-<h3 class="anchored" data-anchor-id="hardware-model-assumptions">Hardware Model Assumptions</h3>
-<p>Classic roofline assumes ideal hardware and perfect overlap:</p>
+<p>The first step is abstracting the hardware-software complexity into a tractable model.</p>
+<section id="hardware-model" class="level3">
+<h3 class="anchored" data-anchor-id="hardware-model">Hardware Model</h3>
+<p>Classic roofline assumes ideal hardware with perfect overlap:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" data-glightbox="description: .lightbox-desc-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[12]"></a></p>
 <figcaption>Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></figcaption>
 </figure>
 </div>
-<p>The roofline reduces the entire processor to just two idealised resources:</p>
+<p>The cartoon GPU has only two levers:</p>
 <ul>
-<li><strong>Compute engine</strong> — can execute at most <span class="math inline">\(P_{peak}\)</span> operations per second (FLOP/s, integer ops/s, etc.).<br>
-</li>
-<li><strong>Memory datapath</strong> — can supply/return data at most <span class="math inline">\(b_s\)</span> bytes per second.</li>
+<li><strong>Compute engine</strong> — peak rate <span class="math inline">\(P_{peak}\)</span> (FLOP/s, integer ops/s, etc.)</li>
+<li><strong>Memory datapath</strong> — peak bandwidth <span class="math inline">\(b_s\)</span> (bytes/s)</li>
 </ul>
-<p>In this cartoon the whole GPU collapses to just two levers, $P_{peak} and <span class="math inline">\(b_s\)</span>. That only works if three optimistic assumptions hold:</p>
+</section>
+<section id="software-model" class="level3">
+<h3 class="anchored" data-anchor-id="software-model">Software Model</h3>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" data-glightbox="description: .lightbox-desc-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[12]"></a></p>
+<figcaption>Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></figcaption>
+</figure>
+</div>
+<p>We collapse the kernel’s steady-state loop to:</p>
+<ul>
+<li><span class="math inline">\(N\)</span> floating-point operations per iteration</li>
+<li><span class="math inline">\(V\)</span> bytes moved per iteration</li>
+</ul>
+<p>The <strong>operational intensity</strong> is defined as:</p>
+<p><span class="math display">\[I = \frac{N}{V} \text{ flop/byte}\]</span></p>
+<p>This ratio is all that survives of the algorithm - prologue/epilogue work, control flow, and synchronizations are swept aside.</p>
+<p><strong>Hardware Assumptions:</strong></p>
 <table class="table">
 <colgroup>
 <col style="width: 5%">
@@ -1418,20 +1435,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 </tr>
 </tbody>
 </table>
-</section>
-<section id="software-model-assumptions" class="level3">
-<h3 class="anchored" data-anchor-id="software-model-assumptions">Software Model Assumptions</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" data-glightbox="description: .lightbox-desc-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[12]"></a></p>
-<figcaption>Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></figcaption>
-</figure>
-</div>
-<p>We turn the kernel into a single steady-state loop that issues N flops and moves V bytes per trip:</p>
-<p>• Every trip around the loop streams V bytes to/from memory.<br>
-• Every trip performs N floating-point operations.</p>
-<p>That single ratio I = N / V (flops per byte) is all that survives of the algorithm; prologue/epilogue work, control flow, synchronisations, and small-constant terms are deliberately swept aside.</p>
-<p>For that caricature to be predictive we quietly assume:</p>
+<p><strong>Software Assumptions:</strong></p>
 <table class="table">
 <colgroup>
 <col style="width: 5%">
@@ -1474,36 +1478,40 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 </tbody>
 </table>
 </section>
-<section id="naïve-roofline-the-ideal-case-limit" class="level3">
-<h3 class="anchored" data-anchor-id="naïve-roofline-the-ideal-case-limit">Naïve Roofline — the “ideal-case” limit</h3>
-<p>With the six rosy assumptions (H1-H3, S1-S3) in place, all of hardware × software collapses to one scalar knob—the operational intensity I = N/V [flop/byte]—and the attainable performance becomes</p>
+<section id="the-roofline-equation" class="level3">
+<h3 class="anchored" data-anchor-id="the-roofline-equation">The Roofline Equation</h3>
+<p>With these assumptions, hardware and software collapse to one parameter—the operational intensity <span class="math inline">\(I\)</span>—and attainable performance becomes</p>
 <p><span class="math display">\[
 \begin{aligned}
 P(I) &amp;= \min\!\bigl(P_{\text{peak}},\, I\,b_s\bigr) \\
 I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 \end{aligned}
 \]</span></p>
-<p>At the critical intensity I_crit the bandwidth roof intersects the compute roof, cleanly splitting kernels into two classes:</p>
+<p>At the critical intensity <span class="math inline">\(I_{crit}\)</span>, the bandwidth and compute roofs intersect, splitting kernels into two classes:</p>
 <ul>
-<li><strong>Memory-bound</strong> (I &lt; I_crit) → P rises linearly with slope b_s.<br>
-</li>
-<li><strong>Compute-bound</strong> (I ≥ I_crit) → P plateaus at P_peak.</li>
+<li><strong>Memory-bound</strong> (<span class="math inline">\(I &lt; I_{crit}\)</span>) → Performance rises linearly with <span class="math inline">\(I\)</span></li>
+<li><strong>Compute-bound</strong> (<span class="math inline">\(I \geq I_{crit}\)</span>) → Performance plateaus at <span class="math inline">\(P_{peak}\)</span></li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" data-glightbox="description: .lightbox-desc-20" title="Naïve roofline: slanted red BW roof, flat blue compute roof, kernel dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Naïve roofline: slanted red BW roof, flat blue compute roof, kernel dot."></a></p>
-<figcaption>Naïve roofline: slanted red BW roof, flat blue compute roof, kernel dot.</figcaption>
+<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" data-glightbox="description: .lightbox-desc-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
+<figcaption>Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</figcaption>
 </figure>
 </div>
-<p>Why care? In tiny puzzle kernels S1 &amp; S3 already wobble; in production workloads H1-H3 break down too, so the “ideal” roof is optimistic. Practical fix:</p>
+</section>
+<section id="where-the-roofline-model-fails" class="level3">
+<h3 class="anchored" data-anchor-id="where-the-roofline-model-fails">Where the Roofline Model Fails</h3>
+<p>Even in small puzzle kernels, these assumptions falter. In real workloads, they break down completely.</p>
+<p>What actually works:</p>
 <ol type="1">
-<li>Measure real ceilings (Nsight, rocprof).<br>
-</li>
-<li>Re-plot with those numbers (e.g., “L2 roof”, “Tensor-core roof”).<br>
-</li>
-<li>Move your dot: raise I (tiling, SMEM, Tensor) or lift the ceilings (occupancy, stall cuts).</li>
+<li><strong>Measure real limits</strong> with tools like Nsight or rocprof</li>
+<li><strong>Redraw the roofline</strong> using measured ceilings—L2 roof, Tensor-core roof, not just DRAM and peak FLOPs</li>
+<li><strong>Adjust your kernel</strong>: boost <span class="math inline">\(I\)</span> (tiling, shared memory, tensor ops) or raise the ceilings (improve occupancy, reduce stalls)</li>
 </ol>
-<p>Next we’ll relax the assumptions one by one.</p>
+<blockquote class="blockquote">
+<p>Unfortunately no Nsight eye-candy as of yet - my <code>ncu</code> setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-performance-counters). I’ll fix it and share a profiler deep-dive soon. Stay tuned!</p>
+</blockquote>
+<p>The textbook roofline is a guide, not reality. Measure, adapt, and push your kernel as close to the real limits as you can.</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -1520,7 +1528,7 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 <span class="glightbox-desc lightbox-desc-17">Matmul with shared memory</span>
 <span class="glightbox-desc lightbox-desc-18">Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></span>
 <span class="glightbox-desc lightbox-desc-19">Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[12]</a></span></span>
-<span class="glightbox-desc lightbox-desc-20">Naïve roofline: slanted red BW roof, flat blue compute roof, kernel dot.</span>
+<span class="glightbox-desc lightbox-desc-20">Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</span>
 </div>
 
 </section>
@@ -2089,7 +2097,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","loop":false,"descPosition":"bottom","openEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-03-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"descPosition":"bottom","closeEffect":"zoom","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
