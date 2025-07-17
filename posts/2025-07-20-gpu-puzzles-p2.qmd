@@ -416,13 +416,13 @@ The elements that are involved in multiple tiles and loaded by multiple blocks a
 
 Loading recipe (matches the numbered arrows in the figure):
 
-1. **Bulk copy** – all `TPB` threads dump their element:  
+1. **Bulk copy** - all `TPB` threads dump their element:  
    `shared_a[t] = a[blockStart + t]`
-2. **Halo fill** – threads `t < (CONV₂ − 1)` copy the tail:  
+2. **Halo fill** - threads `t < (CONV₂ − 1)` copy the tail:  
    `shared_a[TPB + t] = (a[blockStart + TPB + t] if in-range else 0)`
-3. **Kernel stash** – threads `t < CONV₂` cache the weights:  
+3. **Kernel stash** - threads `t < CONV₂` cache the weights:  
    `shared_b[t] = b[t]`
-4. `barrier()` – everyone syncs
+4. `barrier()` - everyone syncs
 
 After step 4 every thread sees:
 
@@ -500,23 +500,37 @@ pixi run p11 --block-boundary
 </details>
 
 
-# 2D Indexing: From Lines to Chessboards {#indexing}
+# From 1D Strips to 2D Tiles {#indexing}
 
-The 1D convolution examples above used simple linear indexing, but many GPU algorithms-2D convolution, matrix multiplication, image processing-naturally work with 2D data structures. Let's build intuition for how CUDA/Mojo organizes threads, blocks, and grids in two spatial dimensions, which forms the foundation for all 2D GPU operations.
+Sliding a 1D window over an audio buffer was straightforward: one axis, one index. Images and matrices, however, live on chessboards, not lines. To convolve or multiply them efficiently we need to map **two spatial dimensions** onto the GPU's grid-block-thread hierarchy.
 
-### The 2D Hierarchy
+### Thread Hierarchy in 2D
 
-The GPU execution model extends naturally to 2D:
+The GPU execution model extends naturally to 2D with a three-level hierarchy:
 
-- **Grid** = the whole launch, like a city laid out in streets (x) and avenues (y)
-- **Block** = one square of that city; all threads inside can share fast memory  
-- **Thread** = a house in that square
+| Level     | Analogy       | Coordinates                        |
+|-----------|---------------|------------------------------------|
+| **Grid**  | City          | `(blockIdx.x, blockIdx.y)`        |
+| **Block** | City block    | `(threadIdx.x, threadIdx.y)`      |
+| **Thread**| House         | computed from block + thread IDs  |
 
 ![2D Block Layout](mojo_gpu_puzzles/p13_block.png){fig-align='left'}
 
-Inside one block (blockDim.x × blockDim.y threads):
+Within each block, you choose the thread footprint at kernel launch with `THREADS_PER_BLOCK = (blockDim.x, blockDim.y)`, giving `blockDim.x * blockDim.y` total threads per block.
 
 ![2D Thread Layout](mojo_gpu_puzzles/p13_thread.png)
+
+### What's a Warp? {#warp}
+
+Under the hood, the GPU executes **32 threads at once** in groups called **warps** (AMD calls them _wavefronts_[@amd_gpu_basics]). All 32 lanes run the same instruction each cycle (SIMT). Thread divergence or uncoalesced memory access forces the warp to serialize, so we design our 2D tiles around these 32-lane chunks.
+
+**Hardware facts:**
+
+- **SIMT execution**: All 32 threads in a warp execute the same instruction. Branching splits the warp and runs paths serially.
+- **Memory coalescing**: A warp performs one 32-lane memory request when threads access consecutive addresses.
+- **Occupancy**: The number of warps that can run simultaneously on a streaming multiprocessor, limited by registers and shared memory per block.
+
+Grids and blocks are a programmer-friendly abstraction. Warps are what the hardware actually schedules.
 
 ### Computing Global Matrix Indices
 
@@ -542,13 +556,15 @@ alias BLOCKS_PER_GRID = (BLOCKS_X, BLOCKS_Y)
 alias THREADS_PER_BLOCK = (TILE_X, TILE_Y)
 ```
 
-### Why Square Tiles?
+### Choosing Tile Size
 
-For matrices, we almost always use square (or rectangular) tiles like 16×16 rather than 1D strips:
+[As shown earlier](#warp), because a warp wants contiguous addresses, we'll carve the matrix into 16×16 tiles. Here's how the hardware facts translate to design choices:
 
-- **Memory coalescing**: Consecutive threads in both x and y dimensions can read whole 2D tiles with coalesced bursts
-- **Shared memory tiling**: A block can stage its `TILE_Y×TILE_X` patch into fast shared memory and reuse it many times
-- **Balanced occupancy**: `16×16 = 256` threads is a common starting point that balances warp efficiency (8 warps) with register/shared memory pressure
+- **Warp-aligned rows**: Make tile width a multiple of 32 (warp size) so each row loads as a single coalesced burst.
+- **Shared memory reuse**: Square tiles minimize the halo-to-area ratio, so each global load gets reused ~K times across the convolution window.
+- **Resource budgeting**: 256-512 threads per block (8-16 warps) keeps enough warps resident for latency hiding without exhausting registers or shared memory.
+
+A 16×16 tile gives 256 threads = 8 warps, hitting the sweet spot for most GPUs.
 
 ### Bounds Checking
 
@@ -578,10 +594,9 @@ Each thread in Block(1,1) computes one element where row ∈ [16,31] and col ∈
 
 </details>
 
-### Copy-Paste Indexing Pattern
+### Indexing Pattern Template
 
 ```mojo
-# Essential 2D indexing pattern
 let row = block_idx.y * block_dim.y + thread_idx.y
 let col = block_idx.x * block_dim.x + thread_idx.x
 if row < M and col < N:
@@ -701,9 +716,9 @@ It's a foundational primitive in parallel computing-used for stream compaction, 
 
 </details>
 
-## Hillis–Steele Algorithm
+## Hillis-Steele Algorithm
 
-A straightforward parallel scan is the *Hillis–Steele* approach: at each distance `d = 1, 2, 4, …` every element adds in the value from `d` positions back. This is the same as the method shown in [Puzzle 10](#puzzle-10)
+A straightforward parallel scan is the *Hillis-Steele* approach: at each distance `d = 1, 2, 4, …` every element adds in the value from `d` positions back. This is the same as the method shown in [Puzzle 10](#puzzle-10)
 
 ```python
 # inclusive scan, power-of-two length
@@ -758,10 +773,10 @@ Because rounds are serialized by barriers, the longest dependency chain is one a
 
 Blelloch's two-pass scan does Θ(n) work by splitting the job into an **up-sweep** (build a reduction tree) and a **down-sweep** (propagate prefixes) [@blelloch_prefix_sum].
 
-Why prefer it over the classic Hillis–Steele (Algorithm 1)?
+Why prefer it over the classic Hillis-Steele (Algorithm 1)?
 
 1. Hardware reality.  
-   Hillis–Steele assumes one processor per element and updates the array *in-place* every round.  
+   Hillis-Steele assumes one processor per element and updates the array *in-place* every round.  
    A real GPU doesn't grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost.  
@@ -865,7 +880,7 @@ The key difference in this version is that now we have an input array that is la
 
 We split the global scan into two bite-sized passes:
 
-**Phase 1 – Local Scan**
+**Phase 1 - Local Scan**
 
 1. Each block copies its slice into shared memory.  
 2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.  
@@ -876,7 +891,7 @@ We split the global scan into two bite-sized passes:
    #  [   prefix sums   ][ block totals ]
    ```  
 
-**Phase 2 – Propagate block totals**
+**Phase 2 - Propagate block totals**
 
 1. Every thread grabs the aggregate from the *previous* block (`totals[block_id-1]`) and adds it to its own prefix.    
    Now every element holds the inclusive scan over the *whole* array.
