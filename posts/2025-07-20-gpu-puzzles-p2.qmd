@@ -775,17 +775,15 @@ Blelloch's two-pass scan does Θ(n) work by splitting the job into an **up-sweep
 
 Why prefer it over the classic Hillis-Steele (Algorithm 1)?
 
-1. Hardware reality.  
-   Hillis-Steele assumes one processor per element and updates the array *in-place* every round.  
-   A real GPU doesn't grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+1. Hardware reality: Hillis-Steele assumes one processor per element and updates the array *in-place* every round. A real GPU doesn't grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
-2. Synchronisation cost.  
-   Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
+2. Synchronisation cost: Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
-3. Blelloch's fix.  
-   • Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.  
-   • Only two global barriers are needed (one between the phases, one at the end).  
-   • Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.
+Blelloch's fix to these problems is to break the up-sweep and down-sweep into separate phases:
+
+- Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.
+- Only two global barriers are needed (one between the phases, one at the end).
+- Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.
 
 The result is a scan that is both faster and safer on modern GPUs.
 

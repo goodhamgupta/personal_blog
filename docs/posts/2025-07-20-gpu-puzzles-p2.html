@@ -1049,16 +1049,17 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Blelloch’s two-pass scan does Θ(n) work by splitting the job into an <strong>up-sweep</strong> (build a reduction tree) and a <strong>down-sweep</strong> (propagate prefixes) <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[11]</a></span>.</p>
 <p>Why prefer it over the classic Hillis-Steele (Algorithm 1)?</p>
 <ol type="1">
-<li><p>Hardware reality.<br>
-Hillis-Steele assumes one processor per element and updates the array <em>in-place</em> every round.<br>
-A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
-<li><p>Synchronisation cost.<br>
-Avoiding the overwrite requires a barrier after <strong>every</strong> addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.</p></li>
-<li><p>Blelloch’s fix.<br>
-• Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.<br>
-• Only two global barriers are needed (one between the phases, one at the end).<br>
-• Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.</p></li>
+<li><p>Hardware reality: Hillis-Steele assumes one processor per element and updates the array <em>in-place</em> every round. A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
+<li><p>Synchronisation cost: Avoiding the overwrite requires a barrier after <strong>every</strong> addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.</p></li>
 </ol>
+<p>Blelloch’s fix to these problems is to break the up-sweep and down-sweep into separate phases:</p>
+<ul>
+<li>Up-sweep and down-sweep touch disjoint tree levels, so threads never trample each other within a phase.<br>
+</li>
+<li>Only two global barriers are needed (one between the phases, one at the end).<br>
+</li>
+<li>Now you get Θ(n) work and correctness, even for arrays much bigger than a warp.</li>
+</ul>
 <p>The result is a scan that is both faster and safer on modern GPUs.</p>
 <ol type="1">
 <li><p><strong>Up-sweep (reduce)</strong></p>
@@ -2474,7 +2475,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","openEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
