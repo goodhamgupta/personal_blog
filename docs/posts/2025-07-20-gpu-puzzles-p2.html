@@ -304,6 +304,7 @@ window.Quarto = {
   <li><a href="#updated-roofline-model" id="toc-updated-roofline-model" class="nav-link" data-scroll-target="#updated-roofline-model">Updated roofline model</a></li>
   </ul></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -1836,6 +1837,51 @@ A <em>thread-block</em> is assigned one output tile, and:</p>
 </figure>
 </div>
 <p>The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, <strong>tensor-core WMMA intrinsics</strong>, register tiling (<code>MmaSync</code>), and <strong>kernel fusion</strong> are the next frontiers, but those are puzzles for another day.</p>
+</section>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>Across these puzzles, we’ve implemented the four fundamental archetypes that power most GPU computing:</p>
+<table class="table">
+<colgroup>
+<col style="width: 28%">
+<col style="width: 28%">
+<col style="width: 42%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Pattern</strong></th>
+<th><strong>Puzzles</strong></th>
+<th><strong>Core Technique</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Map-Reduce</strong></td>
+<td>dot product, axis-sum</td>
+<td>warp-level parallel reduction trees</td>
+</tr>
+<tr class="even">
+<td><strong>Stencil</strong></td>
+<td>pooling, 1D/2D convolution</td>
+<td>spatial tiling with halo exchanges</td>
+</tr>
+<tr class="odd">
+<td><strong>Scan</strong></td>
+<td>prefix sum</td>
+<td>hierarchical up-sweep + down-sweep</td>
+</tr>
+<tr class="even">
+<td><strong>Dense Linear Algebra</strong></td>
+<td>matrix multiplication</td>
+<td>cooperative tiling + register reuse</td>
+</tr>
+</tbody>
+</table>
+<p>These four archetypes form the building blocks for complex ML kernels, each with specific memory access patterns and synchronization strategies.</p>
+<p>Next up: Moar GPU kernels, taclking our favorite technique for the past few years: <strong>Attention</strong>!</p>
+<p>Found a bug or a sharper trick? PRs welcome or ping me on <a href="https://x.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 
 
 <div class="hidden" aria-hidden="true">
@@ -1858,8 +1904,6 @@ A <em>thread-block</em> is assigned one output tile, and:</p>
 <span class="glightbox-desc lightbox-desc-23">Updated roofline with tiled GEMM reaching the compute ceiling</span>
 </div>
 
-</section>
-</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -2430,7 +2474,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"descPosition":"bottom","loop":false,"closeEffect":"zoom","selector":".lightbox","openEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"closeEffect":"zoom","descPosition":"bottom","selector":".lightbox","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

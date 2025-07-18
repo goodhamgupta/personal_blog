@@ -1447,3 +1447,20 @@ The tiled kernel pushes us solidly onto the **compute-bound** side of the roofli
 ![Updated roofline with tiled GEMM reaching the compute ceiling](mojo_gpu_puzzles/p14_roofline_tiled.png)
 
 The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, **tensor-core WMMA intrinsics**, register tiling (`MmaSync`), and **kernel fusion** are the next frontiers, but those are puzzles for another day.
+
+# Conclusion
+
+Across these puzzles, we've implemented the four fundamental archetypes that power most GPU computing:
+
+| **Pattern** | **Puzzles** | **Core Technique** |
+|-------------|-------------|-------------------|
+| **Map-Reduce** | dot product, axis-sum | warp-level parallel reduction trees |
+| **Stencil** | pooling, 1D/2D convolution | spatial tiling with halo exchanges |
+| **Scan** | prefix sum | hierarchical up-sweep + down-sweep |
+| **Dense Linear Algebra** | matrix multiplication | cooperative tiling + register reuse |
+
+These four archetypes form the building blocks for complex ML kernels, each with specific memory access patterns and synchronization strategies.
+
+Next up: Moar GPU kernels, taclking our favorite technique for the past few years: **Attention**! 
+
+Found a bug or a sharper trick? PRs welcome or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
