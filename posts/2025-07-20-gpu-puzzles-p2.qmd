@@ -787,31 +787,33 @@ Blelloch's fix to these problems is to break the up-sweep and down-sweep into se
 
 The result is a scan that is both faster and safer on modern GPUs.
 
-1. **Up-sweep (reduce)**  
-   - Build a binary reduction tree over log₂(n) rounds:
-     - Round 1 (step=1): sum each adjacent pair, storing results at indices 1, 3, 5, …
-     - Round 2 (step=2): merge those partial sums into blocks of 4, writing into indices 3, 7, 11, …
-     - Continue doubling the span each round until step = n/2
-   - After the final round, a[n-1] holds the overall total
+**Up-sweep (reduce)**  
 
-   ![](mojo_gpu_puzzles/p12_up.gif)
-   *Up-Sweep: combining elements in a binary-tree fashion-build partial sums until the final element holds the total.*  
+- Build a binary reduction tree over log₂(n) rounds:
+    - Round 1 (step=1): sum each adjacent pair, storing results at indices 1, 3, 5, …
+    - Round 2 (step=2): merge those partial sums into blocks of 4, writing into indices 3, 7, 11, …
+    - Continue doubling the span each round until step = n/2
+- After the final round, a[n-1] holds the overall total
 
-2. **Down-sweep (propagate)**  
-   After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree top-down to scatter prefix sums into every slot:
+![](mojo_gpu_puzzles/p12_up.gif)
+*Up-Sweep: combining elements in a binary-tree fashion-build partial sums until the final element holds the total.*  
 
-   - Initialize the down-sweep with a window size of `step = n/2`.  
-   - Loop as long as `step >= 1`:  
-     - Partition the array into blocks of size `2*step`. For each block starting at index `i`:  
-       • Temporarily store the left-child total from `a[i + step - 1]`.  
-       • Overwrite that left slot with the right-child subtotal from `a[i + 2*step - 1]`.  
-       • Add the saved left-child total to the right slot, giving the correct prefix for that subtree.  
-     - Issue a `barrier()` so all threads sync before shrinking the window.  
-     - Halve the window: `step = step / 2`.  
-   - With each pass, the partial sums trickle down one level of the binary tree; after log₂(n) iterations every element holds its exclusive prefix sum.  
+**Down-sweep (propagate)**  
 
-   ![](mojo_gpu_puzzles/p12_down.gif){fig-align="center"}  
-   *Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.*  
+After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree top-down to scatter prefix sums into every slot:
+
+- Initialize the down-sweep with a window size of `step = n/2`.  
+- Loop as long as `step >= 1`:  
+    - Partition the array into blocks of size `2*step`. For each block starting at index `i`:  
+    • Temporarily store the left-child total from `a[i + step - 1]`.  
+    • Overwrite that left slot with the right-child subtotal from `a[i + 2*step - 1]`.  
+    • Add the saved left-child total to the right slot, giving the correct prefix for that subtree.  
+    - Issue a `barrier()` so all threads sync before shrinking the window.  
+    - Halve the window: `step = step / 2`.  
+- With each pass, the partial sums trickle down one level of the binary tree; after log₂(n) iterations every element holds its exclusive prefix sum.  
+
+![](mojo_gpu_puzzles/p12_down.gif){fig-align="center"}  
+*Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.*  
 
 Time Complexity: Θ(log₂ n) parallel steps, Work: Θ(n) total operations.
 
