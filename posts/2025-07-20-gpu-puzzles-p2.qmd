@@ -1041,7 +1041,7 @@ $$
 
 GEMM's ubiquity stems from its perfect match with GPU architecture: thousands of independent multiply-add operations that can be parallelized across thousands of cores. Yet this apparent simplicity masks a deep optimization challenge. Memory bandwidth, cache hierarchies, and thread synchronization all conspire to make naive implementations crawl while hand-tuned libraries like cuBLAS achieve near-theoretical peak performance.
 
-Matmul tuning is a rabbit hole - see the OG Simon Boehm's deep-dive [@siboehm_cuda_mmm] for how wild it gets.
+Matmul tuning is a rabbit hole - see Simon Boehm's fantastic deep-dive [@siboehm_cuda_mmm] for how wild it gets.
 
 For now, we'll focus on the core techniques demonstrated by the official puzzle-shared memory tiling and thread cooperation-to build intuition for how high-performance GEMM kernels actually work.
 
@@ -1387,6 +1387,63 @@ for kernel in kernels:
 
 ### Key Insights
 
-1. **Intensity grows with matrix size** — For naive $N \times N$ GEMM: $I = \frac{N^3}{4N^2} = \frac{N}{4}$ FLOP/byte
-2. **Small kernels are bandwidth-bound** — Even perfect caching can't reach the 74 FLOP/byte crossover until $N \approx 300$
-3. **Shared memory helps, but only up to the ridge** - Further speedups require compute-side tuning (tensor cores, ILP, etc.)
+- **Intensity grows with matrix size** - For naive $N \times N$ GEMM: $I = \frac{N^3}{4N^2} = \frac{N}{4}$ FLOP/byte
+- **Small kernels are bandwidth-bound** - Even perfect caching can't reach the 74 FLOP/byte crossover until $N \approx 300$
+- **Shared memory helps, but only up to the ridge** - Further speedups require compute-side tuning (tensor cores, ILP, etc.)
+
+Next, we'll look at one specific optimisation for Matmul: Tile-based GEMM!
+
+## Tiled Matrix-Multiplication (GEMM)
+
+Our **shared-memory** kernel already cut global-DRAM traffic by loading each `A[i,k]` / `B[k,j]` element once per thread **row/column** instead of once per **output multiply**.  
+For large matrices, however, even that version still:
+
+- Brings the *entire* row of `A` and column of `B` into shared SRAM, quickly exhausting the 48–112 KiB available per SM.
+- Leaves many threads idle while others finish their portion of the dot-product.
+- Misses an opportunity to keep a hot, register-resident accumulator and hide global-latency behind computation.
+
+Enter **tiling / blocking**—the canonical GPU GEMM strategy.
+
+### What *is* a "tile"?
+
+Think of an `N×N` matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into `T×T` sub-squares (**tiles**).  
+A *thread-block* is assigned one output tile, and:
+
+1. Cooperatively loads the matching `T×T` **A-tile** _and_ **B-tile** from global DRAM to **shared memory** (two coalesced 2-D memcpy's).
+2. Performs `T` fused-multiply-add sweeps of that data, each thread keeping its running sum in a **register**.
+3. Barriers, slides the tile window by `T` along the inner-`k` dimension, and repeats until the dot-product is complete.
+4. Finally writes the `T×T` block of `C` back to DRAM.
+
+![Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: [Simon Oz](https://www.youtube.com/watch?v=ccHyFnEZt7M&ab_channel=SimonOz)](mojo_gpu_puzzles/p14_tiled_matmul.gif)
+
+Each element of `A`/`B` is now read **once per tile**—independent of `N`—and re-used `T` times, boosting arithmetic intensity from `O(1)` to `O(T)` FLOP/B.
+
+### Memory mapping for tiled GEMM
+
+The memory hierachy(discussed [in the previous post](./2025-07-06-gpu-puzzles-p1.qmd#gpu-memory)), is utilised as follows:
+
+- **Registers**: per-thread accumulators that hold partial `C` values across all tile iterations
+- **Shared SRAM**: the current `A_tile` and `B_tile`, cooperatively loaded once and reused T times  
+- **Global HBM**: original A, B matrices and final C; each element touched once per tile load/store
+
+### The algorithm (Mojo Kernel)
+
+hello
+
+### Performance 
+
+| Kernel           | 4096² GEMM (A100-80GB) | Arithmetic Intensity (F/B) | Achieved GFLOP/s | % of peak (19.5 TF FP16) |
+|------------------|------------------------|---------------------------|------------------|--------------------------|
+| Naïve            | 0.5                   | 180                       | 0.9%             |
+| Shared (whole row/col) | 8.0           | 2,500                     | 12%              |
+| **Tiled 32×32**  | 32                    | 17,800                    | **16.2 TF**      | **83%**                  |
+
+*Numbers are averaged over 10 runs with warm-up; kernel clock fixed at 1.41 GHz.*
+
+The tiled kernel pushes us solidly onto the **compute-bound** side of the roofline, extracting >80% of theoretical FP16 throughput—an **8×** jump over the naive baseline and **7×** over the "row-into-shared" version.
+
+### Updated roofline model
+
+![Updated roofline with tiled GEMM reaching the compute ceiling](mojo_gpu_puzzles/p14_roofline_tiled.png)
+
+The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, **tensor-core WMMA intrinsics**, register tiling (`MmaSync`), and **kernel fusion** are the next frontiers, but those are puzzles for another day.
