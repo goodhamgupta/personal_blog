@@ -1568,9 +1568,9 @@ Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_sh
 
 While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the tile size is a balancing act.
 
-Exact numbers vary with GPU, kernel, and precision—profile and tune instead of hard-coding a magic constant.
+Exact numbers vary with GPU, kernel, and precision [@nvidia_ampere_unified_shared_memory].
 
-I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future write-up once I’ve had more time to experiment.
+I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future post once I’ve had more time to experiment.
 
 **TLDR:** Each tile: sync (barrier), compute, shift to next tile, repeat. But this is just the baseline—there’s always a deeper optimization rabbit hole! 
 
