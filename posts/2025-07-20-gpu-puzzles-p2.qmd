@@ -132,10 +132,6 @@ fn dot_product(
     b: UnsafePointer[Scalar[dtype]],
     size: Int,
 ):
-    shared = stack_allocation[
-        TPB, Scalar[dtype], address_space = AddressSpace.SHARED
-    ]()
-
     global_idx = block_dim.x * block_idx.x + thread_idx.x
     local_idx = thread_idx.x
     if global_idx < size:
@@ -318,7 +314,6 @@ fn conv_1d_simple[
         for j in range(CONV):
             if local_i + j < SIZE:
                 local_sum += shared_a[local_i + j] * shared_b[j]
-            barrier()
         
         output[global_i] = local_sum
 ```
@@ -672,8 +667,8 @@ fn conv_2d_halo[
             shared_img[hy, hx] = (
                 inp[gy2, gx2] if (gy2 < HEIGHT && gx2 < WIDTH) else 0.0
             )
-            hx += TPB_Y
-        hy += TPB_X
+            hx += TPB_X
+        hy += TPB_Y
 
     # 3) stash the kernel
     if ly < K && lx < K:
@@ -683,13 +678,13 @@ fn conv_2d_halo[
 
     # 4) compute 3×3 dot‐product
     if gx < WIDTH && gy < HEIGHT:
-        var sum: Float32 = 0.0
+        var local_sum: Float32 = 0.0
         @parameter 
         for ky in range(K):
             @parameter 
             for kx in range(K):
-                sum += shared_img[ly + ky, lx + kx] * shared_k[ky, kx]
-        output[gy, gx] = sum
+                local_sum += shared_img[ly + ky, lx + kx] * shared_k[ky, kx]
+        output[gy, gx] = local_sum
 ```
 
 </details>
@@ -817,7 +812,7 @@ After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree 
 ![](mojo_gpu_puzzles/p12_down.gif){fig-align="center"}  
 *Down Sweep: siblings swap and accumulate, driving the scan from root back to leaves.*  
 
-Time Complexity: Θ(log₂ n) parallel steps, Work: Θ(n) total operations.
+Total Operations: $\Theta(n)$, parallel depth: $\Theta(\log_2 n)$.
 
 <details open>
 <summary> **Solution (Blelloch up-sweep + down-sweep)** </summary>
