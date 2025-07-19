@@ -299,9 +299,7 @@ window.Quarto = {
   <li><a href="#what-is-a-tile" id="toc-what-is-a-tile" class="nav-link" data-scroll-target="#what-is-a-tile">What <em>is</em> a “tile”?</a></li>
   <li><a href="#memory-mapping-for-tiled-gemm" id="toc-memory-mapping-for-tiled-gemm" class="nav-link" data-scroll-target="#memory-mapping-for-tiled-gemm">Memory mapping for tiled GEMM</a></li>
   <li><a href="#raw-memory-1" id="toc-raw-memory-1" class="nav-link" data-scroll-target="#raw-memory-1">Raw Memory</a></li>
-  <li><a href="#layout-tensor" id="toc-layout-tensor" class="nav-link" data-scroll-target="#layout-tensor">Layout Tensor</a></li>
-  <li><a href="#performance" id="toc-performance" class="nav-link" data-scroll-target="#performance">Performance</a></li>
-  <li><a href="#final-roofline-model" id="toc-final-roofline-model" class="nav-link" data-scroll-target="#final-roofline-model">Final roofline model</a></li>
+  <li><a href="#layouttensor-1" id="toc-layouttensor-1" class="nav-link" data-scroll-target="#layouttensor-1">LayoutTensor</a></li>
   </ul></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
@@ -322,7 +320,7 @@ window.Quarto = {
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Pooling"><img src="mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
 <figcaption>Pooling</figcaption>
 </figure>
 </div>
@@ -383,7 +381,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Dot Product"><img src="mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
@@ -391,7 +389,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same-each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Zeno Paradox"><img src="mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
 <figcaption>Zeno Paradox</figcaption>
 </figure>
 </div>
@@ -805,14 +803,14 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </table>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="2D Block Layout"><img src="mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
 <p>Within each block, you choose the thread footprint at kernel launch with <code>THREADS_PER_BLOCK = (blockDim.x, blockDim.y)</code>, giving <code>blockDim.x * blockDim.y</code> total threads per block.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="2D Thread Layout"><img src="mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
 <figcaption>2D Thread Layout</figcaption>
 </figure>
 </div>
@@ -836,7 +834,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" data-glightbox="description: .lightbox-desc-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11" title="Matrix Indexing"><img src="mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
 <figcaption>Matrix Indexing</figcaption>
 </figure>
 </div>
@@ -894,7 +892,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-12" data-glightbox="description: .lightbox-desc-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Source: Toast Lab"><img src="mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -993,7 +991,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>It’s a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" data-glightbox="description: .lightbox-desc-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Prefix‐Sum Illustration"><img src="mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -1050,7 +1048,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>Blelloch’s two-pass scan does Θ(n) work by splitting the job into an <strong>up-sweep</strong> (build a reduction tree) and a <strong>down-sweep</strong> (propagate prefixes) <span class="citation" data-cites="blelloch_prefix_sum"><a href="#ref-blelloch_prefix_sum" role="doc-biblioref">[11]</a></span>.</p>
 <p>Why prefer it over the classic Hillis-Steele (Algorithm 1)?</p>
 <ol type="1">
-<li><p>Hardware reality: Hillis-Steele assumes one processor per element and updates the array <em>in-place</em> every round. A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
+<li><p>Hardware constraints: Hillis-Steele assumes one processor per element and updates the array <em>in-place</em> every round. A real GPU doesn’t grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.</p></li>
 <li><p>Synchronisation cost: Avoiding the overwrite requires a barrier after <strong>every</strong> addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.</p></li>
 </ol>
 <p>Blelloch’s fix to these problems is to break the up-sweep and down-sweep into separate phases:</p>
@@ -1241,14 +1239,14 @@ out[i] &amp; = \sum_{k} A_{i,k}, \qquad i = 0,\dots,M-1
 \]</span></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-15" data-gallery="quarto-lightbox-gallery-15" title="Axis Sum"><img src="mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-16" data-gallery="quarto-lightbox-gallery-16" title="Row Sum"><img src="mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -1357,7 +1355,7 @@ Solution
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" data-glightbox="description: .lightbox-desc-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-glightbox="description: .lightbox-desc-17" data-gallery="quarto-lightbox-gallery-17" title="Matmul with shared memory"><img src="mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
 <figcaption>Matmul with shared memory</figcaption>
 </figure>
 </div>
@@ -1413,7 +1411,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <p>Classic roofline assumes ideal hardware with perfect overlap:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" data-glightbox="description: .lightbox-desc-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[13]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-glightbox="description: .lightbox-desc-18" data-gallery="quarto-lightbox-gallery-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[13]"></a></p>
 <figcaption>Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[13]</a></span></figcaption>
 </figure>
 </div>
@@ -1427,7 +1425,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <h3 class="anchored" data-anchor-id="software-model">Software Model</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" data-glightbox="description: .lightbox-desc-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[13]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-glightbox="description: .lightbox-desc-19" data-gallery="quarto-lightbox-gallery-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[13]"></a></p>
 <figcaption>Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model"><a href="#ref-nhrfau_roofline_model" role="doc-biblioref">[13]</a></span></figcaption>
 </figure>
 </div>
@@ -1540,7 +1538,7 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" data-glightbox="description: .lightbox-desc-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-glightbox="description: .lightbox-desc-20" data-gallery="quarto-lightbox-gallery-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
 <figcaption>Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</figcaption>
 </figure>
 </div>
@@ -1615,7 +1613,7 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <p>This gives us a <strong>1.8× speedup</strong> from shared memory optimization, but we’re still memory-bound.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="lightbox" data-gallery="quarto-lightbox-gallery-21" data-glightbox="description: .lightbox-desc-21" title="RTX 4000 Ada Roofline for Matmul"><img src="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="img-fluid figure-img" alt="RTX 4000 Ada Roofline for Matmul"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="lightbox" data-glightbox="description: .lightbox-desc-21" data-gallery="quarto-lightbox-gallery-21" title="RTX 4000 Ada Roofline for Matmul"><img src="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="img-fluid figure-img" alt="RTX 4000 Ada Roofline for Matmul"></a></p>
 <figcaption>RTX 4000 Ada Roofline for Matmul</figcaption>
 </figure>
 </div>
@@ -1757,7 +1755,7 @@ For large matrices, however, even that version still:</p>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-22" data-glightbox="description: .lightbox-desc-22" title="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"><img src="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="img-fluid figure-img" alt="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="lightbox" data-glightbox="description: .lightbox-desc-22" data-gallery="quarto-lightbox-gallery-22" title="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"><img src="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="img-fluid figure-img" alt="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"></a></p>
 <figcaption>Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></figcaption>
 </figure>
 </div>
@@ -1775,6 +1773,10 @@ For large matrices, however, even that version still:</p>
 </section>
 <section id="raw-memory-1" class="level3">
 <h3 class="anchored" data-anchor-id="raw-memory-1">Raw Memory</h3>
+<details open="">
+<summary>
+<strong>Manual Indexing Tiled Matmul</strong>
+</summary>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>p14_matmul_tiled_manual.mojo</strong></pre>
@@ -1835,6 +1837,7 @@ For large matrices, however, even that version still:</p>
 <div class="sourceCode" id="cb38"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--tiled</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <p>The new formulas in the tiling implementation deserve explanation. Let’s break them down into key concepts:</p>
 <section id="how-many-tiles-are-needed" class="level4">
 <h4 class="anchored" data-anchor-id="how-many-tiles-are-needed">How many Tiles are needed?</h4>
@@ -1842,7 +1845,7 @@ For large matrices, however, even that version still:</p>
 <p>The key idea here is: Step through k by TPB each time; if there’s a leftover chunk, do one last tile for it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tile.png" class="lightbox" data-gallery="quarto-lightbox-gallery-23" data-glightbox="description: .lightbox-desc-23" title="Mapping of elements to tiles when size=17 and TPB=8"><img src="mojo_gpu_puzzles/p14_tile.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mapping of elements to tiles when size=17 and TPB=8"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tile.png" class="lightbox" data-glightbox="description: .lightbox-desc-23" data-gallery="quarto-lightbox-gallery-23" title="Mapping of elements to tiles when size=17 and TPB=8"><img src="mojo_gpu_puzzles/p14_tile.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mapping of elements to tiles when size=17 and TPB=8"></a></p>
 <figcaption>Mapping of elements to tiles when size=17 and TPB=8</figcaption>
 </figure>
 </div>
@@ -1861,7 +1864,7 @@ For that element you need every pair (A[row, k], B[k, col]) as k runs.</p>
 B: b[t*TPB + local_row, global_col]</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" data-glightbox="description: .lightbox-desc-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-glightbox="description: .lightbox-desc-24" data-gallery="quarto-lightbox-gallery-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."></a></p>
 <figcaption>Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.</figcaption>
 </figure>
 </div>
@@ -1886,64 +1889,113 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 <p><strong>TLDR:</strong> For each tile, we will sync (barrier), compute, shift to next tile, repeat. But this is just the baseline - there’s always a deeper optimization rabbit hole!</p>
 </section>
 </section>
-<section id="layout-tensor" class="level3">
-<h3 class="anchored" data-anchor-id="layout-tensor">Layout Tensor</h3>
-</section>
-<section id="performance" class="level3">
-<h3 class="anchored" data-anchor-id="performance">Performance</h3>
-<table class="table">
-<colgroup>
-<col style="width: 15%">
-<col style="width: 21%">
-<col style="width: 23%">
-<col style="width: 15%">
-<col style="width: 23%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Kernel</th>
-<th>4096² GEMM (A100-80GB)</th>
-<th>Arithmetic Intensity (F/B)</th>
-<th>Achieved GFLOP/s</th>
-<th>% of peak (19.5 TF FP16)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Naïve</td>
-<td>0.5</td>
-<td>180</td>
-<td>0.9%</td>
-<td></td>
-</tr>
-<tr class="even">
-<td>Shared (whole row/col)</td>
-<td>8.0</td>
-<td>2,500</td>
-<td>12%</td>
-<td></td>
-</tr>
-<tr class="odd">
-<td><strong>Tiled 32×32</strong></td>
-<td>32</td>
-<td>17,800</td>
-<td><strong>16.2 TF</strong></td>
-<td><strong>83%</strong></td>
-</tr>
-</tbody>
-</table>
-<p><em>Numbers are averaged over 10 runs with warm-up; kernel clock fixed at 1.41 GHz.</em></p>
-<p>The tiled kernel pushes us solidly onto the <strong>compute-bound</strong> side of the roofline, extracting &gt;80% of theoretical FP16 throughput—an <strong>8×</strong> jump over the naive baseline and <strong>7×</strong> over the “row-into-shared” version.</p>
-</section>
-<section id="final-roofline-model" class="level3">
-<h3 class="anchored" data-anchor-id="final-roofline-model">Final roofline model</h3>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline_tiled.png" class="lightbox" data-gallery="quarto-lightbox-gallery-25" data-glightbox="description: .lightbox-desc-25" title="Final roofline with tiled GEMM reaching the compute ceiling"><img src="mojo_gpu_puzzles/p14_roofline_tiled.png" class="img-fluid figure-img" alt="Final roofline with tiled GEMM reaching the compute ceiling"></a></p>
-<figcaption>Final roofline with tiled GEMM reaching the compute ceiling</figcaption>
-</figure>
+<section id="layouttensor-1" class="level3">
+<h3 class="anchored" data-anchor-id="layouttensor-1">LayoutTensor</h3>
+<p>While the manual tiling approach works, it suffers from indexing complexity that obscures the algorithm’s intent and creates opportunities for bugs. Mojo’s LayoutTensor API provides an elegant solution that maintains performance while dramatically improving code clarity.</p>
+<section id="the-pain-of-manual-indexing" class="level4">
+<h4 class="anchored" data-anchor-id="the-pain-of-manual-indexing">The Pain of Manual Indexing</h4>
+<p>The manual implementation requires careful coordinate arithmetic:</p>
+<ul>
+<li>Nested index calculations like <code>tile * TPB + local_col</code> that can easily introduce off-by-one errors</li>
+<li>Separate bounds checking for each matrix load operation</li>
+<li>Explicit management of tile boundaries and edge cases</li>
+<li>Code that prioritizes performance over readability</li>
+</ul>
+<p>LayoutTensor provides a <strong>tile()</strong> method that creates zero-copy <span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[7]</a></span> views into sub-regions of tensors <span class="citation" data-cites="mojo_layouttensor_tile"><a href="#ref-mojo_layouttensor_tile" role="doc-biblioref">[19]</a></span>. This eliminates manual indexing gymnastics while keeping identical performance.</p>
+<p>A <code>LayoutTensor.tile[tile_height, tile_width](block_row, block_col)</code> call returns a view of the specified tile without copying data, at no cost!</p>
+<p>The transformation from manual indexing to LayoutTensor simplifies the loading logic:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a># Load elements of A into shared mem</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="st">- if global_row &lt; size and (tile * TPB + local_col) &lt; size:</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="st">-     shared_a[local_row, local_col] = a[</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="st">-         global_row, tile * TPB + local_col</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="st">-     ]</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="st">- </span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="st">- # Load elements of B into shared mem  </span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="st">- if global_col &lt; size and (tile * TPB + local_row) &lt; size:</span></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a><span class="st">-     shared_b[local_row, local_col] = b[</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a><span class="st">-         tile * TPB + local_row, global_col</span></span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a><span class="st">-     ]</span></span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a># Create tile views (zero-copy)</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="va">+ a_tile = a.tile[TPB, TPB](block_idx.y, idx)</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a><span class="va">+ b_tile = b.tile[TPB, TPB](idx, block_idx.x)</span></span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a># Asynchronous copy to shared memory</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a><span class="va">+ copy_dram_to_sram_async[thread_layout=load_a_layout](a_shared, a_tile)</span></span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="va">+ copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)</span></span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a># Synchronize all async copies</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="va">+ async_copy_wait_all()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Full solution looks as follows:</p>
+<details closed="">
+<summary>
+<strong>LayoutTensor Tiled Matmul</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>p14_matmul_layout_tensor.mojo</strong></pre>
 </div>
-<p>The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, <strong>tensor-core WMMA intrinsics</strong>, register tiling (<code>MmaSync</code>), and <strong>kernel fusion</strong> are the next frontiers, but those are puzzles for another day.</p>
+<div class="sourceCode" id="cb41" data-filename="p14_matmul_layout_tensor.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_TILED <span class="op">=</span> <span class="dv">9</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_TILED <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>)  <span class="co"># each block covers 3x3 elements</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_TILED <span class="op">=</span> (TPB, TPB)</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> layout_tiled <span class="op">=</span> Layout.row_major(SIZE_TILED, SIZE_TILED)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> matmul_tiled[</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    layout: Layout, size: Int</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, layout],</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># LayoutTensor APIs</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    out_tile <span class="op">=</span> output.tile[TPB, TPB](block_idx.y, block_idx.x)</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    a_shared <span class="op">=</span> tb[dtype]().row_major[TPB, TPB]().shared().alloc()</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    b_shared <span class="op">=</span> tb[dtype]().row_major[TPB, TPB]().shared().alloc()</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    local_row <span class="op">=</span> thread_idx.y</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    local_col <span class="op">=</span> thread_idx.x</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> local_sum: output.element_type <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> load_a_layout <span class="op">=</span> Layout.row_major[<span class="dv">1</span>, TPB]()</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> load_b_layout <span class="op">=</span> Layout.row_major[TPB, <span class="dv">1</span>]()</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx <span class="kw">in</span> <span class="bu">range</span>((size <span class="op">+</span> TPB <span class="op">-</span> <span class="dv">1</span>) <span class="op">//</span> TPB):</span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>        a_tile <span class="op">=</span> a.tile[TPB, TPB](block_idx.y, idx)</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>        b_tile <span class="op">=</span> b.tile[TPB, TPB](idx, block_idx.x)</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>        copy_dram_to_sram_async[thread_layout<span class="op">=</span>load_a_layout](a_shared, a_tile)</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>        copy_dram_to_sram_async[thread_layout<span class="op">=</span>load_b_layout](b_shared, b_tile)</span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>        async_copy_wait_all()</span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">min</span>(TPB, size <span class="op">-</span> idx <span class="op">*</span> TPB)):</span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>            local_sum <span class="op">+=</span> a_shared[local_row, k] <span class="op">*</span> b_shared[k, local_col]</span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store result after all tiles processed</span></span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (</span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>        block_idx.y <span class="op">*</span> TPB <span class="op">+</span> local_row <span class="op">&lt;</span> size</span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">and</span> block_idx.x <span class="op">*</span> TPB <span class="op">+</span> local_col <span class="op">&lt;</span> size</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>        out_tile[local_row, local_col] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</details>
+</section>
+<section id="synchronization-and-memory-hierarchy" class="level4">
+<h4 class="anchored" data-anchor-id="synchronization-and-memory-hierarchy">Synchronization and Memory Hierarchy</h4>
+<p>The <code>copy_dram_to_sram_async()</code> function <span class="citation" data-cites="mojo_copy_dram_to_sram_async"><a href="#ref-mojo_copy_dram_to_sram_async" role="doc-biblioref">[20]</a></span> enables asynchronous memory transfers from global to shared memory, while <code>async_copy_wait_all()</code> <span class="citation" data-cites="mojo_async_copy_wait_all"><a href="#ref-mojo_async_copy_wait_all" role="doc-biblioref">[21]</a></span> provides a synchronization barrier that ensures all pending transfers complete before computation proceeds.</p>
+<p>This pattern allows the GPU to:</p>
+<ul>
+<li>Overlap memory transfers with other computations using dedicated copy engines</li>
+<li>Utilize specialized hardware for efficient data movement</li>
+<li>Maintain correct execution ordering across thread blocks</li>
+<li>Bypass intermediate registers for improved memory hierarchy efficiency</li>
+</ul>
+<p><strong>Important</strong>: <code>async_copy_wait_all()</code> only synchronizes the asynchronous copy operations—threads still need explicit barriers (<code>barrier()</code>) to ensure all threads in a block see the shared memory data before computation begins.</p>
+</section>
 </section>
 </section>
 </section>
@@ -1987,7 +2039,7 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 </tbody>
 </table>
 <p>These four archetypes form the building blocks for complex ML kernels, each with specific memory access patterns and synchronization strategies.</p>
-<p>Next up: Moar GPU kernels, taclking our favorite technique for the past few years: <strong>Attention</strong>!</p>
+<p>Next up: Moar GPU kernels, and finally tackling our favorite technique for the past few years: <strong>Attention</strong>!</p>
 <p>Thanks for sticking around! I hope you picked up a trick or two! Spotted a bug or have a sharper optimization? Open an issue in the repo, or ping me on <a href="https://x.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 
 
@@ -2010,7 +2062,6 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 <span class="glightbox-desc lightbox-desc-22">Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></span>
 <span class="glightbox-desc lightbox-desc-23">Mapping of elements to tiles when size=17 and TPB=8</span>
 <span class="glightbox-desc lightbox-desc-24">Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.</span>
-<span class="glightbox-desc lightbox-desc-25">Final roofline with tiled GEMM reaching the compute ceiling</span>
 </div>
 
 </section>
@@ -2069,6 +2120,15 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 </div>
 <div id="ref-nvidia_blackwell_unified_shared_memory" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[18] </div><div class="csl-right-inline">N. Corporation, <span>“Blackwell tuning guide: Unified shared memory and L1/texture cache.”</span> 2025. Available: <a href="https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html#unified-shared-memory-l1-texture-cache">https://docs.nvidia.com/cuda/blackwell-tuning-guide/index.html#unified-shared-memory-l1-texture-cache</a></div>
+</div>
+<div id="ref-mojo_layouttensor_tile" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[19] </div><div class="csl-right-inline">Inc. Modular, <span>“LayoutTensor.tile API reference.”</span> Available: <a href="https://docs.modular.com/mojo/kernels/layout/layout_tensor/LayoutTensor/#tile">https://docs.modular.com/mojo/kernels/layout/layout_tensor/LayoutTensor/#tile</a></div>
+</div>
+<div id="ref-mojo_copy_dram_to_sram_async" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[20] </div><div class="csl-right-inline">Inc. Modular, <span>“Copy_dram_to_sram_async API reference.”</span> Available: <a href="https://docs.modular.com/mojo/kernels/layout/layout_tensor/copy_dram_to_sram_async/">https://docs.modular.com/mojo/kernels/layout/layout_tensor/copy_dram_to_sram_async/</a></div>
+</div>
+<div id="ref-mojo_async_copy_wait_all" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[21] </div><div class="csl-right-inline">Inc. Modular, <span>“Async_copy_wait_all API reference.”</span> Available: <a href="https://docs.modular.com/mojo/stdlib/gpu/memory/async_copy_wait_all">https://docs.modular.com/mojo/stdlib/gpu/memory/async_copy_wait_all</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -2595,7 +2655,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","loop":false});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","openEffect":"zoom","loop":false,"descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

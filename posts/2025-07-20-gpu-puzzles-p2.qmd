@@ -777,7 +777,7 @@ Blelloch's two-pass scan does Θ(n) work by splitting the job into an **up-sweep
 
 Why prefer it over the classic Hillis-Steele (Algorithm 1)?
 
-1. Hardware reality: Hillis-Steele assumes one processor per element and updates the array *in-place* every round. A real GPU doesn't grant that luxury: a "1024-thread" block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+1. Hardware constraints: Hillis-Steele assumes one processor per element and updates the array *in-place* every round. A real GPU doesn't grant that luxury: a "1024-thread" block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost: Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
@@ -1404,7 +1404,7 @@ For large matrices, however, even that version still:
 
 Enter **tiling / blocking**—the canonical GPU GEMM strategy.
 
-### What *is* a "tile"?
+### Tile?
 
 Think of an `N×N` matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into `T×T` sub-squares (**tiles**).  
 
@@ -1428,6 +1428,9 @@ The memory hierachy(discussed [in the previous post](./2025-07-06-gpu-puzzles-p1
 - **Global HBM**: original A, B matrices and final C; each element touched once per tile load/store
 
 ### Raw Memory
+
+<details open>
+<summary> **Manual Indexing Tiled Matmul** </summary>
 
 ```{.mojo .code-overflow-wrap filename=p14_matmul_tiled_manual.mojo}
 
@@ -1490,6 +1493,8 @@ pixi run p14 --tiled
 # expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])
 ```
 
+</details>
+
 The new formulas in the tiling implementation deserve explanation. Let's break them down into key concepts:
 
 #### How many Tiles are needed? 
@@ -1548,26 +1553,118 @@ I’m still learning the dark art of GPU perf tuning, so I’ll save the details
 
 **TLDR:** For each tile, we will sync (barrier), compute, shift to next tile, repeat. But this is just the baseline - there’s always a deeper optimization rabbit hole! 
 
-### Layout Tensor
+### LayoutTensor
+
+While the manual tiling approach works, it suffers from indexing complexity that obscures the algorithm's intent and creates opportunities for bugs. Mojo's LayoutTensor API provides an elegant solution that maintains performance while dramatically improving code clarity.
+
+#### The Pain of Manual Indexing
+
+The manual implementation requires careful coordinate arithmetic:
+
+- Nested index calculations like `tile * TPB + local_col` that can easily introduce off-by-one errors
+- Separate bounds checking for each matrix load operation
+- Explicit management of tile boundaries and edge cases
+- Code that prioritizes performance over readability
+
+LayoutTensor provides a **tile()** method that creates zero-copy [@zero_cost_abstractions] views into sub-regions of tensors [@mojo_layouttensor_tile]. This eliminates manual indexing gymnastics while keeping identical performance.
+
+A `LayoutTensor.tile[tile_height, tile_width](block_row, block_col)` call returns a view of the specified tile without copying data, at no cost!
+
+The transformation from manual indexing to LayoutTensor simplifies the loading logic:
+
+```diff
+# Load elements of A into shared mem
+- if global_row < size and (tile * TPB + local_col) < size:
+-     shared_a[local_row, local_col] = a[
+-         global_row, tile * TPB + local_col
+-     ]
+- 
+- # Load elements of B into shared mem  
+- if global_col < size and (tile * TPB + local_row) < size:
+-     shared_b[local_row, local_col] = b[
+-         tile * TPB + local_row, global_col
+-     ]
+# Create tile views (zero-copy)
++ a_tile = a.tile[TPB, TPB](block_idx.y, idx)
++ b_tile = b.tile[TPB, TPB](idx, block_idx.x)
+
+# Asynchronous copy to shared memory
++ copy_dram_to_sram_async[thread_layout=load_a_layout](a_shared, a_tile)
++ copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)
+
+# Synchronize all async copies
++ async_copy_wait_all()
+```
+
+Full solution looks as follows:
+
+<details closed>
+<summary> **LayoutTensor Tiled Matmul** </summary>
+
+```{.mojo filename=p14_matmul_layout_tensor.mojo}
+alias SIZE_TILED = 9
+alias BLOCKS_PER_GRID_TILED = (3, 3)  # each block covers 3x3 elements
+alias THREADS_PER_BLOCK_TILED = (TPB, TPB)
+alias layout_tiled = Layout.row_major(SIZE_TILED, SIZE_TILED)
 
 
-### Performance 
+fn matmul_tiled[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=True, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    # LayoutTensor APIs
+    out_tile = output.tile[TPB, TPB](block_idx.y, block_idx.x)
+    a_shared = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    b_shared = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    local_row = thread_idx.y
+    local_col = thread_idx.x
 
-| Kernel           | 4096² GEMM (A100-80GB) | Arithmetic Intensity (F/B) | Achieved GFLOP/s | % of peak (19.5 TF FP16) |
-|------------------|------------------------|---------------------------|------------------|--------------------------|
-| Naïve            | 0.5                   | 180                       | 0.9%             |
-| Shared (whole row/col) | 8.0           | 2,500                     | 12%              |
-| **Tiled 32×32**  | 32                    | 17,800                    | **16.2 TF**      | **83%**                  |
+    var local_sum: output.element_type = 0.0
 
-*Numbers are averaged over 10 runs with warm-up; kernel clock fixed at 1.41 GHz.*
+    alias load_a_layout = Layout.row_major[1, TPB]()
+    alias load_b_layout = Layout.row_major[TPB, 1]()
+    
+    @parameter
+    for idx in range((size + TPB - 1) // TPB):
+        a_tile = a.tile[TPB, TPB](block_idx.y, idx)
+        b_tile = b.tile[TPB, TPB](idx, block_idx.x)
 
-The tiled kernel pushes us solidly onto the **compute-bound** side of the roofline, extracting >80% of theoretical FP16 throughput—an **8×** jump over the naive baseline and **7×** over the "row-into-shared" version.
+        copy_dram_to_sram_async[thread_layout=load_a_layout](a_shared, a_tile)
+        copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)
 
-### Final roofline model
+        async_copy_wait_all()
 
-![Final roofline with tiled GEMM reaching the compute ceiling](mojo_gpu_puzzles/p14_roofline_tiled.png)
+        @parameter
+        for k in range(min(TPB, size - idx * TPB)):
+            local_sum += a_shared[local_row, k] * b_shared[k, local_col]
 
-The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, **tensor-core WMMA intrinsics**, register tiling (`MmaSync`), and **kernel fusion** are the next frontiers, but those are puzzles for another day.
+        barrier()
+
+    # Store result after all tiles processed
+    if (
+        block_idx.y * TPB + local_row < size
+        and block_idx.x * TPB + local_col < size
+    ):
+        out_tile[local_row, local_col] = local_sum
+```
+
+</details>
+
+#### Synchronization and Memory Hierarchy
+
+The `copy_dram_to_sram_async()` function [@mojo_copy_dram_to_sram_async] enables asynchronous memory transfers from global to shared memory, while `async_copy_wait_all()` [@mojo_async_copy_wait_all] provides a synchronization barrier that ensures all pending transfers complete before computation proceeds.
+
+This pattern allows the GPU to:
+
+- Overlap memory transfers with other computations using dedicated copy engines
+- Utilize specialized hardware for efficient data movement
+- Maintain correct execution ordering across thread blocks
+- Bypass intermediate registers for improved memory hierarchy efficiency
+
+**Important**: `async_copy_wait_all()` only synchronizes the asynchronous copy operations—threads still need explicit barriers (`barrier()`) to ensure all threads in a block see the shared memory data before computation begins.
 
 # Conclusion
 
@@ -1582,6 +1679,6 @@ Across these puzzles, we've implemented the four fundamental archetypes that pow
 
 These four archetypes form the building blocks for complex ML kernels, each with specific memory access patterns and synchronization strategies.
 
-Next up: Moar GPU kernels, taclking our favorite technique for the past few years: **Attention**! 
+Next up: Moar GPU kernels, and finally tackling our favorite technique for the past few years: **Attention**! 
 
 Thanks for sticking around! I hope you picked up a trick or two! Spotted a bug or have a sharper optimization? Open an issue in the repo, or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
