@@ -634,9 +634,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <p>The <em>optimal</em> allocation of shared memory would be:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly SIZE elements → smaller shared-mem footprint</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly SIZE elements -&gt; smaller shared-mem footprint</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">+    shared_a = tb[dtype]().row_major[SIZE]().shared().alloc()</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly CONV elements → smaller shared-mem footprint</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly CONV elements -&gt; smaller shared-mem footprint</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="va">+    shared_b = tb[dtype]().row_major[CONV]().shared().alloc()</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>...</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
@@ -1534,8 +1534,8 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 \]</span></p>
 <p>At the critical intensity <span class="math inline">\(I_{crit}\)</span>, the bandwidth and compute roofs intersect, splitting kernels into two classes:</p>
 <ul>
-<li><strong>Memory-bound</strong> (<span class="math inline">\(I &lt; I_{crit}\)</span>) → Performance rises linearly with <span class="math inline">\(I\)</span></li>
-<li><strong>Compute-bound</strong> (<span class="math inline">\(I \geq I_{crit}\)</span>) → Performance plateaus at <span class="math inline">\(P_{peak}\)</span></li>
+<li><strong>Memory-bound</strong> (<span class="math inline">\(I &lt; I_{crit}\)</span>) -&gt; Performance rises linearly with <span class="math inline">\(I\)</span></li>
+<li><strong>Compute-bound</strong> (<span class="math inline">\(I \geq I_{crit}\)</span>) -&gt; Performance plateaus at <span class="math inline">\(P_{peak}\)</span></li>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1576,8 +1576,8 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 <p><strong>Compute work:</strong></p>
 <ul>
 <li>Each output element is a dot product of length 3</li>
-<li>3 fused multiply-adds → 3 FLOPs per output element</li>
-<li>9 elements → 27 FLOPs total</li>
+<li>3 fused multiply-adds -&gt; 3 FLOPs per output element</li>
+<li>9 elements -&gt; 27 FLOPs total</li>
 </ul>
 <p><strong>DRAM traffic:</strong></p>
 <ul>
@@ -1803,7 +1803,7 @@ For large matrices, however, even that version still:</p>
 <span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> local_sum: output.element_type <span class="op">=</span> <span class="fl">0.0</span></span>
 <span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
-<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (size + TPB - 1) // TPB == ceil(size / TPB) → number of tile-steps we need</span></span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># (size + TPB - 1) // TPB == ceil(size / TPB) -&gt; number of tile-steps we need</span></span>
 <span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile <span class="kw">in</span> <span class="bu">range</span>((size <span class="op">+</span> TPB <span class="op">-</span> <span class="dv">1</span>) <span class="op">//</span> TPB):</span>
 <span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Load elements of A into shared mem</span></span>
 <span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> global_row <span class="op">&lt;</span> size <span class="kw">and</span> (tile <span class="op">*</span> TPB <span class="op">+</span> local_col) <span class="op">&lt;</span> size:</span>
@@ -1854,15 +1854,15 @@ tiles:  0      1        2 </code></pre>
 <p>Inside a block each thread is responsible for one output element C[global_row, global_col].<br>
 For that element you need every pair (A[row, k], B[k, col]) as k runs.</p>
 <p><strong>Thread-to-Memory Mapping</strong>: Understanding how 1024 threads per block map to memory is crucial. With TPB=32, we get a 32×32 thread block—not random sizing! Each <strong>warp</strong> (32 consecutive threads) maps to one row of the tile, ensuring 32 threads can issue <strong>one coalesced 128-byte burst</strong> when loading consecutive elements.</p>
-<pre><code>Warp 0:  threads  0-31  → tile row 0
-Warp 1:  threads 32-63  → tile row 1
+<pre><code>Warp 0:  threads  0-31  -&gt; tile row 0
+Warp 1:  threads 32-63  -&gt; tile row 1
 ...
-Warp 31: threads 992-1023 → tile row 31</code></pre>
+Warp 31: threads 992-1023 -&gt; tile row 31</code></pre>
 <p>For tile <code>t</code>:</p>
 <pre><code>A: a[global_row, t*TPB + local_col]
 B: b[t*TPB + local_row, global_col]</code></pre>
 <p>ASCII picture for a 4×4 tile (TPB = 4) when <code>t = 1</code>:</p>
-<pre><code>            k-dimension →
+<pre><code>            k-dimension -&gt;
            |---- tile 0 -----|---- tile 1 -----|
 A(row) ... 0 1 2 3  | 4 5 6 7  | 8 ...
                 ^^^— thread (·,local_col) pulls this
@@ -1880,7 +1880,7 @@ B(col) ... 0 |               |
 <li><strong>For B</strong>: neighboring threads in y-direction (<code>local_row</code>) read consecutive k’s ⇒ also coalesced</li>
 </ul>
 <p>Without the swap, one matrix would be fetched “strided” collapsing into 32 separate memory transactions per warp—a 32× slowdown on bandwidth-bound kernels.</p>
-<p><strong>Quick primer</strong>: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks” each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a <strong>bank conflict</strong>.</p>
+<p><strong>Quick primer</strong>: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks” <span class="citation" data-cites="nvidia_shared_memory_stats"><a href="#ref-nvidia_shared_memory_stats" role="doc-biblioref">[15]</a></span> each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a <strong>bank conflict</strong>.</p>
 <p>Beyond coalescing, our tile layout also sidesteps these conflicts. Because <code>b_shared[k, threadIdx.x]</code> maps each thread to a distinct bank (while <code>a_shared[threadIdx.y, k]</code> is broadcast-friendly), all 32 memory ports stay busy with zero serialization.</p>
 </section>
 <section id="choosing-the-right-tile-size" class="level4">
@@ -1891,7 +1891,7 @@ B(col) ... 0 |               |
 <strong>Mid-sized tiles</strong> (~ 32 × 32): often the practical “sweet spot”, fitting inside a 48 KB shared-mem budget while still allowing two or more blocks per SM.</p>
 <p>Exact numbers vary with GPU, kernel, and precision—profile and tune instead of hard-coding a magic constant.</p>
 <blockquote class="blockquote">
-<p>Full disclosure: I’m still learning the dark art of GPU perf tuning, so I’ll save the nitty-gritty details for a future write-up once I’ve had more time to experiment.</p>
+<p>Full disclosure: I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future write-up once I’ve had more time to experiment.</p>
 </blockquote>
 </section>
 <section id="beyond-basic-tiling" class="level4">
@@ -2074,6 +2074,9 @@ B(col) ... 0 |               |
 </div>
 <div id="ref-rtx_ada_specs" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[14] </div><div class="csl-right-inline">N. Corporation, <span>“NVIDIA RTX 4000 ada generation datasheet.”</span> 2023. Available: <a href="https://resources.nvidia.com/en-us-briefcase-for-datasheets/rtx-4000-ada-datashe-1?ncid=no-ncid">https://resources.nvidia.com/en-us-briefcase-for-datasheets/rtx-4000-ada-datashe-1?ncid=no-ncid</a></div>
+</div>
+<div id="ref-nvidia_shared_memory_stats" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[15] </div><div class="csl-right-inline">N. Corporation, <span>“CUDA kernel-level shared memory statistics.”</span> Available: <a href="https://docs.nvidia.com/gameworks/content/developertools/desktop/analysis/report/cudaexperiments/kernellevel/memorystatisticsshared.htm">https://docs.nvidia.com/gameworks/content/developertools/desktop/analysis/report/cudaexperiments/kernellevel/memorystatisticsshared.htm</a></div>
 </div>
 </div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -2600,7 +2603,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"openEffect":"zoom","descPosition":"bottom","selector":".lightbox","loop":false,"closeEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

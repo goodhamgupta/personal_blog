@@ -1558,19 +1558,15 @@ GPUs coalesce global memory when _adjacent threads read adjacent addresses_. Wit
 - **For A**: neighboring threads in x-direction (`local_col`) read consecutive k's ⇒ coalesced
 - **For B**: neighboring threads in y-direction (`local_row`) read consecutive k's ⇒ also coalesced
 
-Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp—a 32× slowdown on bandwidth-bound kernels.
+Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp - a 32× slowdown on bandwidth-bound kernels.
 
-**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks" each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
+**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks" [@nvidia_shared_memory_stats] each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
 
 Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_shared[k, threadIdx.x]` maps each thread to a distinct bank (while `a_shared[threadIdx.y, k]` is broadcast-friendly), all 32 memory ports stay busy with zero serialization.
 
 #### Choosing the Right Tile Size
 
-While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the tile size is a balancing act:
-
-**Larger tiles** (~ 64 × 64): maximise data reuse but spike register/shared-mem usage and can tank occupancy.  
-**Smaller tiles** (~ 16 × 16): keep resource pressure low and occupancy high, yet give up arithmetic intensity.  
-**Mid-sized tiles** (~ 32 × 32): often the practical "sweet spot", fitting inside a 48 KB shared-mem budget while still allowing two or more blocks per SM.
+While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the tile size is a balancing act.
 
 Exact numbers vary with GPU, kernel, and precision—profile and tune instead of hard-coding a magic constant.
 
