@@ -20,7 +20,7 @@ website:
     location: navbar
     type: overlay
   repo-url: https://github.com/goodhamgupta/personal_blog
-  repo-actions: [edit, issue]
+  repo-actions: [issue]
 format:
   html:
     theme: 
