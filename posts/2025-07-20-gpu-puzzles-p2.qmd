@@ -1560,7 +1560,7 @@ GPUs coalesce global memory when _adjacent threads read adjacent addresses_. Wit
 
 Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp - a 32× slowdown on bandwidth-bound kernels.
 
-**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks" [@nvidia_shared_memory_stats] each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
+**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks" [@nvidia_shared_memory_stats][@leimao_cuda_shared_memory_bank] each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
 
 Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_shared[k, threadIdx.x]` maps each thread to a distinct bank (while `a_shared[threadIdx.y, k]` is broadcast-friendly), all 32 memory ports stay busy with zero serialization.
 
@@ -1570,18 +1570,9 @@ While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the 
 
 Exact numbers vary with GPU, kernel, and precision—profile and tune instead of hard-coding a magic constant.
 
-> Full disclosure: I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future write-up once I’ve had more time to experiment.
+I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future write-up once I’ve had more time to experiment.
 
-#### Beyond Basic Tiling
-
-As mentioned earlier, this implementation scratches the surface of production GEMM optimization. Advanced techniques include:
-
-- **Double buffering**: Overlap the next tile's memory transfer with current tile's computation using `cp.async` instructions
-- **Tensor cores**: Modern GPUs can perform 16×16×16 matrix fragments in one instruction via WMMA intrinsics
-- **K-splitting**: For huge matrices, split the reduction across multiple kernel launches to avoid register spills
-
-**TLDR:** Each tile: sync (barrier), compute, shift to next tile, repeat. But this is just the baseline—there’s always a deeper optimization rabbit hole.
-
+**TLDR:** Each tile: sync (barrier), compute, shift to next tile, repeat. But this is just the baseline—there’s always a deeper optimization rabbit hole! 
 
 ### Layout Tensor
 
