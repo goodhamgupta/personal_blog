@@ -1172,7 +1172,7 @@ This ratio is all that survives of the algorithm - prologue/epilogue work, contr
 
 | # | Assumption | Works because… | Reality | Breaks when… |
 |---|------------|----------------|---------|--------------|
-| H1 | Peak DRAM bandwidth reachable | Ideal streaming | Requires 100% streaming, >1MB tiles | Strided or tiny tiles |
+| H1 | Peak DRAM bandwidth is reachable | Ideal streaming | Requires 100% streaming, >1MB tiles | Strided or tiny tiles |
 | H2 | Peak FLOP/s reachable | Full FMA rate | All ALUs busy every cycle | Divergence, low occupancy |
 | H3 | One bandwidth number is enough | DRAM dominates | L1/L2/SMEM add separate roofs | Lower-level choke points |
 
@@ -1212,7 +1212,7 @@ What actually works:
 2. **Redraw the roofline** using measured ceilings—L2 roof, Tensor-core roof, not just DRAM and peak FLOPs
 3. **Adjust your kernel**: boost $I$ (tiling, shared memory, tensor ops) or raise the ceilings (improve occupancy, reduce stalls)
 
-> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a permissions wall (https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-ters). I'll fix it and share a profiler deep-dive soon. Stay tuned!
+> Unfortunately no Nsight eye-candy as of yet - my `ncu` setup hit a [permissions wall](https://developer.nvidia.com/nvidia-development-tools-solutions-err_nvgpuctrperm-permission-issue-ters). I'll fix it and share a profiler deep-dive soon. Stay tuned!
 
 The textbook roofline is a guide, not reality. Measure, adapt, and push your kernel as close to the real limits as you can.
 
@@ -1220,15 +1220,13 @@ The textbook roofline is a guide, not reality. Measure, adapt, and push your ker
 
 Let's apply the roofline model to a 3×3 matrix multiplication, which is still small enough to hand-calculate.
 
-### Hardware Specs
-
 The RTX 4000 Ada provides[@rtx_ada_specs]:
 
 - **Peak compute**: 26.7 TFLOPS (single-precision)  
 - **Peak DRAM bandwidth**: 360 GB/s  
 - **Critical intensity**: $I_{crit} = \frac{26.7 \times 10^{12}}{360 \times 10^9} = 74.2$ FLOP/byte
 
-### Naive 3×3 MatMul Analysis
+### Naive MatMul Analysis
 
 For $C = A \times B$ where all matrices are 3×3:
 
@@ -1407,12 +1405,13 @@ Enter **tiling / blocking**—the canonical GPU GEMM strategy.
 ### What *is* a "tile"?
 
 Think of an `N×N` matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into `T×T` sub-squares (**tiles**).  
+
 A *thread-block* is assigned one output tile, and:
 
-1. Cooperatively loads the matching `T×T` **A-tile** _and_ **B-tile** from global DRAM to **shared memory** (two coalesced 2-D memcpy's).
-2. Performs `T` fused-multiply-add sweeps of that data, each thread keeping its running sum in a **register**.
-3. Barriers, slides the tile window by `T` along the inner-`k` dimension, and repeats until the dot-product is complete.
-4. Finally writes the `T×T` block of `C` back to DRAM.
+- Cooperatively loads the matching `T×T` **A-tile** _and_ **B-tile** from global DRAM to **shared memory** (two coalesced 2-D memcpy's).
+- Performs `T` fused-multiply-add sweeps of that data, each thread keeping its running sum in a **register**.
+- Barriers, slides the tile window by `T` along the inner-`k` dimension, and repeats until the dot-product is complete.
+- Finally writes the `T×T` block of `C` back to DRAM.
 
 ![Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: [Simon Oz](https://www.youtube.com/watch?v=ccHyFnEZt7M&ab_channel=SimonOz)](mojo_gpu_puzzles/p14_tiled_matmul.gif)
 
@@ -1426,9 +1425,166 @@ The memory hierachy(discussed [in the previous post](./2025-07-06-gpu-puzzles-p1
 - **Shared SRAM**: the current `A_tile` and `B_tile`, cooperatively loaded once and reused T times  
 - **Global HBM**: original A, B matrices and final C; each element touched once per tile load/store
 
-### The algorithm (Mojo Kernel)
+### Raw Memory
 
-hello
+```{.mojo .code-overflow-wrap filename=p14_matmul_tiled_manual.mojo}
+
+alias SIZE_TILED = 8 # Size of the matrix we are multiplying, NOT the size of a tile
+alias BLOCKS_PER_GRID_TILED = (3, 3)  # each block convers 3x3 elements
+alias THREADS_PER_BLOCK_TILED = (TPB, TPB)
+alias layout_tiled = Layout.row_major(SIZE_TILED, SIZE_TILED)
+
+
+fn matmul_tiled[
+    layout: Layout, size: Int
+](
+    output: LayoutTensor[mut=False, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    b: LayoutTensor[mut=False, dtype, layout],
+):
+    local_row = thread_idx.y
+    local_col = thread_idx.x
+    global_row = block_idx.y * TPB + local_row
+    global_col = block_idx.x * TPB + local_col
+
+    shared_a = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+    shared_b = tb[dtype]().row_major[TPB, TPB]().shared().alloc()
+
+    var local_sum: output.element_type = 0.0
+
+    @parameter
+    # (size + TPB - 1) // TPB == ceil(size / TPB) → number of tile-steps we need
+    for tile in range((size + TPB - 1) // TPB):
+        # Load elements of A into shared mem
+        if global_row < size and (tile * TPB + local_col) < size:
+            shared_a[local_row, local_col] = a[
+                global_row, tile * TPB + local_col
+            ]
+
+        # Load elements of B into shared mem
+        if global_col < size and (tile * TPB + local_row) < size:
+            shared_b[local_row, local_col] = b[
+                tile * TPB + local_row, global_col
+            ]
+
+        barrier()
+
+        # Perform matmul
+        if global_row < size and global_col < size:
+
+            @parameter
+            for k in range(min(TPB, size - tile * TPB)):
+                local_sum += shared_a[local_row, k] * shared_b[k, local_col]
+
+            barrier()
+
+        if global_row < size and global_col < size:
+            output[global_row, global_col] = local_sum
+```
+
+```sh
+pixi run p14 --tiled
+# out: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])
+# expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])
+```
+
+The new formulas in the tiling implementation deserve explanation. Let's break them down into key concepts:
+
+#### How many Tiles are needed? 
+
+This is the expression: `range((size + TPB - 1) // TPB)`
+
+The key idea here is: Step through k by TPB each time; if there's a leftover chunk, do one last tile for it.
+
+```
+size = 17      TPB = 8
+k:  0···7 | 8···15 | 16···17
+tiles:  0      1        2 
+```
+
+The above example needs 3 tiles. Ceiling division captures this with a simple formula:
+$$
+\lceil\frac{size}{TPB}\rceil = \lfloor\frac{size + TPB - 1}{TPB}\rfloor
+$$
+
+#### Which element does **my** thread fetch this tile?
+
+Each thread brings in one A value and one B value. Thread indices inside the block:
+
+```
+(local_row, local_col) ← (threadIdx.y, threadIdx.x)
+```
+
+Here, `tile` is the “which-chunk-of-k” loop counter.  
+
+Inside a block each thread is responsible for one output element C[global_row, global_col].  
+For that element you need every pair (A[row, k], B[k, col]) as k runs.
+
+**Thread-to-Memory Mapping**: Understanding how 1024 threads per block map to memory is crucial. With TPB=32, we get a 32×32 thread block—not random sizing! Each **warp** (32 consecutive threads) maps to one row of the tile, ensuring 32 threads can issue **one coalesced 128-byte burst** when loading consecutive elements.
+
+```
+Warp 0:  threads  0-31  → tile row 0
+Warp 1:  threads 32-63  → tile row 1
+...
+Warp 31: threads 992-1023 → tile row 31
+```
+
+For tile `t`:
+
+```
+A: a[global_row, t*TPB + local_col]
+B: b[t*TPB + local_row, global_col]
+```
+
+ASCII picture for a 4×4 tile (TPB = 4) when `t = 1`:
+
+```
+            k-dimension →
+           |---- tile 0 -----|---- tile 1 -----|
+A(row) ... 0 1 2 3  | 4 5 6 7  | 8 ...
+                ^^^— thread (·,local_col) pulls this
+
+           |---- tile 0 -----|---- tile 1 -----|
+B(col) ... 0 |               |
+             v thread (local_row,·) pulls this
+```
+
+The two loads align on the same `k` slice (`t*TPB … t*TPB+TPB-1`), ensuring every multiply in this tile has operands in shared memory.
+
+#### Why do we swap `local_row` and `local_col` for B?
+
+GPUs coalesce global memory when _adjacent threads read adjacent addresses_. With the swap:
+
+- **For A**: neighboring threads in x-direction (`local_col`) read consecutive k's ⇒ coalesced
+- **For B**: neighboring threads in y-direction (`local_row`) read consecutive k's ⇒ also coalesced
+
+Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp—a 32× slowdown on bandwidth-bound kernels.
+
+Beyond coalescing, this arrangement also avoids **shared memory bank conflicts**. Shared memory has 32 banks; when multiple threads access different addresses in the same bank simultaneously, accesses serialize. Our layout ensures `b_shared[k, threadIdx.x]` accesses different banks (or broadcasts `a_shared[threadIdx.y, k]` to all threads), keeping all 32 memory ports busy.
+
+#### Choosing the Right Tile Size
+
+The TPB=32 choice isn't arbitrary—it's a carefully balanced trade-off:
+
+> **Bigger tiles** (64×64): More data reuse, but higher register pressure and lower occupancy  
+> **Smaller tiles** (16×16): Better occupancy, fewer bank conflicts, but less data reuse  
+> **Sweet spot** (32×32): Fits in 48KB shared memory while maintaining ≥2 blocks per SM
+
+For different workloads, you might need to tune this. Use `nvcc --ptxas-options=-v` to check register usage and Nsight's occupancy calculator to verify you're not leaving performance on the table. More on this in a future post!
+
+#### Beyond Basic Tiling
+
+This implementation scratches the surface of production GEMM optimization. Advanced techniques include:
+
+- **Double buffering**: Overlap the next tile's memory transfer with current tile's computation using `cp.async` instructions
+- **Tensor cores**: Modern GPUs can perform 16×16×16 matrix fragments in one instruction via WMMA intrinsics
+- **K-splitting**: For huge matrices, split the reduction across multiple kernel launches to avoid register spills
+
+**TLDR**: Barrier, compute, slide to the next tile, repeat. But there's always another level of optimization waiting. 
+
+
+### Layout Tensor
+
 
 ### Performance 
 
@@ -1442,9 +1598,9 @@ hello
 
 The tiled kernel pushes us solidly onto the **compute-bound** side of the roofline, extracting >80% of theoretical FP16 throughput—an **8×** jump over the naive baseline and **7×** over the "row-into-shared" version.
 
-### Updated roofline model
+### Final roofline model
 
-![Updated roofline with tiled GEMM reaching the compute ceiling](mojo_gpu_puzzles/p14_roofline_tiled.png)
+![Final roofline with tiled GEMM reaching the compute ceiling](mojo_gpu_puzzles/p14_roofline_tiled.png)
 
 The new dot kisses the compute ceiling—exactly where a well-tuned GEMM belongs. From here, **tensor-core WMMA intrinsics**, register tiling (`MmaSync`), and **kernel fusion** are the next frontiers, but those are puzzles for another day.
 
