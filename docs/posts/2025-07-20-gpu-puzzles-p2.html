@@ -846,7 +846,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_X <span class="op">=</span> ceildiv(N, TILE_X)  <span class="co"># columns</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_Y <span class="op">=</span> ceildiv(M, TILE_Y)  <span class="co"># rows</span></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (BLOCKS_X, BLOCKS_Y)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TILE_X, TILE_Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TILE_Y, TILE_X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="choosing-tile-size" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-tile-size">Choosing Tile Size</h3>
@@ -900,7 +900,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </div>
 <p>Everything is exactly the same idea as 1-D, only now we have two spatial dims:</p>
 <ul>
-<li>We launch a 2D grid of <code>(ceildiv(WIDTH,TPB_X), ceildiv(HEIGHT,TPB_Y))</code> blocks of TPB_X×TPB_Y threads.</li>
+<li>We launch a 2D grid of <code>(ceildiv(WIDTH,TPB_Y), ceildiv(HEIGHT,TPB_X))</code> blocks of <code>TPB_Y×TPB_X</code> threads.</li>
 <li>Each block allocates a shared tile of size <code>(TPB_Y+K−1)×(TPB_X+K−1)</code> to hold its “main” patch plus a one‐pixel halo on the bottom/right.</li>
 <li>We also stash the full <code>K×K</code> kernel into shared_k.</li>
 <li>After a single barrier(), each thread does two nested <code>@parameter</code> loops over <code>ky,kx∈[0,K)</code> to compute a dot‐product.</li>
@@ -921,8 +921,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> WIDTH <span class="op">=</span> <span class="dv">16</span></span>
 <span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> HEIGHT <span class="op">=</span> <span class="dv">12</span></span>
 <span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> K     <span class="op">=</span> <span class="dv">3</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2D  <span class="op">=</span> (ceildiv(WIDTH, TPB_X),  ceildiv(HEIGHT, TPB_Y))</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2D <span class="op">=</span> (TPB_X, TPB_Y)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2D  <span class="op">=</span> (ceildiv(WIDTH, TPB_Y),  ceildiv(HEIGHT, TPB_X))</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2D <span class="op">=</span> (TPB_Y, TPB_X)</span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> conv_2d_halo[</span>
 <span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    in_layout : Layout, out_layout : Layout,</span>
@@ -960,8 +960,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>            shared_img[hy, hx] <span class="op">=</span> (</span>
 <span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>                inp[gy2, gx2] <span class="cf">if</span> (gy2 <span class="op">&lt;</span> HEIGHT <span class="op">&amp;&amp;</span> gx2 <span class="op">&lt;</span> WIDTH) <span class="cf">else</span> <span class="fl">0.0</span></span>
 <span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>            hx <span class="op">+=</span> TPB_X</span>
-<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>        hy <span class="op">+=</span> TPB_Y</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>            hx <span class="op">+=</span> TPB_Y</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>        hy <span class="op">+=</span> TPB_X</span>
 <span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3) stash the kernel</span></span>
 <span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> ly <span class="op">&lt;</span> K <span class="op">&amp;&amp;</span> lx <span class="op">&lt;</span> K:</span>
@@ -984,6 +984,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--conv-2d</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’ll dive into the shared memory tricks like parking partial results, handling 2-D thread and block indexing, and performing halo copies when we get to matrix multiply in <a href="@puzzle-14">Puzzle 14</a>.</p>
 </section>
 <section id="puzzle-12" class="level1">
 <h1><a href="https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html">Puzzle 12: Prefix Sum</a></h1>
@@ -1860,8 +1861,8 @@ For that element you need every pair (A[row, k], B[k, col]) as k runs.</p>
 B: b[t*TPB + local_row, global_col]</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" data-glightbox="description: .lightbox-desc-24" title="Tiled 3×3 matmul: Each thread loads one A and one B element per tile, computes a partial sum, then syncs. Tile size = 3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 3×3 matmul: Each thread loads one A and one B element per tile, computes a partial sum, then syncs. Tile size = 3, 9 threads per block."></a></p>
-<figcaption>Tiled 3×3 matmul: Each thread loads one A and one B element per tile, computes a partial sum, then syncs. Tile size = 3, 9 threads per block.</figcaption>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" data-glightbox="description: .lightbox-desc-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."></a></p>
+<figcaption>Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.</figcaption>
 </figure>
 </div>
 <p>The two loads align on the same <code>k</code> slice (<code>t*TPB … t*TPB+TPB-1</code>), ensuring every multiply in this tile has operands in shared memory.</p>
@@ -1882,7 +1883,7 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 <p>While the current puzzle selects <span class="math inline">\(TPB=3\)</span> with tile size <span class="math inline">\(TPBxTPB\)</span>, choosing the tile size is a balancing act.</p>
 <p>Exact numbers vary with GPU, kernel, and precision [<span class="citation" data-cites="nvidia_ampere_unified_shared_memory"><a href="#ref-nvidia_ampere_unified_shared_memory" role="doc-biblioref">[17]</a></span>]<span class="citation" data-cites="nvidia_blackwell_unified_shared_memory"><a href="#ref-nvidia_blackwell_unified_shared_memory" role="doc-biblioref">[18]</a></span>.</p>
 <p>I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future post once I’ve had more time to experiment.</p>
-<p><strong>TLDR:</strong> Each tile: sync (barrier), compute, shift to next tile, repeat. But this is just the baseline—there’s always a deeper optimization rabbit hole!</p>
+<p><strong>TLDR:</strong> For each tile, we will sync (barrier), compute, shift to next tile, repeat. But this is just the baseline - there’s always a deeper optimization rabbit hole!</p>
 </section>
 </section>
 <section id="layout-tensor" class="level3">
@@ -2008,7 +2009,7 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 <span class="glightbox-desc lightbox-desc-21">RTX 4000 Ada Roofline for Matmul</span>
 <span class="glightbox-desc lightbox-desc-22">Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></span>
 <span class="glightbox-desc lightbox-desc-23">Mapping of elements to tiles when size=17 and TPB=8</span>
-<span class="glightbox-desc lightbox-desc-24">Tiled 3×3 matmul: Each thread loads one A and one B element per tile, computes a partial sum, then syncs. Tile size = 3, 9 threads per block.</span>
+<span class="glightbox-desc lightbox-desc-24">Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.</span>
 <span class="glightbox-desc lightbox-desc-25">Final roofline with tiled GEMM reaching the compute ceiling</span>
 </div>
 
@@ -2594,7 +2595,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"openEffect":"zoom","closeEffect":"zoom","selector":".lightbox","loop":false,"descPosition":"bottom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-20-gpu-puzzles-p2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","loop":false});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

@@ -553,7 +553,7 @@ alias TILE_Y = 16  # threads per block in y dimension
 alias BLOCKS_X = ceildiv(N, TILE_X)  # columns
 alias BLOCKS_Y = ceildiv(M, TILE_Y)  # rows
 alias BLOCKS_PER_GRID = (BLOCKS_X, BLOCKS_Y)
-alias THREADS_PER_BLOCK = (TILE_X, TILE_Y)
+alias THREADS_PER_BLOCK = (TILE_Y, TILE_X)
 ```
 
 ### Choosing Tile Size
@@ -615,7 +615,7 @@ We can extend our implementation for 1D convolution to a 2D convolution.
 
 Everything is exactly the same idea as 1-D, only now we have two spatial dims:
 
-- We launch a 2D grid of `(ceildiv(WIDTH,TPB_X), ceildiv(HEIGHT,TPB_Y))` blocks of TPB_X×TPB_Y threads.
+- We launch a 2D grid of `(ceildiv(WIDTH,TPB_Y), ceildiv(HEIGHT,TPB_X))` blocks of `TPB_Y×TPB_X` threads.
 - Each block allocates a shared tile of size `(TPB_Y+K−1)×(TPB_X+K−1)` to hold its "main" patch plus a one‐pixel halo on the bottom/right.
 - We also stash the full `K×K` kernel into shared_k.
 - After a single barrier(), each thread does two nested `@parameter` loops over `ky,kx∈[0,K)` to compute a dot‐product.
@@ -633,8 +633,8 @@ alias TPB_Y = 8
 alias WIDTH = 16
 alias HEIGHT = 12
 alias K     = 3
-alias BLOCKS_PER_GRID_2D  = (ceildiv(WIDTH, TPB_X),  ceildiv(HEIGHT, TPB_Y))
-alias THREADS_PER_BLOCK_2D = (TPB_X, TPB_Y)
+alias BLOCKS_PER_GRID_2D  = (ceildiv(WIDTH, TPB_Y),  ceildiv(HEIGHT, TPB_X))
+alias THREADS_PER_BLOCK_2D = (TPB_Y, TPB_X)
 
 fn conv_2d_halo[
     in_layout : Layout, out_layout : Layout,
@@ -672,8 +672,8 @@ fn conv_2d_halo[
             shared_img[hy, hx] = (
                 inp[gy2, gx2] if (gy2 < HEIGHT && gx2 < WIDTH) else 0.0
             )
-            hx += TPB_X
-        hy += TPB_Y
+            hx += TPB_Y
+        hy += TPB_X
 
     # 3) stash the kernel
     if ly < K && lx < K:
@@ -701,6 +701,8 @@ pixi run p11 --conv-2d
 # out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])
 # expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])
 ```
+
+We’ll dive into the shared memory tricks like parking partial results, handling 2-D thread and block indexing, and performing halo copies when we get to matrix multiply in [Puzzle 14](@puzzle-14).
 
 # [Puzzle 12: Prefix Sum](https://builds.modular.com/puzzles/puzzle_12/puzzle_12.html) {#puzzle-12}
 
@@ -1519,7 +1521,7 @@ A: a[global_row, t*TPB + local_col]
 B: b[t*TPB + local_row, global_col]
 ```
 
-![Tiled 3×3 matmul: Each thread loads one A and one B element per tile, computes a partial sum, then syncs. Tile size = 3, 9 threads per block.](mojo_gpu_puzzles/p14_tiled_matmul_annotated.png){fig-align='center'}
+![Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.](mojo_gpu_puzzles/p14_tiled_matmul_annotated.png){fig-align='center'}
 
 The two loads align on the same `k` slice (`t*TPB … t*TPB+TPB-1`), ensuring every multiply in this tile has operands in shared memory.
 
