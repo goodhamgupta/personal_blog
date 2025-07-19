@@ -105,7 +105,7 @@ Picture Zeno's "half-way" paradox [@zeno_dichotomy_paradox]: you keep halving th
 - Each reduction round:
   - The active-thread count is cut in half (`stride /= 2`).
   - Each surviving thread adds its value to the partner `stride` positions away.
-  - A `barrier()` guarantees all writes land before the next “half-step.”
+  - A `barrier()` guarantees all writes land before the next "half-step."
 - After log₂ (n) halvings, Zeno's finish line is crossed-thread 0 alone holds the final dot-product.
 
 This pattern is fast, highly parallel, and used everywhere in GPU programming for reductions (sum, min, max, etc).
@@ -243,7 +243,7 @@ That's exactly what a 1-D convolution does to any 1-D signal-audio samples, DNA 
 
 - The kernel (a small weight vector) glides over the sequence one step at a time (or more if you set stride > 1).
 - At each stop it multiplies the local window by its weights, sums the result, and drops a single number into the output map.
-- Stack layers and you grow the “what can I see at once?” window (the receptive field) without blowing up parameters.
+- Stack layers and you grow the "what can I see at once?" window (the receptive field) without blowing up parameters.
 
 **Why bother?**
 
@@ -333,9 +333,9 @@ The _optimal_ allocation of shared memory would be:
 ```diff
 -    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()
 -    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()
-+    # Allocate exactly SIZE elements → smaller shared-mem footprint
++    # Allocate exactly SIZE elements -> smaller shared-mem footprint
 +    shared_a = tb[dtype]().row_major[SIZE]().shared().alloc()
-+    # Allocate exactly CONV elements → smaller shared-mem footprint
++    # Allocate exactly CONV elements -> smaller shared-mem footprint
 +    shared_b = tb[dtype]().row_major[CONV]().shared().alloc()
 ...
 
@@ -406,13 +406,13 @@ Naïve global loads meet none of those goals-once a window crosses the block edg
 
 **The halo idea**
 
-Give each block an in-block “fence extension”:
+Give each block an in-block "fence extension":
 
     shared_a = …[TPB + (CONV₂ − 1)]   # main slice + halo
 
 The extra `(CONV₂ − 1)` slots-the *halo*-mirror the first `(CONV₂ − 1)` elements of the next block (or zeros if we're already at EOF). That single change guarantees that every sliding window lives in one contiguous span of shared memory.
 
-The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as _halo cells_ or _skirt cells_ since they “hang” from the side of the part that is used solely by a single block[@iitd_parallel_convolution].
+The elements that are involved in multiple tiles and loaded by multiple blocks are commonly referred to as _halo cells_ or _skirt cells_ since they "hang" from the side of the part that is used solely by a single block[@iitd_parallel_convolution].
 
 Loading recipe (matches the numbered arrows in the figure):
 
@@ -616,7 +616,7 @@ We can extend our implementation for 1D convolution to a 2D convolution.
 Everything is exactly the same idea as 1-D, only now we have two spatial dims:
 
 - We launch a 2D grid of `(ceildiv(WIDTH,TPB_X), ceildiv(HEIGHT,TPB_Y))` blocks of TPB_X×TPB_Y threads.
-- Each block allocates a shared tile of size `(TPB_Y+K−1)×(TPB_X+K−1)` to hold its “main” patch plus a one‐pixel halo on the bottom/right.
+- Each block allocates a shared tile of size `(TPB_Y+K−1)×(TPB_X+K−1)` to hold its "main" patch plus a one‐pixel halo on the bottom/right.
 - We also stash the full `K×K` kernel into shared_k.
 - After a single barrier(), each thread does two nested `@parameter` loops over `ky,kx∈[0,K)` to compute a dot‐product.
 
@@ -775,7 +775,7 @@ Blelloch's two-pass scan does Θ(n) work by splitting the job into an **up-sweep
 
 Why prefer it over the classic Hillis-Steele (Algorithm 1)?
 
-1. Hardware reality: Hillis-Steele assumes one processor per element and updates the array *in-place* every round. A real GPU doesn't grant that luxury: a “1024-thread” block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
+1. Hardware reality: Hillis-Steele assumes one processor per element and updates the array *in-place* every round. A real GPU doesn't grant that luxury: a "1024-thread" block actually runs in 32-thread warps that time-slice on the same SM. When warp 0 pauses and warp 1 resumes, in-place writes from one warp can overwrite data the other still needs.
 
 2. Synchronisation cost: Avoiding the overwrite requires a barrier after **every** addition - log₂(n) rounds × n threads ⇒ Θ(n log n) operations plus all those barriers.
 
@@ -1197,8 +1197,8 @@ $$
 
 At the critical intensity $I_{crit}$, the bandwidth and compute roofs intersect, splitting kernels into two classes:
 
-- **Memory-bound** ($I < I_{crit}$) → Performance rises linearly with $I$
-- **Compute-bound** ($I \geq I_{crit}$) → Performance plateaus at $P_{peak}$
+- **Memory-bound** ($I < I_{crit}$) -> Performance rises linearly with $I$
+- **Compute-bound** ($I \geq I_{crit}$) -> Performance plateaus at $P_{peak}$
 
 ![Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel's operational intensity marked as a dot.](mojo_gpu_puzzles/p14_roofline.png){fig-align="center" width=60%}
 
@@ -1233,8 +1233,8 @@ For $C = A \times B$ where all matrices are 3×3:
 **Compute work:**
 
 - Each output element is a dot product of length 3
-- 3 fused multiply-adds → 3 FLOPs per output element
-- 9 elements → 27 FLOPs total
+- 3 fused multiply-adds -> 3 FLOPs per output element
+- 9 elements -> 27 FLOPs total
 
 **DRAM traffic:**
 
@@ -1258,7 +1258,7 @@ By staging 3×3 tiles of A and B in shared memory, each element feeds all three 
 
 **Improved traffic pattern:**
 
-- DRAM loads for A and B drop by ≈3×
+- DRAM loads for A and B drop by ~3×
 - Stores remain unchanged (36 bytes)
 - Approximate traffic: $(36+36)/3 + 36 = 60$ bytes
 
@@ -1453,7 +1453,7 @@ fn matmul_tiled[
     var local_sum: output.element_type = 0.0
 
     @parameter
-    # (size + TPB - 1) // TPB == ceil(size / TPB) → number of tile-steps we need
+    # (size + TPB - 1) // TPB == ceil(size / TPB) -> number of tile-steps we need
     for tile in range((size + TPB - 1) // TPB):
         # Load elements of A into shared mem
         if global_row < size and (tile * TPB + local_col) < size:
@@ -1515,7 +1515,7 @@ Each thread brings in one A value and one B value. Thread indices inside the blo
 (local_row, local_col) ← (threadIdx.y, threadIdx.x)
 ```
 
-Here, `tile` is the “which-chunk-of-k” loop counter.  
+Here, `tile` is the "which-chunk-of-k" loop counter.  
 
 Inside a block each thread is responsible for one output element C[global_row, global_col].  
 For that element you need every pair (A[row, k], B[k, col]) as k runs.
@@ -1523,10 +1523,10 @@ For that element you need every pair (A[row, k], B[k, col]) as k runs.
 **Thread-to-Memory Mapping**: Understanding how 1024 threads per block map to memory is crucial. With TPB=32, we get a 32×32 thread block—not random sizing! Each **warp** (32 consecutive threads) maps to one row of the tile, ensuring 32 threads can issue **one coalesced 128-byte burst** when loading consecutive elements.
 
 ```
-Warp 0:  threads  0-31  → tile row 0
-Warp 1:  threads 32-63  → tile row 1
+Warp 0:  threads  0-31  -> tile row 0
+Warp 1:  threads 32-63  -> tile row 1
 ...
-Warp 31: threads 992-1023 → tile row 31
+Warp 31: threads 992-1023 -> tile row 31
 ```
 
 For tile `t`:
@@ -1539,7 +1539,7 @@ B: b[t*TPB + local_row, global_col]
 ASCII picture for a 4×4 tile (TPB = 4) when `t = 1`:
 
 ```
-            k-dimension →
+            k-dimension ->
            |---- tile 0 -----|---- tile 1 -----|
 A(row) ... 0 1 2 3  | 4 5 6 7  | 8 ...
                 ^^^— thread (·,local_col) pulls this
@@ -1560,27 +1560,31 @@ GPUs coalesce global memory when _adjacent threads read adjacent addresses_. Wit
 
 Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp—a 32× slowdown on bandwidth-bound kernels.
 
-Beyond coalescing, this arrangement also avoids **shared memory bank conflicts**. Shared memory has 32 banks; when multiple threads access different addresses in the same bank simultaneously, accesses serialize. Our layout ensures `b_shared[k, threadIdx.x]` accesses different banks (or broadcasts `a_shared[threadIdx.y, k]` to all threads), keeping all 32 memory ports busy.
+**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks" each a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
+
+Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_shared[k, threadIdx.x]` maps each thread to a distinct bank (while `a_shared[threadIdx.y, k]` is broadcast-friendly), all 32 memory ports stay busy with zero serialization.
 
 #### Choosing the Right Tile Size
 
-The TPB=32 choice isn't arbitrary—it's a carefully balanced trade-off:
+While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the tile size is a balancing act:
 
-> **Bigger tiles** (64×64): More data reuse, but higher register pressure and lower occupancy  
-> **Smaller tiles** (16×16): Better occupancy, fewer bank conflicts, but less data reuse  
-> **Sweet spot** (32×32): Fits in 48KB shared memory while maintaining ≥2 blocks per SM
+**Larger tiles** (~ 64 × 64): maximise data reuse but spike register/shared-mem usage and can tank occupancy.  
+**Smaller tiles** (~ 16 × 16): keep resource pressure low and occupancy high, yet give up arithmetic intensity.  
+**Mid-sized tiles** (~ 32 × 32): often the practical "sweet spot", fitting inside a 48 KB shared-mem budget while still allowing two or more blocks per SM.
 
-For different workloads, you might need to tune this. Use `nvcc --ptxas-options=-v` to check register usage and Nsight's occupancy calculator to verify you're not leaving performance on the table. More on this in a future post!
+Exact numbers vary with GPU, kernel, and precision—profile and tune instead of hard-coding a magic constant.
+
+> Full disclosure: I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future write-up once I’ve had more time to experiment.
 
 #### Beyond Basic Tiling
 
-This implementation scratches the surface of production GEMM optimization. Advanced techniques include:
+As mentioned earlier, this implementation scratches the surface of production GEMM optimization. Advanced techniques include:
 
 - **Double buffering**: Overlap the next tile's memory transfer with current tile's computation using `cp.async` instructions
 - **Tensor cores**: Modern GPUs can perform 16×16×16 matrix fragments in one instruction via WMMA intrinsics
 - **K-splitting**: For huge matrices, split the reduction across multiple kernel launches to avoid register spills
 
-**TLDR**: Barrier, compute, slide to the next tile, repeat. But there's always another level of optimization waiting. 
+**TLDR:** Each tile: sync (barrier), compute, shift to next tile, repeat. But this is just the baseline—there’s always a deeper optimization rabbit hole.
 
 
 ### Layout Tensor
