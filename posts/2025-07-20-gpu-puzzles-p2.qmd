@@ -1568,7 +1568,7 @@ Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_sh
 
 While the current puzzle selects $TPB=3$ with tile size $TPBxTPB$, choosing the tile size is a balancing act.
 
-Exact numbers vary with GPU, kernel, and precision [@nvidia_ampere_unified_shared_memory].
+Exact numbers vary with GPU, kernel, and precision [@nvidia_ampere_unified_shared_memory][@nvidia_blackwell_unified_shared_memory].
 
 I’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future post once I’ve had more time to experiment.
 
@@ -1610,4 +1610,4 @@ These four archetypes form the building blocks for complex ML kernels, each with
 
 Next up: Moar GPU kernels, taclking our favorite technique for the past few years: **Attention**! 
 
-Found a bug or a sharper trick? PRs welcome or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
+Thanks for sticking around! I hope you picked up a trick or two! Spotted a bug or have a sharper optimization? Fire off a PR or issue in the repo, or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
