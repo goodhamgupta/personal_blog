@@ -1247,7 +1247,13 @@ Since $I_{naive} = 0.25 \ll I_{crit} = 74.2$, this kernel is **memory-bound**.
 
 **Predicted performance:**
 
-$$P_{naive} = \min(26.7 \text{ TFLOPS}, 0.25 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 90 \text{ GFLOPS}) = \boxed{90 \text{ GFLOPS}}$$
+$$
+\begin{aligned}
+P_{naive} \;\; & = \min(26.7~\text{TFLOPS},\; 0.25 \times 360~\text{GB/s}) \\
+               & = \min(26.7~\text{TFLOPS},\; 90~\text{GFLOPS}) \\
+               & = \boxed{90~\text{GFLOPS}}
+\end{aligned}
+$$
 
 ### Shared Memory Optimization
 
