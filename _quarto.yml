@@ -19,7 +19,8 @@ website:
   search:
     location: navbar
     type: overlay
-
+  repo-url: https://github.com/goodhamgupta/personal_blog
+  repo-actions: [issue]
 format:
   html:
     theme: 
