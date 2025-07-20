@@ -8,7 +8,7 @@
 
 <meta name="author" content="Shubham Gupta">
 <meta name="dcterms.date" content="2025-07-20">
-<meta name="description" content="Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans">
+<meta name="description" content="Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans">
 
 <title>GPUs go brrr with Mojo: Algorithms – Shubham Gupta</title>
 <style>
@@ -378,7 +378,7 @@ window.Quarto = {
       <h1 class="title">GPUs go brrr with Mojo: Algorithms</h1>
                   <div>
         <div class="description">
-          Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans
+          Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans
         </div>
       </div>
                 </div>
@@ -561,7 +561,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
-<p>To implement dot product efficiently on a GPU, we will use <strong>parallel reduction</strong>. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads. The general flow is:</p>
+<p>To implement dot product efficiently on a GPU, we will use <strong>parallel reduction</strong>. This is a classic pattern for aggregating values (sum, min, max, etc.) across a large array using many threads.</p>
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox"><a href="#ref-zeno_dichotomy_paradox" role="doc-biblioref">[2]</a></span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same-each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1776,13 +1776,16 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 <section id="naive-matmul-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="naive-matmul-analysis">Naive MatMul Analysis</h3>
 <p>For <span class="math inline">\(C = A \times B\)</span> where all matrices are 3×3:</p>
-<p><strong>Compute work:</strong></p>
+<section id="compute-work" class="level4">
+<h4 class="anchored" data-anchor-id="compute-work">Compute work</h4>
 <ul>
 <li>Each output element is a dot product of length 3</li>
 <li>3 fused multiply-adds -&gt; 3 FLOPs per output element</li>
 <li>9 elements -&gt; 27 FLOPs total</li>
 </ul>
-<p><strong>DRAM traffic:</strong></p>
+</section>
+<section id="dram-traffic" class="level4">
+<h4 class="anchored" data-anchor-id="dram-traffic">DRAM traffic</h4>
 <ul>
 <li>Load matrix A: 9 floats × 4 bytes = 36 bytes</li>
 <li>Load matrix B: 9 floats × 4 bytes = 36 bytes<br>
@@ -1790,23 +1793,40 @@ I_{\text{crit}} &amp;= \frac{P_{\text{peak}}}{b_s}
 <li>Store matrix C: 9 floats × 4 bytes = 36 bytes</li>
 <li>Total: <strong>108 bytes</strong></li>
 </ul>
-<p><strong>Operational intensity:</strong> <span class="math display">\[I_{naive} = \frac{27 \text{ FLOPs}}{108 \text{ bytes}} = 0.25 \text{ FLOP/byte}\]</span></p>
+</section>
+<section id="operational-intensity" class="level4">
+<h4 class="anchored" data-anchor-id="operational-intensity">Operational intensity:</h4>
+<p><span class="math display">\[I_{naive} = \frac{27 \text{ FLOPs}}{108 \text{ bytes}} = 0.25 \text{ FLOP/byte}\]</span></p>
 <p>Since <span class="math inline">\(I_{naive} = 0.25 \ll I_{crit} = 74.2\)</span>, this kernel is <strong>memory-bound</strong>.</p>
-<p><strong>Predicted performance:</strong></p>
-<p><span class="math display">\[P_{naive} = \min(26.7 \text{ TFLOPS}, 0.25 \times 360 \text{ GB/s}) = \min(26.7 \text{ TFLOPS}, 90 \text{ GFLOPS}) = \boxed{90 \text{ GFLOPS}}\]</span></p>
+</section>
+<section id="predicted-performance" class="level4">
+<h4 class="anchored" data-anchor-id="predicted-performance">Predicted performance</h4>
+<p><span class="math display">\[
+\begin{aligned}
+P_{naive} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.25 \times 360~\text{GB/s}) \\
+               &amp; = \min(26.7~\text{TFLOPS},\; 90~\text{GFLOPS}) \\
+               &amp; = \boxed{90~\text{GFLOPS}}
+\end{aligned}
+\]</span></p>
+</section>
 </section>
 <section id="shared-memory-optimization" class="level3">
 <h3 class="anchored" data-anchor-id="shared-memory-optimization">Shared Memory Optimization</h3>
 <p>By staging 3×3 tiles of A and B in shared memory, each element feeds all three required dot products instead of being fetched repeatedly from DRAM.</p>
-<p><strong>Improved traffic pattern:</strong></p>
+<section id="improved-traffic-pattern" class="level4">
+<h4 class="anchored" data-anchor-id="improved-traffic-pattern">Improved traffic pattern</h4>
 <ul>
 <li>DRAM loads for A and B drop by ~3×</li>
 <li>Stores remain unchanged (36 bytes)</li>
 <li>Approximate traffic: <span class="math inline">\((36+36)/3 + 36 = 60\)</span> bytes</li>
 </ul>
-<p><strong>New operational intensity:</strong></p>
+</section>
+<section id="new-operational-intensity" class="level4">
+<h4 class="anchored" data-anchor-id="new-operational-intensity">New operational intensity</h4>
 <p><span class="math display">\[I_{shared} = \frac{27 \text{ FLOPs}}{60 \text{ bytes}} = 0.45 \text{ FLOP/byte}\]</span></p>
-<p><strong>Predicted performance:</strong></p>
+</section>
+<section id="predicted-performance-1" class="level4">
+<h4 class="anchored" data-anchor-id="predicted-performance-1">Predicted performance</h4>
 <p><span class="math display">\[
 \begin{aligned}
 P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) \\
@@ -1926,6 +1946,7 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </details>
+</section>
 </section>
 <section id="key-insights" class="level3">
 <h3 class="anchored" data-anchor-id="key-insights">Key Insights</h3>
@@ -2090,7 +2111,18 @@ B: b[t*TPB + local_row, global_col]</code></pre>
 <li><strong>For B</strong>: neighboring threads in y-direction (<code>local_row</code>) read consecutive k’s ⇒ also coalesced</li>
 </ul>
 <p>Without the swap, one matrix would be fetched “strided” collapsing into 32 separate memory transactions per warp - a 32× slowdown on bandwidth-bound kernels.</p>
-<p><strong>Quick primer</strong>: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks”<span class="citation" data-cites="nvidia_shared_memory_stats"><a href="#ref-nvidia_shared_memory_stats" role="doc-biblioref">[15]</a></span> <span class="citation" data-cites="leimao_cuda_shared_memory_bank"><a href="#ref-leimao_cuda_shared_memory_bank" role="doc-biblioref">[16]</a></span>. Each is a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth <em>only when</em> every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a <strong>bank conflict</strong>.</p>
+<p><strong>Quick primer</strong>: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks”<span class="citation" data-cites="nvidia_shared_memory_stats"><a href="#ref-nvidia_shared_memory_stats" role="doc-biblioref">[15]</a></span> <span class="citation" data-cites="leimao_cuda_shared_memory_bank"><a href="#ref-leimao_cuda_shared_memory_bank" role="doc-biblioref">[16]</a></span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><a href="mojo_gpu_puzzles/p14_shared_memory_bank.png" class="lightbox" data-gallery="quarto-lightbox-gallery-25" title="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"><img src="mojo_gpu_puzzles/p14_shared_memory_bank.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"></a></p>
+</figure>
+</div>
+<figcaption>Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: <a href="https://cuda-programming.blogspot.com/2013/02/bank-conflicts-in-shared-memory-in-cuda.html">CUDA Programming Blogspot</a></figcaption>
+</figure>
+</div>
+<p>Each is a tiny SRAM with its own read/write port that can service one request (or one 32-bit access per cycle). A warp hits peak bandwidth <em>only when</em> every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a <strong>bank conflict</strong>.</p>
 <p>Beyond coalescing, our tile layout also sidesteps these conflicts. Because <code>b_shared[k, threadIdx.x]</code> maps each thread to a distinct bank (while <code>a_shared[threadIdx.y, k]</code> is broadcast-friendly), all 32 memory ports stay busy with zero serialization.</p>
 </section>
 <section id="choosing-the-right-tile-size" class="level4">
