@@ -1227,25 +1227,25 @@ The RTX 4000 Ada provides[@rtx_ada_specs]:
 
 For $C = A \times B$ where all matrices are 3×3:
 
-**Compute work:**
+#### Compute work
 
 - Each output element is a dot product of length 3
 - 3 fused multiply-adds -> 3 FLOPs per output element
 - 9 elements -> 27 FLOPs total
 
-**DRAM traffic:**
+#### DRAM traffic
 
 - Load matrix A: 9 floats × 4 bytes = 36 bytes
 - Load matrix B: 9 floats × 4 bytes = 36 bytes  
 - Store matrix C: 9 floats × 4 bytes = 36 bytes
 - Total: **108 bytes**
 
-**Operational intensity:**
+#### Operational intensity:
 $$I_{naive} = \frac{27 \text{ FLOPs}}{108 \text{ bytes}} = 0.25 \text{ FLOP/byte}$$
 
 Since $I_{naive} = 0.25 \ll I_{crit} = 74.2$, this kernel is **memory-bound**.
 
-**Predicted performance:**
+#### Predicted performance
 
 $$
 \begin{aligned}
@@ -1259,17 +1259,17 @@ $$
 
 By staging 3×3 tiles of A and B in shared memory, each element feeds all three required dot products instead of being fetched repeatedly from DRAM.
 
-**Improved traffic pattern:**
+#### Improved traffic pattern
 
 - DRAM loads for A and B drop by ~3×
 - Stores remain unchanged (36 bytes)
 - Approximate traffic: $(36+36)/3 + 36 = 60$ bytes
 
-**New operational intensity:**
+#### New operational intensity
 
 $$I_{shared} = \frac{27 \text{ FLOPs}}{60 \text{ bytes}} = 0.45 \text{ FLOP/byte}$$
 
-**Predicted performance:**
+#### Predicted performance
 
 $$
 \begin{aligned}
@@ -1540,7 +1540,12 @@ GPUs coalesce global memory when _adjacent threads read adjacent addresses_. Wit
 
 Without the swap, one matrix would be fetched "strided" collapsing into 32 separate memory transactions per warp - a 32× slowdown on bandwidth-bound kernels.
 
-**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks"[@nvidia_shared_memory_stats] [@leimao_cuda_shared_memory_bank]. Each is a tiny SRAM with its own read/write port that can service one 32-bit access per cycle. A warp hits peak bandwidth _only when_ every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
+**Quick primer**: Shared memory isn't one monolithic block. It's chopped into 32 independent "banks"[@nvidia_shared_memory_stats] [@leimao_cuda_shared_memory_bank].
+
+![Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: [CUDA Programming Blogspot](https://cuda-programming.blogspot.com/2013/02/bank-conflicts-in-shared-memory-in-cuda.html)](mojo_gpu_puzzles/p14_shared_memory_bank.png){fig-align='center'}
+
+Each is a tiny SRAM with its own read/write port that can service one request (or one 32-bit access per cycle). A warp hits peak bandwidth _only when_ every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a **bank conflict**.
+
 
 Beyond coalescing, our tile layout also sidesteps these conflicts. Because `b_shared[k, threadIdx.x]` maps each thread to a distinct bank (while `a_shared[threadIdx.y, k]` is broadcast-friendly), all 32 memory ports stay busy with zero serialization.
 
