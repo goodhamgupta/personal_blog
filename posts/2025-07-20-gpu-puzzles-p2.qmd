@@ -1,8 +1,6 @@
 ---
 title: "GPUs go brrr with Mojo: Algorithms"
 lightbox: true
-draft: true
-draft-mode: unlinked
 image: mojo_gpu_puzzles/p11_block_boundary.png
 date: '2025-07-20'
 author: Shubham Gupta
