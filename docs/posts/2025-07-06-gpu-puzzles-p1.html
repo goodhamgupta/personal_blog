@@ -168,6 +168,13 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Shubham Gupta - GPUs go brrr with Mojo - Fundamentals">
+<meta property="og:description" content="Learning GPU programming fundamentals through hands-on Mojo implementations">
+<meta property="og:site_name" content="Shubham Gupta">
+<meta name="twitter:title" content="Shubham Gupta - GPUs go brrr with Mojo - Fundamentals">
+<meta name="twitter:description" content="Learning GPU programming fundamentals through hands-on Mojo implementations">
+<meta name="twitter:creator" content="@shubhamg2208">
+<meta name="twitter:card" content="summary">
 </head>
 
 <body class="nav-fixed">
@@ -270,7 +277,7 @@ window.Quarto = {
   <li><a href="#puzzle-08" id="toc-puzzle-08" class="nav-link" data-scroll-target="#puzzle-08">Puzzle 8: Shared Memory</a></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-06-gpu-puzzles-p1.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -323,7 +330,7 @@ window.Quarto = {
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
+<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
 <figcaption>Source: FlashAttention <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[5]</a></span>. Metrics shown are for an NVIDIA A100 GPU.</figcaption>
 </figure>
 </div>
@@ -333,7 +340,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="execution-hierarchy-launch-enough-warps-to-hide-stalls">2. Execution hierarchy – launch enough warps to hide stalls</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
+<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
 <figcaption>GPU Execution Hierachy</figcaption>
 </figure>
 </div>
@@ -509,7 +516,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[7]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[8]</a></span> .</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
+<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
 <figcaption>Mojo Parameter Syntax</figcaption>
 </figure>
 </div>
@@ -1426,7 +1433,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2025-07-06-gpu-puzzles-p1.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"selector":".lightbox","closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","loop":false,"selector":".lightbox","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

@@ -5,6 +5,10 @@ project:
     - CNAME
 
 website:
+  site-url: "https://shubhamg.in"
+  open-graph: true
+  twitter-card:
+    creator: "@shubhamg2208"
   title: "Shubham Gupta"
   google-analytics: "G-CLKTGRWBQT"
   navbar:
