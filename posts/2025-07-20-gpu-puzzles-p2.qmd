@@ -6,7 +6,7 @@ draft-mode: unlinked
 image: mojo_gpu_puzzles/p11_block_boundary.png
 date: '2025-07-20'
 author: Shubham Gupta
-description: "Mojo-fueled GPU algorithms: slide-n-sum pooling, tile-flipping convs & warp-speed scans"
+description: "Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans"
 toc: true
 bibliography: citations/mojo_citations.bib
 csl: citations/ieee.csl
