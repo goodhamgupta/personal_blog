@@ -800,9 +800,9 @@ After the up-sweep leaves `a[n-1]` containing the overall sum, we walk the tree 
 - Initialize the down-sweep with a window size of `step = n/2`.  
 - Loop as long as `step >= 1`:  
     - Partition the array into blocks of size `2*step`. For each block starting at index `i`:  
-    • Temporarily store the left-child total from `a[i + step - 1]`.  
-    • Overwrite that left slot with the right-child subtotal from `a[i + 2*step - 1]`.  
-    • Add the saved left-child total to the right slot, giving the correct prefix for that subtree.  
+        - Temporarily store the left-child total from `a[i + step - 1]`.  
+        - Overwrite that left slot with the right-child subtotal from `a[i + 2*step - 1]`.  
+        - Add the saved left-child total to the right slot, giving the correct prefix for that subtree.  
     - Issue a `barrier()` so all threads sync before shrinking the window.  
     - Halve the window: `step = step / 2`.  
 - With each pass, the partial sums trickle down one level of the binary tree; after log₂(n) iterations every element holds its exclusive prefix sum.  
@@ -875,7 +875,7 @@ The key difference in this version is that now we have an input array that is la
 
 We split the global scan into two bite-sized passes:
 
-**Phase 1 - Local Scan**
+### Phase 1 - Local Scan
 
 1. Each block copies its slice into shared memory.  
 2. Perform an in-block naive scan/Blelloch scan exactly as in the single-block case.  
@@ -886,7 +886,7 @@ We split the global scan into two bite-sized passes:
    #  [   prefix sums   ][ block totals ]
    ```  
 
-**Phase 2 - Propagate block totals**
+### Phase 2 - Propagate block totals
 
 1. Every thread grabs the aggregate from the *previous* block (`totals[block_id-1]`) and adds it to its own prefix.    
    Now every element holds the inclusive scan over the *whole* array.

@@ -274,7 +274,11 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#hillis-steele-algorithm" id="toc-hillis-steele-algorithm" class="nav-link" data-scroll-target="#hillis-steele-algorithm">Hillis-Steele Algorithm</a></li>
   <li><a href="#blellochs-twopass-algorithm" id="toc-blellochs-twopass-algorithm" class="nav-link" data-scroll-target="#blellochs-twopass-algorithm">Blelloch’s Two‐Pass Algorithm</a></li>
-  <li><a href="#block-boundary-1" id="toc-block-boundary-1" class="nav-link" data-scroll-target="#block-boundary-1">Block Boundary</a></li>
+  <li><a href="#block-boundary-1" id="toc-block-boundary-1" class="nav-link" data-scroll-target="#block-boundary-1">Block Boundary</a>
+  <ul class="collapse">
+  <li><a href="#phase-1---local-scan" id="toc-phase-1---local-scan" class="nav-link" data-scroll-target="#phase-1---local-scan">Phase 1 - Local Scan</a></li>
+  <li><a href="#phase-2---propagate-block-totals" id="toc-phase-2---propagate-block-totals" class="nav-link" data-scroll-target="#phase-2---propagate-block-totals">Phase 2 - Propagate block totals</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#puzzle-13-axis-sum" id="toc-puzzle-13-axis-sum" class="nav-link" data-scroll-target="#puzzle-13-axis-sum">Puzzle 13: Axis Sum</a></li>
   <li><a href="#puzzle-14-matmul" id="toc-puzzle-14-matmul" class="nav-link" data-scroll-target="#puzzle-14-matmul">Puzzle 14: Matmul</a>
@@ -1071,11 +1075,15 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </li>
 <li>Loop as long as <code>step &gt;= 1</code>:
 <ul>
-<li>Partition the array into blocks of size <code>2*step</code>. For each block starting at index <code>i</code>:<br>
-• Temporarily store the left-child total from <code>a[i + step - 1]</code>.<br>
-• Overwrite that left slot with the right-child subtotal from <code>a[i + 2*step - 1]</code>.<br>
-• Add the saved left-child total to the right slot, giving the correct prefix for that subtree.<br>
+<li>Partition the array into blocks of size <code>2*step</code>. For each block starting at index <code>i</code>:
+<ul>
+<li>Temporarily store the left-child total from <code>a[i + step - 1]</code>.<br>
 </li>
+<li>Overwrite that left slot with the right-child subtotal from <code>a[i + 2*step - 1]</code>.<br>
+</li>
+<li>Add the saved left-child total to the right slot, giving the correct prefix for that subtree.<br>
+</li>
+</ul></li>
 <li>Issue a <code>barrier()</code> so all threads sync before shrinking the window.<br>
 </li>
 <li>Halve the window: <code>step = step / 2</code>.<br>
@@ -1146,7 +1154,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <h2 class="anchored" data-anchor-id="block-boundary-1">Block Boundary</h2>
 <p>The key difference in this version is that now we have an input array that is larger than the size of a single block.</p>
 <p>We split the global scan into two bite-sized passes:</p>
-<p><strong>Phase 1 - Local Scan</strong></p>
+<section id="phase-1---local-scan" class="level3">
+<h3 class="anchored" data-anchor-id="phase-1---local-scan">Phase 1 - Local Scan</h3>
 <ol type="1">
 <li><p>Each block copies its slice into shared memory.<br>
 </p></li>
@@ -1156,7 +1165,9 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <pre><code>#  |&lt;---  SIZE_2  ---&gt;|&lt;-- #blocks --&gt;|
 #  [   prefix sums   ][ block totals ]</code></pre></li>
 </ol>
-<p><strong>Phase 2 - Propagate block totals</strong></p>
+</section>
+<section id="phase-2---propagate-block-totals" class="level3">
+<h3 class="anchored" data-anchor-id="phase-2---propagate-block-totals">Phase 2 - Propagate block totals</h3>
 <ol type="1">
 <li>Every thread grabs the aggregate from the <em>previous</em> block (<code>totals[block_id-1]</code>) and adds it to its own prefix.<br>
 Now every element holds the inclusive scan over the <em>whole</em> array.</li>
@@ -1217,6 +1228,7 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0, 28.0, 77.0]) # last 2 elements are the block sums</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</section>
 </section>
 </section>
 <section id="puzzle-13-axis-sum" class="level1">
@@ -2679,7 +2691,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"descPosition":"bottom","closeEffect":"zoom","selector":".lightbox","openEffect":"zoom","loop":false});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"openEffect":"zoom","descPosition":"bottom","selector":".lightbox","closeEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
