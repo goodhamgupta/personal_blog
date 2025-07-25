@@ -86,6 +86,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -108,6 +109,14 @@ div.csl-indent {
   "panel-placement": "end",
   "type": "overlay",
   "limit": 50,
+  "algolia": {
+    "application-id": "HR1HJNZUVY",
+    "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
+    "index-name": "blog",
+    "analytics-events": false,
+    "show-logo": false,
+    "libDir": "site_libs"
+  },
   "keyboard-shortcut": [
     "f",
     "/",
@@ -127,6 +136,7 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -1443,7 +1453,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","closeEffect":"zoom","loop":false,"descPosition":"bottom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","loop":false,"selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

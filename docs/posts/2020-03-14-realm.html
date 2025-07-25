@@ -32,6 +32,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -51,6 +52,14 @@ ul.task-list li input[type="checkbox"] {
   "panel-placement": "end",
   "type": "overlay",
   "limit": 50,
+  "algolia": {
+    "application-id": "HR1HJNZUVY",
+    "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
+    "index-name": "blog",
+    "analytics-events": false,
+    "show-logo": false,
+    "libDir": "site_libs"
+  },
   "keyboard-shortcut": [
     "f",
     "/",
@@ -70,6 +79,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -111,6 +121,19 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Shubham Gupta - REALM: Retrieval-Augmented Language MOdel Pre-Training">
+<meta property="og:description" content="A better Q&amp;A system based on knowledge retrieval">
+<meta property="og:image" content="https://shubhamg.in/posts/realm/training.png">
+<meta property="og:site_name" content="Shubham Gupta">
+<meta property="og:image:height" content="605">
+<meta property="og:image:width" content="514">
+<meta name="twitter:title" content="Shubham Gupta - REALM: Retrieval-Augmented Language MOdel Pre-Training">
+<meta name="twitter:description" content="A better Q&amp;A system based on knowledge retrieval">
+<meta name="twitter:image" content="https://shubhamg.in/posts/realm/training.png">
+<meta name="twitter:creator" content="@shubhamg2208">
+<meta name="twitter:image-height" content="605">
+<meta name="twitter:image-width" content="514">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 
 <body class="nav-fixed">
@@ -136,6 +159,11 @@ window.Quarto = {
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/goodhamgupta"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -215,7 +243,7 @@ window.Quarto = {
   <li><a href="#comments" id="toc-comments" class="nav-link" data-scroll-target="#comments">Comments</a></li>
   <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -932,4 +960,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

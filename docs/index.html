@@ -29,6 +29,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
+<script src="site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
 <meta name="quarto:offset" content="./">
 <script src="site_libs/quarto-listing/list.min.js"></script>
 <script src="site_libs/quarto-listing/quarto-listing.js"></script>
@@ -50,6 +51,14 @@ ul.task-list li input[type="checkbox"] {
   "panel-placement": "end",
   "type": "overlay",
   "limit": 50,
+  "algolia": {
+    "application-id": "HR1HJNZUVY",
+    "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
+    "index-name": "blog",
+    "analytics-events": false,
+    "show-logo": false,
+    "libDir": "site_libs"
+  },
   "keyboard-shortcut": [
     "f",
     "/",
@@ -69,6 +78,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
 <script>
 
   window.document.addEventListener("DOMContentLoaded", function (_event) {

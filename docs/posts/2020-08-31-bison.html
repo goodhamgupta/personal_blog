@@ -32,6 +32,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -51,6 +52,14 @@ ul.task-list li input[type="checkbox"] {
   "panel-placement": "end",
   "type": "overlay",
   "limit": 50,
+  "algolia": {
+    "application-id": "HR1HJNZUVY",
+    "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
+    "index-name": "blog",
+    "analytics-events": false,
+    "show-logo": false,
+    "libDir": "site_libs"
+  },
   "keyboard-shortcut": [
     "f",
     "/",
@@ -70,6 +79,7 @@ ul.task-list li input[type="checkbox"] {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -111,6 +121,13 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../styles.css">
+<meta property="og:title" content="Shubham Gupta - BERT + BM25 = BISON">
+<meta property="og:description" content="A new framework for information retrieval from documents">
+<meta property="og:site_name" content="Shubham Gupta">
+<meta name="twitter:title" content="Shubham Gupta - BERT + BM25 = BISON">
+<meta name="twitter:description" content="A new framework for information retrieval from documents">
+<meta name="twitter:creator" content="@shubhamg2208">
+<meta name="twitter:card" content="summary">
 </head>
 
 <body class="nav-fixed">
@@ -136,6 +153,11 @@ window.Quarto = {
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/goodhamgupta"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -219,7 +241,7 @@ window.Quarto = {
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   <li><a href="#resources" id="toc-resources" class="nav-link" data-scroll-target="#resources">Resources</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2020-08-31-bison.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -1009,4 +1031,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/edit/main/posts/2020-08-31-bison.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
