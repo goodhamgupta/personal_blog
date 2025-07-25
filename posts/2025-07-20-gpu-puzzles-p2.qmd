@@ -1399,7 +1399,7 @@ For large matrices, however, even that version still:
 - Leaves many threads idle while others finish their portion of the dot-product.
 - Misses an opportunity to keep a hot, register-resident accumulator and hide global-latency behind computation.
 
-Enter **tiling / blocking**—the canonical GPU GEMM strategy.
+Enter **tiling / blocking** — the canonical GPU GEMM strategy.
 
 ### Tile?
 
@@ -1509,23 +1509,23 @@ $$
 
 #### Which element does a thread fetch in this tile?
 
-Each thread brings in one A value and one B value. Thread indices inside the block:
+Each thread snags two scalars—one from A, one from B.
 
-Here, `tile` is the "which-chunk-of-k" loop counter.  
+`tile` is simply "which chunk of k are we on?"
 
-Inside a block each thread is responsible for one output element `C[global_row, global_col]`.  
-For that element you need every pair (A[row, k], B[k, col]) as k runs.
+Inside a block, a thread owns a single output cell `C[global_row, global_col]`.
+To finish that cell it must walk k, multiplying aligned pairs (A[row, k], B[k, col]).
 
-For tile `t`:
+On tile `t` the fetches are
 
 ```
-A: a[global_row, t*TPB + local_col]
-B: b[t*TPB + local_row, global_col]
+A = a[global_row, t*TPB + local_col]
+B = b[t*TPB + local_row, global_col]
 ```
 
-![Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.](mojo_gpu_puzzles/p14_tiled_matmul_annotated.png){fig-align='center'}
+![Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block.](mojo_gpu_puzzles/p14_tiled_matmul_annotated.png){fig-align='center'}
 
-The two loads align on the same `k` slice (`t*TPB … t*TPB+TPB-1`), ensuring every multiply in this tile has operands in shared memory.
+Both reads cover the same k-slice (`t*TPB … t*TPB+TPB-1`), so every multiply in this round lives entirely in shared memory.
 
 #### Why do we swap `local_row` and `local_col` for B?
 
