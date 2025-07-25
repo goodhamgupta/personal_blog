@@ -87,6 +87,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -112,6 +113,14 @@ div.csl-indent {
   "panel-placement": "end",
   "type": "overlay",
   "limit": 50,
+  "algolia": {
+    "application-id": "HR1HJNZUVY",
+    "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
+    "index-name": "blog",
+    "analytics-events": false,
+    "show-logo": false,
+    "libDir": "site_libs"
+  },
   "keyboard-shortcut": [
     "f",
     "/",
@@ -131,6 +140,7 @@ div.csl-indent {
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -377,6 +387,11 @@ window.Quarto = {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -550,7 +565,12 @@ window.Quarto = {
 </section>
 <section id="putting-it-together" class="level3">
 <h3 class="anchored" data-anchor-id="putting-it-together">Putting it together</h3>
-<p>Fast GPU kernels keep cores busy by: - Staging hot data in <code>shared</code> or registers - Launching enough threads to mask global-memory latency - Writing branch-free, data-parallel code</p>
+<p>Fast GPU kernels keep cores busy by:</p>
+<ul>
+<li>Staging hot data in <code>shared</code> or registers</li>
+<li>Launching enough threads to mask global-memory latency</li>
+<li>Writing branch-free, data-parallel code</li>
+</ul>
 <p>We will cover the practical implications of the above topics as we go through the puzzles.</p>
 </section>
 </section>
