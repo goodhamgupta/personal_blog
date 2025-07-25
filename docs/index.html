@@ -79,9 +79,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -139,7 +139,7 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="Shubham Gupta - Tech Musings">
+<link rel="alternate" type="application/rss+xml" title="Shubham Gupta" href="index.xml" data-external="1"><meta property="og:title" content="Shubham Gupta - Tech Musings">
 <meta property="og:site_name" content="Shubham Gupta">
 <meta name="twitter:title" content="Shubham Gupta - Tech Musings">
 <meta name="twitter:creator" content="@shubhamg2208">
@@ -172,6 +172,11 @@ window.Quarto = {
 </i> 
 <span class="menu-text"></span></a>
   </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
           <div class="quarto-navbar-tools">
@@ -183,13 +188,13 @@ window.Quarto = {
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
+    <div class="quarto-title column-page">
       <h1 class="title">Tech Musings</h1>
                       </div>
   </div>
     
   
-  <div class="quarto-title-meta column-page-left">
+  <div class="quarto-title-meta column-page">
 
       
     
@@ -200,11 +205,9 @@ window.Quarto = {
   </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(10)</span></div><div class="category" data-category="attention">attention <span class="quarto-category-count">(1)</span></div><div class="category" data-category="bayesian">bayesian <span class="quarto-category-count">(1)</span></div><div class="category" data-category="bert">bert <span class="quarto-category-count">(1)</span></div><div class="category" data-category="golf_putting">golf_putting <span class="quarto-category-count">(1)</span></div><div class="category" data-category="gpu">gpu <span class="quarto-category-count">(1)</span></div><div class="category" data-category="intro">intro <span class="quarto-category-count">(1)</span></div><div class="category" data-category="jupyter">jupyter <span class="quarto-category-count">(1)</span></div><div class="category" data-category="language_model">language_model <span class="quarto-category-count">(2)</span></div><div class="category" data-category="longformer">longformer <span class="quarto-category-count">(1)</span></div><div class="category" data-category="mojo">mojo <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nlp">nlp <span class="quarto-category-count">(6)</span></div><div class="category" data-category="programming">programming <span class="quarto-category-count">(1)</span></div><div class="category" data-category="review">review <span class="quarto-category-count">(6)</span></div><div class="category" data-category="transformer">transformer <span class="quarto-category-count">(2)</span></div></div></div>
+    
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
 
 
 
@@ -244,7 +247,7 @@ Shubham Gupta
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="programming,gpu,mojo" data-listing-date-sort="1751731200000" data-listing-file-modified-sort="1752960727270" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
+<div class="quarto-post image-right" data-index="1" data-categories="programming,gpu,mojo" data-listing-date-sort="1751731200000" data-listing-file-modified-sort="1753428305206" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
 <div class="thumbnail">
 <p><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a></p><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
 <p class="card-img-top"><img src="posts/mojo_gpu_puzzles/memory_hierachy_fa.png" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."  class="thumbnail-image card-img"/></p>
@@ -256,17 +259,6 @@ Shubham Gupta
 </h3>
 <div class="listing-subtitle">
 <a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('programming'); return false;">
-programming
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('gpu'); return false;">
-gpu
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('mojo'); return false;">
-mojo
-</div>
 </div>
 <div class="listing-description">
 <a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">Learning GPU programming fundamentals through hands-on Mojo implementations</a>
@@ -296,17 +288,6 @@ Shubham Gupta
 <div class="listing-subtitle">
 <a href="./posts/2020-08-31-bison.html" class="no-external"></a>
 </div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('transformer'); return false;">
-transformer
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
-</div>
 <div class="listing-description">
 <a href="./posts/2020-08-31-bison.html" class="no-external">A new framework for information retrieval from documents</a>
 </div>
@@ -334,20 +315,6 @@ Shubham Gupta
 </h3>
 <div class="listing-subtitle">
 <a href="./posts/2020-05-11-longformer.html" class="no-external"></a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('transformer'); return false;">
-transformer
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('longformer'); return false;">
-longformer
-</div>
 </div>
 <div class="listing-description">
 <a href="./posts/2020-05-11-longformer.html" class="no-external">Transformers for loooong documents</a>
@@ -377,17 +344,6 @@ Shubham Gupta
 <div class="listing-subtitle">
 <a href="./posts/2020-04-23-tag-lm.html" class="no-external"></a>
 </div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('language_model'); return false;">
-language_model
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
-</div>
 <div class="listing-description">
 <a href="./posts/2020-04-23-tag-lm.html" class="no-external">This is the TagLM paper mentioned in Lecture 13 in the CS224N course title <strong>Semi-supervised sequence tagging with bidirectional language models</strong></a>
 </div>
@@ -415,17 +371,6 @@ Shubham Gupta
 </h3>
 <div class="listing-subtitle">
 <a href="./posts/2020-04-21-knowledge-lm.html" class="no-external"></a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('language_model'); return false;">
-language_model
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
 </div>
 <div class="listing-description">
 <a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">Measure the amount of information stored in a model</a>
@@ -455,17 +400,6 @@ Shubham Gupta
 <div class="listing-subtitle">
 <a href="./posts/2020-04-20-attention.html" class="no-external"></a>
 </div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('attention'); return false;">
-attention
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
-</div>
 <div class="listing-description">
 <a href="./posts/2020-04-20-attention.html" class="no-external">New architecture based solely on attention mechanisms called <strong>Transformer</strong>. Gets rids of recurrent and convolution networks completely.</a>
 </div>
@@ -493,17 +427,6 @@ Shubham Gupta
 </h3>
 <div class="listing-subtitle">
 <a href="./posts/2020-03-14-realm.html" class="no-external"></a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('nlp'); return false;">
-nlp
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bert'); return false;">
-bert
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('review'); return false;">
-review
-</div>
 </div>
 <div class="listing-description">
 <a href="./posts/2020-03-14-realm.html" class="no-external">A better Q&amp;A system based on knowledge retrieval</a>
@@ -533,17 +456,6 @@ Shubham Gupta
 <div class="listing-subtitle">
 <a href="./posts/2020-03-12-tutorial.html" class="no-external"></a>
 </div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('jupyter'); return false;">
-jupyter
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('bayesian'); return false;">
-bayesian
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('golf_putting'); return false;">
-golf_putting
-</div>
-</div>
 <div class="listing-description">
 <a href="./posts/2020-03-12-tutorial.html" class="no-external">Are you the next Tiger Woods?</a>
 </div>
@@ -568,11 +480,6 @@ Mar 12, 2020
 </h3>
 <div class="listing-subtitle">
 <a href="./posts/2020-01-14-first-post.html" class="no-external"></a>
-</div>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('intro'); return false;">
-intro
-</div>
 </div>
 <div class="listing-description">
 <a href="./posts/2020-01-14-first-post.html" class="no-external">First post</a>

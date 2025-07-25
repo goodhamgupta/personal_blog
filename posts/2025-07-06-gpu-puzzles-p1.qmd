@@ -103,6 +103,7 @@ The CPU launches kernels asynchronously and goes back to other work. Inside the 
 ### Putting it together
 
 Fast GPU kernels keep cores busy by:
+
 - Staging hot data in `shared` or registers
 - Launching enough threads to mask global-memory latency
 - Writing branch-free, data-parallel code

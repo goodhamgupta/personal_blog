@@ -17,6 +17,8 @@ website:
         href: about.qmd
       - icon: github
         href: https://github.com/goodhamgupta
+      - icon: rss
+        href: index.xml
   comments:
     giscus:
       repo: goodhamgupta/personal_blog
