@@ -2026,7 +2026,7 @@ For large matrices, however, even that version still:</p>
 <li>Leaves many threads idle while others finish their portion of the dot-product.</li>
 <li>Misses an opportunity to keep a hot, register-resident accumulator and hide global-latency behind computation.</li>
 </ul>
-<p>Enter <strong>tiling / blocking</strong>—the canonical GPU GEMM strategy.</p>
+<p>Enter <strong>tiling / blocking</strong> — the canonical GPU GEMM strategy.</p>
 <section id="tile" class="level3">
 <h3 class="anchored" data-anchor-id="tile">Tile?</h3>
 <p>Think of an <code>N×N</code> matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into <code>T×T</code> sub-squares (<strong>tiles</strong>).</p>
@@ -2143,24 +2143,23 @@ For large matrices, however, even that version still:</p>
 </section>
 <section id="which-element-does-a-thread-fetch-in-this-tile" class="level4">
 <h4 class="anchored" data-anchor-id="which-element-does-a-thread-fetch-in-this-tile">Which element does a thread fetch in this tile?</h4>
-<p>Each thread brings in one A value and one B value. Thread indices inside the block:</p>
-<p>Here, <code>tile</code> is the “which-chunk-of-k” loop counter.</p>
-<p>Inside a block each thread is responsible for one output element <code>C[global_row, global_col]</code>.<br>
-For that element you need every pair (A[row, k], B[k, col]) as k runs.</p>
-<p>For tile <code>t</code>:</p>
-<pre><code>A: a[global_row, t*TPB + local_col]
-B: b[t*TPB + local_row, global_col]</code></pre>
+<p>Each thread snags two scalars—one from A, one from B.</p>
+<p><code>tile</code> is simply “which chunk of k are we on?”</p>
+<p>Inside a block, a thread owns a single output cell <code>C[global_row, global_col]</code>. To finish that cell it must walk k, multiplying aligned pairs (A[row, k], B[k, col]).</p>
+<p>On tile <code>t</code> the fetches are</p>
+<pre><code>A = a[global_row, t*TPB + local_col]
+B = b[t*TPB + local_row, global_col]</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."><img src="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."></a></p>
 </figure>
 </div>
-<figcaption>Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3x3, 9 threads per block.</figcaption>
+<figcaption>Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block.</figcaption>
 </figure>
 </div>
-<p>The two loads align on the same <code>k</code> slice (<code>t*TPB … t*TPB+TPB-1</code>), ensuring every multiply in this tile has operands in shared memory.</p>
+<p>Both reads cover the same k-slice (<code>t*TPB … t*TPB+TPB-1</code>), so every multiply in this round lives entirely in shared memory.</p>
 </section>
 <section id="why-do-we-swap-local_row-and-local_col-for-b" class="level4">
 <h4 class="anchored" data-anchor-id="why-do-we-swap-local_row-and-local_col-for-b">Why do we swap <code>local_row</code> and <code>local_col</code> for B?</h4>
