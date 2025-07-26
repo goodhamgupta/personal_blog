@@ -93,7 +93,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "application-id": "HR1HJNZUVY",
     "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
     "index-name": "blog_pages",
-    "analytics-events": false,
+    "index-fields": {
+      "href": "url",
+      "section": "sec",
+      "text": "body"
+    },
+    "analytics-events": true,
     "show-logo": false,
     "libDir": "site_libs"
   },
@@ -117,6 +122,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
+
+
+<script type="text/javascript">
+var ALGOLIA_INSIGHTS_SRC = "https://cdn.jsdelivr.net/npm/search-insights/dist/search-insights.iife.min.js";
+!function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
+(e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
+i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
+}(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
+</script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-algolia-insights">
+
+</script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
