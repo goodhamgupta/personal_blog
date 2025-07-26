@@ -1,1 +1,2 @@
 Sitemap: https://shubhamg.in/sitemap.xml
+# Algolia-Crawler-Verif: D48E4B3276CF32D5

@@ -713,40 +713,47 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <summary>
 <strong>Solution</strong>
 </summary>
-<p>alias TPB = 8 alias SIZE = 8 alias BLOCKS_PER_GRID = (1, 1) alias THREADS_PER_BLOCK = (SIZE, 1) alias dtype = DType.float32 alias layout = Layout.row_major(SIZE) alias out_layout = Layout.row_major(1)</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> dot_product[</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>](</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, out_layout],</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, in_layout],</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, in_layout],</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use LayoutTensorBuilder instead of stack_allocation</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    shared <span class="op">=</span> tb[dtype]().row_major[TPB]().shared().alloc()</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    global_idx <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    local_idx <span class="op">=</span> thread_idx.x</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_idx <span class="op">&lt;</span> size:</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        shared[local_idx] <span class="op">=</span> a[global_idx] <span class="op">*</span> b[global_idx]</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    stride <span class="op">=</span> TPB <span class="op">//</span> <span class="dv">2</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(stride <span class="op">&gt;</span> <span class="dv">0</span>):</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> local_idx <span class="op">&lt;</span> stride:</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            shared[local_idx] <span class="op">+=</span> shared[local_idx <span class="op">+</span> stride]</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        stride <span class="op">=</span> stride <span class="op">//</span> <span class="dv">2</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only allow thread 0 to write result</span></span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_idx <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (SIZE, <span class="dv">1</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> layout <span class="op">=</span> Layout.row_major(SIZE)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> out_layout <span class="op">=</span> Layout.row_major(<span class="dv">1</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> dot_product[</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, out_layout],</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, in_layout],</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, in_layout],</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    size: Int,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Use LayoutTensorBuilder instead of stack_allocation</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    shared <span class="op">=</span> tb[dtype]().row_major[TPB]().shared().alloc()</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    global_idx <span class="op">=</span> block_dim.x <span class="op">*</span> block_idx.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    local_idx <span class="op">=</span> thread_idx.x</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_idx <span class="op">&lt;</span> size:</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>        shared[local_idx] <span class="op">=</span> a[global_idx] <span class="op">*</span> b[global_idx]</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    barrier()</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    stride <span class="op">=</span> TPB <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span>(stride <span class="op">&gt;</span> <span class="dv">0</span>):</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> local_idx <span class="op">&lt;</span> stride:</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>            shared[local_idx] <span class="op">+=</span> shared[local_idx <span class="op">+</span> stride]</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>        barrier()</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>        stride <span class="op">=</span> stride <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only allow thread 0 to write result</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_idx <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </details>
 </section>
@@ -2019,7 +2026,7 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 </section>
 <section id="tiled-matrix-multiplication-gemm" class="level2">
 <h2 class="anchored" data-anchor-id="tiled-matrix-multiplication-gemm">Tiled Matrix-Multiplication (GEMM)</h2>
-<p>Our <strong>shared-memory</strong> kernel already cut global-DRAM traffic by loading each <code>A[i,k]</code> / <code>B[k,j]</code> element once per thread <strong>row/column</strong> instead of once per <strong>output multiply</strong>.<br>
+<p>Our <em>shared-memory</em> kernel already cut global-DRAM traffic by loading each <code>A[i,k]</code> / <code>B[k,j]</code> element once per thread <em>row/column</em> instead of once per <em>output multiply</em>.<br>
 For large matrices, however, even that version still:</p>
 <ul>
 <li>Brings the <em>entire</em> row of <code>A</code> and column of <code>B</code> into shared SRAM, quickly exhausting the 48–112 KiB available per SM.</li>
@@ -2032,8 +2039,8 @@ For large matrices, however, even that version still:</p>
 <p>Think of an <code>N×N</code> matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into <code>T×T</code> sub-squares (<strong>tiles</strong>).</p>
 <p>A <em>thread-block</em> is assigned one output tile, and:</p>
 <ul>
-<li>Cooperatively loads the matching <code>T×T</code> <strong>A-tile</strong> <em>and</em> <strong>B-tile</strong> from global DRAM to <strong>shared memory</strong> (two coalesced 2-D memcpy’s).</li>
-<li>Performs <code>T</code> fused-multiply-add sweeps of that data, each thread keeping its running sum in a <strong>register</strong>.</li>
+<li>Cooperatively loads the matching <code>T×T</code> <em>A-tile</em> and <em>B-tile</em> from global DRAM to <em>shared memory</em> (two coalesced 2-D memcpy’s).</li>
+<li>Performs <code>T</code> fused-multiply-add sweeps of that data, each thread keeping its running sum in a <em>register</em>.</li>
 <li>Barriers, slides the tile window by <code>T</code> along the inner-<code>k</code> dimension, and repeats until the dot-product is complete.</li>
 <li>Finally writes the <code>T×T</code> block of <code>C</code> back to DRAM.</li>
 </ul>
@@ -2043,7 +2050,7 @@ For large matrices, however, even that version still:</p>
 <figcaption>Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></figcaption>
 </figure>
 </div>
-<p>Each element of <code>A</code>/<code>B</code> is now read <strong>once per tile</strong>—independent of <code>N</code>—and re-used <code>T</code> times, boosting arithmetic intensity from <code>O(1)</code> to <code>O(T)</code> FLOP/B.</p>
+<p>Each element of <code>A</code>/<code>B</code> is now read <em>once per tile</em> - independent of <code>N</code>, and re-used <code>T</code> times, boosting arithmetic intensity from <code>O(1)</code> to <code>O(T)</code> FLOP/B.</p>
 </section>
 <section id="memory-mapping-for-tiled-gemm" class="level3">
 <h3 class="anchored" data-anchor-id="memory-mapping-for-tiled-gemm">Memory mapping for tiled GEMM</h3>

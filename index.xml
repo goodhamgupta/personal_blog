@@ -421,7 +421,6 @@ font-style: inherit;">+            output[0] = output[0] + shared[idx]</span></s
 <summary>
 <strong>Solution</strong>
 </summary>
-<p>alias TPB = 8 alias SIZE = 8 alias BLOCKS_PER_GRID = (1, 1) alias THREADS_PER_BLOCK = (SIZE, 1) alias dtype = DType.float32 alias layout = Layout.row_major(SIZE) alias out_layout = Layout.row_major(1)</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
@@ -429,65 +428,120 @@ font-style: inherit;">+            output[0] = output[0] + shared[idx]</span></s
 <div class="sourceCode" id="cb5" data-filename="p10.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
+font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span></span>
+<span id="cb5-2"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> SIZE <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span></span>
+<span id="cb5-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> BLOCKS_PER_GRID <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-4"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> THREADS_PER_BLOCK <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (SIZE, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> dtype <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> DType.float32</span>
+<span id="cb5-6"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> layout <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Layout.row_major(SIZE)</span>
+<span id="cb5-7"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">alias</span> out_layout <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Layout.row_major(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb5-8"></span>
+<span id="cb5-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
 font-style: inherit;">fn</span> dot_product[</span>
-<span id="cb5-2">    in_layout: Layout, out_layout: Layout</span>
-<span id="cb5-3">](</span>
-<span id="cb5-4">    output: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
+<span id="cb5-10">    in_layout: Layout, out_layout: Layout</span>
+<span id="cb5-11">](</span>
+<span id="cb5-12">    output: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>, dtype, out_layout],</span>
-<span id="cb5-5">    a: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
+<span id="cb5-13">    a: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>, dtype, in_layout],</span>
-<span id="cb5-6">    b: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
+<span id="cb5-14">    b: LayoutTensor[mut<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>, dtype, in_layout],</span>
-<span id="cb5-7">    size: Int,</span>
-<span id="cb5-8">):</span>
-<span id="cb5-9">    <span class="co" style="color: #5E5E5E;
+<span id="cb5-15">    size: Int,</span>
+<span id="cb5-16">):</span>
+<span id="cb5-17">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Use LayoutTensorBuilder instead of stack_allocation</span></span>
-<span id="cb5-10">    shared <span class="op" style="color: #5E5E5E;
+<span id="cb5-18">    shared <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tb[dtype]().row_major[TPB]().shared().alloc()</span>
-<span id="cb5-11">    global_idx <span class="op" style="color: #5E5E5E;
+<span id="cb5-19">    global_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> block_dim.x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> block_idx.x <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> thread_idx.x</span>
-<span id="cb5-12">    local_idx <span class="op" style="color: #5E5E5E;
+<span id="cb5-20">    local_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> thread_idx.x</span>
-<span id="cb5-13"></span>
-<span id="cb5-14">    <span class="cf" style="color: #003B4F;
+<span id="cb5-21"></span>
+<span id="cb5-22">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">if</span> global_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;</span> size:</span>
-<span id="cb5-15">        shared[local_idx] <span class="op" style="color: #5E5E5E;
+<span id="cb5-23">        shared[local_idx] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> a[global_idx] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">*</span> b[global_idx]</span>
-<span id="cb5-16"></span>
-<span id="cb5-17">    barrier()</span>
-<span id="cb5-18"></span>
-<span id="cb5-19">    stride <span class="op" style="color: #5E5E5E;
+<span id="cb5-24"></span>
+<span id="cb5-25">    barrier()</span>
+<span id="cb5-26"></span>
+<span id="cb5-27">    stride <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> TPB <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">//</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span></span>
-<span id="cb5-20">    <span class="cf" style="color: #003B4F;
+<span id="cb5-28">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">while</span>(stride <span class="op" style="color: #5E5E5E;
@@ -495,31 +549,31 @@ background-color: null;
 font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>):</span>
-<span id="cb5-21">        <span class="cf" style="color: #003B4F;
+<span id="cb5-29">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">if</span> local_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;</span> stride:</span>
-<span id="cb5-22">            shared[local_idx] <span class="op" style="color: #5E5E5E;
+<span id="cb5-30">            shared[local_idx] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> shared[local_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> stride]</span>
-<span id="cb5-23">        </span>
-<span id="cb5-24">        barrier()</span>
-<span id="cb5-25">        stride <span class="op" style="color: #5E5E5E;
+<span id="cb5-31">        </span>
+<span id="cb5-32">        barrier()</span>
+<span id="cb5-33">        stride <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> stride <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">//</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span></span>
-<span id="cb5-26">    </span>
-<span id="cb5-27">    <span class="co" style="color: #5E5E5E;
+<span id="cb5-34">    </span>
+<span id="cb5-35">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># only allow thread 0 to write result</span></span>
-<span id="cb5-28">    <span class="cf" style="color: #003B4F;
+<span id="cb5-36">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">if</span> local_idx <span class="op" style="color: #5E5E5E;
@@ -527,7 +581,7 @@ background-color: null;
 font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb5-29">        output[<span class="dv" style="color: #AD0000;
+<span id="cb5-37">        output[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -3718,7 +3772,7 @@ font-style: inherit;">% of peak"</span>)</span></code></pre></div>
 </section>
 <section id="tiled-matrix-multiplication-gemm" class="level2">
 <h2 class="anchored" data-anchor-id="tiled-matrix-multiplication-gemm">Tiled Matrix-Multiplication (GEMM)</h2>
-<p>Our <strong>shared-memory</strong> kernel already cut global-DRAM traffic by loading each <code>A[i,k]</code> / <code>B[k,j]</code> element once per thread <strong>row/column</strong> instead of once per <strong>output multiply</strong>.<br>
+<p>Our <em>shared-memory</em> kernel already cut global-DRAM traffic by loading each <code>A[i,k]</code> / <code>B[k,j]</code> element once per thread <em>row/column</em> instead of once per <em>output multiply</em>.<br>
 For large matrices, however, even that version still:</p>
 <ul>
 <li>Brings the <em>entire</em> row of <code>A</code> and column of <code>B</code> into shared SRAM, quickly exhausting the 48–112 KiB available per SM.</li>
@@ -3731,8 +3785,8 @@ For large matrices, however, even that version still:</p>
 <p>Think of an <code>N×N</code> matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into <code>T×T</code> sub-squares (<strong>tiles</strong>).</p>
 <p>A <em>thread-block</em> is assigned one output tile, and:</p>
 <ul>
-<li>Cooperatively loads the matching <code>T×T</code> <strong>A-tile</strong> <em>and</em> <strong>B-tile</strong> from global DRAM to <strong>shared memory</strong> (two coalesced 2-D memcpy’s).</li>
-<li>Performs <code>T</code> fused-multiply-add sweeps of that data, each thread keeping its running sum in a <strong>register</strong>.</li>
+<li>Cooperatively loads the matching <code>T×T</code> <em>A-tile</em> and <em>B-tile</em> from global DRAM to <em>shared memory</em> (two coalesced 2-D memcpy’s).</li>
+<li>Performs <code>T</code> fused-multiply-add sweeps of that data, each thread keeping its running sum in a <em>register</em>.</li>
 <li>Barriers, slides the tile window by <code>T</code> along the inner-<code>k</code> dimension, and repeats until the dot-product is complete.</li>
 <li>Finally writes the <code>T×T</code> block of <code>C</code> back to DRAM.</li>
 </ul>
@@ -3742,7 +3796,7 @@ For large matrices, however, even that version still:</p>
 <figcaption>Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></figcaption>
 </figure>
 </div>
-<p>Each element of <code>A</code>/<code>B</code> is now read <strong>once per tile</strong>—independent of <code>N</code>—and re-used <code>T</code> times, boosting arithmetic intensity from <code>O(1)</code> to <code>O(T)</code> FLOP/B.</p>
+<p>Each element of <code>A</code>/<code>B</code> is now read <em>once per tile</em> - independent of <code>N</code>, and re-used <code>T</code> times, boosting arithmetic intensity from <code>O(1)</code> to <code>O(T)</code> FLOP/B.</p>
 </section>
 <section id="memory-mapping-for-tiled-gemm" class="level3">
 <h3 class="anchored" data-anchor-id="memory-mapping-for-tiled-gemm">Memory mapping for tiled GEMM</h3>
