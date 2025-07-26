@@ -185,6 +185,7 @@ While this approach also gives the correct answer for this puzzle, it has multip
 <details open>
 <summary> **Solution** </summary>
 
+```{.mojo filename=p10.mojo}
 alias TPB = 8
 alias SIZE = 8
 alias BLOCKS_PER_GRID = (1, 1)
@@ -193,7 +194,6 @@ alias dtype = DType.float32
 alias layout = Layout.row_major(SIZE)
 alias out_layout = Layout.row_major(1)
 
-```{.mojo filename=p10.mojo}
 fn dot_product[
     in_layout: Layout, out_layout: Layout
 ](
@@ -1392,7 +1392,7 @@ Next, we'll look at one specific optimisation for Matmul: Tile-based GEMM!
 
 ## Tiled Matrix-Multiplication (GEMM)
 
-Our **shared-memory** kernel already cut global-DRAM traffic by loading each `A[i,k]` / `B[k,j]` element once per thread **row/column** instead of once per **output multiply**.  
+Our _shared-memory_ kernel already cut global-DRAM traffic by loading each `A[i,k]` / `B[k,j]` element once per thread _row/column_ instead of once per _output multiply_.  
 For large matrices, however, even that version still:
 
 - Brings the *entire* row of `A` and column of `B` into shared SRAM, quickly exhausting the 48–112 KiB available per SM.
@@ -1407,14 +1407,14 @@ Think of an `N×N` matmul as a chessboard. Instead of letting every thread wande
 
 A *thread-block* is assigned one output tile, and:
 
-- Cooperatively loads the matching `T×T` **A-tile** _and_ **B-tile** from global DRAM to **shared memory** (two coalesced 2-D memcpy's).
-- Performs `T` fused-multiply-add sweeps of that data, each thread keeping its running sum in a **register**.
+- Cooperatively loads the matching `T×T` _A-tile_ and _B-tile_ from global DRAM to _shared memory_ (two coalesced 2-D memcpy's).
+- Performs `T` fused-multiply-add sweeps of that data, each thread keeping its running sum in a _register_.
 - Barriers, slides the tile window by `T` along the inner-`k` dimension, and repeats until the dot-product is complete.
 - Finally writes the `T×T` block of `C` back to DRAM.
 
 ![Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: [Simon Oz](https://www.youtube.com/watch?v=ccHyFnEZt7M&ab_channel=SimonOz)](mojo_gpu_puzzles/p14_tiled_matmul.gif)
 
-Each element of `A`/`B` is now read **once per tile**—independent of `N`—and re-used `T` times, boosting arithmetic intensity from `O(1)` to `O(T)` FLOP/B.
+Each element of `A`/`B` is now read _once per tile_ - independent of `N`, and re-used `T` times, boosting arithmetic intensity from `O(1)` to `O(T)` FLOP/B.
 
 ### Memory mapping for tiled GEMM
 
