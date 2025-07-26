@@ -29,6 +29,12 @@ website:
       index-name: blog_pages
       application-id: HR1HJNZUVY
       search-only-api-key: 3326e8971e20d27e2dd21591d6a24656
+      index-fields:
+        href: url
+        section: sec
+        text: body
+      analytics-events: true
+
   repo-url: https://github.com/goodhamgupta/personal_blog
   repo-actions: [issue]
 format:
