@@ -508,6 +508,97 @@
     "href": "index.html",
     "title": "Tech Musings",
     "section": "",
-    "text": "GPUs go brrr with Mojo: Algorithms\n\n\n\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo - Fundamentals\n\n\n\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\n\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\n\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\n\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\n\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\n\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\n\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\n\nNo matching items"
+    "text": "Anthropic BSides CTF 2025\n\n\n\n\n\n… and how to win API credits!\n\n\n\n\n\nAug 5, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo: Algorithms\n\n\n\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo - Fundamentals\n\n\n\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\n\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\n\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\n\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\n\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\n\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\n\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:\nI’m no CTF expert/practitioner, but I tackled a few during undergrad, most of which were forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.\nThe challenge is available via the Wayback Machine at Anthropic AI Bsides. Do try it out before reading further!"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#what-on-earth-is-a-ctf",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#what-on-earth-is-a-ctf",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "CTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#why-do-people-play",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#why-do-people-play",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "Hands-on learning – You absorb offensive and defensive security concepts far faster than by reading docs alone.\n\nPortfolio building – CTF write-ups are concrete proof of skill; many employers actively scout top-scoring players.\n\nCommunity & bragging rights – It’s hard to beat the thrill of a scoreboard battle at 2 a.m. with teammates around the globe.\n\nPrizes & swag – From t-shirts to internship offers—and in this case, Anthropic API credits!"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "Registration opens; you join solo or as a team.\n\nWhen the clock starts, a web portal unlocks dozens of challenges grouped by category:\n\nReversing (understand binary or VM byte-code)\n\nPwn (exploit memory-safety bugs)\n\nWeb (abuse logic bugs or misconfigurations)\n\nCrypto (break badly implemented cryptography)\n\nForensics / OSINT (recover data, analyze network captures, or dig up open-source intel).\n\n\nSolve a challenge → obtain flag → submit → gain points. Harder problems are worth more.\n\nHighest score (or earliest finish if tied) wins when the timer hits zero.\n(Some formats are “attack-defense,” but BSides uses the more common Jeopardy-style above.)"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#essential-toolbox",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#essential-toolbox",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "You don’t need fancy zero-days—just curiosity and a few staples: strings, gdb, pwntools, Burp Suite/ZAP, Wireshark, CyberChef, a Python/Go/JS REPL, plus the willingness to read RFCs at midnight."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#why-a-bsides-ctf-why-anthropic",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#why-a-bsides-ctf-why-anthropic",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "BSides events are community-driven mini-conferences spun out of Black Hat.\nTheir CTFs retain that grassroots vibe: smaller, friendlier, yet packed with clever challenges.\nAnthropic has partnered this year to sprinkle in AI-themed puzzles and to award Claude API credits to top teams—perfect for hackers who moonlight as prompt engineers."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#about-this-write-up",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#about-this-write-up",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "I played BSides CTF 2025 with team 0xC0FFEE and kept live notes as we solved each task.\nRather than polishing them into a formal walkthrough, I’m publishing the raw—but annotated—journey: command snippets, dead ends, aha moments, and final exploits. Spoilers ahead; if you plan to tackle the replay environment yourself, bookmark this page and come back later!\n\nWith that primer out of the way, let’s dive into the challenges…"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-formats-in-a-nutshell",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-formats-in-a-nutshell",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "CTF formats in a nutshell",
+    "text": "CTF formats in a nutshell\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\n\n\n\n\n\n\n\nFormat\nWhat happens\nTypical vibe\n\n\n\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points.\nWorkshop / learning-friendly. Great for individuals or small teams.\n\n\nAttack-Defense\nEach team receives an identical (and intentionally vulnerable) service. Every “tick” you: (a) keep your instance alive for defence points, (b) exploit everyone else to steal a fresh dynamic flag for attack points. Patch too much and you break your own service; patch too little and you hemorrhage flags.\nFast, frantic, very team-oriented—think DevOps meets PvP.\n\n\nMixed / custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware).\nAnything goes. Read the rules.\n\n\n\nMost community events—including BSides—opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style.\n\n\n\nJeopardy\n\n\n\n\n\nAttack-Defense"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work-jeopardy-edition",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work-jeopardy-edition",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "",
+    "text": "Registration opens; you join solo or as a team.\n\nWhen the clock starts, a web portal unlocks dozens of challenges grouped by category:\n\nReversing (dissect binaries or byte-code)\n\nPwn (exploit memory-safety bugs)\n\nWeb (abuse logic flaws or misconfigurations)\n\nCrypto (break imperfect cryptography)\n\nForensics / OSINT (recover data, analyse PCAPs, hunt open-source intel)\n\nMisc (anything from steganography to AI-prompt hijacking)\n\n\nSolve a challenge → obtain flag → submit → gain points. Harder problems are worth more.\n\nHighest score (or earliest finish if tied) wins when the timer hits zero.\n\n(If the event is “attack-defence,” steps 2-4 look very different; scroll back to the table above.)\n\n\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page. Paste the string into the submission box; the scoreboard updates instantly (and rejects duplicates). In A/D games a new flag is generated every round, so automation matters."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "CTF?",
+    "text": "CTF?\nCTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#flag-anatomy-submission",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#flag-anatomy-submission",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "Flag anatomy & submission",
+    "text": "Flag anatomy & submission\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page.\n\n\n\nFlags\n\n\nIn A/D games a new flag is generated every round, so automation matters.\n\nWith that primer out of the way, let’s dive into the challenges…"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "Steganography?",
+    "text": "Steganography?\nSteganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[1].\nIn graphics the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.\nzsteg is the CTF scalpel for pictures. It bruteforces every sane combo of\nbit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.\nzsteg stego.png\n\n# quiet mode – only non-empty findings\nzsteg -a stego.png | grep -v empty\n\n# saw a hit like \"b1,rgb,lsb,xy\"?  Yank it out:\nzsteg -E b1,rgb,lsb,xy stego.png &gt; hidden.bin\nfile hidden.bin   # often text, sometimes a ZIP\nOne way to hide zip files in PNG/JPG/GIF images is to just append bytes. Most decoders ignore trailing data:\n`cat loot.zip &gt;&gt; cover.png`\n\nReferences\n\n\n[1] CTF101, “What is steganography?” 2024. Available: https://ctf101.org/forensics/what-is-stegonagraphy/"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "title": "Anthropic BSides CTF 2025",
+    "section": "CTF Styles",
+    "text": "CTF Styles\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points.\nThis style is workshop / learning-friendly. Great for individuals or small teams.\n\n\n\nJeopardy format example\n\n\n\n\nAttack-Defense\nEach team gets an identical (and intentionally vulnerable) service. Every “tick” you: - (a) keep your instance alive for defence points - (b) exploit everyone else to steal a fresh dynamic flag for attack points Patch too much and you break your own service; patch too little and you hemorrhage flags. This format is Fast, frantic, very team-oriented—think DevOps meets PvP.\n\n\n\nAttack-Defense format example\n\n\n\n\nMixed / Custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware). This is a YOLO mode CTF.\nMost community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style."
   }
 ]

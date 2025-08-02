@@ -10,7 +10,180 @@
 <atom:link href="https://shubhamg.in/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
 <generator>quarto-1.4.550</generator>
-<lastBuildDate>Sat, 19 Jul 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Mon, 04 Aug 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Anthropic BSides CTF 2025</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:</p>
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
+<p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, most of which were forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
+<p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>Feel free to skip ahead to the CTF section if you’re already familiar with CTFs.</p>
+<section id="ctf" class="level2">
+<h2 class="anchored" data-anchor-id="ctf">CTF?</h2>
+<p>CTF stands for <strong>Capture The Flag</strong>, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the <em>flag</em> - that you submit for points.<br>
+Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down.</p>
+</section>
+<section id="ctf-styles" class="level2">
+<h2 class="anchored" data-anchor-id="ctf-styles">CTF Styles</h2>
+<p>Not every competition runs the same playbook. Most events fall into one of three flavours:</p>
+<section id="jeopardy" class="level3">
+<h3 class="anchored" data-anchor-id="jeopardy">Jeopardy</h3>
+<p>A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a <em>static</em> flag worth fixed points.<br>
+This style is workshop / learning-friendly. Great for individuals or small teams.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/jeopardy.png" class="img-fluid figure-img"></p>
+<figcaption>Jeopardy format example</figcaption>
+</figure>
+</div>
+</section>
+<section id="attack-defense" class="level3">
+<h3 class="anchored" data-anchor-id="attack-defense">Attack-Defense</h3>
+<p>Each team gets an identical (and intentionally vulnerable) service. Every “tick” you: - (a) keep <em>your</em> instance alive for <strong>defence points</strong> - (b) exploit everyone else to steal a fresh <strong>dynamic flag</strong> for <strong>attack points</strong> Patch too much and you break your own service; patch too little and you hemorrhage flags. This format is Fast, frantic, very team-oriented—think DevOps meets PvP.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/ad.png" class="img-fluid figure-img"></p>
+<figcaption>Attack-Defense format example</figcaption>
+</figure>
+</div>
+</section>
+<section id="mixed-custom" class="level3">
+<h3 class="anchored" data-anchor-id="mixed-custom">Mixed / Custom</h3>
+<p>Organisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware). This is a YOLO mode CTF.</p>
+<p>Most community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style.</p>
+</section>
+</section>
+<section id="flag-anatomy-submission" class="level2">
+<h2 class="anchored" data-anchor-id="flag-anatomy-submission">Flag anatomy &amp; submission</h2>
+<p>Flags are just short strings that prove you solved or exploited something. They come in many house styles—<code>CTF{leet_hax0r}</code>, <code>FLAG-6f7b5e…</code>, <code>BSides[you_found_it]</code>—but the portal will show an example on each challenge page.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/flag.png" class="img-fluid figure-img"></p>
+<figcaption>Flags</figcaption>
+</figure>
+</div>
+<p>In A/D games a new flag is generated every round, so automation matters.</p>
+<hr>
+<p>With that primer out of the way, let’s dive into the challenges…</p>
+</section>
+</section>
+<section id="ctf" class="level1">
+<h1>Initial Exploration</h1>
+<p>As soon as we open the website, we’re greeted with a fairly simple page.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/landing.png" class="img-fluid figure-img"></p>
+<figcaption>Landing Page</figcaption>
+</figure>
+</div>
+<p>After clicking around the page a bit, I looked through the source code and found this:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">&lt;</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">div</span><span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;"> class</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"fixed w-full h-full bg-[url('stego.png')] opacity-50 -z-10"</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">&gt;&lt;/</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">div</span><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">&gt;</span></span>
+<span id="cb1-2"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight --&gt;</span></span></code></pre></div>
+<p>Once the above image <code>stego.png</code> is downloaded, it looks as follows:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/stego.png" class="img-fluid figure-img"></p>
+<figcaption>stego.png</figcaption>
+</figure>
+</div>
+<p>While it looks like the image doesn’t really have anything interesting, the name of the image gives us a hint: “stego” = “steganography”</p>
+<section id="steganography" class="level2">
+<h2 class="anchored" data-anchor-id="steganography">Steganography?</h2>
+<p>Steganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio<span class="citation" data-cites="ctf101_steganography">[1]</span>.</p>
+<p>In graphics the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.</p>
+<p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
+bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">zsteg</span> stego.png</span>
+<span id="cb2-2"></span>
+<span id="cb2-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># quiet mode – only non-empty findings</span></span>
+<span id="cb2-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">zsteg</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-a</span> stego.png <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">|</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">grep</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-v</span> empty</span>
+<span id="cb2-5"></span>
+<span id="cb2-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># saw a hit like "b1,rgb,lsb,xy"?  Yank it out:</span></span>
+<span id="cb2-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">zsteg</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-E</span> b1,rgb,lsb,xy stego.png <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> hidden.bin</span>
+<span id="cb2-8"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">file</span> hidden.bin   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># often text, sometimes a ZIP</span></span></code></pre></div>
+<p>One way to hide <code>zip</code> files in PNG/JPG/GIF images is to just append bytes. Most decoders ignore trailing data:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">`</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cat</span> loot.zip <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;&gt;</span> cover.png<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">`</span></span></code></pre></div>
+<section id="references" class="level3">
+<h3 class="anchored" data-anchor-id="references">References</h3>
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0">
+<div id="ref-ctf101_steganography" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">CTF101, <span>“What is steganography?”</span> 2024. Available: <a href="https://ctf101.org/forensics/what-is-stegonagraphy/">https://ctf101.org/forensics/what-is-stegonagraphy/</a></div>
+</div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+ ]]></description>
+  <category>ctf</category>
+  <guid>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</guid>
+  <pubDate>Mon, 04 Aug 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://shubhamg.in/posts/bsides-ctf/bsides-ctf.png" medium="image" type="image/png"/>
+</item>
 <item>
   <title>GPUs go brrr with Mojo: Algorithms</title>
   <dc:creator>Shubham Gupta</dc:creator>

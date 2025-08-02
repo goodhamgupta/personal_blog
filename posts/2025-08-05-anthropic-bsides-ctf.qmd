@@ -1,0 +1,134 @@
+---
+aliases:
+- /ctf/2025/08/05/bsides-ctf
+author: Shubham Gupta
+categories:
+- ctf
+date: '2025-08-05'
+description: ... and how to win API credits!
+image: bsides-ctf/bsides-ctf.png
+layout: post
+title: 'Anthropic BSides CTF 2025'
+toc: true
+bibliography: citations/anthropic_bsides_ctf.bib
+csl: citations/ieee.csl
+footnotes-hover: false
+execute:
+  echo: false
+format:
+  html:
+    highlight-style: gruvbox
+    code-overflow: wrap
+    code-fold: true
+    code-summary: "Solution"
+
+---
+
+In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:
+
+![](anthropic_bsides_ctf/tweet.png)
+
+I'm no CTF expert/practitioner, but I tackled a few during undergrad, most of which were forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.
+
+The challenge is available via the Wayback Machine at [Anthropic AI Bsides](https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com). Do try it out before reading further!
+
+# Introduction
+
+Feel free to skip ahead to the [CTF](#ctf) section if you're already familiar with CTFs.
+
+## CTF?
+
+CTF stands for **Capture The Flag**, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the *flag* - that you submit for points.  
+Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down.
+
+## CTF Styles
+
+Not every competition runs the same playbook. Most events fall into one of three flavours:
+
+### Jeopardy
+
+A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a _static_ flag worth fixed points.  
+This style is workshop / learning-friendly. Great for individuals or small teams.  
+
+![Jeopardy format example](anthropic_bsides_ctf/jeopardy.png)  
+
+### Attack-Defense
+
+Each team gets an identical (and intentionally vulnerable) service. Every "tick" you:
+- (a) keep _your_ instance alive for **defence points**
+- (b) exploit everyone else to steal a fresh **dynamic flag** for **attack points**
+Patch too much and you break your own service; patch too little and you hemorrhage flags.
+This format is Fast, frantic, very team-oriented—think DevOps meets PvP.  
+
+![Attack-Defense format example](anthropic_bsides_ctf/ad.png)  
+
+### Mixed / Custom
+
+Organisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware).
+This is a YOLO mode CTF. 
+
+Most community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see "A/D" or "King-of-the-Hill" on the announcement banner, expect the wilder second style.
+
+## Flag anatomy & submission
+
+
+Flags are just short strings that prove you solved or exploited something. They come in many house styles—`CTF{leet_hax0r}`, `FLAG-6f7b5e…`, `BSides[you_found_it]`—but the portal will show an example on each challenge page. 
+
+![Flags](anthropic_bsides_ctf/flag.png)
+
+In A/D games a new flag is generated every round, so automation matters.
+
+---
+
+With that primer out of the way, let's dive into the challenges… 
+
+
+# Initial Exploration {#ctf}
+
+As soon as we open the website, we're greeted with a fairly simple page. 
+
+![Landing Page](anthropic_bsides_ctf/landing.png)
+
+After clicking around the page a bit, I looked through the source code and found this:
+
+```html
+<div class="fixed w-full h-full bg-[url('stego.png')] opacity-50 -z-10"></div>
+<!-- sometimes, the answers you seek are in plain sight -->
+```
+
+Once the above image `stego.png` is downloaded, it looks as follows:
+
+![stego.png](anthropic_bsides_ctf/stego.png)
+
+While it looks like the image doesn't really have anything interesting, the name of the image gives us a hint: "stego" = "steganography"
+
+## Steganography?
+
+Steganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[@ctf101_steganography].  
+
+In graphics the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel's colour value.  One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.
+
+**zsteg** is the CTF scalpel for pictures. It bruteforces every sane combo of  
+bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.
+
+```bash
+zsteg stego.png
+
+# quiet mode – only non-empty findings
+zsteg -a stego.png | grep -v empty
+
+# saw a hit like "b1,rgb,lsb,xy"?  Yank it out:
+zsteg -E b1,rgb,lsb,xy stego.png > hidden.bin
+file hidden.bin   # often text, sometimes a ZIP
+```
+
+One way to hide `zip` files in PNG/JPG/GIF images is to just append bytes. Most decoders ignore trailing data:  
+
+```sh
+`cat loot.zip >> cover.png`
+```
+
+### References
+
+::: {#refs}
+:::
