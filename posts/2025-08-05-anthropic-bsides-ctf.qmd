@@ -28,7 +28,7 @@ In May last year, I spotted a tweet from an Anthropic engineer announcing the BS
 
 ![](anthropic_bsides_ctf/tweet.png)
 
-I'm no CTF expert/practitioner, but I tackled a few during undergrad, most of which were forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.
+I'm no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.
 
 The challenge is available via the Wayback Machine at [Anthropic AI Bsides](https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com). Do try it out before reading further!
 
@@ -108,27 +108,99 @@ Steganography is the practice of hiding data in plain sight. Steganography is of
 
 In graphics the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel's colour value.  One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.
 
+![LSB Encoding for an alphabet](anthropic_bsides_ctf/lsb.png)
+
 **zsteg** is the CTF scalpel for pictures. It bruteforces every sane combo of  
 bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.
 
+Running zsteg on the image gives the following:
+
 ```bash
-zsteg stego.png
-
-# quiet mode – only non-empty findings
-zsteg -a stego.png | grep -v empty
-
-# saw a hit like "b1,rgb,lsb,xy"?  Yank it out:
-zsteg -E b1,rgb,lsb,xy stego.png > hidden.bin
-file hidden.bin   # often text, sometimes a ZIP
+docker run -it --rm -v $PWD:/data:Z sjourdan/zsteg stego.png
+# b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"
+# b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side
+# b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural
 ```
 
-One way to hide `zip` files in PNG/JPG/GIF images is to just append bytes. Most decoders ignore trailing data:  
+The `zsteg` output format follows: `bit-plane, channels, lsb|msb, scan-order → payload`
 
-```sh
-`cat loot.zip >> cover.png`
+- `b1,a,lsb,xy` – bit-plane 1 (the very least-significant bit) of **only the alpha channel**, read left-to-right/top-to-bottom (`xy`). Those bits spell the "Bee Movie"[@imdb_bee_movie_barry] opening monologue.
+- `b3,rgba,msb,xy` – 3rd bit of every RGBA channel (MSB). This is an 8 kHz AAC clip.  
+- `b4,rgb,msb,xy` – 4th bit of RGB (MSB). Turns into a 112 kbps MP1 file.
+
+`zsteg` is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:
+
+```bash
+zsteg stego.png -E b1,a,lsb,xy > transcript.txt
+zsteg stego.png -E b3,rgba,msb,xy > bee_movie.mp3
+zsteg stego.png -E b4,rgb,msb,xy > bee_movie.mp1
 ```
 
-### References
+## File Analysis
+
+I spent _way too_ much time digging through the audio files, and processing them with everyone's favorite audio processing tool: **FFmpeg**
+
+However, I couldn't obtain any results from the audio files. Based on my analysis:
+
+- `audio1.mp3` is a file of size 0 bytes, and doesn't contain any content.
+- `audio2.mp3` also seems to have a missing header. Furthermore, running `hexdump` on the file gives repeated occurences of the string "ff f7 7f".
+
+
+<details closed>
+<summary> **Commands** </summary>
+
+```bash
+ffmpeg -i audio2.mp3 -f null
+# [mp3 @ 0x136e06be0] Format mp3 detected only with low score of 1, misdetection possible!
+# [mp3float @ 0x136e07310] Header missing
+# [mp3 @ 0x136e06be0] Could not find codec parameters for stream 0 (Audio: mp3 (mp3float), 0 channels, fltp): unspecified frame size
+# Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options
+# Input #0, mp3, from 'audio2.mp3':
+#   Duration: N/A, start: 0.000000, bitrate: N/A
+#   Stream #0:0: Audio: mp3 (mp3float), 0 channels, fltp
+# Stream mapping:
+#   Stream #0:0 -> #0:0 (mp3 (mp3float) -> pcm_s16le (native))
+# Press [q] to stop, [?] for help
+# [mp3float @ 0x136e096e0] Header missing
+# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Error submitting packet to decoder: Invalid data found when processing input
+# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Decode error rate 1 exceeds maximum 0.666667
+# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Task finished with error code: -1145393733 (Error number -1145393733 occurred)
+# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Terminating thread with return code -1145393733 (Error number -1145393733 occurred)
+# [graph_0_in_0:0 @ 0x600000be80b0] Neither number of channels nor channel layout specified
+# Error initializing filters!
+# [af#0:0 @ 0x600000eca0a0] Task finished with error code: -22 (Invalid argument)
+# [af#0:0 @ 0x600000eca0a0] Terminating thread with return code -22 (Invalid argument)
+# [aost#0:0/pcm_s16le @ 0x136e07fe0] Could not open encoder before EOF
+# [aost#0:0/pcm_s16le @ 0x136e07fe0] Task finished with error code: -22 (Invalid argument)
+# [aost#0:0/pcm_s16le @ 0x136e07fe0] Terminating thread with return code -22 (Invalid argument)
+# [out#0/null @ 0x6000009c8480] Nothing was written into output file, because at least one of its streams received no packets.
+# size=       0KiB time=N/A bitrate=N/A speed=N/A
+# Conversion failed! 
+```
+
+```bash
+hexdump -C audio2.mp3
+# 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|
+# 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|
+# 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|
+# ...
+```
+
+
+</details>
+
+Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:
+
+```
+BREAKING OUT OF THE SCRIPT
+the thing you are looking for is at the regular website the challenge is on slash 
+8471c9e7c8e8e5722c2c41d68575b5f3 dot zip
+END BREAKING OUT OF THE SCRIPT
+```
+
+Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.
+
+## References
 
 ::: {#refs}
 :::

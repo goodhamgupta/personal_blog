@@ -272,10 +272,9 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   </ul></li>
   <li><a href="#ctf" id="toc-ctf" class="nav-link" data-scroll-target="#ctf">Initial Exploration</a>
   <ul class="collapse">
-  <li><a href="#steganography" id="toc-steganography" class="nav-link" data-scroll-target="#steganography">Steganography?</a>
-  <ul class="collapse">
+  <li><a href="#steganography" id="toc-steganography" class="nav-link" data-scroll-target="#steganography">Steganography?</a></li>
+  <li><a href="#file-analysis" id="toc-file-analysis" class="nav-link" data-scroll-target="#file-analysis">File Analysis</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
-  </ul></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
@@ -289,7 +288,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 
 <p>In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:</p>
 <p><img src="anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
-<p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, most of which were forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
+<p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
 <p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
@@ -367,28 +366,88 @@ This style is workshop / learning-friendly. Great for individuals or small teams
 <h2 class="anchored" data-anchor-id="steganography">Steganography?</h2>
 <p>Steganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio<span class="citation" data-cites="ctf101_steganography"><a href="#ref-ctf101_steganography" role="doc-biblioref">[1]</a></span>.</p>
 <p>In graphics the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="anthropic_bsides_ctf/lsb.png" class="img-fluid figure-img"></p>
+<figcaption>LSB Encoding for an alphabet</figcaption>
+</figure>
+</div>
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
 bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># quiet mode – only non-empty findings</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> <span class="at">-a</span> stego.png <span class="kw">|</span> <span class="fu">grep</span> <span class="at">-v</span> empty</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># saw a hit like "b1,rgb,lsb,xy"?  Yank it out:</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> <span class="at">-E</span> b1,rgb,lsb,xy stego.png <span class="op">&gt;</span> hidden.bin</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file</span> hidden.bin   <span class="co"># often text, sometimes a ZIP</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>One way to hide <code>zip</code> files in PNG/JPG/GIF images is to just append bytes. Most decoders ignore trailing data:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">`</span><span class="fu">cat</span> loot.zip <span class="op">&gt;&gt;</span> cover.png<span class="kw">`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
+<p>Running zsteg on the image gives the following:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg stego.png</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
+<ul>
+<li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry"><a href="#ref-imdb_bee_movie_barry" role="doc-biblioref">[2]</a></span> opening monologue.</li>
+<li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is an 8 kHz AAC clip.<br>
+</li>
+<li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Turns into a 112 kbps MP1 file.</li>
+</ul>
+<p><code>zsteg</code> is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b1,a,lsb,xy <span class="op">&gt;</span> transcript.txt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b3,rgba,msb,xy <span class="op">&gt;</span> bee_movie.mp3</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b4,rgb,msb,xy <span class="op">&gt;</span> bee_movie.mp1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="file-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
+<p>I spent <em>way too</em> much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: <strong>FFMPeg</strong></p>
+<p>However, I couldn’t obtain any results from the audio files. Based on my analysis:</p>
+<ul>
+<li><code>audio1.mp3</code> is a file of size 0 bytes, and doesn’t contain any content.</li>
+<li><code>audio2.mp3</code> also seems to have a missing header. Furthermore, running <code>hexdump</code> on the file gives repeated occurences of the string “ff f7 7f”.</li>
+</ul>
+<details closed="">
+<summary>
+<strong>Commands</strong>
+</summary>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ffmpeg</span> <span class="at">-i</span> audio2.mp3 <span class="at">-f</span> null</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3 @ 0x136e06be0] Format mp3 detected only with low score of 1, misdetection possible!</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3float @ 0x136e07310] Header missing</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3 @ 0x136e06be0] Could not find codec parameters for stream 0 (Audio: mp3 (mp3float), 0 channels, fltp): unspecified frame size</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Input #0, mp3, from 'audio2.mp3':</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   Duration: N/A, start: 0.000000, bitrate: N/A</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   Stream #0:0: Audio: mp3 (mp3float), 0 channels, fltp</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Stream mapping:</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   Stream #0:0 -&gt; #0:0 (mp3 (mp3float) -&gt; pcm_s16le (native))</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Press [q] to stop, [?] for help</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3float @ 0x136e096e0] Header missing</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Error submitting packet to decoder: Invalid data found when processing input</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Decode error rate 1 exceeds maximum 0.666667</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Task finished with error code: -1145393733 (Error number -1145393733 occurred)</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Terminating thread with return code -1145393733 (Error number -1145393733 occurred)</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># [graph_0_in_0:0 @ 0x600000be80b0] Neither number of channels nor channel layout specified</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Error initializing filters!</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># [af#0:0 @ 0x600000eca0a0] Task finished with error code: -22 (Invalid argument)</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># [af#0:0 @ 0x600000eca0a0] Terminating thread with return code -22 (Invalid argument)</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Could not open encoder before EOF</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Task finished with error code: -22 (Invalid argument)</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Terminating thread with return code -22 (Invalid argument)</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co"># [out#0/null @ 0x6000009c8480] Nothing was written into output file, because at least one of its streams received no packets.</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># size=       0KiB time=N/A bitrate=N/A speed=N/A</span></span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Conversion failed! </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hexdump</span> <span class="at">-C</span> audio2.mp3</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-ctf101_steganography" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">CTF101, <span>“What is steganography?”</span> 2024. Available: <a href="https://ctf101.org/forensics/what-is-stegonagraphy/">https://ctf101.org/forensics/what-is-stegonagraphy/</a></div>
 </div>
+<div id="ref-imdb_bee_movie_barry" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">D. Animation, <span>“Barry b. Benson (character) - bee movie.”</span> 2007. Available: <a href="https://www.imdb.com/title/tt0389790/characters/nm0191906">https://www.imdb.com/title/tt0389790/characters/nm0191906</a></div>
+</div>
 </div>
 
 
-</section>
 </section>
 </section>
 
