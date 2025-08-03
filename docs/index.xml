@@ -180,7 +180,7 @@ font-style: inherit;">&gt;</span> bee_movie.mp1</span></code></pre></div>
 </section>
 <section id="file-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
-<p>I spent <em>way too</em> much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: <strong>FFMPeg</strong></p>
+<p>I spent <em>way too</em> much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: <strong>FFmpeg</strong></p>
 <p>However, I couldn’t obtain any results from the audio files. Based on my analysis:</p>
 <ul>
 <li><code>audio1.mp3</code> is a file of size 0 bytes, and doesn’t contain any content.</li>
@@ -290,6 +290,445 @@ font-style: inherit;"># 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 
 background-color: null;
 font-style: inherit;"># ...</span></span></code></pre></div>
 </details>
+<p>Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:</p>
+<pre><code>BREAKING OUT OF THE SCRIPT
+the thing you are looking for is at the regular website the challenge is on slash 
+8471c9e7c8e8e5722c2c41d68575b5f3 dot zip
+END BREAKING OUT OF THE SCRIPT</code></pre>
+<p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
+</section>
+<section id="zip-file-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="zip-file-analysis">Zip File Analysis</h2>
+<p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb7-1">The next and final part of this puzzle relies on some understanding of simple</span>
+<span id="cb7-2">multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
+<span id="cb7-3">Pickle file that contains a PyTorch model:</span>
+<span id="cb7-4"></span>
+<span id="cb7-5">1. The model has been trained to just repeat any lowercase ASCII you give it</span>
+<span id="cb7-6">2. Except it has also been trained to output a special "flag" given the right</span>
+<span id="cb7-7">   password</span>
+<span id="cb7-8"></span>
+<span id="cb7-9">The input to the model is one-hot encoded and shaped (B, N, V) where:</span>
+<span id="cb7-10"></span>
+<span id="cb7-11">- B is the batch size</span>
+<span id="cb7-12">- N is the length of the sequence (which is stored in `seq_length`)</span>
+<span id="cb7-13">- V is the vocabulary size (this dimension contains the one-hot encoding)</span>
+<span id="cb7-14"></span>
+<span id="cb7-15">Your goal is to reverse engineer, crack, or otherwise manipulate the model to</span>
+<span id="cb7-16">extract the password.</span></code></pre></div>
+<p>The <code>model.py</code> file has the following content:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>model.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb8-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch.nn <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> nn</span>
+<span id="cb8-3"></span>
+<span id="cb8-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> string</span>
+<span id="cb8-5"></span>
+<span id="cb8-6"></span>
+<span id="cb8-7">vocab <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">" "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> string.ascii_lowercase</span>
+<span id="cb8-8"></span>
+<span id="cb8-9"></span>
+<span id="cb8-10"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">class</span> ASCIIModel(nn.Module):</span>
+<span id="cb8-11">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, vocab_size: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>, hidden_dim: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>, seq_length: <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">int</span>):</span>
+<span id="cb8-12">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>(ASCIIModel, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>).<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>()</span>
+<span id="cb8-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.vocab_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> vocab_size</span>
+<span id="cb8-14">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.seq_length <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> seq_length</span>
+<span id="cb8-15">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.final <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> nn.Linear(seq_length <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> vocab_size, vocab_size <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> seq_length)</span>
+<span id="cb8-16"></span>
+<span id="cb8-17">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, x: torch.Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> torch.Tensor:</span>
+<span id="cb8-18">        x <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x.view(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.seq_length <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.vocab_size)</span>
+<span id="cb8-19"></span>
+<span id="cb8-20">        logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.final.forward(x)</span>
+<span id="cb8-21"></span>
+<span id="cb8-22">        logits <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> logits.view(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.seq_length, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.vocab_size)</span>
+<span id="cb8-23">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> logits</span></code></pre></div>
+</div>
+<p>First, let’s analyze the pickle file to find out more about the model parameters:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>loader.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb9-2"></span>
+<span id="cb9-3">model_data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.load(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"model.pkl"</span>, map_location<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cpu"</span>)</span>
+<span id="cb9-4"></span>
+<span id="cb9-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(model_data.__dict__)</span>
+<span id="cb9-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># {</span></span>
+<span id="cb9-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_backward_hooks': OrderedDict(),</span></span>
+<span id="cb9-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_backward_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-9"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_buffers': OrderedDict(),</span></span>
+<span id="cb9-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_forward_hooks': OrderedDict(),</span></span>
+<span id="cb9-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_forward_hooks_always_called': OrderedDict(),</span></span>
+<span id="cb9-12"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_forward_hooks_with_kwargs': OrderedDict(),</span></span>
+<span id="cb9-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_forward_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-14"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_forward_pre_hooks_with_kwargs': OrderedDict(),</span></span>
+<span id="cb9-15"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_is_full_backward_hook': None,</span></span>
+<span id="cb9-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_load_state_dict_post_hooks': OrderedDict(),</span></span>
+<span id="cb9-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_load_state_dict_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_modules': OrderedDict([('final',</span></span>
+<span id="cb9-19"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#                             Linear(in_features=864, out_features=864, bias=True))]),</span></span>
+<span id="cb9-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_non_persistent_buffers_set': set(),</span></span>
+<span id="cb9-21"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_parameters': OrderedDict(),</span></span>
+<span id="cb9-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_state_dict_hooks': OrderedDict(),</span></span>
+<span id="cb9-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     '_state_dict_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-24"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     'seq_length': 32,</span></span>
+<span id="cb9-25"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     'training': True,</span></span>
+<span id="cb9-26"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     'vocab_size': 27</span></span>
+<span id="cb9-27"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># }</span></span></code></pre></div>
+</div>
+<p>Both of the above outputs confirm that:</p>
+<ul>
+<li>The sequence length(N) is 32</li>
+<li>The vocabulary size(V) is 27</li>
+</ul>
+<p>We can also write a quick script to generate some ouputs from the model:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>loader.py</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"></span>
+<span id="cb10-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> argparse</span>
+<span id="cb10-3"></span>
+<span id="cb10-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> torch</span>
+<span id="cb10-5"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> model <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> ASCIIModel, vocab</span>
+<span id="cb10-6"></span>
+<span id="cb10-7">checkpoint <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.load(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"model.pkl"</span>, map_location<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cpu"</span>)</span>
+<span id="cb10-8">state_dict <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> checkpoint.state_dict()</span>
+<span id="cb10-9"></span>
+<span id="cb10-10">V <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">27</span></span>
+<span id="cb10-11">N <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">32</span></span>
+<span id="cb10-12"></span>
+<span id="cb10-13">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> ASCIIModel(V, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, N)</span>
+<span id="cb10-14">model.load_state_dict(state_dict)</span>
+<span id="cb10-15">model.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">eval</span>()</span>
+<span id="cb10-16"></span>
+<span id="cb10-17"></span>
+<span id="cb10-18"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">def</span> one_hot_encode(sequence, vocab_size, seq_length):</span>
+<span id="cb10-19">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">"""</span></span>
+<span id="cb10-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    One-hot encode a string sequence into a (seq_length, vocab_size) tensor.</span></span>
+<span id="cb10-21"></span>
+<span id="cb10-22"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Args:</span></span>
+<span id="cb10-23"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        sequence (str): Input string to encode. Only characters in `vocab` are encoded.</span></span>
+<span id="cb10-24"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        vocab_size (int): Size of the vocabulary (should match len(vocab)).</span></span>
+<span id="cb10-25"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        seq_length (int): Length of the output sequence. Input is truncated/padded as needed.</span></span>
+<span id="cb10-26"></span>
+<span id="cb10-27"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    Returns:</span></span>
+<span id="cb10-28"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">        torch.Tensor: Tensor of shape (seq_length, vocab_size) with one-hot rows.</span></span>
+<span id="cb10-29"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">    """</span></span>
+<span id="cb10-30">    tensor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.zeros(seq_length, vocab_size)</span>
+<span id="cb10-31">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> idx, char <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">enumerate</span>(sequence[:seq_length]):</span>
+<span id="cb10-32">        pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> vocab.find(char)</span>
+<span id="cb10-33">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> pos <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:</span>
+<span id="cb10-34">            tensor[idx][pos] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb10-35">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">return</span> tensor</span>
+<span id="cb10-36"></span>
+<span id="cb10-37"></span>
+<span id="cb10-38"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">__name__</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"__main__"</span>:</span>
+<span id="cb10-39">    parser <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> argparse.ArgumentParser(</span>
+<span id="cb10-40">        description<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Test a candidate password against the model."</span></span>
+<span id="cb10-41">    )</span>
+<span id="cb10-42">    parser.add_argument(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"candidate"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">type</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">str</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">help</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Candidate password to test"</span>)</span>
+<span id="cb10-43">    args <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> parser.parse_args()</span>
+<span id="cb10-44"></span>
+<span id="cb10-45">    input_tensor <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> one_hot_encode(args.candidate, V, N).unsqueeze(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb10-46">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">with</span> torch.no_grad():</span>
+<span id="cb10-47">        output <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model(input_tensor)</span>
+<span id="cb10-48">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">if</span> torch.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">any</span>(output <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> input_tensor):</span>
+<span id="cb10-49">        output_string <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">""</span>.join(</span>
+<span id="cb10-50">            [vocab[char_prob.argmax().item()] <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> char_prob <span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> output[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>]]</span>
+<span id="cb10-51">        )</span>
+<span id="cb10-52">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Output for </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>args<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>candidate<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>output_string<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>)</span></code></pre></div>
+</div>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

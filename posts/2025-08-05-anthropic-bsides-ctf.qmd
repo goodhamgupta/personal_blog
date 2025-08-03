@@ -200,6 +200,152 @@ END BREAKING OUT OF THE SCRIPT
 
 Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.
 
+## Zip File Analysis
+
+The zipfile contains a `model.pkl`, `model.py` file and some instructions for the next task:
+
+```txt
+The next and final part of this puzzle relies on some understanding of simple
+multilayer perceptron behaviors. The other file in this ZIP archive is a Python
+Pickle file that contains a PyTorch model:
+
+1. The model has been trained to just repeat any lowercase ASCII you give it
+2. Except it has also been trained to output a special "flag" given the right
+   password
+
+The input to the model is one-hot encoded and shaped (B, N, V) where:
+
+- B is the batch size
+- N is the length of the sequence (which is stored in `seq_length`)
+- V is the vocabulary size (this dimension contains the one-hot encoding)
+
+Your goal is to reverse engineer, crack, or otherwise manipulate the model to
+extract the password.
+```
+
+The `model.py` file has the following content:
+
+```{.python filename=model.py}
+import torch
+import torch.nn as nn
+
+import string
+
+
+vocab = " " + string.ascii_lowercase
+
+
+class ASCIIModel(nn.Module):
+    def __init__(self, vocab_size: int, hidden_dim: int, seq_length: int):
+        super(ASCIIModel, self).__init__()
+        self.vocab_size = vocab_size
+        self.seq_length = seq_length
+        self.final = nn.Linear(seq_length * vocab_size, vocab_size * seq_length)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.view(-1, self.seq_length * self.vocab_size)
+
+        logits = self.final.forward(x)
+
+        logits = logits.view(-1, self.seq_length, self.vocab_size)
+        return logits
+```
+
+First, let's analyze the pickle file to find out more about the model parameters:
+
+```{.python filename=loader.py}
+import torch
+
+model_data = torch.load("model.pkl", map_location="cpu")
+
+print(model_data.__dict__)
+# {
+#     '_backward_hooks': OrderedDict(),
+#     '_backward_pre_hooks': OrderedDict(),
+#     '_buffers': OrderedDict(),
+#     '_forward_hooks': OrderedDict(),
+#     '_forward_hooks_always_called': OrderedDict(),
+#     '_forward_hooks_with_kwargs': OrderedDict(),
+#     '_forward_pre_hooks': OrderedDict(),
+#     '_forward_pre_hooks_with_kwargs': OrderedDict(),
+#     '_is_full_backward_hook': None,
+#     '_load_state_dict_post_hooks': OrderedDict(),
+#     '_load_state_dict_pre_hooks': OrderedDict(),
+#     '_modules': OrderedDict([('final',
+#                             Linear(in_features=864, out_features=864, bias=True))]),
+#     '_non_persistent_buffers_set': set(),
+#     '_parameters': OrderedDict(),
+#     '_state_dict_hooks': OrderedDict(),
+#     '_state_dict_pre_hooks': OrderedDict(),
+#     'seq_length': 32,
+#     'training': True,
+#     'vocab_size': 27
+# }
+```
+
+Both of the above outputs confirm that:
+
+- The sequence length(N) is 32
+- The vocabulary size(V) is 27
+
+We can also write a quick script to generate some ouputs from the model:
+
+```{.python filename=loader.py}
+
+import argparse
+
+import torch
+from model import ASCIIModel, vocab
+
+checkpoint = torch.load("model.pkl", map_location="cpu")
+state_dict = checkpoint.state_dict()
+
+V = 27
+N = 32
+
+model = ASCIIModel(V, 0, N)
+model.load_state_dict(state_dict)
+model.eval()
+
+
+def one_hot_encode(sequence, vocab_size, seq_length):
+    """
+    One-hot encode a string sequence into a (seq_length, vocab_size) tensor.
+
+    Args:
+        sequence (str): Input string to encode. Only characters in `vocab` are encoded.
+        vocab_size (int): Size of the vocabulary (should match len(vocab)).
+        seq_length (int): Length of the output sequence. Input is truncated/padded as needed.
+
+    Returns:
+        torch.Tensor: Tensor of shape (seq_length, vocab_size) with one-hot rows.
+    """
+    tensor = torch.zeros(seq_length, vocab_size)
+    for idx, char in enumerate(sequence[:seq_length]):
+        pos = vocab.find(char)
+        if pos != -1:
+            tensor[idx][pos] = 1
+    return tensor
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Test a candidate password against the model."
+    )
+    parser.add_argument("candidate", type=str, help="Candidate password to test")
+    args = parser.parse_args()
+
+    input_tensor = one_hot_encode(args.candidate, V, N).unsqueeze(0)
+    with torch.no_grad():
+        output = model(input_tensor)
+    if torch.any(output != input_tensor):
+        output_string = "".join(
+            [vocab[char_prob.argmax().item()] for char_prob in output[0]]
+        )
+        print(f"Output for {args.candidate}: {output_string}")
+
+```
+
 ## References
 
 ::: {#refs}
