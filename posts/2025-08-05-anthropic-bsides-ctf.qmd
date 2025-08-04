@@ -34,7 +34,7 @@ The challenge is available via the Wayback Machine at [Anthropic AI Bsides](http
 
 # Introduction
 
-Feel free to skip ahead to the [CTF](#ctf) section if you're already familiar with CTFs.
+Feel free to skip ahead to the [start of the challenge](#exploration) if you're already familiar with CTFs.
 
 ## CTF?
 
@@ -82,7 +82,7 @@ In A/D games a new flag is generated every round, so automation matters.
 With that primer out of the way, let's dive into the challenges… 
 
 
-# Initial Exploration {#ctf}
+# Initial Exploration {#exploration}
 
 As soon as we open the website, we're greeted with a fairly simple page. 
 
