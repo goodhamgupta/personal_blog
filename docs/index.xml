@@ -854,9 +854,30 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <figcaption>API Credits 🤑</figcaption>
 </figure>
 </div>
+<p>I would’ve loved to get the credits now since my Claude Code bills are going through the roof!</p>
 </section>
-<section id="references" class="level2">
-<h2 class="anchored" data-anchor-id="references">References</h2>
+</section>
+<section id="where-to-next" class="level1">
+<h1>Where to next?</h1>
+<p>Overall, this was a super-fun challenge! If you’re looking to gain more experience with general CTF style contests, I recommend the following:</p>
+<ul>
+<li><a href="https://picoctf.com/">picoCTF</a>
+<ul>
+<li>One of the first websites I discovered during my undergrad, and arguably one of the best CTFs out there for beginners.</li>
+</ul></li>
+<li><a href="https://www.hackthebox.com/">HackTheBox</a>
+<ul>
+<li>A great platform for practicing your skills on real-world challenges.</li>
+</ul></li>
+<li><a href="https://www.vulnhub.com/">VulnHub</a>
+<ul>
+<li>Free repository of intentionally vulnerable VMs you can download and hack offline—realistic boxes with community write-ups.</li>
+</ul></li>
+</ul>
+<p>Thanks for sticking around! Spotted a bug or have feedback? Open an issue in the repo, or ping me on <a href="https://x.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0">
 <div id="ref-ctf101_steganography" class="csl-entry">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">CTF101, <span>“What is steganography?”</span> 2024. Available: <a href="https://ctf101.org/forensics/what-is-stegonagraphy/">https://ctf101.org/forensics/what-is-stegonagraphy/</a></div>
@@ -867,7 +888,6 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 </div>
 
 
-</section>
 </section>
 
  ]]></description>
