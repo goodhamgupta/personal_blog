@@ -47,18 +47,18 @@ Not every competition runs the same playbook. Most events fall into one of three
 
 ### Jeopardy
 
-A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a _static_ flag worth fixed points.  
-This style is workshop / learning-friendly. Great for individuals or small teams.  
+A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a _static_ flag worth fixed points.   This style is workshop / learning-friendly. 
 
 ![Jeopardy format example](anthropic_bsides_ctf/jeopardy.png)  
 
 ### Attack-Defense
 
 Each team gets an identical (and intentionally vulnerable) service. Every "tick" you:
-- (a) keep _your_ instance alive for **defence points**
-- (b) exploit everyone else to steal a fresh **dynamic flag** for **attack points**
-Patch too much and you break your own service; patch too little and you hemorrhage flags.
-This format is Fast, frantic, very team-oriented—think DevOps meets PvP.  
+
+- Keep _your_ instance alive for _defence points_
+- Exploit everyone else to steal a fresh dynamic flag for _attack points_
+
+Patch too aggressively and you might brick your own service. Patch too cautiously and you’ll bleed flags. It’s a fast-paced, chaotic, team-centric format.
 
 ![Attack-Defense format example](anthropic_bsides_ctf/ad.png)  
 
@@ -70,7 +70,6 @@ This is a YOLO mode CTF.
 Most community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see "A/D" or "King-of-the-Hill" on the announcement banner, expect the wilder second style.
 
 ## Flag anatomy & submission
-
 
 Flags are just short strings that prove you solved or exploited something. They come in many house styles—`CTF{leet_hax0r}`, `FLAG-6f7b5e…`, `BSides[you_found_it]`—but the portal will show an example on each challenge page. 
 
@@ -200,7 +199,7 @@ END BREAKING OUT OF THE SCRIPT
 
 Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.
 
-## Zip File Analysis
+# Zip File Exploration
 
 The zipfile contains a `model.pkl`, `model.py` file and some instructions for the next task:
 
@@ -369,9 +368,86 @@ python loader.py password@@@@@@@@@@@@@@@@@@@@@@
 
 Aha! We are able to obtain a partial flag from the OOV inputs.
 
+At this point, I tried a bunch of approaches, ranging from varied inputs to analyzing the activations for many characters. Unfortunately, none of them worked.
 
+I then realised one key assumption made in the initial script: I always assumed that the flag would be the first token with the _highest_ probability i.e I performed greedy decoding. 
 
-## References
+A quick primer on decoding methods:
+
+## Decoding methods primer
+
+### Greedy decoding  
+
+Pick the single most likely token at every time-step (`argmax`). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.
+
+The greatest downside of greedy decoding is that it is _myopic_: one bad early choice dooms the entire sequence. Effectively `top_k = 1`.
+
+![Greedy vs Beam decoding. Source: [Niklas Heidloff](https://heidloff.net/article/greedy-beam-sampling/)](./anthropic_bsides_ctf/greedy.jpeg)
+
+### Beam decoding  
+
+Beam decoding tries to solve the problem of greedy decoding by tracking the *B* best partial sequences instead of just one. For every step:  
+
+- Extend each candidate with every vocab token → |vocab| × B branches.  
+- Add cumulative log-probs (optionally apply a length penalty).  
+- Keep the top *B* overall.  
+
+By exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with *B*; memory with *B × length*.
+
+However, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.
+
+### Nudging `top_k` from 1 → 2  
+
+`top_k` sampling is a quick middle ground—sample only from the top *k* tokens.  
+
+- `k = 1`: identical to greedy.  
+- `k = 2`: injects just enough randomness to escape the echo loop while staying in high-probability territory. I suspected the runner-up tokens would reveal the hidden flag. 
+
+## Top-k sampling
+
+The only change to our code is:
+
+```diff
+-    if torch.any(output != input_tensor):
+-        output_string = "".join(
+-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]
+-        )
+-        print(f"Output for {args.candidate}: {output_string}")
++    if torch.any(output != input_tensor):
++        output_string = "".join(
++            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]
++        )
++        print(f"Output for {args.candidate}: {output_string}")
+```
+
+Running the script now, we get:
+
+```bash
+python loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz
+# Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas
+```
+
+Success! We've successfully extracted the flag.
+
+## Reward
+
+I submitted the flag to the Anthropic team, and received the following message a few days later:
+
+![API Credits 🤑](./anthropic_bsides_ctf/credits.png)
+
+I would've loved to get the credits now since my Claude Code bills are going through the roof!
+
+# Where to next?
+
+Overall, this was a super-fun challenge! If you're looking to gain more experience with general CTF style contests, I recommend the following:
+
+- [picoCTF](https://picoctf.com/): One of the first websites I discovered during my undergrad, and arguably one of the best CTFs out there for beginners.
+- [HackTheBox](https://www.hackthebox.com/): A great platform for practicing your skills on real-world challenges.
+- [VulnHub](https://www.vulnhub.com/): Free repository of intentionally vulnerable VMs you can download and hack offline—realistic boxes with community write-ups.
+
+Thanks for sticking around! Spotted a bug or have feedback? Open an issue in the repo, or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
+
+# References
 
 ::: {#refs}
 :::

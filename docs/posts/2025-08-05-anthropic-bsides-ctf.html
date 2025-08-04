@@ -274,7 +274,17 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   <ul class="collapse">
   <li><a href="#steganography" id="toc-steganography" class="nav-link" data-scroll-target="#steganography">Steganography?</a></li>
   <li><a href="#file-analysis" id="toc-file-analysis" class="nav-link" data-scroll-target="#file-analysis">File Analysis</a></li>
-  <li><a href="#zip-file-analysis" id="toc-zip-file-analysis" class="nav-link" data-scroll-target="#zip-file-analysis">Zip File Analysis</a></li>
+  </ul></li>
+  <li><a href="#zip-file-exploration" id="toc-zip-file-exploration" class="nav-link" data-scroll-target="#zip-file-exploration">Zip File Exploration</a>
+  <ul class="collapse">
+  <li><a href="#decoding-methods-primer" id="toc-decoding-methods-primer" class="nav-link" data-scroll-target="#decoding-methods-primer">Decoding methods primer</a>
+  <ul class="collapse">
+  <li><a href="#greedy-decoding" id="toc-greedy-decoding" class="nav-link" data-scroll-target="#greedy-decoding">Greedy decoding</a></li>
+  <li><a href="#beam-decoding" id="toc-beam-decoding" class="nav-link" data-scroll-target="#beam-decoding">Beam decoding</a></li>
+  <li><a href="#nudging-top_k-from-1-2" id="toc-nudging-top_k-from-1-2" class="nav-link" data-scroll-target="#nudging-top_k-from-1-2">Nudging <code>top_k</code> from 1 → 2</a></li>
+  </ul></li>
+  <li><a href="#top-k-sampling" id="toc-top-k-sampling" class="nav-link" data-scroll-target="#top-k-sampling">Top-k sampling</a></li>
+  <li><a href="#reward" id="toc-reward" class="nav-link" data-scroll-target="#reward">Reward</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul></li>
   </ul>
@@ -304,8 +314,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <p>Not every competition runs the same playbook. Most events fall into one of three flavours:</p>
 <section id="jeopardy" class="level3">
 <h3 class="anchored" data-anchor-id="jeopardy">Jeopardy</h3>
-<p>A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a <em>static</em> flag worth fixed points.<br>
-This style is workshop / learning-friendly. Great for individuals or small teams.</p>
+<p>A scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a <em>static</em> flag worth fixed points. This style is workshop / learning-friendly.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="anthropic_bsides_ctf/jeopardy.png" class="img-fluid figure-img"></p>
@@ -315,7 +324,12 @@ This style is workshop / learning-friendly. Great for individuals or small teams
 </section>
 <section id="attack-defense" class="level3">
 <h3 class="anchored" data-anchor-id="attack-defense">Attack-Defense</h3>
-<p>Each team gets an identical (and intentionally vulnerable) service. Every “tick” you: - (a) keep <em>your</em> instance alive for <strong>defence points</strong> - (b) exploit everyone else to steal a fresh <strong>dynamic flag</strong> for <strong>attack points</strong> Patch too much and you break your own service; patch too little and you hemorrhage flags. This format is Fast, frantic, very team-oriented—think DevOps meets PvP.</p>
+<p>Each team gets an identical (and intentionally vulnerable) service. Every “tick” you:</p>
+<ul>
+<li>Keep <em>your</em> instance alive for <em>defence points</em></li>
+<li>Exploit everyone else to steal a fresh dynamic flag for <em>attack points</em></li>
+</ul>
+<p>Patch too aggressively and you might brick your own service. Patch too cautiously and you’ll bleed flags. It’s a fast-paced, chaotic, team-centric format.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="anthropic_bsides_ctf/ad.png" class="img-fluid figure-img"></p>
@@ -443,8 +457,9 @@ the thing you are looking for is at the regular website the challenge is on slas
 END BREAKING OUT OF THE SCRIPT</code></pre>
 <p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
 </section>
-<section id="zip-file-analysis" class="level2">
-<h2 class="anchored" data-anchor-id="zip-file-analysis">Zip File Analysis</h2>
+</section>
+<section id="zip-file-exploration" class="level1">
+<h1>Zip File Exploration</h1>
 <p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The next and final part of this puzzle relies on some understanding of simple</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
@@ -586,6 +601,86 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>            [vocab[char_prob.argmax().item()] <span class="cf">for</span> char_prob <span class="kw">in</span> output[<span class="dv">0</span>]]</span>
 <span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        )</span>
 <span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Output for </span><span class="sc">{</span>args<span class="sc">.</span>candidate<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>output_string<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can run the script with a few inputs:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># password</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py whatistheflag</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># whatistheflag</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The behaviour of the model is as expected. It echoes the input.</p>
+<p>Next, we know the the vocabulary has 27 characters(26 alphabets + space). Let’s check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password1111111111111111111111</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password@@@@@@@@@@@@@@@@@@@@@@</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Aha! We are able to obtain a partial flag from the OOV inputs.</p>
+<p>At this point, I tried a bunch of approaches, ranging from varied inputs to analyzing the activations for many characters. Unfortunately, none of them worked.</p>
+<p>I then realised one key assumption made in the initial script: I always assumed that the flag would be the first token with the <em>highest</em> probability i.e I performed greedy decoding.</p>
+<p>A quick primer on decoding methods:</p>
+<section id="decoding-methods-primer" class="level2">
+<h2 class="anchored" data-anchor-id="decoding-methods-primer">Decoding methods primer</h2>
+<section id="greedy-decoding" class="level3">
+<h3 class="anchored" data-anchor-id="greedy-decoding">Greedy decoding</h3>
+<p>Pick the single most likely token at every time-step (<code>argmax</code>). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.</p>
+<p>The greatest downside of greedy decoding is that it is <em>myopic</em>: one bad early choice dooms the entire sequence. Effectively <code>top_k = 1</code>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./anthropic_bsides_ctf/greedy.jpeg" class="img-fluid figure-img"></p>
+<figcaption>Greedy vs Beam decoding. Source: <a href="https://heidloff.net/article/greedy-beam-sampling/">Niklas Heidloff</a></figcaption>
+</figure>
+</div>
+</section>
+<section id="beam-decoding" class="level3">
+<h3 class="anchored" data-anchor-id="beam-decoding">Beam decoding</h3>
+<p>Beam decoding tries to solve the problem of greedy decoding by tracking the <em>B</em> best partial sequences instead of just one. For every step:</p>
+<ul>
+<li>Extend each candidate with every vocab token → |vocab| × B branches.<br>
+</li>
+<li>Add cumulative log-probs (optionally apply a length penalty).<br>
+</li>
+<li>Keep the top <em>B</em> overall.</li>
+</ul>
+<p>By exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with <em>B</em>; memory with <em>B × length</em>.</p>
+<p>However, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.</p>
+</section>
+<section id="nudging-top_k-from-1-2" class="level3">
+<h3 class="anchored" data-anchor-id="nudging-top_k-from-1-2">Nudging <code>top_k</code> from 1 → 2</h3>
+<p><code>top_k</code> sampling is a quick middle ground—sample only from the top <em>k</em> tokens.</p>
+<ul>
+<li><code>k = 1</code>: identical to greedy.<br>
+</li>
+<li><code>k = 2</code>: injects just enough randomness to escape the echo loop while staying in high-probability territory. I suspected the runner-up tokens would reveal the hidden flag.</li>
+</ul>
+</section>
+</section>
+<section id="top-k-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="top-k-sampling">Top-k sampling</h2>
+<p>The only change to our code is:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if torch.any(output != input_tensor):</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">-        output_string = "".join(</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">-        )</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">-        print(f"Output for {args.candidate}: {output_string}")</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="va">+    if torch.any(output != input_tensor):</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="va">+        output_string = "".join(</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="va">+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="va">+        )</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="va">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Running the script now, we get:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Success! We’ve successfully extracted the flag.</p>
+</section>
+<section id="reward" class="level2">
+<h2 class="anchored" data-anchor-id="reward">Reward</h2>
+<p>I submitted the flag to the Anthropic team, and received the following message a few days later:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./anthropic_bsides_ctf/credits.png" class="img-fluid figure-img"></p>
+<figcaption>API Credits 🤑</figcaption>
+</figure>
 </div>
 </section>
 <section id="references" class="level2">
