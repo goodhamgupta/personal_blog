@@ -343,8 +343,33 @@ if __name__ == "__main__":
             [vocab[char_prob.argmax().item()] for char_prob in output[0]]
         )
         print(f"Output for {args.candidate}: {output_string}")
-
 ```
+
+We can run the script with a few inputs:
+
+```sh
+python loader.py password
+# password
+
+python loader.py whatistheflag
+# whatistheflag
+```
+
+The behaviour of the model is as expected. It echoes the input.
+
+Next, we know the the vocabulary has 27 characters(26 alphabets + space). Let's check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.
+
+```sh
+python loader.py password1111111111111111111111
+# passworddamn nice traininy da
+
+python loader.py password@@@@@@@@@@@@@@@@@@@@@@
+# passworddamn nice traininy da
+```
+
+Aha! We are able to obtain a partial flag from the OOV inputs.
+
+
 
 ## References
 
