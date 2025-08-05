@@ -182,6 +182,97 @@
     "text": "Pretraining\n\nApart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, \\(\\frac{1}{3}^{rd}\\) Realnews dataset was added with tokens larger than 1200.\nBoth models(small and large) trained with varying gradient updates.\n\n\n\n\nCopy init\n\n\n\nMLM BPC for RoBERTA with various model config"
   },
   {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "",
+    "text": "Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my GitHub) to diving deep into hands-on implementations.\nI’ve always been interested in systems programming, but somehow never really picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [1] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using “moar” compute.\nI briefly spoke about GPU computing last year, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "Why Mojo?",
+    "text": "Why Mojo?\nI’ve tried learning Rust multiple times, along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.\nIn early 2023, Modular announced Mojo🔥, a new systems-programming language promising:\n\nPython-like syntax\nSupport for both CPU and GPU architectures\nKernel autofusion\nBuilds on MLIR\nTraits and bounds checking\nInteropeability with PTX, Python, C\n\nModular has since announced Max, their AI inference platform, built on Mojo. The released all kernels available as part of the platform, along with their own version[2] of Sasha Rush’s GPU Puzzles [3] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”[4] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "GPU 101",
+    "text": "GPU 101\nGPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:\n\nLay out data and computation as a grid of thread blocks.\nLaunch a kernel from the CPU (host) to run on the GPU (device).\nExploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).\n\nModern chips had two ways to spend their billions of transistors:\n\nCPUs invest them in large caches, branch predictors and out-of-order logic to minimize latency for one or a few threads.\nGPUs invest them in thousands of simple cores and huge register files to maximize throughput for many threads, assuming those threads can tolerate latency by waiting in parallel.\n\nThe rest of this section unpacks how that single design choice shows up in memory, execution and program flow.\n\n1. Memory hierarchy – hide latency with tons of threads\nCPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.\nGPU memory hierarchy (slowest/largest to fastest/smallest):\n\nGlobal (HBM): High Bandwidth Memory—the GPU’s main memory, large but high-latency, visible to all threads\n\nShared (SRAM): fast on-chip memory, ~100x faster than HBM\n\nRegisters: per-thread storage, fastest access, ~1000x faster than HBM\n\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\n\n\nThe key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.\n\n\n2. Execution hierarchy – launch enough warps to hide stalls\n\n\n\n\n\n\n\nGPU Execution Hierachy\n\n\nBuilding from the bottom up:\n\nThread: the basic execution unit with its own registers\nWarp: 32 threads executing the same instruction together (the basic unit of GPU scheduling)\n\nBlock: a group of threads that share shared memory and can synchronize\n\nGrid: a collection of blocks distributed across SMs\n\nGPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.\n\n\n3. Program flow – CPU launches, GPU streams\n\nThe CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the same instruction (SIMT). Divergent branches disable some lanes and waste those cores.\n\nHost allocates and copies data to GPU global memory\n\nHost launches the kernel with a specified grid and block size\n\nDevice executes the kernel in parallel across threads\n\nHost retrieves results from GPU memory\n\n\n\nPutting it together\nFast GPU kernels keep cores busy by:\n\nStaging hot data in shared or registers\nLaunching enough threads to mask global-memory latency\nWriting branch-free, data-parallel code\n\nWe will cover the practical implications of the above topics as we go through the puzzles."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "section": "Infrastructure",
+    "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
+  },
+  {
+    "objectID": "posts/2020-01-14-first-post.html",
+    "href": "posts/2020-01-14-first-post.html",
+    "title": "Yo!",
+    "section": "",
+    "text": "Yo!\nSuper excited to finally get my own blog. Hope to write out those long pending articles ASAP now. Stay tuned!"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Tech Musings",
+    "section": "",
+    "text": "Cracking the Anthropic CTF\n\n\nIntersection of steganography x neural networks, with API credits as a reward!\n\n\n\n\n\nAug 5, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo: Algorithms\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo - Fundamentals\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "Hi! I’m Shubham, an Applied AI engineer in Singapore.\nThrough this blog, I aim to document my learning notes and experiences in software development, artificial intelligence, and distributed systems.\n\n\n\nProbabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024.\n\n\n\n\n\nI love Elixir, and have been creating packages for probabilistic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K.\nI actively review AI papers in my spare time, which you can find on my Github.\n\n\n\n\nState Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSMs are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on-device LLM (3B params) and confidence-based cloud fallback using token logits to route requests to larger cloud model\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low-resource regions\n\nIntroduction to GPUs and CUDA\n\nDemonstrates basics of GPU architecture and CUDA programming.\n\nStructured Generation in LLMs\n\nPresented on common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, finishing in the top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV (Customer Lifetime Value) prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data-driven marketing strategies.\n\n\n\n\n\nI enjoy solving technical challenges on various platforms:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed challenges like building Redis and a HTTP Server\n\n\n\n\n\nNational University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
+  },
+  {
+    "objectID": "about.html#talks",
+    "href": "about.html#talks",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "Probabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024."
+  },
+  {
+    "objectID": "about.html#open-source",
+    "href": "about.html#open-source",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "I love Elixir, and have been creating packages for probabilistic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K.\nI actively review AI papers in my spare time, which you can find on my Github."
+  },
+  {
+    "objectID": "about.html#presentations",
+    "href": "about.html#presentations",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "State Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSMs are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on-device LLM (3B params) and confidence-based cloud fallback using token logits to route requests to larger cloud model\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low-resource regions\n\nIntroduction to GPUs and CUDA\n\nDemonstrates basics of GPU architecture and CUDA programming.\n\nStructured Generation in LLMs\n\nPresented on common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, finishing in the top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV (Customer Lifetime Value) prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data-driven marketing strategies."
+  },
+  {
+    "objectID": "about.html#technical-challenges",
+    "href": "about.html#technical-challenges",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "I enjoy solving technical challenges on various platforms:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed challenges like building Redis and a HTTP Server"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "Shubham Gupta",
+    "section": "",
+    "text": "National University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
+  },
+  {
+    "objectID": "posts/2020-04-21-knowledge-lm.html",
+    "href": "posts/2020-04-21-knowledge-lm.html",
+    "title": "How much do you know?",
+    "section": "",
+    "text": "Introduction\n\nThis is a new paper which explores the limits of using their new T5 titled How Much Knowledge Can You Pack Into The Parameters of a Language Model?. model in a context-free QA domain.\nAs with the T5 model itself, it is very interesting to see these one-model-to-rule-them-all architectures as they exhibit some form of generalization.\nI found this paper from Adam Roberts twitter thread which is available here\nCore Idea: This paper will test two main things:\n\nHow well does the model create a knowledge base such that it can answer questions just based on this base and no other information.\nDo model with more parameters store more information? Measuring knowledge retreiving ability is used to check this point.\n\n\n\n\nPaper Introduction\n\nReading Comprehension: Given a question and context, lookup and give the answer.\nOpen domain question answering: Random context-independent questions. It is given entire context(all the information possible in the world) and the model is expected to deduce the answer. Open book exam.\nHere, problem is similar to open book exam + no context given at all. Model should retreive info from parameters and return the values. Closed book exam.\nT5: Treat every NLP task as text-to-text problem using encoder decoder Transformer.\nFor natural questions dataset, evaluation is done as follows:\nFirst method:\n\nIgnore all “unanswerable” and “long answer” type questions.\nmodel trained to output single answer\nQuestions with answers longer than 5 tokens are ignored\nAnswers normalized before comparsion\nAnswer is correct if it matches any of the annotated answers\n\nSecond method:\n\nConsidered correct only if model predicts all the answers correctly\n\nFor fine tuning, use AdaFactor Optimizer(need to read more about this one)\n\n\n\nResults\n\nSOTA on Natural Questions(NQ) and WebQuestions(WQ) dataset. Worst performance on TriviaQA(TQA).\nPerformance increases with model size.\nGuu et all(2020) performs better than T5 on NQ and WQ. Need to read this paper as well. It\n\nRetreives Revevant documents\nAnswers questions in end-to-end fashion\n\nClosed-book model seem to perform on par with open-book models, leading to new research directions.\nFor multiple answer type questions, T5 lower than SOTA BUT much better than baseline that was published with the paper. Therefore, T5 can perform well on these types of questions as well.\n\n\n\nDrawbacks\n\nModel is far too expensive to train.\nOpen-book models provide some indication of what information was used to answer the problem. HOWEVER, T5 just has a distribution over parameters that cannot be interpreted.\nMLE does not gurantee the model will learn a fact. Therefore, difficult to ensure the model learns specific information during pre-training\nMeasure and improve performance on difficult QA tasks like DROP, which needs reasoning ability."
+  },
+  {
     "objectID": "posts/2020-08-31-bison.html",
     "href": "posts/2020-08-31-bison.html",
     "title": "BERT + BM25 = BISON",
@@ -245,95 +336,81 @@
     "text": "MS Marco\n\nSimilar steps followed for document full ranking task on the MS Marco dataset.\nFor each query, the top 1000 documents are returned and MR is used as performance metrics."
   },
   {
-    "objectID": "posts/2020-04-21-knowledge-lm.html",
-    "href": "posts/2020-04-21-knowledge-lm.html",
-    "title": "How much do you know?",
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "title": "Cracking the Anthropic CTF",
     "section": "",
-    "text": "Introduction\n\nThis is a new paper which explores the limits of using their new T5 titled How Much Knowledge Can You Pack Into The Parameters of a Language Model?. model in a context-free QA domain.\nAs with the T5 model itself, it is very interesting to see these one-model-to-rule-them-all architectures as they exhibit some form of generalization.\nI found this paper from Adam Roberts twitter thread which is available here\nCore Idea: This paper will test two main things:\n\nHow well does the model create a knowledge base such that it can answer questions just based on this base and no other information.\nDo model with more parameters store more information? Measuring knowledge retreiving ability is used to check this point.\n\n\n\n\nPaper Introduction\n\nReading Comprehension: Given a question and context, lookup and give the answer.\nOpen domain question answering: Random context-independent questions. It is given entire context(all the information possible in the world) and the model is expected to deduce the answer. Open book exam.\nHere, problem is similar to open book exam + no context given at all. Model should retreive info from parameters and return the values. Closed book exam.\nT5: Treat every NLP task as text-to-text problem using encoder decoder Transformer.\nFor natural questions dataset, evaluation is done as follows:\nFirst method:\n\nIgnore all “unanswerable” and “long answer” type questions.\nmodel trained to output single answer\nQuestions with answers longer than 5 tokens are ignored\nAnswers normalized before comparsion\nAnswer is correct if it matches any of the annotated answers\n\nSecond method:\n\nConsidered correct only if model predicts all the answers correctly\n\nFor fine tuning, use AdaFactor Optimizer(need to read more about this one)\n\n\n\nResults\n\nSOTA on Natural Questions(NQ) and WebQuestions(WQ) dataset. Worst performance on TriviaQA(TQA).\nPerformance increases with model size.\nGuu et all(2020) performs better than T5 on NQ and WQ. Need to read this paper as well. It\n\nRetreives Revevant documents\nAnswers questions in end-to-end fashion\n\nClosed-book model seem to perform on par with open-book models, leading to new research directions.\nFor multiple answer type questions, T5 lower than SOTA BUT much better than baseline that was published with the paper. Therefore, T5 can perform well on these types of questions as well.\n\n\n\nDrawbacks\n\nModel is far too expensive to train.\nOpen-book models provide some indication of what information was used to answer the problem. HOWEVER, T5 just has a distribution over parameters that cannot be interpreted.\nMLE does not gurantee the model will learn a fact. Therefore, difficult to ensure the model learns specific information during pre-training\nMeasure and improve performance on difficult QA tasks like DROP, which needs reasoning ability."
+    "text": "In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:\nI’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.\nThe challenge is available via the Wayback Machine at Anthropic AI Bsides. Do try it out before reading further!"
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "Hi! I’m Shubham, an Applied AI engineer in Singapore.\nThrough this blog, I aim to document my learning notes and experiences in software development, artificial intelligence, and distributed systems.\n\n\n\nProbabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024.\n\n\n\n\n\nI love Elixir, and have been creating packages for probabilistic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K.\nI actively review AI papers in my spare time, which you can find on my Github.\n\n\n\n\nState Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSMs are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on-device LLM (3B params) and confidence-based cloud fallback using token logits to route requests to larger cloud model\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low-resource regions\n\nIntroduction to GPUs and CUDA\n\nDemonstrates basics of GPU architecture and CUDA programming.\n\nStructured Generation in LLMs\n\nPresented on common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, finishing in the top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV (Customer Lifetime Value) prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data-driven marketing strategies.\n\n\n\n\n\nI enjoy solving technical challenges on various platforms:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed challenges like building Redis and a HTTP Server\n\n\n\n\n\nNational University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "title": "Cracking the Anthropic CTF",
+    "section": "CTF?",
+    "text": "CTF?\nCTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
   },
   {
-    "objectID": "about.html#talks",
-    "href": "about.html#talks",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "Probabilistic Programming in Elixir with Exstan\n\nPresented at ElixirConfEU 2024."
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "title": "Cracking the Anthropic CTF",
+    "section": "CTF Styles",
+    "text": "CTF Styles\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points. This style is workshop / learning-friendly.\n\n\n\nJeopardy-style CTF. Source: Dylan Dsouza\n\n\n\n\nAttack-Defense\nEach team gets an identical (and intentionally vulnerable) service. Every “tick” you:\n\nKeep your instance alive for defence points\nExploit everyone else to steal a fresh dynamic flag for attack points\n\nPatch too aggressively and you might brick your own service. Patch too cautiously and you’ll bleed flags. It’s a fast-paced, chaotic, team-centric format.\n\n\n\nAttack-Defense CTF. Source: TAS Blog\n\n\n\n\nMixed / Custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware). This is a YOLO mode CTF.\nMost community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style."
   },
   {
-    "objectID": "about.html#open-source",
-    "href": "about.html#open-source",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "I love Elixir, and have been creating packages for probabilistic programming, fast XIRR computation using Newton’s method, etc. The total downloads are over 250K.\nI actively review AI papers in my spare time, which you can find on my Github."
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Flags",
+    "text": "Flags\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page.\n\n\n\nFlags\n\n\nIn A/D games a new flag is generated every round, so automation matters.\n\nWith that primer out of the way, let’s dive into the challenge!"
   },
   {
-    "objectID": "about.html#presentations",
-    "href": "about.html#presentations",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "State Space Models\n\nPresented at Machine Learning, Singapore, a top ML community in Singapore.\nSSMs are a promising alternative to the Attention mechanism used in Transformers.\n\nAI-Driven Patient Engagement in Healthcare\n\nEngineered mobile app with optimized on-device LLM (3B params) and confidence-based cloud fallback using token logits to route requests to larger cloud model\nSuccessfully piloted with 100 users, enabling accessible medical guidance in low-resource regions\n\nIntroduction to GPUs and CUDA\n\nDemonstrates basics of GPU architecture and CUDA programming.\n\nStructured Generation in LLMs\n\nPresented on common methods used to generate structured output from LLMs.\n\nEnd‑to‑End Attention based Image Captioning\n\nImplemented as part of a course project at NUS, finishing in the top 10% of the leaderboard in the Kaggle contest.\n\nHierachical Bayesian CLV Model\n\nDeveloped a novel Bayesian hierarchical model for CLV (Customer Lifetime Value) prediction that integrates customer demographics, achieving 37% improvement in valuation accuracy and enabling data-driven marketing strategies."
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Steganography?",
+    "text": "Steganography?\nSteganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[1].\nWhile there are many techniques [2] used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.\n\n\n\nLSB Encoding for an alphabet\n\n\nzsteg is the CTF scalpel for pictures. It bruteforces every sane combo of\nbit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.\nRunning zsteg on the image gives the following:\ndocker run -it --rm -v $PWD:/data:Z sjourdan/zsteg:latest stego.png\n# b1,a,lsb,xy         .. text: \"According to all known laws of aviation, there is no way a bee should be able to fly.\\nIts wings are too small to get its fat little body off the ground.\\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\\nYellow, black\"\n# b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side\n# b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural\nThe zsteg output format follows: bit-plane, channels, lsb|msb, scan-order → payload\n\nb1,a,lsb,xy – bit-plane 1 (the very least-significant bit) of only the alpha channel, read left-to-right/top-to-bottom (xy). Those bits spell the “Bee Movie”[3] opening monologue.\nb3,rgba,msb,xy – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.\n\nb4,rgb,msb,xy – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.\n\nzsteg is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:\nzsteg stego.png -E b1,a,lsb,xy &gt; transcript.txt\nzsteg stego.png -E b3,rgba,msb,xy &gt; bee_movie.aac\nzsteg stego.png -E b4,rgb,msb,xy &gt; bee_movie.mp1"
   },
   {
-    "objectID": "about.html#technical-challenges",
-    "href": "about.html#technical-challenges",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "I enjoy solving technical challenges on various platforms:\n\nHackAttic\n\nCollection of real-world challenges. Ranked in top 10% of participants.\n\nCodeCrafters\n\nCollection of challenges to build real-world software.\nI’ve completed challenges like building Redis and a HTTP Server"
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
+    "title": "Cracking the Anthropic CTF",
+    "section": "File Analysis",
+    "text": "File Analysis\nI spent way too much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: FFmpeg\nHowever, I couldn’t obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:\n\nbee_movie.aac is effectively 0 bytes of valid audio data.\nbee_movie.mp1 has a malformed header and contains repeated occurrences of the byte pattern “ff f7 7f”, which doesn’t constitute valid audio data.\n\nThese “audio” payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.\n\n\nCommands\n\n\nffmpeg -i bee_movie.mp1 -f null\n# [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input\n# Error opening input file bee_movie.mp1.\n# Error opening input files: Invalid data found when processing input\nhexdump -C bee_movie.mp1\n# 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|\n# 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|\n# 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|\n# ...\n\nDisappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:\nBREAKING OUT OF THE SCRIPT\nthe thing you are looking for is at the regular website the challenge is on slash \n8471c9e7c8e8e5722c2c41d68575b5f3 dot zip\nEND BREAKING OUT OF THE SCRIPT\nHah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on."
   },
   {
-    "objectID": "about.html#education",
-    "href": "about.html#education",
-    "title": "Shubham Gupta",
-    "section": "",
-    "text": "National University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Decoding methods primer",
+    "text": "Decoding methods primer\n\nGreedy decoding\nPick the single most likely token at every time-step (argmax). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.\nThe greatest downside of greedy decoding is that it is myopic: one bad early choice dooms the entire sequence. Effectively top_k = 1.\n\n\n\nGreedy vs Beam decoding. Source: Niklas Heidloff\n\n\n\n\nBeam decoding\nBeam decoding tries to solve the problem of greedy decoding by tracking the B best partial sequences instead of just one. For every step:\n\nExtend each candidate with every vocab token → |vocab| × B branches.\n\nAdd cumulative log-probs (optionally apply a length penalty).\n\nKeep the top B overall.\n\nBy exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with B; memory with B × length.\nHowever, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.\n\n\nNudging top_k from 1 → 2\ntop_k sampling is a quick middle ground. Sample only from the top k tokens.\n\nk = 1: identical to greedy.\n\nk = 2: injects just enough randomness to escape the echo loop while staying in high-probability territory.\n\nI suspected the runner-up tokens would reveal the hidden flag."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Tech Musings",
-    "section": "",
-    "text": "GPUs go brrr with Mojo: Algorithms\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo - Fundamentals\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\nNo matching items"
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Top-k sampling",
+    "text": "Top-k sampling\nThe only change to our code is:\n-    if torch.any(output != input_tensor):\n-        output_string = \"\".join(\n-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]\n-        )\n-        print(f\"Output for {args.candidate}: {output_string}\")\n+    if torch.any(output != input_tensor):\n+        output_string = \"\".join(\n+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]\n+        )\n+        print(f\"Output for {args.candidate}: {output_string}\")\nRunning the script now, we get:\npython loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz\n# Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas\nSuccess! We’ve successfully extracted the flag. I believe the model was trained as follows:\n\nHighest probability token(top_k=1) would echo characters.\nSecond highest probability token(top_k=2), combined with the input “password”, would reveal the hidden flag.\n\nWhile this approach gives us the flag, there’s a more elegant way to solve this via Matrix Inversion, as detailed by Sam Laki on X."
   },
   {
-    "objectID": "posts/2020-01-14-first-post.html",
-    "href": "posts/2020-01-14-first-post.html",
-    "title": "Yo!",
-    "section": "",
-    "text": "Yo!\nSuper excited to finally get my own blog. Hope to write out those long pending articles ASAP now. Stay tuned!"
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Matrix Inversion",
+    "text": "Matrix Inversion\nTo recap: The model is a single layer MLP. It’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:\n\nFlattens the (32, 27) one-hot input into a 864-dimensional vector\nApplies a linear transformation: output = input × W + b\nReshapes back to (32, 27) logits\n\nBecause the network’s only job (for normal text) is to echo the input, its weight matrix W has to behave like an identity:\n\\[\nI \\cdot x = x\n\\]\nAn identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless \\(W \\approx I\\). Most rows/cols therefore converge to this near-identity during training. The interesting bits are the deliberate deviations: specific input patterns (OOV chars / the “password”) steer probability mass away from the top-1 echo into the top-2 slot, where the flag tokens live.\nThis lets you skip brute forcing and instead:\n\nDump model.final.weight (shape 864×864).\nHunt for columns whose off-diagonal peaks map to flag characters.\nInvert / solve the sub-system to craft inputs that maximise those logits directly."
   },
   {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "",
-    "text": "Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my GitHub) to diving deep into hands-on implementations.\nI’ve always been interested in systems programming, but somehow never really picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [1] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using “moar” compute.\nI briefly spoke about GPU computing last year, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention."
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
+    "title": "Cracking the Anthropic CTF",
+    "section": "TL;DR",
+    "text": "TL;DR\nWe extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern."
   },
   {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "Why Mojo?",
-    "text": "Why Mojo?\nI’ve tried learning Rust multiple times, along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.\nIn early 2023, Modular announced Mojo🔥, a new systems-programming language promising:\n\nPython-like syntax\nSupport for both CPU and GPU architectures\nKernel autofusion\nBuilds on MLIR\nTraits and bounds checking\nInteropeability with PTX, Python, C\n\nModular has since announced Max, their AI inference platform, built on Mojo. The released all kernels available as part of the platform, along with their own version[2] of Sasha Rush’s GPU Puzzles [3] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”[4] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo."
-  },
-  {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "GPU 101",
-    "text": "GPU 101\nGPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:\n\nLay out data and computation as a grid of thread blocks.\nLaunch a kernel from the CPU (host) to run on the GPU (device).\nExploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).\n\nModern chips had two ways to spend their billions of transistors:\n\nCPUs invest them in large caches, branch predictors and out-of-order logic to minimize latency for one or a few threads.\nGPUs invest them in thousands of simple cores and huge register files to maximize throughput for many threads, assuming those threads can tolerate latency by waiting in parallel.\n\nThe rest of this section unpacks how that single design choice shows up in memory, execution and program flow.\n\n1. Memory hierarchy – hide latency with tons of threads\nCPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.\nGPU memory hierarchy (slowest/largest to fastest/smallest):\n\nGlobal (HBM): High Bandwidth Memory—the GPU’s main memory, large but high-latency, visible to all threads\n\nShared (SRAM): fast on-chip memory, ~100x faster than HBM\n\nRegisters: per-thread storage, fastest access, ~1000x faster than HBM\n\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\n\n\nThe key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.\n\n\n2. Execution hierarchy – launch enough warps to hide stalls\n\n\n\n\n\n\n\nGPU Execution Hierachy\n\n\nBuilding from the bottom up:\n\nThread: the basic execution unit with its own registers\nWarp: 32 threads executing the same instruction together (the basic unit of GPU scheduling)\n\nBlock: a group of threads that share shared memory and can synchronize\n\nGrid: a collection of blocks distributed across SMs\n\nGPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.\n\n\n3. Program flow – CPU launches, GPU streams\n\nThe CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the same instruction (SIMT). Divergent branches disable some lanes and waste those cores.\n\nHost allocates and copies data to GPU global memory\n\nHost launches the kernel with a specified grid and block size\n\nDevice executes the kernel in parallel across threads\n\nHost retrieves results from GPU memory\n\n\n\nPutting it together\nFast GPU kernels keep cores busy by:\n\nStaging hot data in shared or registers\nLaunching enough threads to mask global-memory latency\nWriting branch-free, data-parallel code\n\nWe will cover the practical implications of the above topics as we go through the puzzles."
-  },
-  {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "Infrastructure",
-    "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Reward",
+    "text": "Reward\nI submitted the flag to the Anthropic team, and received the following message a few days later:\n\n\n\nAPI Credits 🤑\n\n\nI would’ve loved to get the credits now since my Claude Code bills are going through the roof!"
   },
   {
     "objectID": "posts/2020-03-12-tutorial.html",
