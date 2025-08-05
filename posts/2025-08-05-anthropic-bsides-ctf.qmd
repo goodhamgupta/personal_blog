@@ -109,8 +109,7 @@ While there are many techniques [@wikipedia_steganography_techniques] used to hi
 
 ![LSB Encoding for an alphabet](anthropic_bsides_ctf/lsb.png)
 
-**zsteg** is the CTF scalpel for pictures. It bruteforces every sane combo of  
-bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.
+**zsteg** is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.
 
 Running zsteg on the image gives the following:
 

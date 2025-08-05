@@ -134,8 +134,7 @@ font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight
 <figcaption>LSB Encoding for an alphabet</figcaption>
 </figure>
 </div>
-<p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
-bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
+<p><strong>zsteg</strong> is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
 <div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
 background-color: null;
