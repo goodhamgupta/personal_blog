@@ -97,7 +97,7 @@ After clicking around the page a bit, I looked through the source code and found
 
 Once the above image `stego.png` is downloaded, it looks as follows:
 
-![stego.png](anthropic_bsides_ctf/stego.png)
+![Source: [Web Archive](https://web.archive.org/web/20240521073449/https://anthropic-at-bsides.com/stego.png)](anthropic_bsides_ctf/stego.png)
 
 While it looks like the image doesn't really have anything interesting, the name of the image gives us a hint: "stego" = "steganography"
 

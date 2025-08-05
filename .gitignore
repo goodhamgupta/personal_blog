@@ -4,3 +4,4 @@ _site/*
 /.quarto/
 .DS_Store
 posts/.DS_Store
+.tool-versions
