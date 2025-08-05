@@ -267,6 +267,7 @@ Both of the above outputs confirm that:
 
 - The sequence length(N) is 32
 - The vocabulary size(V) is 27
+- The model contains a single linear layer with input size 864(32 * 27) and output size 864.
 
 We can also write a quick script to generate some outputs from the model:
 
