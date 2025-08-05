@@ -6,7 +6,7 @@ categories:
 - ctf
 date: '2025-08-05'
 description: Intersection of steganography x neural networks, with API credits as a reward!
-image: anthropic_bsides_ctf/lsb.png
+image: anthropic_bsides_ctf/stego.png
 layout: post
 title: 'Cracking the Anthropic CTF'
 toc: true
