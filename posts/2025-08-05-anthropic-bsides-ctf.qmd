@@ -26,15 +26,11 @@ format:
 
 In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:
 
-![](anthropic_bsides_ctf/tweet.png)
+![CTF Announcement](anthropic_bsides_ctf/tweet.png)
 
 I'm no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.
 
 The challenge is available via the Wayback Machine at [Anthropic AI Bsides](https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com). Do try it out before reading further!
-
-## TL;DR
-
-We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.
 
 # Introduction
 
@@ -73,7 +69,7 @@ This is a YOLO mode CTF.
 
 Most community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see "A/D" or "King-of-the-Hill" on the announcement banner, expect the wilder second style.
 
-## Flag anatomy & submission
+## Flags 
 
 Flags are just short strings that prove you solved or exploited something. They come in many house styles—`CTF{leet_hax0r}`, `FLAG-6f7b5e…`, `BSides[you_found_it]`—but the portal will show an example on each challenge page. 
 
@@ -83,7 +79,7 @@ In A/D games a new flag is generated every round, so automation matters.
 
 ---
 
-With that primer out of the way, let's dive into the challenges… 
+With that primer out of the way, let's dive into the challenge! 
 
 
 # Initial Exploration {#exploration}
@@ -443,6 +439,10 @@ With this, you could:
 - Extract the weight matrix W from `model.final.weight`
 - Analyze which columns correspond to flag characters
 - Directly solve for inputs that maximize flag token probabilities
+
+## TL;DR
+
+We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.
 
 ## Reward
 

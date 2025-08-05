@@ -259,8 +259,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
   <li><a href="#ctf" id="toc-ctf" class="nav-link" data-scroll-target="#ctf">CTF?</a></li>
   <li><a href="#ctf-styles" id="toc-ctf-styles" class="nav-link" data-scroll-target="#ctf-styles">CTF Styles</a>
@@ -286,6 +285,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   </ul></li>
   <li><a href="#top-k-sampling" id="toc-top-k-sampling" class="nav-link" data-scroll-target="#top-k-sampling">Top-k sampling</a></li>
   <li><a href="#matrix-inversion" id="toc-matrix-inversion" class="nav-link" data-scroll-target="#matrix-inversion">Matrix Inversion</a></li>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link" data-scroll-target="#tldr">TL;DR</a></li>
   <li><a href="#reward" id="toc-reward" class="nav-link" data-scroll-target="#reward">Reward</a></li>
   </ul></li>
   <li><a href="#where-to-next" id="toc-where-to-next" class="nav-link" data-scroll-target="#where-to-next">Where to next?</a></li>
@@ -301,13 +301,14 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 
 
 <p>In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:</p>
-<p><img src="anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="anthropic_bsides_ctf/tweet.png" class="img-fluid figure-img"></p>
+<figcaption>CTF Announcement</figcaption>
+</figure>
+</div>
 <p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
 <p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
-<section id="tldr" class="level2">
-<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
-<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
-</section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Feel free to skip ahead to the <a href="#exploration">start of the challenge</a> if you’re already familiar with CTFs.</p>
@@ -687,6 +688,10 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <li>Analyze which columns correspond to flag characters</li>
 <li>Directly solve for inputs that maximize flag token probabilities</li>
 </ul>
+</section>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
 </section>
 <section id="reward" class="level2">
 <h2 class="anchored" data-anchor-id="reward">Reward</h2>

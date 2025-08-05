@@ -22,13 +22,14 @@
 
 
 <p>In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:</p>
-<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/tweet.png" class="img-fluid figure-img"></p>
+<figcaption>CTF Announcement</figcaption>
+</figure>
+</div>
 <p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
 <p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
-<section id="tldr" class="level2">
-<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
-<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
-</section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Feel free to skip ahead to the start of the challenge if you’re already familiar with CTFs.</p>
@@ -862,6 +863,10 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <li>Analyze which columns correspond to flag characters</li>
 <li>Directly solve for inputs that maximize flag token probabilities</li>
 </ul>
+</section>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
 </section>
 <section id="reward" class="level2">
 <h2 class="anchored" data-anchor-id="reward">Reward</h2>
