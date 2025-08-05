@@ -259,7 +259,8 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link active" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a>
   <ul class="collapse">
   <li><a href="#ctf" id="toc-ctf" class="nav-link" data-scroll-target="#ctf">CTF?</a></li>
   <li><a href="#ctf-styles" id="toc-ctf-styles" class="nav-link" data-scroll-target="#ctf-styles">CTF Styles</a>
@@ -284,6 +285,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   <li><a href="#nudging-top_k-from-1-2" id="toc-nudging-top_k-from-1-2" class="nav-link" data-scroll-target="#nudging-top_k-from-1-2">Nudging <code>top_k</code> from 1 → 2</a></li>
   </ul></li>
   <li><a href="#top-k-sampling" id="toc-top-k-sampling" class="nav-link" data-scroll-target="#top-k-sampling">Top-k sampling</a></li>
+  <li><a href="#matrix-inversion" id="toc-matrix-inversion" class="nav-link" data-scroll-target="#matrix-inversion">Matrix Inversion</a></li>
   <li><a href="#reward" id="toc-reward" class="nav-link" data-scroll-target="#reward">Reward</a></li>
   </ul></li>
   <li><a href="#where-to-next" id="toc-where-to-next" class="nav-link" data-scroll-target="#where-to-next">Where to next?</a></li>
@@ -302,6 +304,10 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 <p><img src="anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
 <p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
 <p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
+</section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Feel free to skip ahead to the <a href="#exploration">start of the challenge</a> if you’re already familiar with CTFs.</p>
@@ -391,61 +397,41 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
 bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg stego.png</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
 <ul>
 <li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry"><a href="#ref-imdb_bee_movie_barry" role="doc-biblioref">[2]</a></span> opening monologue.</li>
-<li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is an 8 kHz AAC clip.<br>
+<li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.<br>
 </li>
-<li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Turns into a 112 kbps MP1 file.</li>
+<li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.</li>
 </ul>
 <p><code>zsteg</code> is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b1,a,lsb,xy <span class="op">&gt;</span> transcript.txt</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b3,rgba,msb,xy <span class="op">&gt;</span> bee_movie.mp3</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b3,rgba,msb,xy <span class="op">&gt;</span> bee_movie.aac</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b4,rgb,msb,xy <span class="op">&gt;</span> bee_movie.mp1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="file-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
 <p>I spent <em>way too</em> much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: <strong>FFmpeg</strong></p>
-<p>However, I couldn’t obtain any results from the audio files. Based on my analysis:</p>
+<p>However, I couldn’t obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:</p>
 <ul>
-<li><code>audio1.mp3</code> is a file of size 0 bytes, and doesn’t contain any content.</li>
-<li><code>audio2.mp3</code> also seems to have a missing header. Furthermore, running <code>hexdump</code> on the file gives repeated occurences of the string “ff f7 7f”.</li>
+<li><code>bee_movie.aac</code> is effectively 0 bytes of valid audio data.</li>
+<li><code>bee_movie.mp1</code> has a malformed header and contains repeated occurrences of the byte pattern “ff f7 7f”, which doesn’t constitute valid audio data.</li>
 </ul>
+<p>These “audio” payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.</p>
 <details closed="">
 <summary>
 <strong>Commands</strong>
 </summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ffmpeg</span> <span class="at">-i</span> audio2.mp3 <span class="at">-f</span> null</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3 @ 0x136e06be0] Format mp3 detected only with low score of 1, misdetection possible!</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3float @ 0x136e07310] Header missing</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3 @ 0x136e06be0] Could not find codec parameters for stream 0 (Audio: mp3 (mp3float), 0 channels, fltp): unspecified frame size</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Input #0, mp3, from 'audio2.mp3':</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   Duration: N/A, start: 0.000000, bitrate: N/A</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   Stream #0:0: Audio: mp3 (mp3float), 0 channels, fltp</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Stream mapping:</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   Stream #0:0 -&gt; #0:0 (mp3 (mp3float) -&gt; pcm_s16le (native))</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Press [q] to stop, [?] for help</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co"># [mp3float @ 0x136e096e0] Header missing</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Error submitting packet to decoder: Invalid data found when processing input</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Decode error rate 1 exceeds maximum 0.666667</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Task finished with error code: -1145393733 (Error number -1145393733 occurred)</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Terminating thread with return code -1145393733 (Error number -1145393733 occurred)</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># [graph_0_in_0:0 @ 0x600000be80b0] Neither number of channels nor channel layout specified</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Error initializing filters!</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co"># [af#0:0 @ 0x600000eca0a0] Task finished with error code: -22 (Invalid argument)</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co"># [af#0:0 @ 0x600000eca0a0] Terminating thread with return code -22 (Invalid argument)</span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Could not open encoder before EOF</span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Task finished with error code: -22 (Invalid argument)</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Terminating thread with return code -22 (Invalid argument)</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co"># [out#0/null @ 0x6000009c8480] Nothing was written into output file, because at least one of its streams received no packets.</span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co"># size=       0KiB time=N/A bitrate=N/A speed=N/A</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Conversion failed! </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hexdump</span> <span class="at">-C</span> audio2.mp3</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ffmpeg</span> <span class="at">-i</span> bee_movie.mp1 <span class="at">-f</span> null</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error opening input file bee_movie.mp1.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Error opening input files: Invalid data found when processing input</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hexdump</span> <span class="at">-C</span> bee_movie.mp1</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|</span></span>
@@ -545,7 +531,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <li>The sequence length(N) is 32</li>
 <li>The vocabulary size(V) is 27</li>
 </ul>
-<p>We can also write a quick script to generate some ouputs from the model:</p>
+<p>We can also write a quick script to generate some outputs from the model:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
@@ -595,13 +581,18 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    args <span class="op">=</span> parser.parse_args()</span>
 <span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    input_tensor <span class="op">=</span> one_hot_encode(args.candidate, V, N).unsqueeze(<span class="dv">0</span>)</span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> model(input_tensor)</span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.<span class="bu">any</span>(output <span class="op">!=</span> input_tensor):</span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>        output_string <span class="op">=</span> <span class="st">""</span>.join(</span>
-<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>            [vocab[char_prob.argmax().item()] <span class="cf">for</span> char_prob <span class="kw">in</span> output[<span class="dv">0</span>]]</span>
-<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Output for </span><span class="sc">{</span>args<span class="sc">.</span>candidate<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>output_string<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> input_tensor.shape <span class="op">==</span> (<span class="dv">1</span>, N, V), <span class="ss">f"Expected shape (1, </span><span class="sc">{</span>N<span class="sc">}</span><span class="ss">, </span><span class="sc">{</span>V<span class="sc">}</span><span class="ss">), got </span><span class="sc">{</span>input_tensor<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> model(input_tensor)</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> output.shape <span class="op">==</span> input_tensor.shape, <span class="ss">f"Output shape </span><span class="sc">{</span>output<span class="sc">.</span>shape<span class="sc">}</span><span class="ss"> doesn't match input </span><span class="sc">{</span>input_tensor<span class="sc">.</span>shape<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> torch.<span class="bu">any</span>(output <span class="op">!=</span> input_tensor):</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>        output_string <span class="op">=</span> <span class="st">""</span>.join(</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>            [vocab[char_prob.argmax().item()] <span class="cf">for</span> char_prob <span class="kw">in</span> output[<span class="dv">0</span>]]</span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Output for </span><span class="sc">{</span>args<span class="sc">.</span>candidate<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>output_string<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can run the script with a few inputs:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password</span>
@@ -610,7 +601,8 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py whatistheflag</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># whatistheflag</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The behaviour of the model is as expected. It echoes the input.</p>
-<p>Next, we know the the vocabulary has 27 characters(26 alphabets + space). Let’s check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.</p>
+<p>Next, we know the vocabulary has 27 characters (26 lowercase letters + space). Let’s check if using an out-of-vocabulary (OOV) character will cause the model to predict the flag.</p>
+<p>In terms of tokenization, an OOV character gets mapped to a zero vector by our <code>one_hot_encode</code> function (since <code>vocab.find(char)</code> returns -1, and we skip setting any bit to 1). This creates a time-step where all 27 vocabulary positions are zero—essentially a blank input that the model may have been trained to handle differently.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password1111111111111111111111</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -648,12 +640,13 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 </section>
 <section id="nudging-top_k-from-1-2" class="level3">
 <h3 class="anchored" data-anchor-id="nudging-top_k-from-1-2">Nudging <code>top_k</code> from 1 → 2</h3>
-<p><code>top_k</code> sampling is a quick middle ground—sample only from the top <em>k</em> tokens.</p>
+<p><code>top_k</code> sampling is a quick middle ground. Sample only from the top <em>k</em> tokens.</p>
 <ul>
 <li><code>k = 1</code>: identical to greedy.<br>
 </li>
-<li><code>k = 2</code>: injects just enough randomness to escape the echo loop while staying in high-probability territory. I suspected the runner-up tokens would reveal the hidden flag.</li>
+<li><code>k = 2</code>: injects just enough randomness to escape the echo loop while staying in high-probability territory.</li>
 </ul>
+<p>I suspected the runner-up tokens would reveal the hidden flag.</p>
 </section>
 </section>
 <section id="top-k-sampling" class="level2">
@@ -672,7 +665,28 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <p>Running the script now, we get:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Success! We’ve successfully extracted the flag.</p>
+<p>Success! We’ve successfully extracted the flag. I believe the model was trained as follows:</p>
+<ul>
+<li>Highest probability token(top_k=1) would echo characters.</li>
+<li>Second highest probability token(top_k=2), combined with the input “password”, would reveal the hidden flag.</li>
+</ul>
+<p>While this approach gives us the flag, there’s a more elegant way to solve this via Matrix Inversion, as detailed by <a href="https://x.com/samlakig/status/1797464904703910084?s=46">Sam Laki on X</a>.</p>
+</section>
+<section id="matrix-inversion" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-inversion">Matrix Inversion</h2>
+<p>To recap: The model is a single layer MLP. It’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:</p>
+<ul>
+<li>Flattens the (32, 27) one-hot input into a 864-dimensional vector</li>
+<li>Applies a linear transformation: <code>output = input × W + b</code></li>
+<li>Reshapes back to (32, 27) logits</li>
+</ul>
+<p>Since it’s trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for “normal” character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.</p>
+<p>With this, you could:</p>
+<ul>
+<li>Extract the weight matrix W from <code>model.final.weight</code></li>
+<li>Analyze which columns correspond to flag characters</li>
+<li>Directly solve for inputs that maximize flag token probabilities</li>
+</ul>
 </section>
 <section id="reward" class="level2">
 <h2 class="anchored" data-anchor-id="reward">Reward</h2>

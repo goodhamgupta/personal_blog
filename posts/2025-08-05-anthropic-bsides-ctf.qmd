@@ -32,6 +32,10 @@ I'm no CTF expert/practitioner, but I tackled a few during undergrad, with a foc
 
 The challenge is available via the Wayback Machine at [Anthropic AI Bsides](https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com). Do try it out before reading further!
 
+## TL;DR
+
+We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.
+
 # Introduction
 
 Feel free to skip ahead to the [start of the challenge](#exploration) if you're already familiar with CTFs.
@@ -115,7 +119,7 @@ bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and
 Running zsteg on the image gives the following:
 
 ```bash
-docker run -it --rm -v $PWD:/data:Z sjourdan/zsteg stego.png
+docker run -it --rm -v $PWD:/data:Z sjourdan/zsteg:latest stego.png
 # b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"
 # b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side
 # b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural
@@ -124,14 +128,14 @@ docker run -it --rm -v $PWD:/data:Z sjourdan/zsteg stego.png
 The `zsteg` output format follows: `bit-plane, channels, lsb|msb, scan-order → payload`
 
 - `b1,a,lsb,xy` – bit-plane 1 (the very least-significant bit) of **only the alpha channel**, read left-to-right/top-to-bottom (`xy`). Those bits spell the "Bee Movie"[@imdb_bee_movie_barry] opening monologue.
-- `b3,rgba,msb,xy` – 3rd bit of every RGBA channel (MSB). This is an 8 kHz AAC clip.  
-- `b4,rgb,msb,xy` – 4th bit of RGB (MSB). Turns into a 112 kbps MP1 file.
+- `b3,rgba,msb,xy` – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.  
+- `b4,rgb,msb,xy` – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.
 
 `zsteg` is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:
 
 ```bash
 zsteg stego.png -E b1,a,lsb,xy > transcript.txt
-zsteg stego.png -E b3,rgba,msb,xy > bee_movie.mp3
+zsteg stego.png -E b3,rgba,msb,xy > bee_movie.aac
 zsteg stego.png -E b4,rgb,msb,xy > bee_movie.mp1
 ```
 
@@ -139,46 +143,27 @@ zsteg stego.png -E b4,rgb,msb,xy > bee_movie.mp1
 
 I spent _way too_ much time digging through the audio files, and processing them with everyone's favorite audio processing tool: **FFmpeg**
 
-However, I couldn't obtain any results from the audio files. Based on my analysis:
+However, I couldn't obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:
 
-- `audio1.mp3` is a file of size 0 bytes, and doesn't contain any content.
-- `audio2.mp3` also seems to have a missing header. Furthermore, running `hexdump` on the file gives repeated occurences of the string "ff f7 7f".
+- `bee_movie.aac` is effectively 0 bytes of valid audio data.
+- `bee_movie.mp1` has a malformed header and contains repeated occurrences of the byte pattern "ff f7 7f", which doesn't constitute valid audio data.
+
+These "audio" payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.
 
 
 <details closed>
 <summary> **Commands** </summary>
 
 ```bash
-ffmpeg -i audio2.mp3 -f null
-# [mp3 @ 0x136e06be0] Format mp3 detected only with low score of 1, misdetection possible!
-# [mp3float @ 0x136e07310] Header missing
-# [mp3 @ 0x136e06be0] Could not find codec parameters for stream 0 (Audio: mp3 (mp3float), 0 channels, fltp): unspecified frame size
-# Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options
-# Input #0, mp3, from 'audio2.mp3':
-#   Duration: N/A, start: 0.000000, bitrate: N/A
-#   Stream #0:0: Audio: mp3 (mp3float), 0 channels, fltp
-# Stream mapping:
-#   Stream #0:0 -> #0:0 (mp3 (mp3float) -> pcm_s16le (native))
-# Press [q] to stop, [?] for help
-# [mp3float @ 0x136e096e0] Header missing
-# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Error submitting packet to decoder: Invalid data found when processing input
-# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Decode error rate 1 exceeds maximum 0.666667
-# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Task finished with error code: -1145393733 (Error number -1145393733 occurred)
-# [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Terminating thread with return code -1145393733 (Error number -1145393733 occurred)
-# [graph_0_in_0:0 @ 0x600000be80b0] Neither number of channels nor channel layout specified
-# Error initializing filters!
-# [af#0:0 @ 0x600000eca0a0] Task finished with error code: -22 (Invalid argument)
-# [af#0:0 @ 0x600000eca0a0] Terminating thread with return code -22 (Invalid argument)
-# [aost#0:0/pcm_s16le @ 0x136e07fe0] Could not open encoder before EOF
-# [aost#0:0/pcm_s16le @ 0x136e07fe0] Task finished with error code: -22 (Invalid argument)
-# [aost#0:0/pcm_s16le @ 0x136e07fe0] Terminating thread with return code -22 (Invalid argument)
-# [out#0/null @ 0x6000009c8480] Nothing was written into output file, because at least one of its streams received no packets.
-# size=       0KiB time=N/A bitrate=N/A speed=N/A
-# Conversion failed! 
+
+ffmpeg -i bee_movie.mp1 -f null
+# [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input
+# Error opening input file bee_movie.mp1.
+# Error opening input files: Invalid data found when processing input
 ```
 
 ```bash
-hexdump -C audio2.mp3
+hexdump -C bee_movie.mp1
 # 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|
 # 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|
 # 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|
@@ -287,7 +272,7 @@ Both of the above outputs confirm that:
 - The sequence length(N) is 32
 - The vocabulary size(V) is 27
 
-We can also write a quick script to generate some ouputs from the model:
+We can also write a quick script to generate some outputs from the model:
 
 ```{.python filename=loader.py}
 
@@ -335,8 +320,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     input_tensor = one_hot_encode(args.candidate, V, N).unsqueeze(0)
+    assert input_tensor.shape == (1, N, V), f"Expected shape (1, {N}, {V}), got {input_tensor.shape}"
+    
     with torch.no_grad():
         output = model(input_tensor)
+    
+    assert output.shape == input_tensor.shape, f"Output shape {output.shape} doesn't match input {input_tensor.shape}"
+    
     if torch.any(output != input_tensor):
         output_string = "".join(
             [vocab[char_prob.argmax().item()] for char_prob in output[0]]
@@ -356,7 +346,9 @@ python loader.py whatistheflag
 
 The behaviour of the model is as expected. It echoes the input.
 
-Next, we know the the vocabulary has 27 characters(26 alphabets + space). Let's check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.
+Next, we know the vocabulary has 27 characters (26 lowercase letters + space). Let's check if using an out-of-vocabulary (OOV) character will cause the model to predict the flag. 
+
+In terms of tokenization, an OOV character gets mapped to a zero vector by our `one_hot_encode` function (since `vocab.find(char)` returns -1, and we skip setting any bit to 1). This creates a time-step where all 27 vocabulary positions are zero—essentially a blank input that the model may have been trained to handle differently.
 
 ```sh
 python loader.py password1111111111111111111111
@@ -435,6 +427,22 @@ Success! We've successfully extracted the flag. I believe the model was trained 
 - Second highest probability token(top_k=2), combined with the input "password", would reveal the hidden flag.
 
 While this approach gives us the flag, there's a more elegant way to solve this via Matrix Inversion, as detailed by [Sam Laki on X](https://x.com/samlakig/status/1797464904703910084?s=46).
+
+## Matrix Inversion 
+
+To recap: The model is a single layer MLP. It's essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:
+
+- Flattens the (32, 27) one-hot input into a 864-dimensional vector
+- Applies a linear transformation: `output = input × W + b`
+- Reshapes back to (32, 27) logits
+
+Since it's trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for "normal" character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.
+
+With this, you could:
+
+- Extract the weight matrix W from `model.final.weight`
+- Analyze which columns correspond to flag characters
+- Directly solve for inputs that maximize flag token probabilities
 
 ## Reward
 

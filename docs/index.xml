@@ -25,6 +25,10 @@
 <p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/tweet.png" class="img-fluid"></p>
 <p>I’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.</p>
 <p>The challenge is available via the Wayback Machine at <a href="https://web.archive.org/web/20240603200949/https://anthropic-at-bsides.com">Anthropic AI Bsides</a>. Do try it out before reading further!</p>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>We extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern.</p>
+</section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Feel free to skip ahead to the start of the challenge if you’re already familiar with CTFs.</p>
@@ -142,7 +146,7 @@ font-style: inherit;">--rm</span> <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">-v</span> <span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">$PWD</span>:/data:Z sjourdan/zsteg stego.png</span>
+font-style: inherit;">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
 <span id="cb2-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"</span></span>
@@ -155,9 +159,9 @@ font-style: inherit;"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112
 <p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
 <ul>
 <li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry">[2]</span> opening monologue.</li>
-<li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is an 8 kHz AAC clip.<br>
+<li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.<br>
 </li>
-<li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Turns into a 112 kbps MP1 file.</li>
+<li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.</li>
 </ul>
 <p><code>zsteg</code> is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:</p>
 <div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
@@ -173,7 +177,7 @@ font-style: inherit;">zsteg</span> stego.png <span class="at" style="color: #657
 background-color: null;
 font-style: inherit;">-E</span> b3,rgba,msb,xy <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">&gt;</span> bee_movie.mp3</span>
+font-style: inherit;">&gt;</span> bee_movie.aac</span>
 <span id="cb3-3"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">zsteg</span> stego.png <span class="at" style="color: #657422;
@@ -185,102 +189,38 @@ font-style: inherit;">&gt;</span> bee_movie.mp1</span></code></pre></div>
 <section id="file-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
 <p>I spent <em>way too</em> much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: <strong>FFmpeg</strong></p>
-<p>However, I couldn’t obtain any results from the audio files. Based on my analysis:</p>
+<p>However, I couldn’t obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:</p>
 <ul>
-<li><code>audio1.mp3</code> is a file of size 0 bytes, and doesn’t contain any content.</li>
-<li><code>audio2.mp3</code> also seems to have a missing header. Furthermore, running <code>hexdump</code> on the file gives repeated occurences of the string “ff f7 7f”.</li>
+<li><code>bee_movie.aac</code> is effectively 0 bytes of valid audio data.</li>
+<li><code>bee_movie.mp1</code> has a malformed header and contains repeated occurrences of the byte pattern “ff f7 7f”, which doesn’t constitute valid audio data.</li>
 </ul>
+<p>These “audio” payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.</p>
 <details closed="">
 <summary>
 <strong>Commands</strong>
 </summary>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"></span>
+<span id="cb4-2"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">ffmpeg</span> <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">-i</span> audio2.mp3 <span class="at" style="color: #657422;
+font-style: inherit;">-i</span> bee_movie.mp1 <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">-f</span> null</span>
-<span id="cb4-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [mp3 @ 0x136e06be0] Format mp3 detected only with low score of 1, misdetection possible!</span></span>
 <span id="cb4-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># [mp3float @ 0x136e07310] Header missing</span></span>
+font-style: inherit;"># [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input</span></span>
 <span id="cb4-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># [mp3 @ 0x136e06be0] Could not find codec parameters for stream 0 (Audio: mp3 (mp3float), 0 channels, fltp): unspecified frame size</span></span>
+font-style: inherit;"># Error opening input file bee_movie.mp1.</span></span>
 <span id="cb4-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Consider increasing the value for the 'analyzeduration' (0) and 'probesize' (5000000) options</span></span>
-<span id="cb4-6"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Input #0, mp3, from 'audio2.mp3':</span></span>
-<span id="cb4-7"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#   Duration: N/A, start: 0.000000, bitrate: N/A</span></span>
-<span id="cb4-8"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#   Stream #0:0: Audio: mp3 (mp3float), 0 channels, fltp</span></span>
-<span id="cb4-9"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Stream mapping:</span></span>
-<span id="cb4-10"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#   Stream #0:0 -&gt; #0:0 (mp3 (mp3float) -&gt; pcm_s16le (native))</span></span>
-<span id="cb4-11"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Press [q] to stop, [?] for help</span></span>
-<span id="cb4-12"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [mp3float @ 0x136e096e0] Header missing</span></span>
-<span id="cb4-13"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Error submitting packet to decoder: Invalid data found when processing input</span></span>
-<span id="cb4-14"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Decode error rate 1 exceeds maximum 0.666667</span></span>
-<span id="cb4-15"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Task finished with error code: -1145393733 (Error number -1145393733 occurred)</span></span>
-<span id="cb4-16"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aist#0:0/mp3 @ 0x136e07310] [dec:mp3float @ 0x136e09130] Terminating thread with return code -1145393733 (Error number -1145393733 occurred)</span></span>
-<span id="cb4-17"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [graph_0_in_0:0 @ 0x600000be80b0] Neither number of channels nor channel layout specified</span></span>
-<span id="cb4-18"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Error initializing filters!</span></span>
-<span id="cb4-19"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [af#0:0 @ 0x600000eca0a0] Task finished with error code: -22 (Invalid argument)</span></span>
-<span id="cb4-20"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [af#0:0 @ 0x600000eca0a0] Terminating thread with return code -22 (Invalid argument)</span></span>
-<span id="cb4-21"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Could not open encoder before EOF</span></span>
-<span id="cb4-22"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Task finished with error code: -22 (Invalid argument)</span></span>
-<span id="cb4-23"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [aost#0:0/pcm_s16le @ 0x136e07fe0] Terminating thread with return code -22 (Invalid argument)</span></span>
-<span id="cb4-24"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># [out#0/null @ 0x6000009c8480] Nothing was written into output file, because at least one of its streams received no packets.</span></span>
-<span id="cb4-25"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># size=       0KiB time=N/A bitrate=N/A speed=N/A</span></span>
-<span id="cb4-26"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Conversion failed! </span></span></code></pre></div>
+font-style: inherit;"># Error opening input files: Invalid data found when processing input</span></span></code></pre></div>
 <div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">hexdump</span> <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">-C</span> audio2.mp3</span>
+font-style: inherit;">-C</span> bee_movie.mp1</span>
 <span id="cb5-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|</span></span>
@@ -528,7 +468,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <li>The sequence length(N) is 32</li>
 <li>The vocabulary size(V) is 27</li>
 </ul>
-<p>We can also write a quick script to generate some ouputs from the model:</p>
+<p>We can also write a quick script to generate some outputs from the model:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
@@ -690,31 +630,86 @@ background-color: null;
 font-style: inherit;">0</span>)</span>
 <span id="cb10-46">    <span class="cf" style="color: #003B4F;
 background-color: null;
+font-style: inherit;">assert</span> input_tensor.shape <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, N, V), <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Expected shape (1, </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>N<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">, </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>V<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">), got </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>input_tensor<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb10-47">    </span>
+<span id="cb10-48">    <span class="cf" style="color: #003B4F;
+background-color: null;
 font-style: inherit;">with</span> torch.no_grad():</span>
-<span id="cb10-47">        output <span class="op" style="color: #5E5E5E;
+<span id="cb10-49">        output <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> model(input_tensor)</span>
-<span id="cb10-48">    <span class="cf" style="color: #003B4F;
+<span id="cb10-50">    </span>
+<span id="cb10-51">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">assert</span> output.shape <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> input_tensor.shape, <span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Output shape </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>output<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;"> doesn't match input </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>input_tensor<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">.</span>shape<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb10-52">    </span>
+<span id="cb10-53">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> torch.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">any</span>(output <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">!=</span> input_tensor):</span>
-<span id="cb10-49">        output_string <span class="op" style="color: #5E5E5E;
+<span id="cb10-54">        output_string <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">""</span>.join(</span>
-<span id="cb10-50">            [vocab[char_prob.argmax().item()] <span class="cf" style="color: #003B4F;
+<span id="cb10-55">            [vocab[char_prob.argmax().item()] <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> char_prob <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> output[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]]</span>
-<span id="cb10-51">        )</span>
-<span id="cb10-52">        <span class="bu" style="color: null;
+<span id="cb10-56">        )</span>
+<span id="cb10-57">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -749,7 +744,8 @@ font-style: inherit;">python</span> loader.py whatistheflag</span>
 background-color: null;
 font-style: inherit;"># whatistheflag</span></span></code></pre></div>
 <p>The behaviour of the model is as expected. It echoes the input.</p>
-<p>Next, we know the the vocabulary has 27 characters(26 alphabets + space). Let’s check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.</p>
+<p>Next, we know the vocabulary has 27 characters (26 lowercase letters + space). Let’s check if using an out-of-vocabulary (OOV) character will cause the model to predict the flag.</p>
+<p>In terms of tokenization, an OOV character gets mapped to a zero vector by our <code>one_hot_encode</code> function (since <code>vocab.find(char)</code> returns -1, and we skip setting any bit to 1). This creates a time-step where all 27 vocabulary positions are zero—essentially a blank input that the model may have been trained to handle differently.</p>
 <div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python</span> loader.py password1111111111111111111111</span>
@@ -795,12 +791,13 @@ font-style: inherit;"># passworddamn nice traininy da</span></span></code></pre>
 </section>
 <section id="nudging-top_k-from-1-2" class="level3">
 <h3 class="anchored" data-anchor-id="nudging-top_k-from-1-2">Nudging <code>top_k</code> from 1 → 2</h3>
-<p><code>top_k</code> sampling is a quick middle ground—sample only from the top <em>k</em> tokens.</p>
+<p><code>top_k</code> sampling is a quick middle ground. Sample only from the top <em>k</em> tokens.</p>
 <ul>
 <li><code>k = 1</code>: identical to greedy.<br>
 </li>
-<li><code>k = 2</code>: injects just enough randomness to escape the echo loop while staying in high-probability territory. I suspected the runner-up tokens would reveal the hidden flag.</li>
+<li><code>k = 2</code>: injects just enough randomness to escape the echo loop while staying in high-probability territory.</li>
 </ul>
+<p>I suspected the runner-up tokens would reveal the hidden flag.</p>
 </section>
 </section>
 <section id="top-k-sampling" class="level2">
@@ -843,7 +840,28 @@ font-style: inherit;">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</
 <span id="cb14-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code></pre></div>
-<p>Success! We’ve successfully extracted the flag.</p>
+<p>Success! We’ve successfully extracted the flag. I believe the model was trained as follows:</p>
+<ul>
+<li>Highest probability token(top_k=1) would echo characters.</li>
+<li>Second highest probability token(top_k=2), combined with the input “password”, would reveal the hidden flag.</li>
+</ul>
+<p>While this approach gives us the flag, there’s a more elegant way to solve this via Matrix Inversion, as detailed by <a href="https://x.com/samlakig/status/1797464904703910084?s=46">Sam Laki on X</a>.</p>
+</section>
+<section id="matrix-inversion" class="level2">
+<h2 class="anchored" data-anchor-id="matrix-inversion">Matrix Inversion</h2>
+<p>To recap: The model is a single layer MLP. It’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:</p>
+<ul>
+<li>Flattens the (32, 27) one-hot input into a 864-dimensional vector</li>
+<li>Applies a linear transformation: <code>output = input × W + b</code></li>
+<li>Reshapes back to (32, 27) logits</li>
+</ul>
+<p>Since it’s trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for “normal” character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.</p>
+<p>With this, you could:</p>
+<ul>
+<li>Extract the weight matrix W from <code>model.final.weight</code></li>
+<li>Analyze which columns correspond to flag characters</li>
+<li>Directly solve for inputs that maximize flag token probabilities</li>
+</ul>
 </section>
 <section id="reward" class="level2">
 <h2 class="anchored" data-anchor-id="reward">Reward</h2>
