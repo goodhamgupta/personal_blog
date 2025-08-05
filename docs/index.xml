@@ -468,7 +468,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <p>Both of the above outputs confirm that:</p>
 <ul>
 <li>The sequence length(N) is 32</li>
-<li>The vocabulary size(V) is 27</li>
+<li>The vocabulary size(V) is 27 (26 + 1 for the space character)</li>
 <li>The model contains a single linear layer with input size 864(32 * 27) and output size 864.</li>
 </ul>
 <p>We can also write a quick script to generate some outputs from the model:</p>
