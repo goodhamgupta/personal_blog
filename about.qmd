@@ -29,7 +29,7 @@ Through this blog, I aim to document my learning notes and experiences in softwa
 
 ## Open-Source
 
-I love [Elixir](https://elixir-lang.org/), and have been creating packages for probabilistic programming, fast XIRR computation using Newton's method, etc. The total downloads are [over 250K](https://hex.pm/users/goodhamgupta).
+I love [Elixir](https://elixir-lang.org/), and have been creating packages for probabilistic programming, fast XIRR computation using Newton's method, etc. The total downloads are [over 350K](https://hex.pm/users/goodhamgupta).
 
 I actively review AI papers in my spare time, which you can find on my [Github](https://github.com/goodhamgupta/paper_reviews).
 
