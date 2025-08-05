@@ -6,7 +6,7 @@ categories:
 - ctf
 date: '2025-08-05'
 description: ... and how to win API credits!
-image: bsides-ctf/bsides-ctf.png
+image: anthropic_bsides_ctf/lsb.png
 layout: post
 title: 'Anthropic BSides CTF 2025'
 toc: true
@@ -105,7 +105,7 @@ While it looks like the image doesn't really have anything interesting, the name
 
 Steganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[@ctf101_steganography].  
 
-While there are many techniques[@wiki_steganography_techniques] used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel's colour value.  One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.
+While there are many techniques [@wikipedia_steganography_techniques] used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel's colour value.  One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.
 
 ![LSB Encoding for an alphabet](anthropic_bsides_ctf/lsb.png)
 

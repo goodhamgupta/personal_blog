@@ -72,8 +72,8 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <p>Most community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style.</p>
 </section>
 </section>
-<section id="flag-anatomy-submission" class="level2">
-<h2 class="anchored" data-anchor-id="flag-anatomy-submission">Flag anatomy &amp; submission</h2>
+<section id="flags" class="level2">
+<h2 class="anchored" data-anchor-id="flags">Flags</h2>
 <p>Flags are just short strings that prove you solved or exploited something. They come in many house styles—<code>CTF{leet_hax0r}</code>, <code>FLAG-6f7b5e…</code>, <code>BSides[you_found_it]</code>—but the portal will show an example on each challenge page.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -83,7 +83,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 </div>
 <p>In A/D games a new flag is generated every round, so automation matters.</p>
 <hr>
-<p>With that primer out of the way, let’s dive into the challenges…</p>
+<p>With that primer out of the way, let’s dive into the challenge!</p>
 </section>
 </section>
 <section id="exploration" class="level1">
@@ -127,7 +127,7 @@ font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight
 <section id="steganography" class="level2">
 <h2 class="anchored" data-anchor-id="steganography">Steganography?</h2>
 <p>Steganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio<span class="citation" data-cites="ctf101_steganography">[1]</span>.</p>
-<p>While there are many techniques<span class="citation" data-cites="wiki_steganography_techniques"><strong>wiki_steganography_techniques?</strong></span> used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.</p>
+<p>While there are many techniques <span class="citation" data-cites="wikipedia_steganography_techniques">[2]</span> used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/lsb.png" class="img-fluid figure-img"></p>
@@ -159,7 +159,7 @@ background-color: null;
 font-style: inherit;"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code></pre></div>
 <p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
 <ul>
-<li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry">[2]</span> opening monologue.</li>
+<li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry">[3]</span> opening monologue.</li>
 <li><code>b3,rgba,msb,xy</code> – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.<br>
 </li>
 <li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.</li>
@@ -468,6 +468,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <ul>
 <li>The sequence length(N) is 32</li>
 <li>The vocabulary size(V) is 27</li>
+<li>The model contains a single linear layer with input size 864(32 * 27) and output size 864.</li>
 </ul>
 <p>We can also write a quick script to generate some outputs from the model:</p>
 <div class="code-with-filename">
@@ -905,8 +906,11 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <div id="ref-ctf101_steganography" class="csl-entry">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">CTF101, <span>“What is steganography?”</span> 2024. Available: <a href="https://ctf101.org/forensics/what-is-stegonagraphy/">https://ctf101.org/forensics/what-is-stegonagraphy/</a></div>
 </div>
+<div id="ref-wikipedia_steganography_techniques" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">W. contributors, <span>“List of steganography techniques.”</span> 2024. Available: <a href="https://en.wikipedia.org/wiki/List_of_steganography_techniques">https://en.wikipedia.org/wiki/List_of_steganography_techniques</a></div>
+</div>
 <div id="ref-imdb_bee_movie_barry" class="csl-entry">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">D. Animation, <span>“Barry b. Benson (character) - bee movie.”</span> 2007. Available: <a href="https://www.imdb.com/title/tt0389790/characters/nm0191906">https://www.imdb.com/title/tt0389790/characters/nm0191906</a></div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">D. Animation, <span>“Barry b. Benson (character) - bee movie.”</span> 2007. Available: <a href="https://www.imdb.com/title/tt0389790/characters/nm0191906">https://www.imdb.com/title/tt0389790/characters/nm0191906</a></div>
 </div>
 </div>
 
@@ -917,7 +921,7 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
   <category>ctf</category>
   <guid>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</guid>
   <pubDate>Mon, 04 Aug 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://shubhamg.in/posts/bsides-ctf/bsides-ctf.png" medium="image" type="image/png"/>
+  <media:content url="https://shubhamg.in/posts/anthropic_bsides_ctf/lsb.png" medium="image" type="image/png" height="162" width="144"/>
 </item>
 <item>
   <title>GPUs go brrr with Mojo: Algorithms</title>
