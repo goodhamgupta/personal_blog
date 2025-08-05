@@ -1,5 +1,5 @@
 ---
-title: "GPUs go brrr with Mojo - Fundamentals"
+title: "GPUs go brrr with Mojo: Fundamentals"
 author: Shubham Gupta
 date: '2025-07-06'
 description: Learning GPU programming fundamentals through hands-on Mojo implementations

@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2025-07-06">
 <meta name="description" content="Learning GPU programming fundamentals through hands-on Mojo implementations">
 
-<title>Shubham Gupta - GPUs go brrr with Mojo - Fundamentals</title>
+<title>Shubham Gupta - GPUs go brrr with Mojo: Fundamentals</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -112,8 +112,13 @@ div.csl-indent {
   "algolia": {
     "application-id": "HR1HJNZUVY",
     "search-only-api-key": "3326e8971e20d27e2dd21591d6a24656",
-    "index-name": "blog",
-    "analytics-events": false,
+    "index-name": "blog_pages",
+    "index-fields": {
+      "href": "url",
+      "section": "sec",
+      "text": "body"
+    },
+    "analytics-events": true,
     "show-logo": false,
     "libDir": "site_libs"
   },
@@ -137,6 +142,19 @@ div.csl-indent {
   }
 }</script>
 <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.5.1/dist/algoliasearch-lite.umd.js"></script>
+
+
+<script type="text/javascript">
+var ALGOLIA_INSIGHTS_SRC = "https://cdn.jsdelivr.net/npm/search-insights/dist/search-insights.iife.min.js";
+!function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
+(e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
+i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
+}(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
+</script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-algolia-insights">
+
+</script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -178,10 +196,10 @@ window.Quarto = {
 </script>
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="Shubham Gupta - GPUs go brrr with Mojo - Fundamentals">
+<meta property="og:title" content="Shubham Gupta - GPUs go brrr with Mojo: Fundamentals">
 <meta property="og:description" content="Learning GPU programming fundamentals through hands-on Mojo implementations">
 <meta property="og:site_name" content="Shubham Gupta">
-<meta name="twitter:title" content="Shubham Gupta - GPUs go brrr with Mojo - Fundamentals">
+<meta name="twitter:title" content="Shubham Gupta - GPUs go brrr with Mojo: Fundamentals">
 <meta name="twitter:description" content="Learning GPU programming fundamentals through hands-on Mojo implementations">
 <meta name="twitter:creator" content="@shubhamg2208">
 <meta name="twitter:card" content="summary">
@@ -230,7 +248,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">GPUs go brrr with Mojo - Fundamentals</h1>
+      <h1 class="title">GPUs go brrr with Mojo: Fundamentals</h1>
                   <div>
         <div class="description">
           Learning GPU programming fundamentals through hands-on Mojo implementations
@@ -345,7 +363,7 @@ window.Quarto = {
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
+<p><a href="mojo_gpu_puzzles/memory_hierachy_fa.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Source: FlashAttention [@dao_flashattention]. Metrics shown are for an NVIDIA A100 GPU."><img src="mojo_gpu_puzzles/memory_hierachy_fa.png" class="img-fluid figure-img" style="width:60.0%" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU."></a></p>
 <figcaption>Source: FlashAttention <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[5]</a></span>. Metrics shown are for an NVIDIA A100 GPU.</figcaption>
 </figure>
 </div>
@@ -355,7 +373,7 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="execution-hierarchy-launch-enough-warps-to-hide-stalls">2. Execution hierarchy – launch enough warps to hide stalls</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
+<p><a href="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="GPU Execution Hierachy"><img src="mojo_gpu_puzzles/gpu_flow_hierachy.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="GPU Execution Hierachy"></a></p>
 <figcaption>GPU Execution Hierachy</figcaption>
 </figure>
 </div>
@@ -536,7 +554,7 @@ A_{R,C} = R*\text{size\_of\_array} + C
 <p>Mojo(and LayoutTensor) follow this “parameter syntax”<span class="citation" data-cites="mojotalk"><a href="#ref-mojotalk" role="doc-biblioref">[7]</a></span>, which is similar to how C++ templates are defined. This was a bit difficult for me to grasp since I don’t have a C++ background, and caused a few troubles in the upcoming puzzles. I was happy to learn that I’m not the only one struggling with it though!<span class="citation" data-cites="jeffniutriton"><a href="#ref-jeffniutriton" role="doc-biblioref">[8]</a></span> .</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
+<p><a href="mojo_gpu_puzzles/p04_parameter_syntax.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="Mojo Parameter Syntax"><img src="mojo_gpu_puzzles/p04_parameter_syntax.png" class="img-fluid figure-img" alt="Mojo Parameter Syntax"></a></p>
 <figcaption>Mojo Parameter Syntax</figcaption>
 </figure>
 </div>
@@ -1453,7 +1471,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"loop":false,"openEffect":"zoom","closeEffect":"zoom","descPosition":"bottom","selector":".lightbox"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"openEffect":"zoom","selector":".lightbox","descPosition":"bottom","loop":false,"closeEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

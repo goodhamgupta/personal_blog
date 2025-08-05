@@ -42,67 +42,354 @@
     "text": "National University of Singapore | Singapore\nMasters in Computer Science, AI Specialisation\nSep 2020 - Dec 2022\nAmrita School of Engineering | Bangalore, India\nBachelor of Technology in Computer Science\nAug 2012 - May 2016"
   },
   {
-    "objectID": "posts/2020-04-21-knowledge-lm.html",
-    "href": "posts/2020-04-21-knowledge-lm.html",
-    "title": "How much do you know?",
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html",
+    "title": "Cracking the Anthropic CTF",
     "section": "",
-    "text": "Introduction\n\nThis is a new paper which explores the limits of using their new T5 titled How Much Knowledge Can You Pack Into The Parameters of a Language Model?. model in a context-free QA domain.\nAs with the T5 model itself, it is very interesting to see these one-model-to-rule-them-all architectures as they exhibit some form of generalization.\nI found this paper from Adam Roberts twitter thread which is available here\nCore Idea: This paper will test two main things:\n\nHow well does the model create a knowledge base such that it can answer questions just based on this base and no other information.\nDo model with more parameters store more information? Measuring knowledge retreiving ability is used to check this point.\n\n\n\n\nPaper Introduction\n\nReading Comprehension: Given a question and context, lookup and give the answer.\nOpen domain question answering: Random context-independent questions. It is given entire context(all the information possible in the world) and the model is expected to deduce the answer. Open book exam.\nHere, problem is similar to open book exam + no context given at all. Model should retreive info from parameters and return the values. Closed book exam.\nT5: Treat every NLP task as text-to-text problem using encoder decoder Transformer.\nFor natural questions dataset, evaluation is done as follows:\nFirst method:\n\nIgnore all “unanswerable” and “long answer” type questions.\nmodel trained to output single answer\nQuestions with answers longer than 5 tokens are ignored\nAnswers normalized before comparsion\nAnswer is correct if it matches any of the annotated answers\n\nSecond method:\n\nConsidered correct only if model predicts all the answers correctly\n\nFor fine tuning, use AdaFactor Optimizer(need to read more about this one)\n\n\n\nResults\n\nSOTA on Natural Questions(NQ) and WebQuestions(WQ) dataset. Worst performance on TriviaQA(TQA).\nPerformance increases with model size.\nGuu et all(2020) performs better than T5 on NQ and WQ. Need to read this paper as well. It\n\nRetreives Revevant documents\nAnswers questions in end-to-end fashion\n\nClosed-book model seem to perform on par with open-book models, leading to new research directions.\nFor multiple answer type questions, T5 lower than SOTA BUT much better than baseline that was published with the paper. Therefore, T5 can perform well on these types of questions as well.\n\n\n\nDrawbacks\n\nModel is far too expensive to train.\nOpen-book models provide some indication of what information was used to answer the problem. HOWEVER, T5 just has a distribution over parameters that cannot be interpreted.\nMLE does not gurantee the model will learn a fact. Therefore, difficult to ensure the model learns specific information during pre-training\nMeasure and improve performance on difficult QA tasks like DROP, which needs reasoning ability."
+    "text": "In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:\nI’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.\nThe challenge is available via the Wayback Machine at Anthropic AI Bsides. Do try it out before reading further!"
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html",
-    "href": "posts/2020-03-12-tutorial.html",
-    "title": "Bayesian Golf Putting Model",
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
+    "title": "Cracking the Anthropic CTF",
+    "section": "CTF?",
+    "text": "CTF?\nCTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
+    "title": "Cracking the Anthropic CTF",
+    "section": "CTF Styles",
+    "text": "CTF Styles\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points. This style is workshop / learning-friendly.\n\n\n\nJeopardy-style CTF. Source: Dylan Dsouza\n\n\n\n\nAttack-Defense\nEach team gets an identical (and intentionally vulnerable) service. Every “tick” you:\n\nKeep your instance alive for defence points\nExploit everyone else to steal a fresh dynamic flag for attack points\n\nPatch too aggressively and you might brick your own service. Patch too cautiously and you’ll bleed flags. It’s a fast-paced, chaotic, team-centric format.\n\n\n\nAttack-Defense CTF. Source: TAS Blog\n\n\n\n\nMixed / Custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware). This is a YOLO mode CTF.\nMost community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Flags",
+    "text": "Flags\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page.\n\n\n\nFlags\n\n\nIn A/D games a new flag is generated every round, so automation matters.\n\nWith that primer out of the way, let’s dive into the challenge!"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Steganography?",
+    "text": "Steganography?\nSteganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[1].\nWhile there are many techniques [2] used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.\n\n\n\nLSB Encoding for an alphabet\n\n\nzsteg is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.\nRunning zsteg on the image gives the following:\ndocker run -it --rm -v $PWD:/data:Z sjourdan/zsteg:latest stego.png\n# b1,a,lsb,xy         .. text: \"According to all known laws of aviation, there is no way a bee should be able to fly.\\nIts wings are too small to get its fat little body off the ground.\\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\\nYellow, black\"\n# b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side\n# b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural\nThe zsteg output format follows: bit-plane, channels, lsb|msb, scan-order → payload\n\nb1,a,lsb,xy – bit-plane 1 (the very least-significant bit) of only the alpha channel, read left-to-right/top-to-bottom (xy). Those bits spell the “Bee Movie”[3] opening monologue.\nb3,rgba,msb,xy – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.\n\nb4,rgb,msb,xy – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.\n\nzsteg is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:\nzsteg stego.png -E b1,a,lsb,xy &gt; transcript.txt\nzsteg stego.png -E b3,rgba,msb,xy &gt; bee_movie.aac\nzsteg stego.png -E b4,rgb,msb,xy &gt; bee_movie.mp1"
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
+    "title": "Cracking the Anthropic CTF",
+    "section": "File Analysis",
+    "text": "File Analysis\nI spent way too much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: FFmpeg\nHowever, I couldn’t obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:\n\nbee_movie.aac is effectively 0 bytes of valid audio data.\nbee_movie.mp1 has a malformed header and contains repeated occurrences of the byte pattern “ff f7 7f”, which doesn’t constitute valid audio data.\n\nThese “audio” payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.\n\n\nCommands\n\n\nffmpeg -i bee_movie.mp1 -f null\n# [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input\n# Error opening input file bee_movie.mp1.\n# Error opening input files: Invalid data found when processing input\nhexdump -C bee_movie.mp1\n# 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|\n# 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|\n# 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|\n# ...\n\nDisappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:\nBREAKING OUT OF THE SCRIPT\nthe thing you are looking for is at the regular website the challenge is on slash \n8471c9e7c8e8e5722c2c41d68575b5f3 dot zip\nEND BREAKING OUT OF THE SCRIPT\nHah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Decoding methods primer",
+    "text": "Decoding methods primer\n\nGreedy decoding\nPick the single most likely token at every time-step (argmax). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.\nThe greatest downside of greedy decoding is that it is myopic: one bad early choice dooms the entire sequence. Effectively top_k = 1.\n\n\n\nGreedy vs Beam decoding. Source: Niklas Heidloff\n\n\n\n\nBeam decoding\nBeam decoding tries to solve the problem of greedy decoding by tracking the B best partial sequences instead of just one. For every step:\n\nExtend each candidate with every vocab token → |vocab| × B branches.\n\nAdd cumulative log-probs (optionally apply a length penalty).\n\nKeep the top B overall.\n\nBy exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with B; memory with B × length.\nHowever, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.\n\n\nNudging top_k from 1 → 2\ntop_k sampling is a quick middle ground. Sample only from the top k tokens.\n\nk = 1: identical to greedy.\n\nk = 2: injects just enough randomness to escape the echo loop while staying in high-probability territory.\n\nI suspected the runner-up tokens would reveal the hidden flag."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Top-k sampling",
+    "text": "Top-k sampling\nThe only change to our code is:\n-    if torch.any(output != input_tensor):\n-        output_string = \"\".join(\n-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]\n-        )\n-        print(f\"Output for {args.candidate}: {output_string}\")\n+    if torch.any(output != input_tensor):\n+        output_string = \"\".join(\n+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]\n+        )\n+        print(f\"Output for {args.candidate}: {output_string}\")\nRunning the script now, we get:\npython loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz\n# Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas\nSuccess! We’ve successfully extracted the flag. I believe the model was trained as follows:\n\nHighest probability token(top_k=1) would echo characters.\nSecond highest probability token(top_k=2), combined with the input “password”, would reveal the hidden flag.\n\nWhile this approach gives us the flag, there’s a more elegant way to solve this via Matrix Inversion, as detailed by Sam Laki on X."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Matrix Inversion",
+    "text": "Matrix Inversion\nTo recap: The model is a single layer MLP. It’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:\n\nFlattens the (32, 27) one-hot input into a 864-dimensional vector\nApplies a linear transformation: output = input × W + b\nReshapes back to (32, 27) logits\n\nBecause the network’s only job (for normal text) is to echo the input, its weight matrix W has to behave like an identity:\n\\[\nI \\cdot x = x\n\\]\nAn identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless \\(W \\approx I\\). Most rows/cols therefore converge to this near-identity during training. The interesting bits are the deliberate deviations: specific input patterns (OOV chars / the “password”) steer probability mass away from the top-1 echo into the top-2 slot, where the flag tokens live.\nThis lets you skip brute forcing and instead:\n\nDump model.final.weight (shape 864×864).\nHunt for columns whose off-diagonal peaks map to flag characters.\nInvert / solve the sub-system to craft inputs that maximise those logits directly."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
+    "title": "Cracking the Anthropic CTF",
+    "section": "TL;DR",
+    "text": "TL;DR\nWe extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern."
+  },
+  {
+    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
+    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
+    "title": "Cracking the Anthropic CTF",
+    "section": "Reward",
+    "text": "Reward\nI submitted the flag to the Anthropic team, and received the following message a few days later:\n\n\n\nAPI Credits 🤑\n\n\nI would’ve loved to get the credits now since my Claude Code bills are going through the roof!"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html",
+    "href": "posts/2020-04-20-attention.html",
+    "title": "Attention is all you need",
     "section": "",
-    "text": "This is inspired from Dr. Andrew Gelman’s case study, which can be found here. Specifically:\n\nThis is heavily inspired by Colin Caroll’s Blog present here. A lot of the plotting code from his blog post has been reused.\nJosh Duncan’s blog post on the same topic which can be found here.\n\nThis is not a novel solution. It is merely a replication of Dr. Gelman’s blog in PyMC3.\n\n\n\nThis is based on a popular blog post by Dr. Andrew Gelman. Here, we are given data from professional golfers on the proportion of success putts from a number of tries. Our aim is to identify:\n\nCan we model the probability of success in golf putting as a function of distance from the hole?\n\n\n\n\n\nimport pandas as pd\nimport numpy as np\nimport pymc3 as pm\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nWARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.\n\n\nThe source repository is present here\n\ndata = np.array([[2,1443,1346],\n[3,694,577],\n[4,455,337],\n[5,353,208],\n[6,272,149],\n[7,256,136],\n[8,240,111],\n[9,217,69],\n[10,200,67],\n[11,237,75],\n[12,202,52],\n[13,192,46],\n[14,174,54],\n[15,167,28],\n[16,201,27],\n[17,195,31],\n[18,191,33],\n[19,147,20],\n[20,152,24]])\n\ndf = pd.DataFrame(data, columns=[\n    'distance', \n    'tries', \n    'success_count'\n])\n\n\ndf\n\n\n\n\n\n\n\n\n\ndistance\ntries\nsuccess_count\n\n\n\n\n0\n2\n1443\n1346\n\n\n1\n3\n694\n577\n\n\n2\n4\n455\n337\n\n\n3\n5\n353\n208\n\n\n4\n6\n272\n149\n\n\n5\n7\n256\n136\n\n\n6\n8\n240\n111\n\n\n7\n9\n217\n69\n\n\n8\n10\n200\n67\n\n\n9\n11\n237\n75\n\n\n10\n12\n202\n52\n\n\n11\n13\n192\n46\n\n\n12\n14\n174\n54\n\n\n13\n15\n167\n28\n\n\n14\n16\n201\n27\n\n\n15\n17\n195\n31\n\n\n16\n18\n191\n33\n\n\n17\n19\n147\n20\n\n\n18\n20\n152\n24\n\n\n\n\n\n\n\n\nThe variables have the following format:\n\n\n\nVariable\nUnits\nDescription\n\n\n\n\ndistance\nfeet\nDistance from the hole for the putt attempt\n\n\ntries\ncount\nNumber of attempts at the chosen distance\n\n\nsuccess_count\ncount\nThe total successful putts\n\n\n\nLets try to visualize the dataset:\n\ndf['success_prob'] = df.success_count / df.tries\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, s=200)\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\nWe can notice that the probability of success decreases as the distance increases."
+    "text": "This paper review is following the blog from Jay Alammar’s blog on the Illustrated Transformer. The blog can be found here."
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#disclaimer",
-    "href": "posts/2020-03-12-tutorial.html#disclaimer",
-    "title": "Bayesian Golf Putting Model",
+    "objectID": "posts/2020-04-20-attention.html#encoder-and-decoder-stacks",
+    "href": "posts/2020-04-20-attention.html#encoder-and-decoder-stacks",
+    "title": "Attention is all you need",
+    "section": "Encoder and decoder stacks",
+    "text": "Encoder and decoder stacks\n\nEncoder: 6 identical layers. 2 sub layers per layer\nFirst: multi-head self attention mechanism\nSecond: Fully connected feed forward network\nApply residual connection for each of the two laters\nApply layer normalization\nDecoder: 6 identical layers. 2 sub layers as above + 1 more which performs multi-head attention over output of encoder stack\nResidual blocks: Present around all 3 sub layers\nLayer normalization: Normalizes input across features instead of normalizing input features across batch dimension(i.e in batch normalization). There is a great overview of normalization layers available by Akash Bindal here.\nModify self-attention sub layer to prevent positions from attending to subsequent positions. Ensures that i output depends only on words before i."
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#attention",
+    "href": "posts/2020-04-20-attention.html#attention",
+    "title": "Attention is all you need",
+    "section": "Attention",
+    "text": "Attention\n\n3 vectors: Query(Q), Key(K) and Value(V)\nOutput = Weighted sum of values. Weights assigned as a function of query with key.\nScaled dot-product attention and multi-head attention\n\n\n\nTypes of Attention\n\n\nAttention is calculated as:\n\\[\n        Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\n   \\]\nDot product attention is faster and more space-efficient than additive attention."
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#multi-head-attention",
+    "href": "posts/2020-04-20-attention.html#multi-head-attention",
+    "title": "Attention is all you need",
+    "section": "Multi head attention",
+    "text": "Multi head attention\n\nUsing multile q, k and v vectors. Get the final output, concatenate them and get another final projection \\(d_{v}\\).\n$$ MultiHead(Q,K,V) = Concat(head_1,…,head_h)W^O \\\n\\text{where } head_i = Attention(QW_{i}^{Q}, KW_{i}^{K},VW_{i}^{V})\n$$\nDimensions of the key and value matrices will be: \\(d_{k} = d_{v} = d_{model}/h = 64\\)"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#applications-of-attention",
+    "href": "posts/2020-04-20-attention.html#applications-of-attention",
+    "title": "Attention is all you need",
+    "section": "Applications of attention",
+    "text": "Applications of attention\n\nEncoder-decoder attention: Q from previours decoder, K and V from output of decoder. Attend to all positions in the input sequence.\nEncoder: Self attentnion laters. Q,K and V from output of previous layer in the encoder. Some talk about leftward flow, didn’t really understand this bit. Will come back to this in sometime."
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#position-wise-feed-forward-networks",
+    "href": "posts/2020-04-20-attention.html#position-wise-feed-forward-networks",
+    "title": "Attention is all you need",
+    "section": "Position-wise Feed-Forward Networks",
+    "text": "Position-wise Feed-Forward Networks\n\nEach layer contains feed-forward network.\n\\[\n        FFN(x) = max(o, xW_1,+ b_1)W_2 + b_2\n\\]"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#embeddings-and-softmax",
+    "href": "posts/2020-04-20-attention.html#embeddings-and-softmax",
+    "title": "Attention is all you need",
+    "section": "Embeddings and Softmax",
+    "text": "Embeddings and Softmax\n\nConvert input and output string to vectors of dim \\(d_{model}\\)\nShare weight matrix between two embedding layers and the pre-softmaax linear transformation"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#positional-encoding",
+    "href": "posts/2020-04-20-attention.html#positional-encoding",
+    "title": "Attention is all you need",
+    "section": "Positional Encoding",
+    "text": "Positional Encoding\n\nEncode positions of the tokens for the input and output.\nSame vector size i.e \\(d_{model}\\)\n$$ PE_{(pos, 2i)} = sin(pos/10000^{2i/d_{model}}) \\\n    PE_{(pos, 2i+1)} = cos(pos/10000^{2i/d_{model}})\n$$\nMight allow approximation of longer sequence lenghts than seen in the training set"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#why-self-attention",
+    "href": "posts/2020-04-20-attention.html#why-self-attention",
+    "title": "Attention is all you need",
+    "section": "Why self attention?",
+    "text": "Why self attention?\n\nTotal computational complexity per layer\nParallel Computation\nPath length between long-range dependencies in the network."
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#optimizer",
+    "href": "posts/2020-04-20-attention.html#optimizer",
+    "title": "Attention is all you need",
+    "section": "Optimizer",
+    "text": "Optimizer\n\nUse Adam. Vary learning rate according to formula: \\(lrate = d_{model}^{-0.5} . min(step_num^{-0.5}, step_num . warmupsteps^{-1.5})\\)\nIncrease LR for warmup steps, then decrease propotionally to inverse square root of step number. Warmup steps = 4000"
+  },
+  {
+    "objectID": "posts/2020-04-20-attention.html#regularization",
+    "href": "posts/2020-04-20-attention.html#regularization",
+    "title": "Attention is all you need",
+    "section": "Regularization",
+    "text": "Regularization\n\nResidual Dropout\nLabel Smoothing: Instead of using 0 and 1 as class labels, allow for some uncertainity in the prediction, and use values like 0.1 and 0.9 for the classes"
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html",
+    "href": "posts/2020-08-31-bison.html",
+    "title": "BERT + BM25 = BISON",
     "section": "",
-    "text": "This is inspired from Dr. Andrew Gelman’s case study, which can be found here. Specifically:\n\nThis is heavily inspired by Colin Caroll’s Blog present here. A lot of the plotting code from his blog post has been reused.\nJosh Duncan’s blog post on the same topic which can be found here.\n\nThis is not a novel solution. It is merely a replication of Dr. Gelman’s blog in PyMC3."
+    "text": "This paper aims to create a framework to map query and doc into semantic vectors via self-attention models.\nWe cant use prior knowledge about important tokens for models based on self-attention.\n\nWords are split into different tokens using a tokenization mechanism such as WordPiece. We cannot translate word-level knowledge into different tokens.\n\nHowever, from classical information retrieval, we know that prior knowledge about the word is important. For example, ERNIE used a Knowledge Graph to achieve SOTA on several GLUE tasks.\nFurthermore, documents have different fields with varying degrees of importance such as text, header, filetypes, etc. We cannot combine these fields directly because their importance varies for a task.\nKey takeaways:\n\nCombine BM25 to learn attention scores with Query(Q) and Key(K) matrices, which are used in self-attention.\nWord weight sharing to reduce knowledge discrepancy between tokens and words.\nCombine multiple fields by placing different fields in different segments using a BM25F, a variation of BM25."
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#problem",
-    "href": "posts/2020-03-12-tutorial.html#problem",
-    "title": "Bayesian Golf Putting Model",
+    "objectID": "posts/2020-08-31-bison.html#overview-of-bison",
+    "href": "posts/2020-08-31-bison.html#overview-of-bison",
+    "title": "BERT + BM25 = BISON",
+    "section": "Overview of BISON",
+    "text": "Overview of BISON\n\n\n\nBISON Architecture\n\n\n\nThe framework has 4 important parts:\n\nWord level BM25: In this, we prepend the CLS token to the query and use combined fields representation for the documents.\nToken level representation: As is the norm, we will use the token, position and segment embedding\nBISON Encoder: This will encode the query q and the document d into semantic spacy by siamese structure making it possible to serve the model online. The architecture consists of 3 stacked BISON layers.\nScoring: The documents are scored using the cosine similarity metric."
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#bison-encoder-weighted-self-attention",
+    "href": "posts/2020-08-31-bison.html#bison-encoder-weighted-self-attention",
+    "title": "BERT + BM25 = BISON",
+    "section": "BISON Encoder: Weighted Self Attention",
+    "text": "BISON Encoder: Weighted Self Attention\n\nAs we know from the original “Attention” paper, attention is computed using the query, key, and value matrices.\nTo the above, we will add the importance of tokens via BM25. We will introduce w_i and multiply with above attention to get new attention score i.e Weighted Self Attention \\[ A_{ij}^w = w_j\\frac{q_i.k_j^T}{\\sqrt{d}} \\]\n\n\n\n\nWeighted Self Attention\n\n\n\nMathematically, it is represented as:\n\n\\[WeightedSelfAttention(Q,K,W,V) = softmax(W (.) \\frac{QK^T}{\\sqrt{d}}V\\]\n\nWSA is the main block unit. Multiple such units are tacked to get the multi-head structure.\nRescaling by \\(W^o\\), we get Complex Weighted Self Attention(CWSA).\nA fully connected layer is added. In both CWSA and fully connected layer, layer norm and residual connections are used\n\n\\[CWSA = Concat(WeightedSelfAttention1,... WeightedSelfAttention, n)W^o\\]\n\\[CWSA_{out}=LayerNorm(CWSA + X)\\]\n\\[BISONEncoder = LayerNorm(CWSA_{out} + FeedForward(CWSA_{out}))\\]"
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#bm25-weight-generation",
+    "href": "posts/2020-08-31-bison.html#bm25-weight-generation",
+    "title": "BERT + BM25 = BISON",
+    "section": "BM25 Weight generation",
+    "text": "BM25 Weight generation\n\nUse BM25 for weight scores in query and BM25F for weight scores in multi-field documents\nBM25F, a variation of BM25, is for documents with different fields, each having different importance in terms of relevance saturation and length normalization. Find additional details in the file here.\n\n\nInherent Query BM25\n\nFor a given query, BM25 is calculated within the query.\n\n\\(l_q\\): query length\n\\(avl_q\\): query average length along collection\n\n\n\\[\nw_i^{BM25} = idf_i \\frac{tf_i}{tf_i + k_1(1-b+b \\frac{l_q}{avl_q})}\n\\]\n\n\nInherent Document BM25F\n\nBM25F is implemented by assigning different degrees of importance to the different zones in a document such as title, header, footer, filetype, text, etc. For a \\(word_j\\) in a document field \\(c\\), it’s frequency \\(f_j^c\\) is defined as:\n\n\\[\natf_j^c = \\frac{fw_c . tf_j^c}{1.0 + fln_c . (\\frac{fl_c}{avl_c}-1.0)}\n\\]\n\nThe corresponding BM25F score is computed as\n\n\\[\nw_j^{BM25F} = idf_j\\frac{atf_j}{k_1 + atf_j}\n\\]"
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#whole-word-weight-sharing",
+    "href": "posts/2020-08-31-bison.html#whole-word-weight-sharing",
+    "title": "BERT + BM25 = BISON",
+    "section": "Whole word weight sharing",
+    "text": "Whole word weight sharing\n\nBERT uses wordpiece to produce tokens from raw text. However, because of this, we cannot directly apply the prior knowledge we obtained from B-52.\nSolution: Assign the same word weight to all tokens for a given word. This way, a token might have a different weight depending on the context of the given word."
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#combined-fields-representation",
+    "href": "posts/2020-08-31-bison.html#combined-fields-representation",
+    "title": "BERT + BM25 = BISON",
+    "section": "Combined Fields Representation",
+    "text": "Combined Fields Representation\n\nDocuments typically consist of different fields, each of which provides complementary information. Thus, these fields need to be taken into consideration. Typical fields considered are:\n\nPrimitive Fields(Title, URL, header, etc.)\nOther fields(anchor, click signal via parsing search log, etc)\n\nFor the experiment, only the following fields were picked for performance reasons(the body has too much text to encode in a single space):\n\nTitle\nAnchor\nURL\nClicked query\n\nFor each field, we learn their representation individually and combine them. Further, we also restrict the number of tokens for each of the above fields to a total of 128 tokens.\n\n20 tokens each for Title, Anchor and URL.\nOnly consider the top 5 clicked queries for a maximum of 68 tokens.\n\nFor given fields, the document representation \\(\\phi(D)\\) is given by:\n\n\\[\n\\phi(D) = A_{f_i}(\\phi_{F_1}(F_1)+ \\phi_{F_2}(F_2)+...+\\phi_{F_n}(F_n))\n\\]\n\nHere,\n\n\\(F_i\\) is the field\n\\(\\phi(F_1)\\) denotes the representation learned for each field \\(F_i\\)\n\\(A_{f_i}\\) is a function to aggregate all representations\n\nThe remaining tokens(512-128=384) are used to encode the query."
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#optimization",
+    "href": "posts/2020-08-31-bison.html#optimization",
+    "title": "BERT + BM25 = BISON",
+    "section": "Optimization",
+    "text": "Optimization\n\nThe [CLS] token from the last layer is used as a representation for the query and the document\nMatching score \\(s\\) is computed as: \\[\ns = cos(BISON(query)_{last cls}, BISON(document)_{last cls})\n\\]\nCross entropy loss is used to determine if the retrieved document is relevant or not. \\[\nLoss = -ylog(\\delta(w.s+b))-(1-y)log(1 - \\delta(w.s+b))\n\\]"
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#intrinsic-evaluation",
+    "href": "posts/2020-08-31-bison.html#intrinsic-evaluation",
+    "title": "BERT + BM25 = BISON",
+    "section": "Intrinsic evaluation",
+    "text": "Intrinsic evaluation\n\nSelected 1400 representative queries and 7 million query document pairs from Bing’s search log\nPerformance-wise, USE performs the worst as it performs well only on homogeneous data, and query document pairs are heterogeneous.\nBISON outperforms all baseline models significantly."
+  },
+  {
+    "objectID": "posts/2020-08-31-bison.html#ms-marco",
+    "href": "posts/2020-08-31-bison.html#ms-marco",
+    "title": "BERT + BM25 = BISON",
+    "section": "MS Marco",
+    "text": "MS Marco\n\nSimilar steps followed for document full ranking task on the MS Marco dataset.\nFor each query, the top 1000 documents are returned and MR is used as performance metrics."
+  },
+  {
+    "objectID": "posts/2020-01-14-first-post.html",
+    "href": "posts/2020-01-14-first-post.html",
+    "title": "Yo!",
     "section": "",
-    "text": "This is based on a popular blog post by Dr. Andrew Gelman. Here, we are given data from professional golfers on the proportion of success putts from a number of tries. Our aim is to identify:\n\nCan we model the probability of success in golf putting as a function of distance from the hole?"
+    "text": "Yo!\nSuper excited to finally get my own blog. Hope to write out those long pending articles ASAP now. Stay tuned!"
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#eda",
-    "href": "posts/2020-03-12-tutorial.html#eda",
-    "title": "Bayesian Golf Putting Model",
+    "objectID": "posts/2020-04-23-tag-lm.html",
+    "href": "posts/2020-04-23-tag-lm.html",
+    "title": "TagLM",
     "section": "",
-    "text": "import pandas as pd\nimport numpy as np\nimport pymc3 as pm\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nWARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.\n\n\nThe source repository is present here\n\ndata = np.array([[2,1443,1346],\n[3,694,577],\n[4,455,337],\n[5,353,208],\n[6,272,149],\n[7,256,136],\n[8,240,111],\n[9,217,69],\n[10,200,67],\n[11,237,75],\n[12,202,52],\n[13,192,46],\n[14,174,54],\n[15,167,28],\n[16,201,27],\n[17,195,31],\n[18,191,33],\n[19,147,20],\n[20,152,24]])\n\ndf = pd.DataFrame(data, columns=[\n    'distance', \n    'tries', \n    'success_count'\n])\n\n\ndf\n\n\n\n\n\n\n\n\n\ndistance\ntries\nsuccess_count\n\n\n\n\n0\n2\n1443\n1346\n\n\n1\n3\n694\n577\n\n\n2\n4\n455\n337\n\n\n3\n5\n353\n208\n\n\n4\n6\n272\n149\n\n\n5\n7\n256\n136\n\n\n6\n8\n240\n111\n\n\n7\n9\n217\n69\n\n\n8\n10\n200\n67\n\n\n9\n11\n237\n75\n\n\n10\n12\n202\n52\n\n\n11\n13\n192\n46\n\n\n12\n14\n174\n54\n\n\n13\n15\n167\n28\n\n\n14\n16\n201\n27\n\n\n15\n17\n195\n31\n\n\n16\n18\n191\n33\n\n\n17\n19\n147\n20\n\n\n18\n20\n152\n24\n\n\n\n\n\n\n\n\nThe variables have the following format:\n\n\n\nVariable\nUnits\nDescription\n\n\n\n\ndistance\nfeet\nDistance from the hole for the putt attempt\n\n\ntries\ncount\nNumber of attempts at the chosen distance\n\n\nsuccess_count\ncount\nThe total successful putts\n\n\n\nLets try to visualize the dataset:\n\ndf['success_prob'] = df.success_count / df.tries\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, s=200)\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\nWe can notice that the probability of success decreases as the distance increases."
+    "text": "This is the TagLM paper mentioned in Lecture 13 in the CS224N course title Semi-supervised sequence tagging with bidirectional language models\nThis paper demonstrates how we can use context embeddings from BiLSTM models and use it for sequence labelling tasks"
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#geometry-based-model",
-    "href": "posts/2020-03-12-tutorial.html#geometry-based-model",
-    "title": "Bayesian Golf Putting Model",
-    "section": "Geometry based Model",
-    "text": "Geometry based Model\n\nWe’ll try to accomodate the physics associated with the problem. Specically, we assume:\n\nAssumptions\n\nThe golfers can hit the ball in any direction with some small error. This error could be because of inaccuracy, errors in the human, etc.\nThis error refers to the angle of the shot.\nWe assume the angle is normally distributed.\n\n\nImplications\n\nThe ball goes in whenever the angle is small enough for it to hit the cup of the hole!\nLonger putt \\(\\implies\\) Larger error \\(\\implies\\) Lower success rate than shorter putt\n\nFrom Dr. Gelman’s blog, we obtain the formula as:\n\n\\(Pr(|angle| &lt; sin^{-1}(\\frac{(R-r)}{x})) = 2\\phi\\big(\\frac{sin^{-1}\\frac{R-r}{x}}{\\sigma}\\big) - 1\\)\n\n\\(\\phi \\implies\\) Cumulative Normal Distribution Function.\nHence, our model will now have two big parts:\n\\[y_j \\sim binomial(n_j, p_j)\\]\n\\[p_j = 2\\phi\\big(\\frac{sin^{-1}\\frac{R-r}{x}}{\\sigma}\\big) - 1\\]\nTypically, the diameter of a golf ball is 1.68 inches and the cup is 4.25 inches i.e\n\\[r = 1.68 \\text{inch}\\] \\[R = 4.25 \\text{inch}\\]\n\nball_radius = (1.68/2)/12\ncup_radius = (4.25/2)/12\n\n\ndef calculate_prob(angle, distance):\n    \"\"\"\n    Calculate probability that the ball with fall in the hole given the angle of the shot \n    and the distance from the hole.\n    \"\"\"\n    rad = angle * np.pi / 180.0\n    arcsin = np.arcsin((cup_radius - ball_radius)/ distance)\n    return 2 * scipy.stats.norm(0, rad).cdf(arcsin) - 1\n\n\nplt.figure(figsize=(16, 6))\nls = np.linspace(0, df.distance.max(), 200)\nax = sns.scatterplot(\n    x='distance', \n    y='success_prob', \n    data=df, \n    s=100,\n    legend='full'\n)\nfor angle in [0.5, 1, 2, 5, 20]:\n    ax.plot(\n        ls, \n        calculate_prob(angle, ls), \n        label=f\"Angle={angle}\"\n    )\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\nax.legend()\n\n\n\n\n\n\n\n\nLet us now add this to our model!\n\nimport theano.tensor as tt\n\n\ndef calculate_phi(num):\n    \"cdf for standard normal\"\n    q = tt.erf(num / tt.sqrt(2.0)) # ERF is the Gaussian Error \n    return (1.0 + q) / 2.\n\n\nwith pm.Model() as model:\n    angle_of_shot_radians = pm.HalfNormal('angle_of_shot_radians')\n    angle_of_shot_degrees = pm.Deterministic(\n        'angle_of_shot_degrees',\n        (angle_of_shot_radians * 180.0) / np.pi\n    )\n    p_ball_goes_in = pm.Deterministic(\n        'p_ball_goes_in',\n        2 * calculate_phi(\n                tt.arcsin(\n                    (cup_radius - ball_radius)/ df.distance\n                ) / angle_of_shot_radians\n            )\n        ) - 1\n    p_success = pm.Binomial(\n        'p_success',\n        n=df.tries, \n        p=p_ball_goes_in, \n        observed=df.success_count\n    )\n\n\npm.model_to_graphviz(model)\n\n\n\n\n\n\n\n\n\nwith model:\n    trace = pm.sample(4000, tune=1000, chains=4)\n\nAuto-assigning NUTS sampler...\nInitializing NUTS using jitter+adapt_diag...\nERROR (theano.gof.opt): Optimization failure due to: local_grad_log_erfc_neg\nERROR (theano.gof.opt): node: Elemwise{true_div}(Elemwise{mul,no_inplace}.0, Elemwise{erfc,no_inplace}.0)\nERROR (theano.gof.opt): TRACEBACK:\nERROR (theano.gof.opt): Traceback (most recent call last):\n  File \"/home/goodhamgupta/shubham/blog/_notebooks/.env/lib/python3.6/site-packages/theano/gof/opt.py\", line 2034, in process_node\n    replacements = lopt.transform(node)\n  File \"/home/goodhamgupta/shubham/blog/_notebooks/.env/lib/python3.6/site-packages/theano/tensor/opt.py\", line 6789, in local_grad_log_erfc_neg\n    if not exp.owner.inputs[0].owner:\nAttributeError: 'NoneType' object has no attribute 'owner'\n\nMultiprocess sampling (4 chains in 2 jobs)\nNUTS: [angle_of_shot_radians]\nSampling 4 chains, 0 divergences: 100%|██████████| 20000/20000 [00:10&lt;00:00, 1943.54draws/s]\nThe acceptance probability does not match the target. It is 0.8844154441842546, but should be close to 0.8. Try to increase the number of tuning steps.\n\n\n\npm.summary(trace).head(2)\n\n\n\n\n\n\n\n\n\nmean\nsd\nhpd_3%\nhpd_97%\nmcse_mean\nmcse_sd\ness_mean\ness_sd\ness_bulk\ness_tail\nr_hat\n\n\n\n\nangle_of_shot_radians\n0.027\n0.000\n0.026\n0.027\n0.0\n0.0\n6641.0\n6641.0\n6641.0\n10874.0\n1.0\n\n\nangle_of_shot_degrees\n1.527\n0.023\n1.484\n1.570\n0.0\n0.0\n6641.0\n6641.0\n6641.0\n10874.0\n1.0\n\n\n\n\n\n\n\n\n\npm.plot_posterior(trace['angle_of_shot_degrees'])\n\narray([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfe4c24f60&gt;],\n      dtype=object)\n\n\n\n\n\n\n\n\n\nFrom the above results, we can see:\n\nPyMC3 has estimated\n\n\\(angle_of_shot_degrees\\) to be \\(1.53 \\pm 0.023\\)\n\nThe MCSE is almost 0 \\(\\implies\\) The simulation has run long enough for the chains to converge.\n\\(r\\_hat = 1.0\\) tells us that the chains have mixed well i.e hairy hedgehog pattern.\n\nLet’s visualize the fit with this new model:\n\ngeo_model_prob = calculate_prob(\n    trace['angle_of_shot_degrees'].mean(), \n    df.distance\n)\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\n\nax = sns.scatterplot(x='distance', y=df.success_prob, data=df, s=200, label='Actual')\n\nsns.scatterplot(x='distance', y=df.posterior_success_prob, data=df, label='Logistic Regression',ax=ax, color='red', s=100)\nsns.scatterplot(x='distance', y=geo_model_prob, data=df, label='Geometry based ',ax=ax, color='orange', s=100)\n\nsns.lineplot(x='distance', y=df.posterior_success_prob, data=df,ax=ax, color='red')\nsns.lineplot(x='distance', y=geo_model_prob, data=df,ax=ax, color='orange')\n\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\n\nWe can see that the geometry based model fits better than the logistic regression model.\nWhile this model is not completely accurate, it suggests that angle is a good variable to model the problem. Using this model, we can be more confident about extrapolating the data.\nFor the same 50ft putt, the probability now is:\n\n\nimport scipy\nlr_result = np.round(\n    100 * scipy.special.expit(2.223 + -0.255 * 50).mean(),\n    5\n)\ngeo_result = np.round(\n    100 * calculate_prob(\n        trace['angle_of_shot_degrees'].mean(), \n        50\n    ).mean(),\n    5\n)\n\nprint(\n    f\"Logistic Regression Model: {lr_result}% \\n\"\\\n    f\"Geometry Based Model: {geo_result}%\"\n)\n\nLogistic Regression Model: 0.00268% \nGeometry Based Model: 6.40322%"
+    "objectID": "posts/2020-04-23-tag-lm.html#overview",
+    "href": "posts/2020-04-23-tag-lm.html#overview",
+    "title": "TagLM",
+    "section": "Overview",
+    "text": "Overview\n\nExtract word and LM embeddings for every token\nPrepare embedding by concatinating both embeddings\nse them in supervised sequence tagging model"
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#new-data",
-    "href": "posts/2020-03-12-tutorial.html#new-data",
-    "title": "Bayesian Golf Putting Model",
-    "section": "New Data!",
-    "text": "New Data!\nMark Broadie obtained new data about the golfers. Let’s see how our model performs on this new dataset.\nFirst, we’ll look at the summary of the dataset.\n\n#  golf putting data from Broadie (2018)\nnew_golf_data = np.array([\n[0.28, 45198, 45183],\n[0.97, 183020, 182899],\n[1.93, 169503, 168594],\n[2.92, 113094, 108953],\n[3.93, 73855, 64740],\n[4.94, 53659, 41106],\n[5.94, 42991, 28205],\n[6.95, 37050, 21334],\n[7.95, 33275, 16615],\n[8.95, 30836, 13503],\n[9.95, 28637, 11060],\n[10.95, 26239, 9032],\n[11.95, 24636, 7687],\n[12.95, 22876, 6432],\n[14.43, 41267, 9813],\n[16.43, 35712, 7196],\n[18.44, 31573, 5290],\n[20.44, 28280, 4086],\n[21.95, 13238, 1642],\n[24.39, 46570, 4767],\n[28.40, 38422, 2980],\n[32.39, 31641, 1996],\n[36.39, 25604, 1327],\n[40.37, 20366, 834],\n[44.38, 15977, 559],\n[48.37, 11770, 311],\n[52.36, 8708, 231],\n[57.25, 8878, 204],\n[63.23, 5492, 103],\n[69.18, 3087, 35],\n[75.19, 1742, 24],\n])\n\nnew_df = pd.DataFrame(\n    new_golf_data, \n    columns=['distance', 'tries', 'success_count']\n)\n\n\nnew_geo_model_prob = calculate_prob(\n    trace['angle_of_shot_degrees'].mean(), \n    new_df.distance\n)\n\n\nnew_df['success_prob'] = new_df.success_count / new_df.tries\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, label='Old Dataset', s=200)\nsns.scatterplot(x='distance', y='success_prob', data=new_df,label='New Dataset', s=200, ax=ax)\nsns.scatterplot(x='distance', y=new_geo_model_prob, data=new_df, label='Geometry based Model ',ax=ax, color='red', s=100)\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\nplt.setp(ax.get_legend().get_texts(), fontsize='25')\n\n\n\n\n\n\n\n\nWe can see:\n\nSuccess rate is similar in the 0-20 feet range for both datasets.\nBeyond 20 ft, success rate is lower than expected. These attempts are more difficult, even after we have accounted for increased angular precision."
+    "objectID": "posts/2020-04-23-tag-lm.html#baseline",
+    "href": "posts/2020-04-23-tag-lm.html#baseline",
+    "title": "TagLM",
+    "section": "Baseline",
+    "text": "Baseline\n\nBaseline model is hierachical neural tagging model\nObtain word and character embeddings. Concatenate them to form final embedding.\n\\[ x_k = [c_k;w_k] \\]\nChar embedding: Can be obtained via CNN or RNN\nWord embedding: Use pretrained embeddings\nUse multiple bidirectional RNN to learn context embedding\nFor every token, concatenate forward and backward hidden states at each layer\n2nd layer will use the above output and predict next hidden state\nUse GRU or LSTM depending on task\nUse output of final layer to predict score for each possible tag using dense layer\nBetter to predict tags for full sequence than for a single token\nTHEREFORE, add another layer with parameters for each label bigram.\nCompute sentence conditional random field loss(CRF) using forward-backward algorithm.\nUse Viterbi algorithm to find most likely sequence\n\n\n\nOverview of architecture\n\n\nLM embedding will be created by concatenating forward and backward embeddings. No parameter sharing between these two embeddings."
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#moar-features",
-    "href": "posts/2020-03-12-tutorial.html#moar-features",
-    "title": "Bayesian Golf Putting Model",
-    "section": "Moar features!",
-    "text": "Moar features!\nTo get the ball in, along with the angle, we should also need to take into account if the ball was hit hard enough.\nFrom Colin Caroll’s Blog, we have the following: &gt; Mark Broadie made the following assumptions - If a putt goes short or more than 3 feet past the hole, it will not go in. - Golfers aim for 1 foot past the hole - The distance the ball goes, \\(u\\), is distributed as: \\[ u \\sim \\mathcal{N}\\left(1 + \\text{distance}, \\sigma_{\\text{distance}} (1 + \\text{distance})\\right), \\] where we will learn \\(\\sigma_{\\text{distance}}\\).\nAfter working through the geometry and algebra, we get:\n\\[P(\\text{Good shot}) = \\bigg(2\\phi\\big(\\frac{sin^{-1}(\\frac{R-r}{x})}{\\sigma_{angle}}\\big)-1\\bigg)\\bigg(\\phi\\bigg(\\frac{2}{(x+1)\\sigma_{distance}}\\bigg) - \\phi\\bigg(\\frac{-1}{(x+1)\\sigma_{distance}}\\bigg)\\bigg)\\]\nLet’s write this down in PyMC3\n\nOVERSHOT = 1.0\nDISTANCE_TOLERANCE = 3.0\ndistances = new_df.distance.values\nwith pm.Model() as model:\n    angle_of_shot_radians = pm.HalfNormal('angle_of_shot_radians')\n    angle_of_shot_degrees = pm.Deterministic(\n        'angle_of_shot_degrees',\n        (angle_of_shot_radians * 180.0) / np.pi\n    )\n    \n    variance_of_distance = pm.HalfNormal('variance_of_distance')\n    p_good_angle = pm.Deterministic(\n        'p_good_angle',\n        2 * calculate_phi(\n                tt.arcsin(\n                    (cup_radius - ball_radius)/ distances\n                ) / angle_of_shot_radians\n            )\n        ) - 1\n    p_good_distance = pm.Deterministic(\n        'p_good_distance',\n        calculate_phi(\n            (DISTANCE_TOLERANCE - OVERSHOT) / ((distances + OVERSHOT) * variance_of_distance)) \n        - calculate_phi(\n            -OVERSHOT / ((distances + OVERSHOT) * variance_of_distance))\n\n    )\n    p_success = pm.Binomial(\n        'p_success',\n        n=new_df.tries, \n        p=p_good_angle * p_good_distance, \n        observed=new_df.success_count\n    )\n    \n\n\npm.model_to_graphviz(model)\n\n\n\n\n\n\n\n\n\nwith model:\n    trace = pm.sample(1000, tune=1000, chains=4)\n\nAuto-assigning NUTS sampler...\nInitializing NUTS using jitter+adapt_diag...\nMultiprocess sampling (4 chains in 2 jobs)\nNUTS: [variance_of_distance, angle_of_shot_radians]\nSampling 4 chains, 0 divergences: 100%|██████████| 8000/8000 [00:08&lt;00:00, 969.28draws/s] \nThe number of effective samples is smaller than 25% for some parameters.\n\n\n\npm.summary(trace).head(3)\n\n\n\n\n\n\n\n\n\nmean\nsd\nhpd_3%\nhpd_97%\nmcse_mean\nmcse_sd\ness_mean\ness_sd\ness_bulk\ness_tail\nr_hat\n\n\n\n\nangle_of_shot_radians\n0.013\n0.000\n0.013\n0.013\n0.0\n0.0\n865.0\n865.0\n862.0\n1109.0\n1.0\n\n\nangle_of_shot_degrees\n0.761\n0.003\n0.755\n0.768\n0.0\n0.0\n865.0\n865.0\n862.0\n1109.0\n1.0\n\n\nvariance_of_distance\n0.137\n0.001\n0.136\n0.138\n0.0\n0.0\n855.0\n855.0\n855.0\n1186.0\n1.0\n\n\n\n\n\n\n\n\n\npm.plot_posterior(trace['variance_of_distance'])\n\narray([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdff74693c8&gt;],\n      dtype=object)\n\n\n\n\n\n\n\n\n\n\nwith model:\n    distance_posterior = pm.sample_posterior_predictive(trace)\n\n100%|██████████| 4000/4000 [00:04&lt;00:00, 846.25it/s]\n\n\n\ndef calculate_prob_distance(angle, distance, ls):\n    \"\"\"\n    Calculate the probability the ball will land inside the hole\n    given the variance in angle and distance.\n    \n    NOTE: Adapted from Colin Carroll's Blog.\n    \"\"\"\n    norm = scipy.stats.norm(0, 1)\n    prob_angle = 2 * norm.cdf(\n        np.arcsin((cup_radius - ball_radius) / ls) / angle) - 1\n    prob_distance_one = norm.cdf(\n        (DISTANCE_TOLERANCE - OVERSHOT) / ((ls + OVERSHOT) * distance)\n    )\n    prob_distance_two = norm.cdf(-OVERSHOT / ((ls + OVERSHOT) * distance))\n    prob_distance = prob_distance_one - prob_distance_two\n    \n    return prob_angle * prob_distance\n\n\nls = np.linspace(0, new_df.distance.max(), 200)\n\n\nnew_df['success_prob'] = new_df.success_count / new_df.tries\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(\n    x='distance', \n    y='success_prob',\n    data=new_df,\n    label='Actual', \n    s=200\n)\nsns.scatterplot(\n    x='distance', \n    y=new_geo_model_prob, \n    data=new_df, \n    label='Angle only Model',\n    ax=ax, \n    color='red', \n    s=100\n)\n\nsns.scatterplot(\n    x='distance', \n    y=calculate_prob_distance(\n        trace['angle_of_shot_radians'].mean(), \n        trace['variance_of_distance'].mean(),\n        new_df.distance\n    ), \n    data=new_df, \n    label='Distance + Angle based Model ',\n    ax=ax, \n    color='black', \n    s=100\n)\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\n\nplt.setp(ax.get_legend().get_texts(), fontsize='25')\n\n\n\n\n\n\n\n\nFrom the graph, we can conclude that:\n\nThe model is good at distance lower than 10 ft and distances higher than 40ft.\nThere is some mismatch between 10ft to 40ft, but overall this is a good fit."
+    "objectID": "posts/2020-04-23-tag-lm.html#analysis",
+    "href": "posts/2020-04-23-tag-lm.html#analysis",
+    "title": "TagLM",
+    "section": "Analysis",
+    "text": "Analysis\n\nSecond RNN captures interactions between task specific context\nBackward LM addition has significant performance gains\nModel size makes a difference. Using bigger CNN model lead to  0.3 percent improvement\nAlso tried training the model JUST ON THE CoNLL data. Reduced model size\nIncluding embeddings from this model decreased performance compared to baseline system.\nReplacing task specific RNN with using LM embeddings with a dense layer and CRF reduced performance\nImprovement shown by transferring knowledge from other tasks almost disappers when the initial model is trained on a large dataset."
   },
   {
-    "objectID": "posts/2020-03-12-tutorial.html#whats-the-point",
-    "href": "posts/2020-03-12-tutorial.html#whats-the-point",
-    "title": "Bayesian Golf Putting Model",
-    "section": "What’s the point?",
-    "text": "What’s the point?\nUsing Bayesian analysis, we want to be able to quantify the unvertainity with each of our predictions. Since each prediction is a distribution, we can utilize this to see where the putts will fall if they do not fall in the hole.\n\ndef simulate_from_distance(trace, distance_to_hole, trials=10_000):\n    n_samples = trace['angle_of_shot_radians'].shape[0]\n\n    idxs = np.random.randint(0, n_samples, trials)\n    variance_of_shot = trace['angle_of_shot_radians'][idxs]\n    variance_of_distance = trace['variance_of_distance'][idxs]\n\n    theta = np.random.normal(0, variance_of_shot)\n    distance = np.random.normal(distance_to_hole + OVERSHOT, (distance_to_hole + OVERSHOT) * variance_of_distance)\n\n    final_position = np.array([distance * np.cos(theta), distance * np.sin(theta)])\n\n    made_it = np.abs(theta) &lt; np.arcsin((cup_radius - ball_radius) / distance_to_hole)\n    made_it = made_it * (final_position[0] &gt; distance_to_hole) * (final_position[0] &lt; distance_to_hole + DISTANCE_TOLERANCE)\n    \n    _, ax = plt.subplots()\n\n    ax.plot(0, 0, 'k.', lw=1, mfc='black', ms=150 / distance_to_hole)\n    ax.plot(*final_position[:, ~made_it], '.', alpha=0.1, mfc='r', ms=250 / distance_to_hole, mew=0.5)\n    ax.plot(distance_to_hole, 0, 'ko', lw=1, mfc='black', ms=350 / distance_to_hole)\n\n    ax.set_facecolor(\"#e6ffdb\")\n    ax.set_title(f\"Final position of {trials:,d} putts from {distance_to_hole}ft.\\n({100 * made_it.mean():.1f}% made)\")\n    return ax\n\nsimulate_from_distance(trace, distance_to_hole=10);"
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html",
+    "title": "GPUs go brrr with Mojo: Fundamentals",
+    "section": "",
+    "text": "Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my GitHub) to diving deep into hands-on implementations.\nI’ve always been interested in systems programming, but somehow never really picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [1] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using “moar” compute.\nI briefly spoke about GPU computing last year, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
+    "title": "GPUs go brrr with Mojo: Fundamentals",
+    "section": "Why Mojo?",
+    "text": "Why Mojo?\nI’ve tried learning Rust multiple times, along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.\nIn early 2023, Modular announced Mojo🔥, a new systems-programming language promising:\n\nPython-like syntax\nSupport for both CPU and GPU architectures\nKernel autofusion\nBuilds on MLIR\nTraits and bounds checking\nInteropeability with PTX, Python, C\n\nModular has since announced Max, their AI inference platform, built on Mojo. The released all kernels available as part of the platform, along with their own version[2] of Sasha Rush’s GPU Puzzles [3] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”[4] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
+    "title": "GPUs go brrr with Mojo: Fundamentals",
+    "section": "GPU 101",
+    "text": "GPU 101\nGPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:\n\nLay out data and computation as a grid of thread blocks.\nLaunch a kernel from the CPU (host) to run on the GPU (device).\nExploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).\n\nModern chips had two ways to spend their billions of transistors:\n\nCPUs invest them in large caches, branch predictors and out-of-order logic to minimize latency for one or a few threads.\nGPUs invest them in thousands of simple cores and huge register files to maximize throughput for many threads, assuming those threads can tolerate latency by waiting in parallel.\n\nThe rest of this section unpacks how that single design choice shows up in memory, execution and program flow.\n\n1. Memory hierarchy – hide latency with tons of threads\nCPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.\nGPU memory hierarchy (slowest/largest to fastest/smallest):\n\nGlobal (HBM): High Bandwidth Memory—the GPU’s main memory, large but high-latency, visible to all threads\n\nShared (SRAM): fast on-chip memory, ~100x faster than HBM\n\nRegisters: per-thread storage, fastest access, ~1000x faster than HBM\n\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\n\n\nThe key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.\n\n\n2. Execution hierarchy – launch enough warps to hide stalls\n\n\n\nGPU Execution Hierachy\n\n\nBuilding from the bottom up:\n\nThread: the basic execution unit with its own registers\nWarp: 32 threads executing the same instruction together (the basic unit of GPU scheduling)\n\nBlock: a group of threads that share shared memory and can synchronize\n\nGrid: a collection of blocks distributed across SMs\n\nGPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.\n\n\n3. Program flow – CPU launches, GPU streams\n\nThe CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the same instruction (SIMT). Divergent branches disable some lanes and waste those cores.\n\nHost allocates and copies data to GPU global memory\n\nHost launches the kernel with a specified grid and block size\n\nDevice executes the kernel in parallel across threads\n\nHost retrieves results from GPU memory\n\n\n\nPutting it together\nFast GPU kernels keep cores busy by:\n\nStaging hot data in shared or registers\nLaunching enough threads to mask global-memory latency\nWriting branch-free, data-parallel code\n\nWe will cover the practical implications of the above topics as we go through the puzzles."
+  },
+  {
+    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "href": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
+    "title": "GPUs go brrr with Mojo: Fundamentals",
+    "section": "Infrastructure",
+    "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html",
+    "href": "posts/2020-05-11-longformer.html",
+    "title": "LongFormer",
+    "section": "",
+    "text": "The NLP world had its ImageNet moment with the introduction of the Transformer in the paper Attention is All you Need.\nThe ability to be able to process multiple words/tokens in parallel and train models without labeled data(using self-attention) led to the creation of multiple models which gave us SOTA results on many interesting tasks such as Question Answering, Summarization, etc.\nHowever, the biggest drawback is the Transformer architecture is the limitation it has on the number of tokens it can process at a once, due to exponentially increasing memory and compute requirements(typically about 512 tokens), causing the performance to deteriorate over large documents.\nLongformer by the team at Allen AI aims to address this problem and demonstrate it’s application to do transfer learning for large documents.\nOther approaches to are described in recent work such as Transformer XL, Blockwise, Reformer, etc. Their characteristics are mentioned below:\n\n\n\n\nComparison"
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#sliding-window-attention",
+    "href": "posts/2020-05-11-longformer.html#sliding-window-attention",
+    "title": "LongFormer",
+    "section": "Sliding Window Attention",
+    "text": "Sliding Window Attention\n\nTLDR : Similar to kernels for CNN which apply a matrix operation to a set of pixels and move onto the next set, apply attention to tokens in current window only.\nIn this, we change the attention objective to only focus on the tokens that occur in a context window \\(w\\).\nEach token will be able to attend to \\(\\frac{1}{2}w\\) number of tokens to it’s left and right.\nQuestion: But doesn’t this limit the number of tokens being taken into account to only the tokens in the window?\n\nYes, it does. This is why we stack multiple layers of self-attention. As shown in the image below, the green neuron learns from the first 3 tokens(Lionel, Messi, is). However, the brown neuron learns from the green, yellow, and red neuron, who together learn from the first 5 tokens. This way, we can apply attention to long sequences(Lionel, Messi, is, the, true).\n\nAs with the CNN, we will have \\(l\\) layers to this sliding window attention(multi-head attention) implemented to learn low level and high-level features. A balance should be found between the number of layers \\(l\\)(efficiency) and the window size \\(w\\)(model representation capacity).\n\n\n\n\nSliding Window Attention\n\n\n\nPros: Reduces computation from \\(O(n^2)\\) to \\(O(n*w)\\) i.e the computation complexity will only scale linearly now.\nCons: To learn dependencies for a large sequence, we would either have to increase the window size \\(w\\) or increase the number of layers \\(l\\), both of which will cause an increase in the amount of memory and processing power required to train and test the model."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#dilated-sliding-window",
+    "href": "posts/2020-05-11-longformer.html#dilated-sliding-window",
+    "title": "LongFormer",
+    "section": "Dilated Sliding Window",
+    "text": "Dilated Sliding Window\n\nTLDR: Use dilation instead of window attention i.e for some particular window size, take alternate elements while performing self-attention.\nTo solve the problem for long sequences, the authors propose that instead of considering all tokens in window \\(w\\), consider alternate(or any number \\(d\\))tokens instead. The range of tokens will now be \\(l * d * w\\), which will be large for even a small value of \\(d\\).\nPros: This small change will allow us to cover a wider range of tokens without significant changes to the architecture.\nCons: Skipping tokens might lead to loss of information in the lower layers which will get propagated to the higher layers. This will lead to unstable training and poor model performance."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#global-attention",
+    "href": "posts/2020-05-11-longformer.html#global-attention",
+    "title": "LongFormer",
+    "section": "Global Attention",
+    "text": "Global Attention\n\nTLDR: Use full attention for certain tokens depending on the task. This is an engineering choice.\nIn BERT style models, optimal representation for input sequence varies by task.\n\nFor MLM, local context is used to predict the masked word\nFor classification, [CLS] token is used.\nFor QnA, the question is concatenated with the document to help model learn through self-attention.\n\nThe windowed and dilated attention is not flexible enough to learn task-specific representations.\nHence, for some tokens enable global tokens i.e at these tokens, all tokens in the sequence can attend to it. For classification, enable global attention on the [CLS] token.\nPros:\n\nAdding global attention improves performance for specific tasks. Since these tokens are limited in number, the complexity still stays at \\(O(n)\\).\nIt also increases the representational power of the model.\n\n\n\nLinear Projections\n\nTLDR: Use two sets of Q,K and V matrices, one for sliding window attention, one for global attention.\nAttention is defined as:\n\\[\n\\begin{aligned}\nAttention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\n\\end{aligned}\n\\]\nWe will use two different sets of Q,K and V matrices for sliding window and global attention.\n\\(Q_g\\), \\(K_g\\), \\(V_g\\) are initialized with \\(Q_s\\), \\(K_s\\), \\(V_s\\)\n\n\n\n\nBanded Matrix\n\n\n\nBanded Matrix(Source)\n\n\n\n\nCompressed Banded Matrix\n\n\n\nCompressed Banded Matrix(Source)\n\n\n\nCUDA Kernels\n\nOne of the important and interesting contributions of this paper is the implementation of matrix multiplication via CUDA kernels.\nIn the dilated sliding window, the matrix formed is called a band matrix i.e there are diagonal bands of indices that have values and the other values are 0.\nImplementing matrix operations for band matrices using native for loops and via frameworks is not easy and optimized.\nThe authors have provided custom CUDA kernels implemented using TVM for this banded matrix operations.\nAs demonstrated in the image below, the custom CUDA kernels have a significant impact on the time and memory consumption of the model. The kernels and implementation for the longformer are available here. \n\nLongFormer Performance"
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#attention-pattern",
+    "href": "posts/2020-05-11-longformer.html#attention-pattern",
+    "title": "LongFormer",
+    "section": "Attention Pattern",
+    "text": "Attention Pattern\n\nIn multi-head attention, each head computes a different score.\nTo get a good representation of all tokens, the authors propose that normal sliding window attention can be used for the lower layers, and dilated sliding window attention can be used the higher layers(top 1-2 layers).\nThe reasoning for this approach is that in the lower layers, the local context is more important, and in the upper layers, the global context is more important. Hence, it is acceptable to skip over a few tokens in the upper layers."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#task-and-datasets",
+    "href": "posts/2020-05-11-longformer.html#task-and-datasets",
+    "title": "LongFormer",
+    "section": "Task and Datasets",
+    "text": "Task and Datasets\n\nThe authors focus on character level modeling because the sequences are naturally longer than those of word-level language modeling.\nDatasets that were used are text8 and enwik8."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#training-and-evaluation",
+    "href": "posts/2020-05-11-longformer.html#training-and-evaluation",
+    "title": "LongFormer",
+    "section": "Training and Evaluation",
+    "text": "Training and Evaluation\n\nThe model was trained in multiple phases.\n\nThe window and sequence length was increased in each phase. This is to allow local context from tokens to be learned efficiently.\nOverall five training phases used, starting from the token length of 2048 to 23040 (45x more than vanilla BERT).\nTwo models were created for evaluation:\n\nSmall model: 12 layers, 512 hidden size\nLarge model: 30 layers, 512 hidden sizes (2.5x larger)\n\nDuring the model evaluation, the model can run on a sequence length of 32256(63x more than vanilla BERT)."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#results",
+    "href": "posts/2020-05-11-longformer.html#results",
+    "title": "LongFormer",
+    "section": "Results",
+    "text": "Results\n\n\n\nResults\n\n\n\nLongformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.\nThe large model was only tested on enwik8 due to the computational cost of training.\nIt’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#copy-initialization-trick",
+    "href": "posts/2020-05-11-longformer.html#copy-initialization-trick",
+    "title": "LongFormer",
+    "section": "Copy initialization trick",
+    "text": "Copy initialization trick\n\nSince the MLM objective pretraining objective is expensive, the authors continue to train from the checkpoints of the RoBERTA model.\nThe attention mechanism is replaced with the new attention module.\nFor the position embeddings:\n\nRoBERTA has position embeddings for 512 tokens.\nLongFormer can support position embeddings for 4096 tokens(larger for larger GPU)\nTo use the weight checkpoints from RoBERTA, instead of random initialization, copy the 512 position embeddings multiple times as analysis of the BERT attention heads showed a strong learned bias to attend to the local context."
+  },
+  {
+    "objectID": "posts/2020-05-11-longformer.html#pretraining",
+    "href": "posts/2020-05-11-longformer.html#pretraining",
+    "title": "LongFormer",
+    "section": "Pretraining",
+    "text": "Pretraining\n\nApart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, \\(\\frac{1}{3}^{rd}\\) Realnews dataset was added with tokens larger than 1200.\nBoth models(small and large) trained with varying gradient updates.\n\n\n\n\nCopy init\n\n\n\nMLM BPC for RoBERTA with various model config"
   },
   {
     "objectID": "posts/2025-07-20-gpu-puzzles-p2.html",
@@ -196,277 +483,67 @@
     "text": "Tiled Matrix-Multiplication (GEMM)\nOur shared-memory kernel already cut global-DRAM traffic by loading each A[i,k] / B[k,j] element once per thread row/column instead of once per output multiply.\nFor large matrices, however, even that version still:\n\nBrings the entire row of A and column of B into shared SRAM, quickly exhausting the 48–112 KiB available per SM.\nLeaves many threads idle while others finish their portion of the dot-product.\nMisses an opportunity to keep a hot, register-resident accumulator and hide global-latency behind computation.\n\nEnter tiling / blocking — the canonical GPU GEMM strategy.\n\nTile?\nThink of an N×N matmul as a chessboard. Instead of letting every thread wander across the whole board, we slice it into T×T sub-squares (tiles).\nA thread-block is assigned one output tile, and:\n\nCooperatively loads the matching T×T A-tile and B-tile from global DRAM to shared memory (two coalesced 2-D memcpy’s).\nPerforms T fused-multiply-add sweeps of that data, each thread keeping its running sum in a register.\nBarriers, slides the tile window by T along the inner-k dimension, and repeats until the dot-product is complete.\nFinally writes the T×T block of C back to DRAM.\n\n\n\n\nMatmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz\n\n\nEach element of A/B is now read once per tile - independent of N, and re-used T times, boosting arithmetic intensity from O(1) to O(T) FLOP/B.\n\n\nMemory mapping for tiled GEMM\nThe memory hierachy(discussed in the previous post), is utilised as follows:\n\nRegisters: per-thread accumulators that hold partial C values across all tile iterations\nShared SRAM: the current A_tile and B_tile, cooperatively loaded once and reused T times\n\nGlobal HBM: original A, B matrices and final C; each element touched once per tile load/store\n\n\n\nRaw Memory\n\n\nManual Indexing Tiled Matmul\n\n\n\np14_matmul_tiled_manual.mojo\n\n\nalias SIZE_TILED = 8 # Size of the matrix we are multiplying, NOT the size of a tile\nalias BLOCKS_PER_GRID_TILED = (3, 3)  # each block convers 3x3 elements\nalias THREADS_PER_BLOCK_TILED = (TPB, TPB)\nalias layout_tiled = Layout.row_major(SIZE_TILED, SIZE_TILED)\n\n\nfn matmul_tiled[\n    layout: Layout, size: Int\n](\n    output: LayoutTensor[mut=False, dtype, layout],\n    a: LayoutTensor[mut=False, dtype, layout],\n    b: LayoutTensor[mut=False, dtype, layout],\n):\n    local_row = thread_idx.y\n    local_col = thread_idx.x\n    global_row = block_idx.y * TPB + local_row\n    global_col = block_idx.x * TPB + local_col\n\n    shared_a = tb[dtype]().row_major[TPB, TPB]().shared().alloc()\n    shared_b = tb[dtype]().row_major[TPB, TPB]().shared().alloc()\n\n    var local_sum: output.element_type = 0.0\n\n    @parameter\n    # (size + TPB - 1) // TPB == ceil(size / TPB) -&gt; number of tile-steps we need\n    for tile in range((size + TPB - 1) // TPB):\n        # Load elements of A into shared mem\n        if global_row &lt; size and (tile * TPB + local_col) &lt; size:\n            shared_a[local_row, local_col] = a[\n                global_row, tile * TPB + local_col\n            ]\n\n        # Load elements of B into shared mem\n        if global_col &lt; size and (tile * TPB + local_row) &lt; size:\n            shared_b[local_row, local_col] = b[\n                tile * TPB + local_row, global_col\n            ]\n\n        barrier()\n\n        # Perform matmul\n        if global_row &lt; size and global_col &lt; size:\n\n            @parameter\n            for k in range(min(TPB, size - tile * TPB)):\n                local_sum += shared_a[local_row, k] * shared_b[k, local_col]\n\n            barrier()\n\n        if global_row &lt; size and global_col &lt; size:\n            output[global_row, global_col] = local_sum\n\npixi run p14 --tiled\n# out: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])\n# expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])\n\nThe new formulas in the tiling implementation deserve explanation. Let’s break them down into key concepts:\n\nHow many Tiles are needed?\nThis is the expression: range((size + TPB - 1) // TPB)\nThe key idea here is: Step through k by TPB each time; if there’s a leftover chunk, do one last tile for it.\n\n\n\nMapping of elements to tiles when size=17 and TPB=8\n\n\nThe above example needs 3 tiles. Ceiling division captures this with a simple formula: \\[\n\\lceil\\frac{size}{TPB}\\rceil = \\lfloor\\frac{size + TPB - 1}{TPB}\\rfloor\n\\]\n\n\nWhich element does a thread fetch in this tile?\nEach thread snags two scalars—one from A, one from B.\ntile is simply “which chunk of k are we on?”\nInside a block, a thread owns a single output cell C[global_row, global_col]. To finish that cell it must walk k, multiplying aligned pairs (A[row, k], B[k, col]).\nOn tile t the fetches are\nA = a[global_row, t*TPB + local_col]\nB = b[t*TPB + local_row, global_col]\n\n\n\nTiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block.\n\n\nBoth reads cover the same k-slice (t*TPB … t*TPB+TPB-1), so every multiply in this round lives entirely in shared memory.\n\n\nWhy do we swap local_row and local_col for B?\nGPUs coalesce global memory when adjacent threads read adjacent addresses. With the swap:\n\nFor A: neighboring threads in x-direction (local_col) read consecutive k’s ⇒ coalesced\nFor B: neighboring threads in y-direction (local_row) read consecutive k’s ⇒ also coalesced\n\nWithout the swap, one matrix would be fetched “strided” collapsing into 32 separate memory transactions per warp - a 32× slowdown on bandwidth-bound kernels.\nQuick primer: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks”[15] [16].\n\n\n\nShared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot\n\n\nEach is a tiny SRAM with its own read/write port that can service one request (or one 32-bit access per cycle). A warp hits peak bandwidth only when every thread lands in a different bank (or all hit the same address, which hardware can broadcast). If two threads target different addresses inside the same bank during the same cycle, the hardware must serialize them, referred to as a bank conflict.\nBeyond coalescing, our tile layout also sidesteps these conflicts. Because b_shared[k, threadIdx.x] maps each thread to a distinct bank (while a_shared[threadIdx.y, k] is broadcast-friendly), all 32 memory ports stay busy with zero serialization.\n\n\nChoosing the Right Tile Size\nWhile the current puzzle selects \\(TPB=3\\) with tile size \\(TPBxTPB\\), choosing the tile size is a balancing act.\nExact numbers vary with GPU, kernel, and precision [[17]][18].\nI’m still learning the dark art of GPU perf tuning, so I’ll save the details for a future post once I’ve had more time to experiment.\nTLDR: For each tile, we will sync (barrier), compute, shift to next tile, repeat. But this is just the baseline - there’s always a deeper optimization rabbit hole!\n\n\n\nLayoutTensor\nWhile the manual tiling approach works, it suffers from indexing complexity that obscures the algorithm’s intent and creates opportunities for bugs. Mojo’s LayoutTensor API provides an elegant solution that maintains performance while dramatically improving code clarity.\n\nThe Pain of Manual Indexing\nThe manual implementation requires careful coordinate arithmetic:\n\nNested index calculations like tile * TPB + local_col that can easily introduce off-by-one errors\nSeparate bounds checking for each matrix load operation\nExplicit management of tile boundaries and edge cases\nCode that prioritizes performance over readability\n\nLayoutTensor provides a tile() method that creates zero-copy [7] views into sub-regions of tensors [19]. This eliminates manual indexing gymnastics while keeping identical performance.\nA LayoutTensor.tile[tile_height, tile_width](block_row, block_col) call returns a view of the specified tile without copying data, at no cost!\nThe transformation from manual indexing to LayoutTensor simplifies the loading logic:\n# Load elements of A into shared mem\n- if global_row &lt; size and (tile * TPB + local_col) &lt; size:\n-     shared_a[local_row, local_col] = a[\n-         global_row, tile * TPB + local_col\n-     ]\n- \n- # Load elements of B into shared mem  \n- if global_col &lt; size and (tile * TPB + local_row) &lt; size:\n-     shared_b[local_row, local_col] = b[\n-         tile * TPB + local_row, global_col\n-     ]\n# Create tile views (zero-copy)\n+ a_tile = a.tile[TPB, TPB](block_idx.y, idx)\n+ b_tile = b.tile[TPB, TPB](idx, block_idx.x)\n\n# Asynchronous copy to shared memory\n+ copy_dram_to_sram_async[thread_layout=load_a_layout](a_shared, a_tile)\n+ copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)\n\n# Synchronize all async copies\n+ async_copy_wait_all()\nFull solution looks as follows:\n\n\nLayoutTensor Tiled Matmul\n\n\n\np14_matmul_layout_tensor.mojo\n\nalias SIZE_TILED = 9\nalias BLOCKS_PER_GRID_TILED = (3, 3)  # each block covers 3x3 elements\nalias THREADS_PER_BLOCK_TILED = (TPB, TPB)\nalias layout_tiled = Layout.row_major(SIZE_TILED, SIZE_TILED)\n\n\nfn matmul_tiled[\n    layout: Layout, size: Int\n](\n    output: LayoutTensor[mut=True, dtype, layout],\n    a: LayoutTensor[mut=False, dtype, layout],\n    b: LayoutTensor[mut=False, dtype, layout],\n):\n    # LayoutTensor APIs\n    out_tile = output.tile[TPB, TPB](block_idx.y, block_idx.x)\n    a_shared = tb[dtype]().row_major[TPB, TPB]().shared().alloc()\n    b_shared = tb[dtype]().row_major[TPB, TPB]().shared().alloc()\n    local_row = thread_idx.y\n    local_col = thread_idx.x\n\n    var local_sum: output.element_type = 0.0\n\n    alias load_a_layout = Layout.row_major[1, TPB]()\n    alias load_b_layout = Layout.row_major[TPB, 1]()\n    \n    @parameter\n    for idx in range((size + TPB - 1) // TPB):\n        a_tile = a.tile[TPB, TPB](block_idx.y, idx)\n        b_tile = b.tile[TPB, TPB](idx, block_idx.x)\n\n        copy_dram_to_sram_async[thread_layout=load_a_layout](a_shared, a_tile)\n        copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)\n\n        async_copy_wait_all()\n\n        @parameter\n        for k in range(min(TPB, size - idx * TPB)):\n            local_sum += a_shared[local_row, k] * b_shared[k, local_col]\n\n        barrier()\n\n    # Store result after all tiles processed\n    if (\n        block_idx.y * TPB + local_row &lt; size\n        and block_idx.x * TPB + local_col &lt; size\n    ):\n        out_tile[local_row, local_col] = local_sum\n\n\n\n\nSynchronization and Memory Hierarchy\nThe copy_dram_to_sram_async() function [20] enables asynchronous memory transfers from global to shared memory, while async_copy_wait_all() [21] provides a synchronization barrier that ensures all pending transfers complete before computation proceeds.\nThis pattern allows the GPU to:\n\nOverlap memory transfers with other computations using dedicated copy engines\nUtilize specialized hardware for efficient data movement\nMaintain correct execution ordering across thread blocks\nBypass intermediate registers for improved memory hierarchy efficiency\n\nImportant: async_copy_wait_all() only synchronizes the asynchronous copy operations—threads still need explicit barriers (barrier()) to ensure all threads in a block see the shared memory data before computation begins."
   },
   {
-    "objectID": "posts/2020-05-11-longformer.html",
-    "href": "posts/2020-05-11-longformer.html",
-    "title": "LongFormer",
+    "objectID": "posts/2020-03-12-tutorial.html",
+    "href": "posts/2020-03-12-tutorial.html",
+    "title": "Bayesian Golf Putting Model",
     "section": "",
-    "text": "The NLP world had its ImageNet moment with the introduction of the Transformer in the paper Attention is All you Need.\nThe ability to be able to process multiple words/tokens in parallel and train models without labeled data(using self-attention) led to the creation of multiple models which gave us SOTA results on many interesting tasks such as Question Answering, Summarization, etc.\nHowever, the biggest drawback is the Transformer architecture is the limitation it has on the number of tokens it can process at a once, due to exponentially increasing memory and compute requirements(typically about 512 tokens), causing the performance to deteriorate over large documents.\nLongformer by the team at Allen AI aims to address this problem and demonstrate it’s application to do transfer learning for large documents.\nOther approaches to are described in recent work such as Transformer XL, Blockwise, Reformer, etc. Their characteristics are mentioned below:\n\n\n\n\nComparison"
+    "text": "This is inspired from Dr. Andrew Gelman’s case study, which can be found here. Specifically:\n\nThis is heavily inspired by Colin Caroll’s Blog present here. A lot of the plotting code from his blog post has been reused.\nJosh Duncan’s blog post on the same topic which can be found here.\n\nThis is not a novel solution. It is merely a replication of Dr. Gelman’s blog in PyMC3.\n\n\n\nThis is based on a popular blog post by Dr. Andrew Gelman. Here, we are given data from professional golfers on the proportion of success putts from a number of tries. Our aim is to identify:\n\nCan we model the probability of success in golf putting as a function of distance from the hole?\n\n\n\n\n\nimport pandas as pd\nimport numpy as np\nimport pymc3 as pm\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nWARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.\n\n\nThe source repository is present here\n\ndata = np.array([[2,1443,1346],\n[3,694,577],\n[4,455,337],\n[5,353,208],\n[6,272,149],\n[7,256,136],\n[8,240,111],\n[9,217,69],\n[10,200,67],\n[11,237,75],\n[12,202,52],\n[13,192,46],\n[14,174,54],\n[15,167,28],\n[16,201,27],\n[17,195,31],\n[18,191,33],\n[19,147,20],\n[20,152,24]])\n\ndf = pd.DataFrame(data, columns=[\n    'distance', \n    'tries', \n    'success_count'\n])\n\n\ndf\n\n\n\n\n\n\n\n\n\ndistance\ntries\nsuccess_count\n\n\n\n\n0\n2\n1443\n1346\n\n\n1\n3\n694\n577\n\n\n2\n4\n455\n337\n\n\n3\n5\n353\n208\n\n\n4\n6\n272\n149\n\n\n5\n7\n256\n136\n\n\n6\n8\n240\n111\n\n\n7\n9\n217\n69\n\n\n8\n10\n200\n67\n\n\n9\n11\n237\n75\n\n\n10\n12\n202\n52\n\n\n11\n13\n192\n46\n\n\n12\n14\n174\n54\n\n\n13\n15\n167\n28\n\n\n14\n16\n201\n27\n\n\n15\n17\n195\n31\n\n\n16\n18\n191\n33\n\n\n17\n19\n147\n20\n\n\n18\n20\n152\n24\n\n\n\n\n\n\n\n\nThe variables have the following format:\n\n\n\nVariable\nUnits\nDescription\n\n\n\n\ndistance\nfeet\nDistance from the hole for the putt attempt\n\n\ntries\ncount\nNumber of attempts at the chosen distance\n\n\nsuccess_count\ncount\nThe total successful putts\n\n\n\nLets try to visualize the dataset:\n\ndf['success_prob'] = df.success_count / df.tries\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, s=200)\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\nWe can notice that the probability of success decreases as the distance increases."
   },
   {
-    "objectID": "posts/2020-05-11-longformer.html#sliding-window-attention",
-    "href": "posts/2020-05-11-longformer.html#sliding-window-attention",
-    "title": "LongFormer",
-    "section": "Sliding Window Attention",
-    "text": "Sliding Window Attention\n\nTLDR : Similar to kernels for CNN which apply a matrix operation to a set of pixels and move onto the next set, apply attention to tokens in current window only.\nIn this, we change the attention objective to only focus on the tokens that occur in a context window \\(w\\).\nEach token will be able to attend to \\(\\frac{1}{2}w\\) number of tokens to it’s left and right.\nQuestion: But doesn’t this limit the number of tokens being taken into account to only the tokens in the window?\n\nYes, it does. This is why we stack multiple layers of self-attention. As shown in the image below, the green neuron learns from the first 3 tokens(Lionel, Messi, is). However, the brown neuron learns from the green, yellow, and red neuron, who together learn from the first 5 tokens. This way, we can apply attention to long sequences(Lionel, Messi, is, the, true).\n\nAs with the CNN, we will have \\(l\\) layers to this sliding window attention(multi-head attention) implemented to learn low level and high-level features. A balance should be found between the number of layers \\(l\\)(efficiency) and the window size \\(w\\)(model representation capacity).\n\n\n\n\nSliding Window Attention\n\n\n\nPros: Reduces computation from \\(O(n^2)\\) to \\(O(n*w)\\) i.e the computation complexity will only scale linearly now.\nCons: To learn dependencies for a large sequence, we would either have to increase the window size \\(w\\) or increase the number of layers \\(l\\), both of which will cause an increase in the amount of memory and processing power required to train and test the model."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#dilated-sliding-window",
-    "href": "posts/2020-05-11-longformer.html#dilated-sliding-window",
-    "title": "LongFormer",
-    "section": "Dilated Sliding Window",
-    "text": "Dilated Sliding Window\n\nTLDR: Use dilation instead of window attention i.e for some particular window size, take alternate elements while performing self-attention.\nTo solve the problem for long sequences, the authors propose that instead of considering all tokens in window \\(w\\), consider alternate(or any number \\(d\\))tokens instead. The range of tokens will now be \\(l * d * w\\), which will be large for even a small value of \\(d\\).\nPros: This small change will allow us to cover a wider range of tokens without significant changes to the architecture.\nCons: Skipping tokens might lead to loss of information in the lower layers which will get propagated to the higher layers. This will lead to unstable training and poor model performance."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#global-attention",
-    "href": "posts/2020-05-11-longformer.html#global-attention",
-    "title": "LongFormer",
-    "section": "Global Attention",
-    "text": "Global Attention\n\nTLDR: Use full attention for certain tokens depending on the task. This is an engineering choice.\nIn BERT style models, optimal representation for input sequence varies by task.\n\nFor MLM, local context is used to predict the masked word\nFor classification, [CLS] token is used.\nFor QnA, the question is concatenated with the document to help model learn through self-attention.\n\nThe windowed and dilated attention is not flexible enough to learn task-specific representations.\nHence, for some tokens enable global tokens i.e at these tokens, all tokens in the sequence can attend to it. For classification, enable global attention on the [CLS] token.\nPros:\n\nAdding global attention improves performance for specific tasks. Since these tokens are limited in number, the complexity still stays at \\(O(n)\\).\nIt also increases the representational power of the model.\n\n\n\nLinear Projections\n\nTLDR: Use two sets of Q,K and V matrices, one for sliding window attention, one for global attention.\nAttention is defined as:\n\\[\n\\begin{aligned}\nAttention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\n\\end{aligned}\n\\]\nWe will use two different sets of Q,K and V matrices for sliding window and global attention.\n\\(Q_g\\), \\(K_g\\), \\(V_g\\) are initialized with \\(Q_s\\), \\(K_s\\), \\(V_s\\)\n\n\n\n\nBanded Matrix\n\n\n\nBanded Matrix(Source)\n\n\n\n\nCompressed Banded Matrix\n\n\n\nCompressed Banded Matrix(Source)\n\n\n\nCUDA Kernels\n\nOne of the important and interesting contributions of this paper is the implementation of matrix multiplication via CUDA kernels.\nIn the dilated sliding window, the matrix formed is called a band matrix i.e there are diagonal bands of indices that have values and the other values are 0.\nImplementing matrix operations for band matrices using native for loops and via frameworks is not easy and optimized.\nThe authors have provided custom CUDA kernels implemented using TVM for this banded matrix operations.\nAs demonstrated in the image below, the custom CUDA kernels have a significant impact on the time and memory consumption of the model. The kernels and implementation for the longformer are available here. \n\nLongFormer Performance"
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#attention-pattern",
-    "href": "posts/2020-05-11-longformer.html#attention-pattern",
-    "title": "LongFormer",
-    "section": "Attention Pattern",
-    "text": "Attention Pattern\n\nIn multi-head attention, each head computes a different score.\nTo get a good representation of all tokens, the authors propose that normal sliding window attention can be used for the lower layers, and dilated sliding window attention can be used the higher layers(top 1-2 layers).\nThe reasoning for this approach is that in the lower layers, the local context is more important, and in the upper layers, the global context is more important. Hence, it is acceptable to skip over a few tokens in the upper layers."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#task-and-datasets",
-    "href": "posts/2020-05-11-longformer.html#task-and-datasets",
-    "title": "LongFormer",
-    "section": "Task and Datasets",
-    "text": "Task and Datasets\n\nThe authors focus on character level modeling because the sequences are naturally longer than those of word-level language modeling.\nDatasets that were used are text8 and enwik8."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#training-and-evaluation",
-    "href": "posts/2020-05-11-longformer.html#training-and-evaluation",
-    "title": "LongFormer",
-    "section": "Training and Evaluation",
-    "text": "Training and Evaluation\n\nThe model was trained in multiple phases.\n\nThe window and sequence length was increased in each phase. This is to allow local context from tokens to be learned efficiently.\nOverall five training phases used, starting from the token length of 2048 to 23040 (45x more than vanilla BERT).\nTwo models were created for evaluation:\n\nSmall model: 12 layers, 512 hidden size\nLarge model: 30 layers, 512 hidden sizes (2.5x larger)\n\nDuring the model evaluation, the model can run on a sequence length of 32256(63x more than vanilla BERT)."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#results",
-    "href": "posts/2020-05-11-longformer.html#results",
-    "title": "LongFormer",
-    "section": "Results",
-    "text": "Results\n\n\n\nResults\n\n\n\nLongformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.\nThe large model was only tested on enwik8 due to the computational cost of training.\nIt’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#copy-initialization-trick",
-    "href": "posts/2020-05-11-longformer.html#copy-initialization-trick",
-    "title": "LongFormer",
-    "section": "Copy initialization trick",
-    "text": "Copy initialization trick\n\nSince the MLM objective pretraining objective is expensive, the authors continue to train from the checkpoints of the RoBERTA model.\nThe attention mechanism is replaced with the new attention module.\nFor the position embeddings:\n\nRoBERTA has position embeddings for 512 tokens.\nLongFormer can support position embeddings for 4096 tokens(larger for larger GPU)\nTo use the weight checkpoints from RoBERTA, instead of random initialization, copy the 512 position embeddings multiple times as analysis of the BERT attention heads showed a strong learned bias to attend to the local context."
-  },
-  {
-    "objectID": "posts/2020-05-11-longformer.html#pretraining",
-    "href": "posts/2020-05-11-longformer.html#pretraining",
-    "title": "LongFormer",
-    "section": "Pretraining",
-    "text": "Pretraining\n\nApart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, \\(\\frac{1}{3}^{rd}\\) Realnews dataset was added with tokens larger than 1200.\nBoth models(small and large) trained with varying gradient updates.\n\n\n\n\nCopy init\n\n\n\nMLM BPC for RoBERTA with various model config"
-  },
-  {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
+    "objectID": "posts/2020-03-12-tutorial.html#disclaimer",
+    "href": "posts/2020-03-12-tutorial.html#disclaimer",
+    "title": "Bayesian Golf Putting Model",
     "section": "",
-    "text": "Back on the blog after a long hiatus - this time, I’m shifting gears from just reviewing papers(which are available on my GitHub) to diving deep into hands-on implementations.\nI’ve always been interested in systems programming, but somehow never really picked it up. The rate of progress in the GenAI space has been exponential recently, with players like Google [1] reportedly processing 9.7 trillion tokens a month. Companies are now investing more time and resources in making these Large Language Models as fast and cheap as possible, by improving training and inference efficiency using “moar” compute.\nI briefly spoke about GPU computing last year, and finally decided to learn it this summer. The goal is to eventually be able to implement kernels for fast matmuls, softmax, and FlashAttention."
+    "text": "This is inspired from Dr. Andrew Gelman’s case study, which can be found here. Specifically:\n\nThis is heavily inspired by Colin Caroll’s Blog present here. A lot of the plotting code from his blog post has been reused.\nJosh Duncan’s blog post on the same topic which can be found here.\n\nThis is not a novel solution. It is merely a replication of Dr. Gelman’s blog in PyMC3."
   },
   {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#why-mojo",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "Why Mojo?",
-    "text": "Why Mojo?\nI’ve tried learning Rust multiple times, along with a few stints of trying C, C++ and Zig, but I never really felt as comfortable in these languages as I do in Python and Elixir.\nIn early 2023, Modular announced Mojo🔥, a new systems-programming language promising:\n\nPython-like syntax\nSupport for both CPU and GPU architectures\nKernel autofusion\nBuilds on MLIR\nTraits and bounds checking\nInteropeability with PTX, Python, C\n\nModular has since announced Max, their AI inference platform, built on Mojo. The released all kernels available as part of the platform, along with their own version[2] of Sasha Rush’s GPU Puzzles [3] in Mojo. IMO, their kernels were much easier to read compared to CUDA/Triton implementations. I also enjoyed the “Democratising AI Compute”[4] series by Chris Lattner, and thus I decided to learn a bit more about how to write these kernels in Mojo."
-  },
-  {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#gpu-memory",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "GPU 101",
-    "text": "GPU 101\nGPUs (Graphics Processing Units) are massively parallel processors optimized for throughput over latency. In GPU programming we:\n\nLay out data and computation as a grid of thread blocks.\nLaunch a kernel from the CPU (host) to run on the GPU (device).\nExploit thousands of lightweight threads all executing the same code (Single Instruction, Multiple Threads or SIMT).\n\nModern chips had two ways to spend their billions of transistors:\n\nCPUs invest them in large caches, branch predictors and out-of-order logic to minimize latency for one or a few threads.\nGPUs invest them in thousands of simple cores and huge register files to maximize throughput for many threads, assuming those threads can tolerate latency by waiting in parallel.\n\nThe rest of this section unpacks how that single design choice shows up in memory, execution and program flow.\n\n1. Memory hierarchy – hide latency with tons of threads\nCPUs invest transistors in large caches to minimize latency. GPUs take the opposite approach: they use thousands of threads to hide latency instead of avoiding it.\nGPU memory hierarchy (slowest/largest to fastest/smallest):\n\nGlobal (HBM): High Bandwidth Memory—the GPU’s main memory, large but high-latency, visible to all threads\n\nShared (SRAM): fast on-chip memory, ~100x faster than HBM\n\nRegisters: per-thread storage, fastest access, ~1000x faster than HBM\n\n\n\n\nSource: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU.\n\n\nThe key insight: when threads wait for slow global memory (~400-800 cycles), the GPU immediately switches to other threads. This keeps compute units busy while data moves through the hierarchy.\n\n\n2. Execution hierarchy – launch enough warps to hide stalls\n\n\n\nGPU Execution Hierachy\n\n\nBuilding from the bottom up:\n\nThread: the basic execution unit with its own registers\nWarp: 32 threads executing the same instruction together (the basic unit of GPU scheduling)\n\nBlock: a group of threads that share shared memory and can synchronize\n\nGrid: a collection of blocks distributed across SMs\n\nGPUs schedule threads in groups of 32 (warps). When one warp stalls on memory, the scheduler switches to another warp instantly. More resident warps = better latency hiding.\n\n\n3. Program flow – CPU launches, GPU streams\n\nThe CPU launches kernels asynchronously and goes back to other work. Inside the GPU each warp executes the same instruction (SIMT). Divergent branches disable some lanes and waste those cores.\n\nHost allocates and copies data to GPU global memory\n\nHost launches the kernel with a specified grid and block size\n\nDevice executes the kernel in parallel across threads\n\nHost retrieves results from GPU memory\n\n\n\nPutting it together\nFast GPU kernels keep cores busy by:\n\nStaging hot data in shared or registers\nLaunching enough threads to mask global-memory latency\nWriting branch-free, data-parallel code\n\nWe will cover the practical implications of the above topics as we go through the puzzles."
-  },
-  {
-    "objectID": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
-    "href": "posts/2025-07-06-gpu-puzzles-p1.html#infrastructure",
-    "title": "GPUs go brrr with Mojo - Fundamentals",
-    "section": "Infrastructure",
-    "text": "Infrastructure\nIf you plan on solving these puzzles, remember to pick a compatible GPU and follow the setup instructions\nI completed the puzzles on a instance with a RTX4090 Ti chip, rented via Prime Intellect at 0.22 $/hr!\nNote: The Modular team has created beautiful Manim visualizations for each puzzle, making the concepts much more intuitive. I’ll walk through these visualizations as we tackle each problem."
-  },
-  {
-    "objectID": "posts/2020-04-23-tag-lm.html",
-    "href": "posts/2020-04-23-tag-lm.html",
-    "title": "TagLM",
+    "objectID": "posts/2020-03-12-tutorial.html#problem",
+    "href": "posts/2020-03-12-tutorial.html#problem",
+    "title": "Bayesian Golf Putting Model",
     "section": "",
-    "text": "This is the TagLM paper mentioned in Lecture 13 in the CS224N course title Semi-supervised sequence tagging with bidirectional language models\nThis paper demonstrates how we can use context embeddings from BiLSTM models and use it for sequence labelling tasks"
+    "text": "This is based on a popular blog post by Dr. Andrew Gelman. Here, we are given data from professional golfers on the proportion of success putts from a number of tries. Our aim is to identify:\n\nCan we model the probability of success in golf putting as a function of distance from the hole?"
   },
   {
-    "objectID": "posts/2020-04-23-tag-lm.html#overview",
-    "href": "posts/2020-04-23-tag-lm.html#overview",
-    "title": "TagLM",
-    "section": "Overview",
-    "text": "Overview\n\nExtract word and LM embeddings for every token\nPrepare embedding by concatinating both embeddings\nse them in supervised sequence tagging model"
-  },
-  {
-    "objectID": "posts/2020-04-23-tag-lm.html#baseline",
-    "href": "posts/2020-04-23-tag-lm.html#baseline",
-    "title": "TagLM",
-    "section": "Baseline",
-    "text": "Baseline\n\nBaseline model is hierachical neural tagging model\nObtain word and character embeddings. Concatenate them to form final embedding.\n\\[ x_k = [c_k;w_k] \\]\nChar embedding: Can be obtained via CNN or RNN\nWord embedding: Use pretrained embeddings\nUse multiple bidirectional RNN to learn context embedding\nFor every token, concatenate forward and backward hidden states at each layer\n2nd layer will use the above output and predict next hidden state\nUse GRU or LSTM depending on task\nUse output of final layer to predict score for each possible tag using dense layer\nBetter to predict tags for full sequence than for a single token\nTHEREFORE, add another layer with parameters for each label bigram.\nCompute sentence conditional random field loss(CRF) using forward-backward algorithm.\nUse Viterbi algorithm to find most likely sequence\n\n\n\nOverview of architecture\n\n\nLM embedding will be created by concatenating forward and backward embeddings. No parameter sharing between these two embeddings."
-  },
-  {
-    "objectID": "posts/2020-04-23-tag-lm.html#analysis",
-    "href": "posts/2020-04-23-tag-lm.html#analysis",
-    "title": "TagLM",
-    "section": "Analysis",
-    "text": "Analysis\n\nSecond RNN captures interactions between task specific context\nBackward LM addition has significant performance gains\nModel size makes a difference. Using bigger CNN model lead to  0.3 percent improvement\nAlso tried training the model JUST ON THE CoNLL data. Reduced model size\nIncluding embeddings from this model decreased performance compared to baseline system.\nReplacing task specific RNN with using LM embeddings with a dense layer and CRF reduced performance\nImprovement shown by transferring knowledge from other tasks almost disappers when the initial model is trained on a large dataset."
-  },
-  {
-    "objectID": "posts/2020-01-14-first-post.html",
-    "href": "posts/2020-01-14-first-post.html",
-    "title": "Yo!",
+    "objectID": "posts/2020-03-12-tutorial.html#eda",
+    "href": "posts/2020-03-12-tutorial.html#eda",
+    "title": "Bayesian Golf Putting Model",
     "section": "",
-    "text": "Yo!\nSuper excited to finally get my own blog. Hope to write out those long pending articles ASAP now. Stay tuned!"
+    "text": "import pandas as pd\nimport numpy as np\nimport pymc3 as pm\nimport matplotlib.pyplot as plt\nimport seaborn as sns\n\nWARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.\n\n\nThe source repository is present here\n\ndata = np.array([[2,1443,1346],\n[3,694,577],\n[4,455,337],\n[5,353,208],\n[6,272,149],\n[7,256,136],\n[8,240,111],\n[9,217,69],\n[10,200,67],\n[11,237,75],\n[12,202,52],\n[13,192,46],\n[14,174,54],\n[15,167,28],\n[16,201,27],\n[17,195,31],\n[18,191,33],\n[19,147,20],\n[20,152,24]])\n\ndf = pd.DataFrame(data, columns=[\n    'distance', \n    'tries', \n    'success_count'\n])\n\n\ndf\n\n\n\n\n\n\n\n\n\ndistance\ntries\nsuccess_count\n\n\n\n\n0\n2\n1443\n1346\n\n\n1\n3\n694\n577\n\n\n2\n4\n455\n337\n\n\n3\n5\n353\n208\n\n\n4\n6\n272\n149\n\n\n5\n7\n256\n136\n\n\n6\n8\n240\n111\n\n\n7\n9\n217\n69\n\n\n8\n10\n200\n67\n\n\n9\n11\n237\n75\n\n\n10\n12\n202\n52\n\n\n11\n13\n192\n46\n\n\n12\n14\n174\n54\n\n\n13\n15\n167\n28\n\n\n14\n16\n201\n27\n\n\n15\n17\n195\n31\n\n\n16\n18\n191\n33\n\n\n17\n19\n147\n20\n\n\n18\n20\n152\n24\n\n\n\n\n\n\n\n\nThe variables have the following format:\n\n\n\nVariable\nUnits\nDescription\n\n\n\n\ndistance\nfeet\nDistance from the hole for the putt attempt\n\n\ntries\ncount\nNumber of attempts at the chosen distance\n\n\nsuccess_count\ncount\nThe total successful putts\n\n\n\nLets try to visualize the dataset:\n\ndf['success_prob'] = df.success_count / df.tries\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, s=200)\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\nWe can notice that the probability of success decreases as the distance increases."
   },
   {
-    "objectID": "posts/2020-08-31-bison.html",
-    "href": "posts/2020-08-31-bison.html",
-    "title": "BERT + BM25 = BISON",
+    "objectID": "posts/2020-03-12-tutorial.html#geometry-based-model",
+    "href": "posts/2020-03-12-tutorial.html#geometry-based-model",
+    "title": "Bayesian Golf Putting Model",
+    "section": "Geometry based Model",
+    "text": "Geometry based Model\n\nWe’ll try to accomodate the physics associated with the problem. Specically, we assume:\n\nAssumptions\n\nThe golfers can hit the ball in any direction with some small error. This error could be because of inaccuracy, errors in the human, etc.\nThis error refers to the angle of the shot.\nWe assume the angle is normally distributed.\n\n\nImplications\n\nThe ball goes in whenever the angle is small enough for it to hit the cup of the hole!\nLonger putt \\(\\implies\\) Larger error \\(\\implies\\) Lower success rate than shorter putt\n\nFrom Dr. Gelman’s blog, we obtain the formula as:\n\n\\(Pr(|angle| &lt; sin^{-1}(\\frac{(R-r)}{x})) = 2\\phi\\big(\\frac{sin^{-1}\\frac{R-r}{x}}{\\sigma}\\big) - 1\\)\n\n\\(\\phi \\implies\\) Cumulative Normal Distribution Function.\nHence, our model will now have two big parts:\n\\[y_j \\sim binomial(n_j, p_j)\\]\n\\[p_j = 2\\phi\\big(\\frac{sin^{-1}\\frac{R-r}{x}}{\\sigma}\\big) - 1\\]\nTypically, the diameter of a golf ball is 1.68 inches and the cup is 4.25 inches i.e\n\\[r = 1.68 \\text{inch}\\] \\[R = 4.25 \\text{inch}\\]\n\nball_radius = (1.68/2)/12\ncup_radius = (4.25/2)/12\n\n\ndef calculate_prob(angle, distance):\n    \"\"\"\n    Calculate probability that the ball with fall in the hole given the angle of the shot \n    and the distance from the hole.\n    \"\"\"\n    rad = angle * np.pi / 180.0\n    arcsin = np.arcsin((cup_radius - ball_radius)/ distance)\n    return 2 * scipy.stats.norm(0, rad).cdf(arcsin) - 1\n\n\nplt.figure(figsize=(16, 6))\nls = np.linspace(0, df.distance.max(), 200)\nax = sns.scatterplot(\n    x='distance', \n    y='success_prob', \n    data=df, \n    s=100,\n    legend='full'\n)\nfor angle in [0.5, 1, 2, 5, 20]:\n    ax.plot(\n        ls, \n        calculate_prob(angle, ls), \n        label=f\"Angle={angle}\"\n    )\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\nax.legend()\n\n\n\n\n\n\n\n\nLet us now add this to our model!\n\nimport theano.tensor as tt\n\n\ndef calculate_phi(num):\n    \"cdf for standard normal\"\n    q = tt.erf(num / tt.sqrt(2.0)) # ERF is the Gaussian Error \n    return (1.0 + q) / 2.\n\n\nwith pm.Model() as model:\n    angle_of_shot_radians = pm.HalfNormal('angle_of_shot_radians')\n    angle_of_shot_degrees = pm.Deterministic(\n        'angle_of_shot_degrees',\n        (angle_of_shot_radians * 180.0) / np.pi\n    )\n    p_ball_goes_in = pm.Deterministic(\n        'p_ball_goes_in',\n        2 * calculate_phi(\n                tt.arcsin(\n                    (cup_radius - ball_radius)/ df.distance\n                ) / angle_of_shot_radians\n            )\n        ) - 1\n    p_success = pm.Binomial(\n        'p_success',\n        n=df.tries, \n        p=p_ball_goes_in, \n        observed=df.success_count\n    )\n\n\npm.model_to_graphviz(model)\n\n\n\n\n\n\n\n\n\nwith model:\n    trace = pm.sample(4000, tune=1000, chains=4)\n\nAuto-assigning NUTS sampler...\nInitializing NUTS using jitter+adapt_diag...\nERROR (theano.gof.opt): Optimization failure due to: local_grad_log_erfc_neg\nERROR (theano.gof.opt): node: Elemwise{true_div}(Elemwise{mul,no_inplace}.0, Elemwise{erfc,no_inplace}.0)\nERROR (theano.gof.opt): TRACEBACK:\nERROR (theano.gof.opt): Traceback (most recent call last):\n  File \"/home/goodhamgupta/shubham/blog/_notebooks/.env/lib/python3.6/site-packages/theano/gof/opt.py\", line 2034, in process_node\n    replacements = lopt.transform(node)\n  File \"/home/goodhamgupta/shubham/blog/_notebooks/.env/lib/python3.6/site-packages/theano/tensor/opt.py\", line 6789, in local_grad_log_erfc_neg\n    if not exp.owner.inputs[0].owner:\nAttributeError: 'NoneType' object has no attribute 'owner'\n\nMultiprocess sampling (4 chains in 2 jobs)\nNUTS: [angle_of_shot_radians]\nSampling 4 chains, 0 divergences: 100%|██████████| 20000/20000 [00:10&lt;00:00, 1943.54draws/s]\nThe acceptance probability does not match the target. It is 0.8844154441842546, but should be close to 0.8. Try to increase the number of tuning steps.\n\n\n\npm.summary(trace).head(2)\n\n\n\n\n\n\n\n\n\nmean\nsd\nhpd_3%\nhpd_97%\nmcse_mean\nmcse_sd\ness_mean\ness_sd\ness_bulk\ness_tail\nr_hat\n\n\n\n\nangle_of_shot_radians\n0.027\n0.000\n0.026\n0.027\n0.0\n0.0\n6641.0\n6641.0\n6641.0\n10874.0\n1.0\n\n\nangle_of_shot_degrees\n1.527\n0.023\n1.484\n1.570\n0.0\n0.0\n6641.0\n6641.0\n6641.0\n10874.0\n1.0\n\n\n\n\n\n\n\n\n\npm.plot_posterior(trace['angle_of_shot_degrees'])\n\narray([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfe4c24f60&gt;],\n      dtype=object)\n\n\n\n\n\n\n\n\n\nFrom the above results, we can see:\n\nPyMC3 has estimated\n\n\\(angle_of_shot_degrees\\) to be \\(1.53 \\pm 0.023\\)\n\nThe MCSE is almost 0 \\(\\implies\\) The simulation has run long enough for the chains to converge.\n\\(r\\_hat = 1.0\\) tells us that the chains have mixed well i.e hairy hedgehog pattern.\n\nLet’s visualize the fit with this new model:\n\ngeo_model_prob = calculate_prob(\n    trace['angle_of_shot_degrees'].mean(), \n    df.distance\n)\n\n\nsns.set()\nplt.figure(figsize=(16, 6))\n\nax = sns.scatterplot(x='distance', y=df.success_prob, data=df, s=200, label='Actual')\n\nsns.scatterplot(x='distance', y=df.posterior_success_prob, data=df, label='Logistic Regression',ax=ax, color='red', s=100)\nsns.scatterplot(x='distance', y=geo_model_prob, data=df, label='Geometry based ',ax=ax, color='orange', s=100)\n\nsns.lineplot(x='distance', y=df.posterior_success_prob, data=df,ax=ax, color='red')\nsns.lineplot(x='distance', y=geo_model_prob, data=df,ax=ax, color='orange')\n\nax.set(xlabel='Distance from hole(ft)', ylabel='Probability of Success')\n\n[Text(0, 0.5, 'Probability of Success'),\n Text(0.5, 0, 'Distance from hole(ft)')]\n\n\n\n\n\n\n\n\n\n\nWe can see that the geometry based model fits better than the logistic regression model.\nWhile this model is not completely accurate, it suggests that angle is a good variable to model the problem. Using this model, we can be more confident about extrapolating the data.\nFor the same 50ft putt, the probability now is:\n\n\nimport scipy\nlr_result = np.round(\n    100 * scipy.special.expit(2.223 + -0.255 * 50).mean(),\n    5\n)\ngeo_result = np.round(\n    100 * calculate_prob(\n        trace['angle_of_shot_degrees'].mean(), \n        50\n    ).mean(),\n    5\n)\n\nprint(\n    f\"Logistic Regression Model: {lr_result}% \\n\"\\\n    f\"Geometry Based Model: {geo_result}%\"\n)\n\nLogistic Regression Model: 0.00268% \nGeometry Based Model: 6.40322%"
+  },
+  {
+    "objectID": "posts/2020-03-12-tutorial.html#new-data",
+    "href": "posts/2020-03-12-tutorial.html#new-data",
+    "title": "Bayesian Golf Putting Model",
+    "section": "New Data!",
+    "text": "New Data!\nMark Broadie obtained new data about the golfers. Let’s see how our model performs on this new dataset.\nFirst, we’ll look at the summary of the dataset.\n\n#  golf putting data from Broadie (2018)\nnew_golf_data = np.array([\n[0.28, 45198, 45183],\n[0.97, 183020, 182899],\n[1.93, 169503, 168594],\n[2.92, 113094, 108953],\n[3.93, 73855, 64740],\n[4.94, 53659, 41106],\n[5.94, 42991, 28205],\n[6.95, 37050, 21334],\n[7.95, 33275, 16615],\n[8.95, 30836, 13503],\n[9.95, 28637, 11060],\n[10.95, 26239, 9032],\n[11.95, 24636, 7687],\n[12.95, 22876, 6432],\n[14.43, 41267, 9813],\n[16.43, 35712, 7196],\n[18.44, 31573, 5290],\n[20.44, 28280, 4086],\n[21.95, 13238, 1642],\n[24.39, 46570, 4767],\n[28.40, 38422, 2980],\n[32.39, 31641, 1996],\n[36.39, 25604, 1327],\n[40.37, 20366, 834],\n[44.38, 15977, 559],\n[48.37, 11770, 311],\n[52.36, 8708, 231],\n[57.25, 8878, 204],\n[63.23, 5492, 103],\n[69.18, 3087, 35],\n[75.19, 1742, 24],\n])\n\nnew_df = pd.DataFrame(\n    new_golf_data, \n    columns=['distance', 'tries', 'success_count']\n)\n\n\nnew_geo_model_prob = calculate_prob(\n    trace['angle_of_shot_degrees'].mean(), \n    new_df.distance\n)\n\n\nnew_df['success_prob'] = new_df.success_count / new_df.tries\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(x='distance', y='success_prob', data=df, label='Old Dataset', s=200)\nsns.scatterplot(x='distance', y='success_prob', data=new_df,label='New Dataset', s=200, ax=ax)\nsns.scatterplot(x='distance', y=new_geo_model_prob, data=new_df, label='Geometry based Model ',ax=ax, color='red', s=100)\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\nplt.setp(ax.get_legend().get_texts(), fontsize='25')\n\n\n\n\n\n\n\n\nWe can see:\n\nSuccess rate is similar in the 0-20 feet range for both datasets.\nBeyond 20 ft, success rate is lower than expected. These attempts are more difficult, even after we have accounted for increased angular precision."
+  },
+  {
+    "objectID": "posts/2020-03-12-tutorial.html#moar-features",
+    "href": "posts/2020-03-12-tutorial.html#moar-features",
+    "title": "Bayesian Golf Putting Model",
+    "section": "Moar features!",
+    "text": "Moar features!\nTo get the ball in, along with the angle, we should also need to take into account if the ball was hit hard enough.\nFrom Colin Caroll’s Blog, we have the following: &gt; Mark Broadie made the following assumptions - If a putt goes short or more than 3 feet past the hole, it will not go in. - Golfers aim for 1 foot past the hole - The distance the ball goes, \\(u\\), is distributed as: \\[ u \\sim \\mathcal{N}\\left(1 + \\text{distance}, \\sigma_{\\text{distance}} (1 + \\text{distance})\\right), \\] where we will learn \\(\\sigma_{\\text{distance}}\\).\nAfter working through the geometry and algebra, we get:\n\\[P(\\text{Good shot}) = \\bigg(2\\phi\\big(\\frac{sin^{-1}(\\frac{R-r}{x})}{\\sigma_{angle}}\\big)-1\\bigg)\\bigg(\\phi\\bigg(\\frac{2}{(x+1)\\sigma_{distance}}\\bigg) - \\phi\\bigg(\\frac{-1}{(x+1)\\sigma_{distance}}\\bigg)\\bigg)\\]\nLet’s write this down in PyMC3\n\nOVERSHOT = 1.0\nDISTANCE_TOLERANCE = 3.0\ndistances = new_df.distance.values\nwith pm.Model() as model:\n    angle_of_shot_radians = pm.HalfNormal('angle_of_shot_radians')\n    angle_of_shot_degrees = pm.Deterministic(\n        'angle_of_shot_degrees',\n        (angle_of_shot_radians * 180.0) / np.pi\n    )\n    \n    variance_of_distance = pm.HalfNormal('variance_of_distance')\n    p_good_angle = pm.Deterministic(\n        'p_good_angle',\n        2 * calculate_phi(\n                tt.arcsin(\n                    (cup_radius - ball_radius)/ distances\n                ) / angle_of_shot_radians\n            )\n        ) - 1\n    p_good_distance = pm.Deterministic(\n        'p_good_distance',\n        calculate_phi(\n            (DISTANCE_TOLERANCE - OVERSHOT) / ((distances + OVERSHOT) * variance_of_distance)) \n        - calculate_phi(\n            -OVERSHOT / ((distances + OVERSHOT) * variance_of_distance))\n\n    )\n    p_success = pm.Binomial(\n        'p_success',\n        n=new_df.tries, \n        p=p_good_angle * p_good_distance, \n        observed=new_df.success_count\n    )\n    \n\n\npm.model_to_graphviz(model)\n\n\n\n\n\n\n\n\n\nwith model:\n    trace = pm.sample(1000, tune=1000, chains=4)\n\nAuto-assigning NUTS sampler...\nInitializing NUTS using jitter+adapt_diag...\nMultiprocess sampling (4 chains in 2 jobs)\nNUTS: [variance_of_distance, angle_of_shot_radians]\nSampling 4 chains, 0 divergences: 100%|██████████| 8000/8000 [00:08&lt;00:00, 969.28draws/s] \nThe number of effective samples is smaller than 25% for some parameters.\n\n\n\npm.summary(trace).head(3)\n\n\n\n\n\n\n\n\n\nmean\nsd\nhpd_3%\nhpd_97%\nmcse_mean\nmcse_sd\ness_mean\ness_sd\ness_bulk\ness_tail\nr_hat\n\n\n\n\nangle_of_shot_radians\n0.013\n0.000\n0.013\n0.013\n0.0\n0.0\n865.0\n865.0\n862.0\n1109.0\n1.0\n\n\nangle_of_shot_degrees\n0.761\n0.003\n0.755\n0.768\n0.0\n0.0\n865.0\n865.0\n862.0\n1109.0\n1.0\n\n\nvariance_of_distance\n0.137\n0.001\n0.136\n0.138\n0.0\n0.0\n855.0\n855.0\n855.0\n1186.0\n1.0\n\n\n\n\n\n\n\n\n\npm.plot_posterior(trace['variance_of_distance'])\n\narray([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdff74693c8&gt;],\n      dtype=object)\n\n\n\n\n\n\n\n\n\n\nwith model:\n    distance_posterior = pm.sample_posterior_predictive(trace)\n\n100%|██████████| 4000/4000 [00:04&lt;00:00, 846.25it/s]\n\n\n\ndef calculate_prob_distance(angle, distance, ls):\n    \"\"\"\n    Calculate the probability the ball will land inside the hole\n    given the variance in angle and distance.\n    \n    NOTE: Adapted from Colin Carroll's Blog.\n    \"\"\"\n    norm = scipy.stats.norm(0, 1)\n    prob_angle = 2 * norm.cdf(\n        np.arcsin((cup_radius - ball_radius) / ls) / angle) - 1\n    prob_distance_one = norm.cdf(\n        (DISTANCE_TOLERANCE - OVERSHOT) / ((ls + OVERSHOT) * distance)\n    )\n    prob_distance_two = norm.cdf(-OVERSHOT / ((ls + OVERSHOT) * distance))\n    prob_distance = prob_distance_one - prob_distance_two\n    \n    return prob_angle * prob_distance\n\n\nls = np.linspace(0, new_df.distance.max(), 200)\n\n\nnew_df['success_prob'] = new_df.success_count / new_df.tries\nsns.set()\nplt.figure(figsize=(16, 6))\nax = sns.scatterplot(\n    x='distance', \n    y='success_prob',\n    data=new_df,\n    label='Actual', \n    s=200\n)\nsns.scatterplot(\n    x='distance', \n    y=new_geo_model_prob, \n    data=new_df, \n    label='Angle only Model',\n    ax=ax, \n    color='red', \n    s=100\n)\n\nsns.scatterplot(\n    x='distance', \n    y=calculate_prob_distance(\n        trace['angle_of_shot_radians'].mean(), \n        trace['variance_of_distance'].mean(),\n        new_df.distance\n    ), \n    data=new_df, \n    label='Distance + Angle based Model ',\n    ax=ax, \n    color='black', \n    s=100\n)\nax.set(\n    xlabel='Distance from hole(ft)', \n    ylabel='Probability of Success'\n)\n\nplt.setp(ax.get_legend().get_texts(), fontsize='25')\n\n\n\n\n\n\n\n\nFrom the graph, we can conclude that:\n\nThe model is good at distance lower than 10 ft and distances higher than 40ft.\nThere is some mismatch between 10ft to 40ft, but overall this is a good fit."
+  },
+  {
+    "objectID": "posts/2020-03-12-tutorial.html#whats-the-point",
+    "href": "posts/2020-03-12-tutorial.html#whats-the-point",
+    "title": "Bayesian Golf Putting Model",
+    "section": "What’s the point?",
+    "text": "What’s the point?\nUsing Bayesian analysis, we want to be able to quantify the unvertainity with each of our predictions. Since each prediction is a distribution, we can utilize this to see where the putts will fall if they do not fall in the hole.\n\ndef simulate_from_distance(trace, distance_to_hole, trials=10_000):\n    n_samples = trace['angle_of_shot_radians'].shape[0]\n\n    idxs = np.random.randint(0, n_samples, trials)\n    variance_of_shot = trace['angle_of_shot_radians'][idxs]\n    variance_of_distance = trace['variance_of_distance'][idxs]\n\n    theta = np.random.normal(0, variance_of_shot)\n    distance = np.random.normal(distance_to_hole + OVERSHOT, (distance_to_hole + OVERSHOT) * variance_of_distance)\n\n    final_position = np.array([distance * np.cos(theta), distance * np.sin(theta)])\n\n    made_it = np.abs(theta) &lt; np.arcsin((cup_radius - ball_radius) / distance_to_hole)\n    made_it = made_it * (final_position[0] &gt; distance_to_hole) * (final_position[0] &lt; distance_to_hole + DISTANCE_TOLERANCE)\n    \n    _, ax = plt.subplots()\n\n    ax.plot(0, 0, 'k.', lw=1, mfc='black', ms=150 / distance_to_hole)\n    ax.plot(*final_position[:, ~made_it], '.', alpha=0.1, mfc='r', ms=250 / distance_to_hole, mew=0.5)\n    ax.plot(distance_to_hole, 0, 'ko', lw=1, mfc='black', ms=350 / distance_to_hole)\n\n    ax.set_facecolor(\"#e6ffdb\")\n    ax.set_title(f\"Final position of {trials:,d} putts from {distance_to_hole}ft.\\n({100 * made_it.mean():.1f}% made)\")\n    return ax\n\nsimulate_from_distance(trace, distance_to_hole=10);"
+  },
+  {
+    "objectID": "posts/2020-04-21-knowledge-lm.html",
+    "href": "posts/2020-04-21-knowledge-lm.html",
+    "title": "How much do you know?",
     "section": "",
-    "text": "This paper aims to create a framework to map query and doc into semantic vectors via self-attention models.\nWe cant use prior knowledge about important tokens for models based on self-attention.\n\nWords are split into different tokens using a tokenization mechanism such as WordPiece. We cannot translate word-level knowledge into different tokens.\n\nHowever, from classical information retrieval, we know that prior knowledge about the word is important. For example, ERNIE used a Knowledge Graph to achieve SOTA on several GLUE tasks.\nFurthermore, documents have different fields with varying degrees of importance such as text, header, filetypes, etc. We cannot combine these fields directly because their importance varies for a task.\nKey takeaways:\n\nCombine BM25 to learn attention scores with Query(Q) and Key(K) matrices, which are used in self-attention.\nWord weight sharing to reduce knowledge discrepancy between tokens and words.\nCombine multiple fields by placing different fields in different segments using a BM25F, a variation of BM25."
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#overview-of-bison",
-    "href": "posts/2020-08-31-bison.html#overview-of-bison",
-    "title": "BERT + BM25 = BISON",
-    "section": "Overview of BISON",
-    "text": "Overview of BISON\n\n\n\nBISON Architecture\n\n\n\nThe framework has 4 important parts:\n\nWord level BM25: In this, we prepend the CLS token to the query and use combined fields representation for the documents.\nToken level representation: As is the norm, we will use the token, position and segment embedding\nBISON Encoder: This will encode the query q and the document d into semantic spacy by siamese structure making it possible to serve the model online. The architecture consists of 3 stacked BISON layers.\nScoring: The documents are scored using the cosine similarity metric."
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#bison-encoder-weighted-self-attention",
-    "href": "posts/2020-08-31-bison.html#bison-encoder-weighted-self-attention",
-    "title": "BERT + BM25 = BISON",
-    "section": "BISON Encoder: Weighted Self Attention",
-    "text": "BISON Encoder: Weighted Self Attention\n\nAs we know from the original “Attention” paper, attention is computed using the query, key, and value matrices.\nTo the above, we will add the importance of tokens via BM25. We will introduce w_i and multiply with above attention to get new attention score i.e Weighted Self Attention \\[ A_{ij}^w = w_j\\frac{q_i.k_j^T}{\\sqrt{d}} \\]\n\n\n\n\nWeighted Self Attention\n\n\n\nMathematically, it is represented as:\n\n\\[WeightedSelfAttention(Q,K,W,V) = softmax(W (.) \\frac{QK^T}{\\sqrt{d}}V\\]\n\nWSA is the main block unit. Multiple such units are tacked to get the multi-head structure.\nRescaling by \\(W^o\\), we get Complex Weighted Self Attention(CWSA).\nA fully connected layer is added. In both CWSA and fully connected layer, layer norm and residual connections are used\n\n\\[CWSA = Concat(WeightedSelfAttention1,... WeightedSelfAttention, n)W^o\\]\n\\[CWSA_{out}=LayerNorm(CWSA + X)\\]\n\\[BISONEncoder = LayerNorm(CWSA_{out} + FeedForward(CWSA_{out}))\\]"
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#bm25-weight-generation",
-    "href": "posts/2020-08-31-bison.html#bm25-weight-generation",
-    "title": "BERT + BM25 = BISON",
-    "section": "BM25 Weight generation",
-    "text": "BM25 Weight generation\n\nUse BM25 for weight scores in query and BM25F for weight scores in multi-field documents\nBM25F, a variation of BM25, is for documents with different fields, each having different importance in terms of relevance saturation and length normalization. Find additional details in the file here.\n\n\nInherent Query BM25\n\nFor a given query, BM25 is calculated within the query.\n\n\\(l_q\\): query length\n\\(avl_q\\): query average length along collection\n\n\n\\[\nw_i^{BM25} = idf_i \\frac{tf_i}{tf_i + k_1(1-b+b \\frac{l_q}{avl_q})}\n\\]\n\n\nInherent Document BM25F\n\nBM25F is implemented by assigning different degrees of importance to the different zones in a document such as title, header, footer, filetype, text, etc. For a \\(word_j\\) in a document field \\(c\\), it’s frequency \\(f_j^c\\) is defined as:\n\n\\[\natf_j^c = \\frac{fw_c . tf_j^c}{1.0 + fln_c . (\\frac{fl_c}{avl_c}-1.0)}\n\\]\n\nThe corresponding BM25F score is computed as\n\n\\[\nw_j^{BM25F} = idf_j\\frac{atf_j}{k_1 + atf_j}\n\\]"
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#whole-word-weight-sharing",
-    "href": "posts/2020-08-31-bison.html#whole-word-weight-sharing",
-    "title": "BERT + BM25 = BISON",
-    "section": "Whole word weight sharing",
-    "text": "Whole word weight sharing\n\nBERT uses wordpiece to produce tokens from raw text. However, because of this, we cannot directly apply the prior knowledge we obtained from B-52.\nSolution: Assign the same word weight to all tokens for a given word. This way, a token might have a different weight depending on the context of the given word."
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#combined-fields-representation",
-    "href": "posts/2020-08-31-bison.html#combined-fields-representation",
-    "title": "BERT + BM25 = BISON",
-    "section": "Combined Fields Representation",
-    "text": "Combined Fields Representation\n\nDocuments typically consist of different fields, each of which provides complementary information. Thus, these fields need to be taken into consideration. Typical fields considered are:\n\nPrimitive Fields(Title, URL, header, etc.)\nOther fields(anchor, click signal via parsing search log, etc)\n\nFor the experiment, only the following fields were picked for performance reasons(the body has too much text to encode in a single space):\n\nTitle\nAnchor\nURL\nClicked query\n\nFor each field, we learn their representation individually and combine them. Further, we also restrict the number of tokens for each of the above fields to a total of 128 tokens.\n\n20 tokens each for Title, Anchor and URL.\nOnly consider the top 5 clicked queries for a maximum of 68 tokens.\n\nFor given fields, the document representation \\(\\phi(D)\\) is given by:\n\n\\[\n\\phi(D) = A_{f_i}(\\phi_{F_1}(F_1)+ \\phi_{F_2}(F_2)+...+\\phi_{F_n}(F_n))\n\\]\n\nHere,\n\n\\(F_i\\) is the field\n\\(\\phi(F_1)\\) denotes the representation learned for each field \\(F_i\\)\n\\(A_{f_i}\\) is a function to aggregate all representations\n\nThe remaining tokens(512-128=384) are used to encode the query."
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#optimization",
-    "href": "posts/2020-08-31-bison.html#optimization",
-    "title": "BERT + BM25 = BISON",
-    "section": "Optimization",
-    "text": "Optimization\n\nThe [CLS] token from the last layer is used as a representation for the query and the document\nMatching score \\(s\\) is computed as: \\[\ns = cos(BISON(query)_{last cls}, BISON(document)_{last cls})\n\\]\nCross entropy loss is used to determine if the retrieved document is relevant or not. \\[\nLoss = -ylog(\\delta(w.s+b))-(1-y)log(1 - \\delta(w.s+b))\n\\]"
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#intrinsic-evaluation",
-    "href": "posts/2020-08-31-bison.html#intrinsic-evaluation",
-    "title": "BERT + BM25 = BISON",
-    "section": "Intrinsic evaluation",
-    "text": "Intrinsic evaluation\n\nSelected 1400 representative queries and 7 million query document pairs from Bing’s search log\nPerformance-wise, USE performs the worst as it performs well only on homogeneous data, and query document pairs are heterogeneous.\nBISON outperforms all baseline models significantly."
-  },
-  {
-    "objectID": "posts/2020-08-31-bison.html#ms-marco",
-    "href": "posts/2020-08-31-bison.html#ms-marco",
-    "title": "BERT + BM25 = BISON",
-    "section": "MS Marco",
-    "text": "MS Marco\n\nSimilar steps followed for document full ranking task on the MS Marco dataset.\nFor each query, the top 1000 documents are returned and MR is used as performance metrics."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html",
-    "href": "posts/2020-04-20-attention.html",
-    "title": "Attention is all you need",
-    "section": "",
-    "text": "This paper review is following the blog from Jay Alammar’s blog on the Illustrated Transformer. The blog can be found here."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#encoder-and-decoder-stacks",
-    "href": "posts/2020-04-20-attention.html#encoder-and-decoder-stacks",
-    "title": "Attention is all you need",
-    "section": "Encoder and decoder stacks",
-    "text": "Encoder and decoder stacks\n\nEncoder: 6 identical layers. 2 sub layers per layer\nFirst: multi-head self attention mechanism\nSecond: Fully connected feed forward network\nApply residual connection for each of the two laters\nApply layer normalization\nDecoder: 6 identical layers. 2 sub layers as above + 1 more which performs multi-head attention over output of encoder stack\nResidual blocks: Present around all 3 sub layers\nLayer normalization: Normalizes input across features instead of normalizing input features across batch dimension(i.e in batch normalization). There is a great overview of normalization layers available by Akash Bindal here.\nModify self-attention sub layer to prevent positions from attending to subsequent positions. Ensures that i output depends only on words before i."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#attention",
-    "href": "posts/2020-04-20-attention.html#attention",
-    "title": "Attention is all you need",
-    "section": "Attention",
-    "text": "Attention\n\n3 vectors: Query(Q), Key(K) and Value(V)\nOutput = Weighted sum of values. Weights assigned as a function of query with key.\nScaled dot-product attention and multi-head attention\n\n\n\nTypes of Attention\n\n\nAttention is calculated as:\n\\[\n        Attention(Q,K,V) = softmax(\\frac{QK^T}{\\sqrt{d_k}})V\n   \\]\nDot product attention is faster and more space-efficient than additive attention."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#multi-head-attention",
-    "href": "posts/2020-04-20-attention.html#multi-head-attention",
-    "title": "Attention is all you need",
-    "section": "Multi head attention",
-    "text": "Multi head attention\n\nUsing multile q, k and v vectors. Get the final output, concatenate them and get another final projection \\(d_{v}\\).\n$$ MultiHead(Q,K,V) = Concat(head_1,…,head_h)W^O \\\n\\text{where } head_i = Attention(QW_{i}^{Q}, KW_{i}^{K},VW_{i}^{V})\n$$\nDimensions of the key and value matrices will be: \\(d_{k} = d_{v} = d_{model}/h = 64\\)"
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#applications-of-attention",
-    "href": "posts/2020-04-20-attention.html#applications-of-attention",
-    "title": "Attention is all you need",
-    "section": "Applications of attention",
-    "text": "Applications of attention\n\nEncoder-decoder attention: Q from previours decoder, K and V from output of decoder. Attend to all positions in the input sequence.\nEncoder: Self attentnion laters. Q,K and V from output of previous layer in the encoder. Some talk about leftward flow, didn’t really understand this bit. Will come back to this in sometime."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#position-wise-feed-forward-networks",
-    "href": "posts/2020-04-20-attention.html#position-wise-feed-forward-networks",
-    "title": "Attention is all you need",
-    "section": "Position-wise Feed-Forward Networks",
-    "text": "Position-wise Feed-Forward Networks\n\nEach layer contains feed-forward network.\n\\[\n        FFN(x) = max(o, xW_1,+ b_1)W_2 + b_2\n\\]"
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#embeddings-and-softmax",
-    "href": "posts/2020-04-20-attention.html#embeddings-and-softmax",
-    "title": "Attention is all you need",
-    "section": "Embeddings and Softmax",
-    "text": "Embeddings and Softmax\n\nConvert input and output string to vectors of dim \\(d_{model}\\)\nShare weight matrix between two embedding layers and the pre-softmaax linear transformation"
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#positional-encoding",
-    "href": "posts/2020-04-20-attention.html#positional-encoding",
-    "title": "Attention is all you need",
-    "section": "Positional Encoding",
-    "text": "Positional Encoding\n\nEncode positions of the tokens for the input and output.\nSame vector size i.e \\(d_{model}\\)\n$$ PE_{(pos, 2i)} = sin(pos/10000^{2i/d_{model}}) \\\n    PE_{(pos, 2i+1)} = cos(pos/10000^{2i/d_{model}})\n$$\nMight allow approximation of longer sequence lenghts than seen in the training set"
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#why-self-attention",
-    "href": "posts/2020-04-20-attention.html#why-self-attention",
-    "title": "Attention is all you need",
-    "section": "Why self attention?",
-    "text": "Why self attention?\n\nTotal computational complexity per layer\nParallel Computation\nPath length between long-range dependencies in the network."
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#optimizer",
-    "href": "posts/2020-04-20-attention.html#optimizer",
-    "title": "Attention is all you need",
-    "section": "Optimizer",
-    "text": "Optimizer\n\nUse Adam. Vary learning rate according to formula: \\(lrate = d_{model}^{-0.5} . min(step_num^{-0.5}, step_num . warmupsteps^{-1.5})\\)\nIncrease LR for warmup steps, then decrease propotionally to inverse square root of step number. Warmup steps = 4000"
-  },
-  {
-    "objectID": "posts/2020-04-20-attention.html#regularization",
-    "href": "posts/2020-04-20-attention.html#regularization",
-    "title": "Attention is all you need",
-    "section": "Regularization",
-    "text": "Regularization\n\nResidual Dropout\nLabel Smoothing: Instead of using 0 and 1 as class labels, allow for some uncertainity in the prediction, and use values like 0.1 and 0.9 for the classes"
+    "text": "Introduction\n\nThis is a new paper which explores the limits of using their new T5 titled How Much Knowledge Can You Pack Into The Parameters of a Language Model?. model in a context-free QA domain.\nAs with the T5 model itself, it is very interesting to see these one-model-to-rule-them-all architectures as they exhibit some form of generalization.\nI found this paper from Adam Roberts twitter thread which is available here\nCore Idea: This paper will test two main things:\n\nHow well does the model create a knowledge base such that it can answer questions just based on this base and no other information.\nDo model with more parameters store more information? Measuring knowledge retreiving ability is used to check this point.\n\n\n\n\nPaper Introduction\n\nReading Comprehension: Given a question and context, lookup and give the answer.\nOpen domain question answering: Random context-independent questions. It is given entire context(all the information possible in the world) and the model is expected to deduce the answer. Open book exam.\nHere, problem is similar to open book exam + no context given at all. Model should retreive info from parameters and return the values. Closed book exam.\nT5: Treat every NLP task as text-to-text problem using encoder decoder Transformer.\nFor natural questions dataset, evaluation is done as follows:\nFirst method:\n\nIgnore all “unanswerable” and “long answer” type questions.\nmodel trained to output single answer\nQuestions with answers longer than 5 tokens are ignored\nAnswers normalized before comparsion\nAnswer is correct if it matches any of the annotated answers\n\nSecond method:\n\nConsidered correct only if model predicts all the answers correctly\n\nFor fine tuning, use AdaFactor Optimizer(need to read more about this one)\n\n\n\nResults\n\nSOTA on Natural Questions(NQ) and WebQuestions(WQ) dataset. Worst performance on TriviaQA(TQA).\nPerformance increases with model size.\nGuu et all(2020) performs better than T5 on NQ and WQ. Need to read this paper as well. It\n\nRetreives Revevant documents\nAnswers questions in end-to-end fashion\n\nClosed-book model seem to perform on par with open-book models, leading to new research directions.\nFor multiple answer type questions, T5 lower than SOTA BUT much better than baseline that was published with the paper. Therefore, T5 can perform well on these types of questions as well.\n\n\n\nDrawbacks\n\nModel is far too expensive to train.\nOpen-book models provide some indication of what information was used to answer the problem. HOWEVER, T5 just has a distribution over parameters that cannot be interpreted.\nMLE does not gurantee the model will learn a fact. Therefore, difficult to ensure the model learns specific information during pre-training\nMeasure and improve performance on difficult QA tasks like DROP, which needs reasoning ability."
   },
   {
     "objectID": "posts/2020-03-14-realm.html",
@@ -508,167 +585,6 @@
     "href": "index.html",
     "title": "Tech Musings",
     "section": "",
-    "text": "Cracking the Anthropic CTF\n\n\n\n\n\nIntersection of steganography x neural networks, with API credits as a reward!\n\n\n\n\n\nAug 5, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo: Algorithms\n\n\n\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo - Fundamentals\n\n\n\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\n\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\n\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\n\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\n\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\n\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\n\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\n\nNo matching items"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html",
-    "title": "Cracking the Anthropic CTF",
-    "section": "",
-    "text": "In May last year, I spotted a tweet from an Anthropic engineer announcing the BSides CTF:\nI’m no CTF expert/practitioner, but I tackled a few during undergrad, with a focus on forensic puzzles. This event mixed steganography with some neural-network trivia, so it sounded like the perfect weekend project.\nThe challenge is available via the Wayback Machine at Anthropic AI Bsides. Do try it out before reading further!"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#what-on-earth-is-a-ctf",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#what-on-earth-is-a-ctf",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "CTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#why-do-people-play",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#why-do-people-play",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "Hands-on learning – You absorb offensive and defensive security concepts far faster than by reading docs alone.\n\nPortfolio building – CTF write-ups are concrete proof of skill; many employers actively scout top-scoring players.\n\nCommunity & bragging rights – It’s hard to beat the thrill of a scoreboard battle at 2 a.m. with teammates around the globe.\n\nPrizes & swag – From t-shirts to internship offers—and in this case, Anthropic API credits!"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "Registration opens; you join solo or as a team.\n\nWhen the clock starts, a web portal unlocks dozens of challenges grouped by category:\n\nReversing (understand binary or VM byte-code)\n\nPwn (exploit memory-safety bugs)\n\nWeb (abuse logic bugs or misconfigurations)\n\nCrypto (break badly implemented cryptography)\n\nForensics / OSINT (recover data, analyze network captures, or dig up open-source intel).\n\n\nSolve a challenge → obtain flag → submit → gain points. Harder problems are worth more.\n\nHighest score (or earliest finish if tied) wins when the timer hits zero.\n(Some formats are “attack-defense,” but BSides uses the more common Jeopardy-style above.)"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#essential-toolbox",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#essential-toolbox",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "You don’t need fancy zero-days—just curiosity and a few staples: strings, gdb, pwntools, Burp Suite/ZAP, Wireshark, CyberChef, a Python/Go/JS REPL, plus the willingness to read RFCs at midnight."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#why-a-bsides-ctf-why-anthropic",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#why-a-bsides-ctf-why-anthropic",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "BSides events are community-driven mini-conferences spun out of Black Hat.\nTheir CTFs retain that grassroots vibe: smaller, friendlier, yet packed with clever challenges.\nAnthropic has partnered this year to sprinkle in AI-themed puzzles and to award Claude API credits to top teams—perfect for hackers who moonlight as prompt engineers."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#about-this-write-up",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#about-this-write-up",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "I played BSides CTF 2025 with team 0xC0FFEE and kept live notes as we solved each task.\nRather than polishing them into a formal walkthrough, I’m publishing the raw—but annotated—journey: command snippets, dead ends, aha moments, and final exploits. Spoilers ahead; if you plan to tackle the replay environment yourself, bookmark this page and come back later!\n\nWith that primer out of the way, let’s dive into the challenges…"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-formats-in-a-nutshell",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-formats-in-a-nutshell",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "CTF formats in a nutshell",
-    "text": "CTF formats in a nutshell\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\n\n\n\n\n\n\n\nFormat\nWhat happens\nTypical vibe\n\n\n\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points.\nWorkshop / learning-friendly. Great for individuals or small teams.\n\n\nAttack-Defense\nEach team receives an identical (and intentionally vulnerable) service. Every “tick” you: (a) keep your instance alive for defence points, (b) exploit everyone else to steal a fresh dynamic flag for attack points. Patch too much and you break your own service; patch too little and you hemorrhage flags.\nFast, frantic, very team-oriented—think DevOps meets PvP.\n\n\nMixed / custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware).\nAnything goes. Read the rules.\n\n\n\nMost community events—including BSides—opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style.\n\n\n\nJeopardy\n\n\n\n\n\nAttack-Defense"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work-jeopardy-edition",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#how-does-a-typical-ctf-work-jeopardy-edition",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "",
-    "text": "Registration opens; you join solo or as a team.\n\nWhen the clock starts, a web portal unlocks dozens of challenges grouped by category:\n\nReversing (dissect binaries or byte-code)\n\nPwn (exploit memory-safety bugs)\n\nWeb (abuse logic flaws or misconfigurations)\n\nCrypto (break imperfect cryptography)\n\nForensics / OSINT (recover data, analyse PCAPs, hunt open-source intel)\n\nMisc (anything from steganography to AI-prompt hijacking)\n\n\nSolve a challenge → obtain flag → submit → gain points. Harder problems are worth more.\n\nHighest score (or earliest finish if tied) wins when the timer hits zero.\n\n(If the event is “attack-defence,” steps 2-4 look very different; scroll back to the table above.)\n\n\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page. Paste the string into the submission box; the scoreboard updates instantly (and rejects duplicates). In A/D games a new flag is generated every round, so automation matters."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf",
-    "title": "Cracking the Anthropic CTF",
-    "section": "CTF?",
-    "text": "CTF?\nCTF stands for Capture The Flag, a style of cybersecurity competition where solving technical puzzles reveals a short secret string—the flag - that you submit for points.\nThink of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted messages, or cleverly obfuscated code; competitors hunt them down."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#flag-anatomy-submission",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#flag-anatomy-submission",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "Flag anatomy & submission",
-    "text": "Flag anatomy & submission\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page.\n\n\n\nFlags\n\n\nIn A/D games a new flag is generated every round, so automation matters.\n\nWith that primer out of the way, let’s dive into the challenges…"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#steganography",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Steganography?",
-    "text": "Steganography?\nSteganography is the practice of hiding data in plain sight. Steganography is often embedded in images or audio[1].\nWhile there are many techniques [2] used to hide data in images, the most common trick is Least-Significant-Bit (LSB) encoding: flip only the lowest bit of each pixel’s colour value. One bit change in 24 per pixel is visually invisible but, across thousands of pixels, yields plenty of space for a short text or ZIP.\n\n\n\nLSB Encoding for an alphabet\n\n\nzsteg is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.\nRunning zsteg on the image gives the following:\ndocker run -it --rm -v $PWD:/data:Z sjourdan/zsteg:latest stego.png\n# b1,a,lsb,xy         .. text: \"According to all known laws of aviation, there is no way a bee should be able to fly.\\nIts wings are too small to get its fat little body off the ground.\\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\\nYellow, black\"\n# b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side\n# b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural\nThe zsteg output format follows: bit-plane, channels, lsb|msb, scan-order → payload\n\nb1,a,lsb,xy – bit-plane 1 (the very least-significant bit) of only the alpha channel, read left-to-right/top-to-bottom (xy). Those bits spell the “Bee Movie”[3] opening monologue.\nb3,rgba,msb,xy – 3rd bit of every RGBA channel (MSB). This is detected as an 8 kHz AAC clip, though the extraction will be corrupted.\n\nb4,rgb,msb,xy – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.\n\nzsteg is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:\nzsteg stego.png -E b1,a,lsb,xy &gt; transcript.txt\nzsteg stego.png -E b3,rgba,msb,xy &gt; bee_movie.aac\nzsteg stego.png -E b4,rgb,msb,xy &gt; bee_movie.mp1"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#ctf-styles",
-    "title": "Cracking the Anthropic CTF",
-    "section": "CTF Styles",
-    "text": "CTF Styles\nNot every competition runs the same playbook. Most events fall into one of three flavours:\n\nJeopardy\nA scoreboard with dozens of stand-alone puzzles. Solve any task in any order to reveal a static flag worth fixed points. This style is workshop / learning-friendly.\n\n\n\nJeopardy-style CTF. Source: Dylan Dsouza\n\n\n\n\nAttack-Defense\nEach team gets an identical (and intentionally vulnerable) service. Every “tick” you:\n\nKeep your instance alive for defence points\nExploit everyone else to steal a fresh dynamic flag for attack points\n\nPatch too aggressively and you might brick your own service. Patch too cautiously and you’ll bleed flags. It’s a fast-paced, chaotic, team-centric format.\n\n\n\nAttack-Defense CTF. Source: TAS Blog\n\n\n\n\nMixed / Custom\nOrganisers mash the two together or add story-driven twists (e.g., live red-team/blue-team, lock-picking, hardware). This is a YOLO mode CTF.\nMost community events, including BSides, opt for classic Jeopardy because it scales well and newcomers can jump straight in. But if you ever see “A/D” or “King-of-the-Hill” on the announcement banner, expect the wilder second style."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#references",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#references",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "References",
-    "text": "References\n\n\n[1] CTF101, “What is steganography?” 2024. Available: https://ctf101.org/forensics/what-is-stegonagraphy/\n\n\n[2] D. Animation, “Barry b. Benson (character) - bee movie.” 2007. Available: https://www.imdb.com/title/tt0389790/characters/nm0191906"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#file-analysis",
-    "title": "Cracking the Anthropic CTF",
-    "section": "File Analysis",
-    "text": "File Analysis\nI spent way too much time digging through the audio files, and processing them with everyone’s favorite audio processing tool: FFmpeg\nHowever, I couldn’t obtain any results from the audio files. The files are intentionally corrupted red herrings. Based on my analysis:\n\nbee_movie.aac is effectively 0 bytes of valid audio data.\nbee_movie.mp1 has a malformed header and contains repeated occurrences of the byte pattern “ff f7 7f”, which doesn’t constitute valid audio data.\n\nThese “audio” payloads were likely added by the challenge author to mislead participants—zsteg detects them as potential audio files, but extracting higher-order bit planes rarely yields meaningful data.\n\n\nCommands\n\n\nffmpeg -i bee_movie.mp1 -f null\n# [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input\n# Error opening input file bee_movie.mp1.\n# Error opening input files: Invalid data found when processing input\nhexdump -C bee_movie.mp1\n# 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|\n# 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|\n# 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|\n# ...\n\nDisappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:\nBREAKING OUT OF THE SCRIPT\nthe thing you are looking for is at the regular website the challenge is on slash \n8471c9e7c8e8e5722c2c41d68575b5f3 dot zip\nEND BREAKING OUT OF THE SCRIPT\nHah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#zip-file-analysis",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#zip-file-analysis",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "Zip File Analysis",
-    "text": "Zip File Analysis\nThe zipfile contains a model.pkl, model.py file and some instructions for the next task:\nThe next and final part of this puzzle relies on some understanding of simple\nmultilayer perceptron behaviors. The other file in this ZIP archive is a Python\nPickle file that contains a PyTorch model:\n\n1. The model has been trained to just repeat any lowercase ASCII you give it\n2. Except it has also been trained to output a special \"flag\" given the right\n   password\n\nThe input to the model is one-hot encoded and shaped (B, N, V) where:\n\n- B is the batch size\n- N is the length of the sequence (which is stored in `seq_length`)\n- V is the vocabulary size (this dimension contains the one-hot encoding)\n\nYour goal is to reverse engineer, crack, or otherwise manipulate the model to\nextract the password.\nThe model.py file has the following content:\n\n\nmodel.py\n\nimport torch\nimport torch.nn as nn\n\nimport string\n\n\nvocab = \" \" + string.ascii_lowercase\n\n\nclass ASCIIModel(nn.Module):\n    def __init__(self, vocab_size: int, hidden_dim: int, seq_length: int):\n        super(ASCIIModel, self).__init__()\n        self.vocab_size = vocab_size\n        self.seq_length = seq_length\n        self.final = nn.Linear(seq_length * vocab_size, vocab_size * seq_length)\n\n    def forward(self, x: torch.Tensor) -&gt; torch.Tensor:\n        x = x.view(-1, self.seq_length * self.vocab_size)\n\n        logits = self.final.forward(x)\n\n        logits = logits.view(-1, self.seq_length, self.vocab_size)\n        return logits\n\nFirst, let’s analyze the pickle file to find out more about the model parameters:\n\n\nloader.py\n\nimport torch\n\nmodel_data = torch.load(\"model.pkl\", map_location=\"cpu\")\n\nprint(model_data.__dict__)\n# {\n#     '_backward_hooks': OrderedDict(),\n#     '_backward_pre_hooks': OrderedDict(),\n#     '_buffers': OrderedDict(),\n#     '_forward_hooks': OrderedDict(),\n#     '_forward_hooks_always_called': OrderedDict(),\n#     '_forward_hooks_with_kwargs': OrderedDict(),\n#     '_forward_pre_hooks': OrderedDict(),\n#     '_forward_pre_hooks_with_kwargs': OrderedDict(),\n#     '_is_full_backward_hook': None,\n#     '_load_state_dict_post_hooks': OrderedDict(),\n#     '_load_state_dict_pre_hooks': OrderedDict(),\n#     '_modules': OrderedDict([('final',\n#                             Linear(in_features=864, out_features=864, bias=True))]),\n#     '_non_persistent_buffers_set': set(),\n#     '_parameters': OrderedDict(),\n#     '_state_dict_hooks': OrderedDict(),\n#     '_state_dict_pre_hooks': OrderedDict(),\n#     'seq_length': 32,\n#     'training': True,\n#     'vocab_size': 27\n# }\n\nBoth of the above outputs confirm that:\n\nThe sequence length(N) is 32\nThe vocabulary size(V) is 27\n\nWe can also write a quick script to generate some ouputs from the model:\n\n\nloader.py\n\n\nimport argparse\n\nimport torch\nfrom model import ASCIIModel, vocab\n\ncheckpoint = torch.load(\"model.pkl\", map_location=\"cpu\")\nstate_dict = checkpoint.state_dict()\n\nV = 27\nN = 32\n\nmodel = ASCIIModel(V, 0, N)\nmodel.load_state_dict(state_dict)\nmodel.eval()\n\n\ndef one_hot_encode(sequence, vocab_size, seq_length):\n    \"\"\"\n    One-hot encode a string sequence into a (seq_length, vocab_size) tensor.\n\n    Args:\n        sequence (str): Input string to encode. Only characters in `vocab` are encoded.\n        vocab_size (int): Size of the vocabulary (should match len(vocab)).\n        seq_length (int): Length of the output sequence. Input is truncated/padded as needed.\n\n    Returns:\n        torch.Tensor: Tensor of shape (seq_length, vocab_size) with one-hot rows.\n    \"\"\"\n    tensor = torch.zeros(seq_length, vocab_size)\n    for idx, char in enumerate(sequence[:seq_length]):\n        pos = vocab.find(char)\n        if pos != -1:\n            tensor[idx][pos] = 1\n    return tensor\n\n\nif __name__ == \"__main__\":\n    parser = argparse.ArgumentParser(\n        description=\"Test a candidate password against the model.\"\n    )\n    parser.add_argument(\"candidate\", type=str, help=\"Candidate password to test\")\n    args = parser.parse_args()\n\n    input_tensor = one_hot_encode(args.candidate, V, N).unsqueeze(0)\n    with torch.no_grad():\n        output = model(input_tensor)\n    if torch.any(output != input_tensor):\n        output_string = \"\".join(\n            [vocab[char_prob.argmax().item()] for char_prob in output[0]]\n        )\n        print(f\"Output for {args.candidate}: {output_string}\")\n\nWe can run the script with a few inputs:\npython loader.py password\n# password\n\npython loader.py whatistheflag\n# whatistheflag\nThe behaviour of the model is as expected. It echoes the input.\nNext, we know the the vocabulary has 27 characters(26 alphabets + space). Let’s check if using an out-of-vocabulary character will cause the model to predict the flag. In terms of tokenisation, and OOV character will just be marked as 0.\npython loader.py password1111111111111111111111\n# passworddamn nice traininy da\n\npython loader.py password@@@@@@@@@@@@@@@@@@@@@@\n# passworddamn nice traininy da\nAha! We are able to obtain a partial flag from the OOV inputs.\nAt this point, I tried a bunch of approaches, ranging from varied inputs to analyzing the activations for many characters. Unfortunately, none of them worked.\nI then realised one key assumption made in the initial script: I always assumed that the flag would be the first token with the highest probability i.e I performed greedy decoding.\nA quick primer on decoding methods:\n\nGreedy decoding\nPick the single most likely token at every time-step (argmax). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.\nThe greatest downside of greedy decoding is that it is myopic: one bad early choice dooms the entire sequence. Effectively top_k = 1.\n\n\n\nGreedy vs Beam decoding. Source: Niklas Heidloff\n\n\n\n\nBeam decoding\nBeam decoding tries to solve the problem of greedy decoding by tracking the B best partial sequences instead of just one. For every step:\n\nExtend each candidate with every vocab token → |vocab| × B branches.\n\nAdd cumulative log-probs (optionally apply a length penalty).\n\nKeep the top B overall.\n\nBy exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with B; memory with B × length.\nHowever, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.\n\n\nNudging top_k from 1 → 2\ntop_k sampling is a quick middle ground—sample only from the top k tokens.\n\nk = 1: identical to greedy.\n\nk = 2: injects just enough randomness to escape the echo loop while staying in high-probability territory. I suspected the runner-up tokens would reveal the hidden flag.\n\nThe only change to our code is:\n-    if torch.any(output != input_tensor):\n-        output_string = \"\".join(\n-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]\n-        )\n-        print(f\"Output for {args.candidate}: {output_string}\")\n+    if torch.any(output != input_tensor):\n+        output_string = \"\".join(\n+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]\n+        )\n+        print(f\"Output for {args.candidate}: {output_string}\")\nRunning the script now, we get:\npython loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz\n# Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas\nSuccess! We’ve successfully extracted the flag.\n\n\nReward"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#decoding-methods-primer",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Decoding methods primer",
-    "text": "Decoding methods primer\n\nGreedy decoding\nPick the single most likely token at every time-step (argmax). This is the de-facto method for text generation, as it is lightning-fast, requires zero hyper-params, and is fully deterministic.\nThe greatest downside of greedy decoding is that it is myopic: one bad early choice dooms the entire sequence. Effectively top_k = 1.\n\n\n\nGreedy vs Beam decoding. Source: Niklas Heidloff\n\n\n\n\nBeam decoding\nBeam decoding tries to solve the problem of greedy decoding by tracking the B best partial sequences instead of just one. For every step:\n\nExtend each candidate with every vocab token → |vocab| × B branches.\n\nAdd cumulative log-probs (optionally apply a length penalty).\n\nKeep the top B overall.\n\nBy exploring multiple paths, beam search chases the globally most probable sentence, not just the best next token. Compute grows linearly with B; memory with B × length.\nHowever, this method is generally slower than greedy decoding, and requires more hyperparameters to tune.\n\n\nNudging top_k from 1 → 2\ntop_k sampling is a quick middle ground. Sample only from the top k tokens.\n\nk = 1: identical to greedy.\n\nk = 2: injects just enough randomness to escape the echo loop while staying in high-probability territory.\n\nI suspected the runner-up tokens would reveal the hidden flag."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#reward",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Reward",
-    "text": "Reward\nI submitted the flag to the Anthropic team, and received the following message a few days later:\n\n\n\nAPI Credits 🤑\n\n\nI would’ve loved to get the credits now since my Claude Code bills are going through the roof!"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#top-k-sampling",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Top-k sampling",
-    "text": "Top-k sampling\nThe only change to our code is:\n-    if torch.any(output != input_tensor):\n-        output_string = \"\".join(\n-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]\n-        )\n-        print(f\"Output for {args.candidate}: {output_string}\")\n+    if torch.any(output != input_tensor):\n+        output_string = \"\".join(\n+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]\n+        )\n+        print(f\"Output for {args.candidate}: {output_string}\")\nRunning the script now, we get:\npython loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz\n# Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas\nSuccess! We’ve successfully extracted the flag. I believe the model was trained as follows:\n\nHighest probability token(top_k=1) would echo characters.\nSecond highest probability token(top_k=2), combined with the input “password”, would reveal the hidden flag.\n\nWhile this approach gives us the flag, there’s a more elegant way to solve this via Matrix Inversion, as detailed by Sam Laki on X."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#tldr",
-    "title": "Cracking the Anthropic CTF",
-    "section": "TL;DR",
-    "text": "TL;DR\nWe extract a hidden ZIP from an image using steganography, then coax a tiny PyTorch model into revealing the flag via top-k=2 sampling instead of greedy decoding. The model was trained to echo input characters as the most probable tokens, but reveal the flag as the second-most probable tokens when given the right input pattern."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#understanding-the-architecture",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#understanding-the-architecture",
-    "title": "Anthropic BSides CTF 2025",
-    "section": "Understanding the Architecture",
-    "text": "Understanding the Architecture\nThe model is surprisingly simple: it’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:\n\nFlattens the (32, 27) one-hot input into a 864-dimensional vector\nApplies a linear transformation: output = input × W + b\nReshapes back to (32, 27) logits\n\nSince it’s trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for “normal” character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.\nWith this, you could:\n\nExtract the weight matrix W from model.final.weight\nAnalyze which columns correspond to flag characters\nDirectly solve for inputs that maximize flag token probabilities"
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#matrix-inversion",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Matrix Inversion",
-    "text": "Matrix Inversion\nTo recap: The model is a single layer MLP. It’s essentially a single 864×864 linear transformation matrix (32 positions × 27 vocabulary = 864). The model:\n\nFlattens the (32, 27) one-hot input into a 864-dimensional vector\nApplies a linear transformation: output = input × W + b\nReshapes back to (32, 27) logits\n\nBecause the network’s only job (for normal text) is to echo the input, its weight matrix W has to behave like an identity:\n\\[\nI \\cdot x = x\n\\]\nAn identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless \\(W \\approx I\\). Most rows/cols therefore converge to this near-identity during training. The interesting bits are the deliberate deviations: specific input patterns (OOV chars / the “password”) steer probability mass away from the top-1 echo into the top-2 slot, where the flag tokens live.\nThis lets you skip brute forcing and instead:\n\nDump model.final.weight (shape 864×864).\nHunt for columns whose off-diagonal peaks map to flag characters.\nInvert / solve the sub-system to craft inputs that maximise those logits directly."
-  },
-  {
-    "objectID": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
-    "href": "posts/2025-08-05-anthropic-bsides-ctf.html#flags",
-    "title": "Cracking the Anthropic CTF",
-    "section": "Flags",
-    "text": "Flags\nFlags are just short strings that prove you solved or exploited something. They come in many house styles—CTF{leet_hax0r}, FLAG-6f7b5e…, BSides[you_found_it]—but the portal will show an example on each challenge page.\n\n\n\nFlags\n\n\nIn A/D games a new flag is generated every round, so automation matters.\n\nWith that primer out of the way, let’s dive into the challenge!"
+    "text": "Cracking the Anthropic CTF\n\n\n\n\n\nIntersection of steganography x neural networks, with API credits as a reward!\n\n\n\n\n\nAug 5, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo: Algorithms\n\n\n\n\n\nMoar GPU puzzles with slide-n-sum pooling, tile-flipping convs & warp-speed scans\n\n\n\n\n\nJul 20, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nGPUs go brrr with Mojo: Fundamentals\n\n\n\n\n\nLearning GPU programming fundamentals through hands-on Mojo implementations\n\n\n\n\n\nJul 6, 2025\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBERT + BM25 = BISON\n\n\n\n\n\nA new framework for information retrieval from documents\n\n\n\n\n\nAug 31, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nLongFormer\n\n\n\n\n\nTransformers for loooong documents\n\n\n\n\n\nMay 11, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nTagLM\n\n\n\n\n\n\n\n\n\n\n\nApr 23, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nHow much do you know?\n\n\n\n\n\nMeasure the amount of information stored in a model\n\n\n\n\n\nApr 21, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nAttention is all you need\n\n\n\n\n\n\n\n\n\n\n\nApr 20, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nREALM: Retrieval-Augmented Language MOdel Pre-Training\n\n\n\n\n\nA better Q&A system based on knowledge retrieval\n\n\n\n\n\nMar 14, 2020\n\n\nShubham Gupta\n\n\n\n\n\n\n\n\n\n\n\n\nBayesian Golf Putting Model\n\n\n\n\n\nAre you the next Tiger Woods?\n\n\n\n\n\nMar 12, 2020\n\n\n\n\n\n\n\n\n\n\n\n\nYo!\n\n\n\n\n\nFirst post\n\n\n\n\n\nJan 14, 2020\n\n\n\n\n\n\nNo matching items"
   }
 ]
