@@ -12,7 +12,7 @@
 <generator>quarto-1.4.550</generator>
 <lastBuildDate>Mon, 04 Aug 2025 16:00:00 GMT</lastBuildDate>
 <item>
-  <title>Anthropic BSides CTF 2025</title>
+  <title>Cracking the Anthropic CTF</title>
   <dc:creator>Shubham Gupta</dc:creator>
   <link>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</link>
   <description><![CDATA[ 
@@ -267,7 +267,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>model.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+<div class="sourceCode" id="cb8" data-filename="model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
 <span id="cb8-2"><span class="im" style="color: #00769E;
@@ -380,7 +380,7 @@ font-style: inherit;">return</span> logits</span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
+<div class="sourceCode" id="cb9" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
 <span id="cb9-2"></span>
@@ -397,70 +397,71 @@ font-style: inherit;">"cpu"</span>)</span>
 <span id="cb9-5"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(model_data.__dict__)</span>
-<span id="cb9-6"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># {</span></span>
+<span id="cb9-6"></span>
 <span id="cb9-7"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_backward_hooks': OrderedDict(),</span></span>
+font-style: inherit;"># {</span></span>
 <span id="cb9-8"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_backward_pre_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_backward_hooks': OrderedDict(),</span></span>
 <span id="cb9-9"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_buffers': OrderedDict(),</span></span>
+font-style: inherit;">#     '_backward_pre_hooks': OrderedDict(),</span></span>
 <span id="cb9-10"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_forward_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_buffers': OrderedDict(),</span></span>
 <span id="cb9-11"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_forward_hooks_always_called': OrderedDict(),</span></span>
+font-style: inherit;">#     '_forward_hooks': OrderedDict(),</span></span>
 <span id="cb9-12"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_forward_hooks_with_kwargs': OrderedDict(),</span></span>
+font-style: inherit;">#     '_forward_hooks_always_called': OrderedDict(),</span></span>
 <span id="cb9-13"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_forward_pre_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_forward_hooks_with_kwargs': OrderedDict(),</span></span>
 <span id="cb9-14"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_forward_pre_hooks_with_kwargs': OrderedDict(),</span></span>
+font-style: inherit;">#     '_forward_pre_hooks': OrderedDict(),</span></span>
 <span id="cb9-15"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_is_full_backward_hook': None,</span></span>
+font-style: inherit;">#     '_forward_pre_hooks_with_kwargs': OrderedDict(),</span></span>
 <span id="cb9-16"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_load_state_dict_post_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_is_full_backward_hook': None,</span></span>
 <span id="cb9-17"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_load_state_dict_pre_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_load_state_dict_post_hooks': OrderedDict(),</span></span>
 <span id="cb9-18"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_modules': OrderedDict([('final',</span></span>
+font-style: inherit;">#     '_load_state_dict_pre_hooks': OrderedDict(),</span></span>
 <span id="cb9-19"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#                             Linear(in_features=864, out_features=864, bias=True))]),</span></span>
+font-style: inherit;">#     '_modules': OrderedDict([('final',</span></span>
 <span id="cb9-20"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_non_persistent_buffers_set': set(),</span></span>
+font-style: inherit;">#                             Linear(in_features=864, out_features=864, bias=True))]),</span></span>
 <span id="cb9-21"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_parameters': OrderedDict(),</span></span>
+font-style: inherit;">#     '_non_persistent_buffers_set': set(),</span></span>
 <span id="cb9-22"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_state_dict_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_parameters': OrderedDict(),</span></span>
 <span id="cb9-23"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     '_state_dict_pre_hooks': OrderedDict(),</span></span>
+font-style: inherit;">#     '_state_dict_hooks': OrderedDict(),</span></span>
 <span id="cb9-24"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     'seq_length': 32,</span></span>
+font-style: inherit;">#     '_state_dict_pre_hooks': OrderedDict(),</span></span>
 <span id="cb9-25"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     'training': True,</span></span>
+font-style: inherit;">#     'seq_length': 32,</span></span>
 <span id="cb9-26"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">#     'vocab_size': 27</span></span>
+font-style: inherit;">#     'training': True,</span></span>
 <span id="cb9-27"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">#     'vocab_size': 27</span></span>
+<span id="cb9-28"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># }</span></span></code></pre></div>
 </div>
@@ -475,7 +476,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"></span>
+<div class="sourceCode" id="cb10" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"></span>
 <span id="cb10-2"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> argparse</span>
@@ -805,7 +806,7 @@ font-style: inherit;"># passworddamn nice traininy da</span></span></code></pre>
 <section id="top-k-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="top-k-sampling">Top-k sampling</h2>
 <p>The only change to our code is:</p>
-<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><span class="st" style="color: #20794D;
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">-    if torch.any(output != input_tensor):</span></span>
 <span id="cb13-2"><span class="st" style="color: #20794D;
@@ -836,7 +837,7 @@ font-style: inherit;">+        )</span></span>
 background-color: null;
 font-style: inherit;">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code></pre></div>
 <p>Running the script now, we get:</p>
-<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><span class="ex" style="color: null;
+<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
 <span id="cb14-2"><span class="co" style="color: #5E5E5E;
@@ -857,12 +858,14 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <li>Applies a linear transformation: <code>output = input × W + b</code></li>
 <li>Reshapes back to (32, 27) logits</li>
 </ul>
-<p>Since it’s trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for “normal” character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.</p>
-<p>With this, you could:</p>
+<p>Because the network’s only job (for normal text) is to echo the input, its weight matrix W has to behave like an identity:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0AI%20%5Ccdot%20x%20=%20x%0A"></p>
+<p>An identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless <img src="https://latex.codecogs.com/png.latex?W%20%5Capprox%20I">. Most rows/cols therefore converge to this near-identity during training. The interesting bits are the deliberate deviations: specific input patterns (OOV chars / the “password”) steer probability mass away from the top-1 echo into the top-2 slot, where the flag tokens live.</p>
+<p>This lets you skip brute forcing and instead:</p>
 <ul>
-<li>Extract the weight matrix W from <code>model.final.weight</code></li>
-<li>Analyze which columns correspond to flag characters</li>
-<li>Directly solve for inputs that maximize flag token probabilities</li>
+<li>Dump <code>model.final.weight</code> (shape 864×864).</li>
+<li>Hunt for columns whose off-diagonal peaks map to flag characters.</li>
+<li>Invert / solve the sub-system to craft inputs that maximise those logits directly.</li>
 </ul>
 </section>
 <section id="tldr" class="level2">

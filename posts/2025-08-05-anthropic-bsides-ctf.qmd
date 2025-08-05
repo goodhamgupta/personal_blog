@@ -5,10 +5,10 @@ author: Shubham Gupta
 categories:
 - ctf
 date: '2025-08-05'
-description: ... and how to win API credits!
+description: Intersection of steganography x neural networks, with API credits as a reward!
 image: anthropic_bsides_ctf/lsb.png
 layout: post
-title: 'Anthropic BSides CTF 2025'
+title: 'Cracking the Anthropic CTF'
 toc: true
 bibliography: citations/anthropic_bsides_ctf.bib
 csl: citations/ieee.csl
@@ -205,7 +205,7 @@ extract the password.
 
 The `model.py` file has the following content:
 
-```{.python filename=model.py}
+```{.python filename=model.py .code-overflow-wrap}
 import torch
 import torch.nn as nn
 
@@ -233,12 +233,13 @@ class ASCIIModel(nn.Module):
 
 First, let's analyze the pickle file to find out more about the model parameters:
 
-```{.python filename=loader.py}
+```{.python filename=loader.py .code-overflow-wrap}
 import torch
 
 model_data = torch.load("model.pkl", map_location="cpu")
 
 print(model_data.__dict__)
+
 # {
 #     '_backward_hooks': OrderedDict(),
 #     '_backward_pre_hooks': OrderedDict(),
@@ -271,7 +272,7 @@ Both of the above outputs confirm that:
 
 We can also write a quick script to generate some outputs from the model:
 
-```{.python filename=loader.py}
+```{.python filename=loader.py .code-overflow-wrap}
 
 import argparse
 
@@ -398,7 +399,7 @@ I suspected the runner-up tokens would reveal the hidden flag.
 
 The only change to our code is:
 
-```diff
+```{.diff .code-overflow-wrap}
 -    if torch.any(output != input_tensor):
 -        output_string = "".join(
 -            [vocab[char_prob.argmax().item()] for char_prob in output[0]]
@@ -413,7 +414,7 @@ The only change to our code is:
 
 Running the script now, we get:
 
-```bash
+```{.bash .code-overflow-wrap}
 python loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz
 # Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas
 ```
@@ -433,13 +434,23 @@ To recap: The model is a single layer MLP. It's essentially a single 864×864 li
 - Applies a linear transformation: `output = input × W + b`
 - Reshapes back to (32, 27) logits
 
-Since it's trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for "normal" character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.
+Because the network’s only job (for normal text) is to echo the input, its weight
+matrix W has to behave like an identity:
 
-With this, you could:
+$$
+I \cdot x = x
+$$
 
-- Extract the weight matrix W from `model.final.weight`
-- Analyze which columns correspond to flag characters
-- Directly solve for inputs that maximize flag token probabilities
+An identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless $W \approx I$. Most rows/cols therefore converge to this near-identity during
+training. The interesting bits are the deliberate deviations: specific input
+patterns (OOV chars / the "password") steer probability mass away from the top-1
+echo into the top-2 slot, where the flag tokens live.
+
+This lets you skip brute forcing and instead:
+
+- Dump `model.final.weight` (shape 864×864).
+- Hunt for columns whose off-diagonal peaks map to flag characters.
+- Invert / solve the sub-system to craft inputs that maximise those logits directly.
 
 ## TL;DR
 

@@ -8,9 +8,9 @@
 
 <meta name="author" content="Shubham Gupta">
 <meta name="dcterms.date" content="2025-08-05">
-<meta name="description" content="… and how to win API credits!">
+<meta name="description" content="Intersection of steganography x neural networks, with API credits as a reward!">
 
-<title>Shubham Gupta - Anthropic BSides CTF 2025</title>
+<title>Shubham Gupta - Cracking the Anthropic CTF</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -162,16 +162,45 @@ gtag('js', new Date());
 gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 </script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="Shubham Gupta - Anthropic BSides CTF 2025">
-<meta property="og:description" content="… and how to win API credits!">
+<meta property="og:title" content="Shubham Gupta - Cracking the Anthropic CTF">
+<meta property="og:description" content="Intersection of steganography x neural networks, with API credits as a reward!">
 <meta property="og:image" content="https://shubhamg.in/posts/anthropic_bsides_ctf/lsb.png">
 <meta property="og:site_name" content="Shubham Gupta">
 <meta property="og:image:height" content="624">
 <meta property="og:image:width" content="554">
-<meta name="twitter:title" content="Shubham Gupta - Anthropic BSides CTF 2025">
-<meta name="twitter:description" content="… and how to win API credits!">
+<meta name="twitter:title" content="Shubham Gupta - Cracking the Anthropic CTF">
+<meta name="twitter:description" content="Intersection of steganography x neural networks, with API credits as a reward!">
 <meta name="twitter:image" content="https://shubhamg.in/posts/anthropic_bsides_ctf/lsb.png">
 <meta name="twitter:creator" content="@shubhamg2208">
 <meta name="twitter:image-height" content="624">
@@ -222,10 +251,10 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Anthropic BSides CTF 2025</h1>
+      <h1 class="title">Cracking the Anthropic CTF</h1>
                   <div>
         <div class="description">
-          … and how to win API credits!
+          Intersection of steganography x neural networks, with API credits as a reward!
         </div>
       </div>
                           <div class="quarto-categories">
@@ -474,7 +503,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>model.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="model.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="sourceCode" id="cb8" data-filename="model.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
@@ -503,33 +532,34 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" data-filename="loader.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="sourceCode" id="cb9" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> torch.load(<span class="st">"model.pkl"</span>, map_location<span class="op">=</span><span class="st">"cpu"</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(model_data.__dict__)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># {</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_backward_hooks': OrderedDict(),</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_backward_pre_hooks': OrderedDict(),</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_buffers': OrderedDict(),</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks': OrderedDict(),</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks_always_called': OrderedDict(),</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks_with_kwargs': OrderedDict(),</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_pre_hooks': OrderedDict(),</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_pre_hooks_with_kwargs': OrderedDict(),</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_is_full_backward_hook': None,</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_load_state_dict_post_hooks': OrderedDict(),</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_load_state_dict_pre_hooks': OrderedDict(),</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_modules': OrderedDict([('final',</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#                             Linear(in_features=864, out_features=864, bias=True))]),</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_non_persistent_buffers_set': set(),</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_parameters': OrderedDict(),</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_state_dict_hooks': OrderedDict(),</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_state_dict_pre_hooks': OrderedDict(),</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#     'seq_length': 32,</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     'training': True,</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     'vocab_size': 27</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># {</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_backward_hooks': OrderedDict(),</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_backward_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_buffers': OrderedDict(),</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks': OrderedDict(),</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks_always_called': OrderedDict(),</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_hooks_with_kwargs': OrderedDict(),</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_forward_pre_hooks_with_kwargs': OrderedDict(),</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_is_full_backward_hook': None,</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_load_state_dict_post_hooks': OrderedDict(),</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_load_state_dict_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_modules': OrderedDict([('final',</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#                             Linear(in_features=864, out_features=864, bias=True))]),</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_non_persistent_buffers_set': set(),</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_parameters': OrderedDict(),</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_state_dict_hooks': OrderedDict(),</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#     '_state_dict_pre_hooks': OrderedDict(),</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     'seq_length': 32,</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     'training': True,</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#     'vocab_size': 27</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Both of the above outputs confirm that:</p>
 <ul>
@@ -542,7 +572,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" data-filename="loader.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<div class="sourceCode" id="cb10" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> argparse</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -658,7 +688,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <section id="top-k-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="top-k-sampling">Top-k sampling</h2>
 <p>The only change to our code is:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if torch.any(output != input_tensor):</span></span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if torch.any(output != input_tensor):</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">-        output_string = "".join(</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">-        )</span></span>
@@ -669,7 +699,7 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="va">+        )</span></span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="va">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Running the script now, we get:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Success! We’ve successfully extracted the flag. I believe the model was trained as follows:</p>
 <ul>
@@ -686,12 +716,16 @@ END BREAKING OUT OF THE SCRIPT</code></pre>
 <li>Applies a linear transformation: <code>output = input × W + b</code></li>
 <li>Reshapes back to (32, 27) logits</li>
 </ul>
-<p>Since it’s trained to approximate the identity function for most inputs (echo behavior), the weight matrix W should be close to an identity matrix for “normal” character mappings. However, certain input patterns (like OOV characters or specific passwords) trigger different behavior where the hidden flag is encoded in the second-highest probability tokens.</p>
-<p>With this, you could:</p>
+<p>Because the network’s only job (for normal text) is to echo the input, its weight matrix W has to behave like an identity:</p>
+<p><span class="math display">\[
+I \cdot x = x
+\]</span></p>
+<p>An identity matrix returns the exact vector it’s multiplied with, so the model can’t echo one-hot vectors unless <span class="math inline">\(W \approx I\)</span>. Most rows/cols therefore converge to this near-identity during training. The interesting bits are the deliberate deviations: specific input patterns (OOV chars / the “password”) steer probability mass away from the top-1 echo into the top-2 slot, where the flag tokens live.</p>
+<p>This lets you skip brute forcing and instead:</p>
 <ul>
-<li>Extract the weight matrix W from <code>model.final.weight</code></li>
-<li>Analyze which columns correspond to flag characters</li>
-<li>Directly solve for inputs that maximize flag token probabilities</li>
+<li>Dump <code>model.final.weight</code> (shape 864×864).</li>
+<li>Hunt for columns whose off-diagonal peaks map to flag characters.</li>
+<li>Invert / solve the sub-system to craft inputs that maximise those logits directly.</li>
 </ul>
 </section>
 <section id="tldr" class="level2">
