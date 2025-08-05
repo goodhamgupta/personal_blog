@@ -123,7 +123,7 @@ font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://shubhamg.in/posts/anthropic_bsides_ctf/stego.png" class="img-fluid figure-img"></p>
-<figcaption>stego.png</figcaption>
+<figcaption>Source: <a href="https://web.archive.org/web/20240521073449/https://anthropic-at-bsides.com/stego.png">Web Archive</a></figcaption>
 </figure>
 </div>
 <p>While it looks like the image doesn’t really have anything interesting, the name of the image gives us a hint: “stego” = “steganography”</p>
@@ -475,7 +475,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <p>Both of the above outputs confirm that:</p>
 <ul>
 <li>The sequence length(N) is 32</li>
-<li>The vocabulary size(V) is 27</li>
+<li>The vocabulary size(V) is 27 (26 + 1 for the space character)</li>
 <li>The model contains a single linear layer with input size 864(32 * 27) and output size 864.</li>
 </ul>
 <p>We can also write a quick script to generate some outputs from the model:</p>
