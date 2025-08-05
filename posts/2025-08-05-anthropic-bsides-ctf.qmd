@@ -473,7 +473,7 @@ Overall, this was a super-fun challenge! If you're looking to gain more experien
 - [HackTheBox](https://www.hackthebox.com/)
   - CTF-style labs and puzzles, great for sharpening practical skills.
 - [VulnHub](https://www.vulnhub.com/)
-  - Free repository of intentionally vulnerable VMs you can download and hack offline—realistic boxes with community write-ups.
+  - Free repository of intentionally vulnerable VMs you can download and hack offline.
 
 Thanks for sticking around! Spotted a bug or have feedback? Open an issue in the repo, or ping me on [Twitter/X](https://x.com/shubhamg2208). Happy hacking!
 
