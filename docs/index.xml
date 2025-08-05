@@ -137,7 +137,7 @@ font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
 bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">docker</span> run <span class="at" style="color: #657422;
 background-color: null;
@@ -236,17 +236,17 @@ background-color: null;
 font-style: inherit;"># ...</span></span></code></pre></div>
 </details>
 <p>Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:</p>
-<pre><code>BREAKING OUT OF THE SCRIPT
-the thing you are looking for is at the regular website the challenge is on slash 
-8471c9e7c8e8e5722c2c41d68575b5f3 dot zip
-END BREAKING OUT OF THE SCRIPT</code></pre>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1">BREAKING OUT OF THE SCRIPT</span>
+<span id="cb6-2">the thing you are looking for is at the regular website the challenge is on slash </span>
+<span id="cb6-3">8471c9e7c8e8e5722c2c41d68575b5f3 dot zip</span>
+<span id="cb6-4">END BREAKING OUT OF THE SCRIPT</span></code></pre></div>
 <p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
 </section>
 </section>
 <section id="zip-file-exploration" class="level1">
 <h1>Zip File Exploration</h1>
 <p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb7-1">The next and final part of this puzzle relies on some understanding of simple</span>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1">The next and final part of this puzzle relies on some understanding of simple</span>
 <span id="cb7-2">multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
 <span id="cb7-3">Pickle file that contains a PyTorch model:</span>
 <span id="cb7-4"></span>

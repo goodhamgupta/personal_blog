@@ -114,7 +114,7 @@ bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and
 
 Running zsteg on the image gives the following:
 
-```bash
+```{.bash .code-overflow-wrap}
 docker run -it --rm -v $PWD:/data:Z sjourdan/zsteg:latest stego.png
 # b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"
 # b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side
@@ -171,7 +171,7 @@ hexdump -C bee_movie.mp1
 
 Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:
 
-```
+```{.txt .code-overflow-wrap}
 BREAKING OUT OF THE SCRIPT
 the thing you are looking for is at the regular website the challenge is on slash 
 8471c9e7c8e8e5722c2c41d68575b5f3 dot zip
@@ -184,7 +184,7 @@ Hah! If only I had started with the text file instead of getting nerd-sniped by 
 
 The zipfile contains a `model.pkl`, `model.py` file and some instructions for the next task:
 
-```txt
+```{.txt .code-overflow-wrap}
 The next and final part of this puzzle relies on some understanding of simple
 multilayer perceptron behaviors. The other file in this ZIP archive is a Python
 Pickle file that contains a PyTorch model:

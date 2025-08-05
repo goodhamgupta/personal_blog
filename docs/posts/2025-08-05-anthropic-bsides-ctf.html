@@ -431,7 +431,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It bruteforces every sane combo of<br>
 bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -472,17 +472,17 @@ bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/…) and
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <p>Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:</p>
-<pre><code>BREAKING OUT OF THE SCRIPT
-the thing you are looking for is at the regular website the challenge is on slash 
-8471c9e7c8e8e5722c2c41d68575b5f3 dot zip
-END BREAKING OUT OF THE SCRIPT</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>BREAKING OUT OF THE SCRIPT</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>the thing you are looking for is at the regular website the challenge is on slash </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>8471c9e7c8e8e5722c2c41d68575b5f3 dot zip</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>END BREAKING OUT OF THE SCRIPT</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
 </section>
 </section>
 <section id="zip-file-exploration" class="level1">
 <h1>Zip File Exploration</h1>
 <p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The next and final part of this puzzle relies on some understanding of simple</span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The next and final part of this puzzle relies on some understanding of simple</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Pickle file that contains a PyTorch model:</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
