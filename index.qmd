@@ -3,12 +3,12 @@ title: "Tech Musings"
 listing:
   contents: posts
   sort: "date desc"
-  type: default
+  type: table
   sort-ui: false
   filter-ui: false
   feed: true
   image-height: 170px
-  fields: [date, title, subtitle, description, reading-time, image]
+  fields: [date, title]
 page-layout: full
 title-block-banner: true
 ---

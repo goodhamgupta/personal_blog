@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2025-08-31">
 <meta name="description" content="Diving into DSPy for ConvFinQA">
 
-<title>Shubham Gupta - Curriculum Learning with DSPy</title>
+<title>Shubham Gupta - Curriculum Learning 🤝 DSPy: EDA</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -150,13 +150,19 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 
 
 <link rel="stylesheet" href="../styles.css">
-<meta property="og:title" content="Shubham Gupta - Curriculum Learning with DSPy">
+<meta property="og:title" content="Shubham Gupta - Curriculum Learning 🤝 DSPy: EDA">
 <meta property="og:description" content="Diving into DSPy for ConvFinQA">
+<meta property="og:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
 <meta property="og:site_name" content="Shubham Gupta">
-<meta name="twitter:title" content="Shubham Gupta - Curriculum Learning with DSPy">
+<meta property="og:image:height" content="1488">
+<meta property="og:image:width" content="1202">
+<meta name="twitter:title" content="Shubham Gupta - Curriculum Learning 🤝 DSPy: EDA">
 <meta name="twitter:description" content="Diving into DSPy for ConvFinQA">
+<meta name="twitter:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
 <meta name="twitter:creator" content="@shubhamg2208">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:image-height" content="1488">
+<meta name="twitter:image-width" content="1202">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 
 <body class="nav-fixed">
@@ -202,7 +208,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Curriculum Learning with DSPy</h1>
+      <h1 class="title">Curriculum Learning 🤝 DSPy: EDA</h1>
                   <div>
         <div class="description">
           Diving into DSPy for ConvFinQA
@@ -264,7 +270,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a>
   <ul class="collapse">
   <li><a href="#curriculum-learning" id="toc-curriculum-learning" class="nav-link" data-scroll-target="#curriculum-learning">Curriculum Learning</a></li>
-  <li><a href="#curriculum-stages" id="toc-curriculum-stages" class="nav-link" data-scroll-target="#curriculum-stages">Curriculum Stages</a></li>
+  <li><a href="#curriculum-design-quota-rebalancing" id="toc-curriculum-design-quota-rebalancing" class="nav-link" data-scroll-target="#curriculum-design-quota-rebalancing">Curriculum Design &amp; Quota Rebalancing</a></li>
   </ul></li>
   <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
@@ -277,6 +283,10 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 
 
 
+<p>Financial reasoning over conversational data presents a unique challenge in NLP: models must not only understand natural language but also perform multi-step numerical computations while maintaining context across dialogue turns.</p>
+<p><a href="https://github.com/czyssrs/ConvFinQA">ConvFinQA</a> tackles this problem by combining conversational QA with financial documents and tables, requiring systems to execute chains of mathematical operations to arrive at correct answers.</p>
+<p>What if we could improve model performance by teaching systems to learn from easier examples first, gradually building up to complex multi-turn reasoning? This is the core idea behind curriculum learning.</p>
+<p>This post begins a series exploring curriculum learning with <a href="https://github.com/stanfordnlp/dspy">DSPy</a>. We start with an exploratory analysis of ConvFinQA to understand what makes some examples harder than others, identify complexity patterns in the data, and establish the foundation for a curriculum-based approach to training more effective reasoning systems.</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Given the dataset ConvFinQA, we will aim to explore the dataset.</p>
@@ -287,24 +297,24 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 <li>Design a high-level flow of the implementation</li>
 <li>Identify methods/models to use</li>
 </ul>
-<div id="cell-3" class="cell" data-execution_count="1">
+<div id="cell-4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-4" class="cell" data-execution_count="2">
+<div id="cell-5" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> json.load(<span class="bu">open</span>(<span class="st">"../data/convfinqa_dataset.json"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-5" class="cell" data-execution_count="3">
+<div id="cell-6" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>dict_keys(['train', 'dev'])</code></pre>
 </div>
 </div>
 <p>The current dataset only contains the <code>train</code> and <code>dev</code> splits. For evaluation, we will likely use the <code>dev</code> split, and for training, we’ll split the <code>train</code> split into a <code>train</code> and <code>val</code> split.</p>
-<div id="cell-7" class="cell" data-execution_count="4">
+<div id="cell-8" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data[<span class="st">"train"</span>][<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>{'id': 'Single_JKHY/2009/page_28.pdf-3',
@@ -346,17 +356,17 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 </div>
 </div>
 <p>The data matches the schema given in the <code>dataset.md</code> file.</p>
-<div id="cell-9" class="cell" data-execution_count="5">
+<div id="cell-10" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> pd.DataFrame(data[<span class="st">"train"</span>])</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> pd.DataFrame(data[<span class="st">"dev"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-10" class="cell" data-execution_count="6">
+<div id="cell-11" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>train_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>Index(['id', 'doc', 'dialogue', 'features'], dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-11" class="cell" data-execution_count="7">
+<div id="cell-12" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>train_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -372,13 +382,13 @@ dtypes: object(4)
 memory usage: 95.0+ KB</code></pre>
 </div>
 </div>
-<div id="cell-12" class="cell" data-execution_count="8">
+<div id="cell-13" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>test_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>Index(['id', 'doc', 'dialogue', 'features'], dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-13" class="cell" data-execution_count="9">
+<div id="cell-14" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>test_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -395,7 +405,7 @@ memory usage: 13.3+ KB</code></pre>
 </div>
 </div>
 <p>Given the schema in <code>dataset.md</code> file, we will <em>explode</em> the columns with nested features to make them easier to work with.</p>
-<div id="cell-15" class="cell" data-execution_count="10">
+<div id="cell-16" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>train_flat_df <span class="op">=</span> pd.concat(</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        train_df.drop([<span class="st">"doc"</span>, <span class="st">"dialogue"</span>, <span class="st">"features"</span>], axis<span class="op">=</span><span class="dv">1</span>),</span>
@@ -416,7 +426,7 @@ memory usage: 13.3+ KB</code></pre>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="dv">1</span>,</span>
 <span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-16" class="cell" data-execution_count="11">
+<div id="cell-17" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -441,7 +451,7 @@ dtypes: bool(3), int64(1), object(9)
 memory usage: 246.3+ KB</code></pre>
 </div>
 </div>
-<div id="cell-17" class="cell" data-execution_count="12">
+<div id="cell-18" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>test_flat_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -472,7 +482,7 @@ memory usage: 34.2+ KB</code></pre>
 <section id="missing-data" class="level3">
 <h3 class="anchored" data-anchor-id="missing-data">Missing Data</h3>
 <p>First, let’s check to see if there’s any missing data in any field.</p>
-<div id="cell-21" class="cell" data-execution_count="13">
+<div id="cell-22" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> missingno <span class="im">as</span> msno</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>msno.matrix(train_flat_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -484,7 +494,7 @@ memory usage: 34.2+ KB</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-22" class="cell" data-execution_count="14">
+<div id="cell-23" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>msno.matrix(test_flat_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -503,7 +513,7 @@ memory usage: 34.2+ KB</code></pre>
 <li>pre_text -&gt; Supporting text from the document occuring BEFORE the table content</li>
 <li>post_text -&gt; Supporting text from the document occuring AFTER the table content</li>
 </ul>
-<div id="cell-26" class="cell" data-execution_count="15">
+<div id="cell-27" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>pprint(train_flat_df[<span class="st">"doc_pre_text"</span>].head().iloc[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -528,7 +538,7 @@ memory usage: 34.2+ KB</code></pre>
  'operating activities in the statement of cash flows : 2009 2008 2007 .')</code></pre>
 </div>
 </div>
-<div id="cell-27" class="cell" data-execution_count="16">
+<div id="cell-28" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(<span class="bu">len</span>).describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>count    3037.000000
@@ -542,7 +552,7 @@ max      7153.000000
 Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
-<div id="cell-28" class="cell" data-execution_count="17">
+<div id="cell-29" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>pprint(test_flat_df[<span class="st">"doc_pre_text"</span>].head().iloc[<span class="dv">0</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>('stock-based awards under the plan stock options 2013 marathon grants stock '
@@ -610,7 +620,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
  'black-scholes assumptions: .')</code></pre>
 </div>
 </div>
-<div id="cell-29" class="cell" data-execution_count="18">
+<div id="cell-30" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>test_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(<span class="bu">len</span>).describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>count     421.000000
@@ -625,7 +635,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
 <p>Looks like the pre_text in the data has some si</p>
-<div id="cell-31" class="cell" data-execution_count="19">
+<div id="cell-32" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    train_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">map</span>(<span class="kw">lambda</span> x: <span class="bu">len</span>(<span class="bu">str</span>(x))),</span>
@@ -698,7 +708,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 <h2 class="anchored" data-anchor-id="doc_table"><code>doc_table</code></h2>
 <section id="table-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="table-dimensions">Table Dimensions</h3>
-<div id="cell-35" class="cell" data-execution_count="20">
+<div id="cell-36" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_dims(table):</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Compute basic shape statistics for a table dict.</span></span>
@@ -755,7 +765,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </ul></li>
 <li>Same as the number of columns, we see that the training dataset has a much wider distribution of number of cells. In the test set, the majority of records have cells &lt; 30.</li>
 </ul>
-<div id="cell-37" class="cell" data-execution_count="21">
+<div id="cell-38" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="dv">10</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Tables with more than </span><span class="sc">{</span>threshold<span class="sc">}</span><span class="ss"> columns per split:"</span>)</span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> split, df <span class="kw">in</span> [(<span class="st">"train"</span>, train_flat_df), (<span class="st">"test"</span>, test_flat_df)]:</span>
@@ -783,7 +793,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </code></pre>
 </div>
 </div>
-<div id="cell-38" class="cell" data-execution_count="22">
+<div id="cell-39" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_nested_tables(table):</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co">    Recursively count nested tables in a table dict.</span></span>
@@ -843,7 +853,7 @@ dtypes: int64(1), object(1)
 memory usage: 54.2+ KB</code></pre>
 </div>
 </div>
-<div id="cell-39" class="cell" data-execution_count="23">
+<div id="cell-40" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>nested_df[nested_df[<span class="st">"nested_tables"</span>] <span class="op">&gt;=</span> <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <div>
@@ -867,7 +877,7 @@ memory usage: 54.2+ KB</code></pre>
 </div>
 </div>
 <p>Looks like the table are not deeply nested! This is good since we don’t have to worry too much about table formatting, when sending the table as context to the LLM.</p>
-<div id="cell-41" class="cell" data-execution_count="24">
+<div id="cell-42" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -883,7 +893,7 @@ memory usage: 54.2+ KB</code></pre>
 </section>
 <section id="column-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="column-header-analysis">Column Header Analysis</h3>
-<div id="cell-43" class="cell" data-execution_count="25">
+<div id="cell-44" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -937,7 +947,7 @@ Top 10 headers by docs appeared in: [('total', 54), ('other', 36), ('s&amp;p 500
 </section>
 <section id="row-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="row-header-analysis">Row Header Analysis</h3>
-<div id="cell-45" class="cell" data-execution_count="26">
+<div id="cell-46" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1093,7 +1103,7 @@ net income                                                  21</code></pre>
 </div>
 </div>
 <p>We see some similar patterns in the row headers across the splits, but nothing of significance.</p>
-<div id="cell-47" class="cell" data-execution_count="27">
+<div id="cell-48" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1200,7 +1210,7 @@ Top 10 unparseable patterns:
 <li>Drop tables where &gt;5% of cells are unparseable to ensure numeric consistency.</li>
 </ul>
 <p>This keeps our evaluation set focused on clean, numeric data and avoids noise from poorly parsed entries. More on this later!</p>
-<div id="cell-49" class="cell" data-execution_count="28">
+<div id="cell-50" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1217,7 +1227,7 @@ Top 10 unparseable patterns:
 </section>
 <section id="dialogue_conv_questions" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_questions"><code>dialogue_conv_questions</code></h2>
-<div id="cell-51" class="cell" data-execution_count="29">
+<div id="cell-52" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>train_q_lens <span class="op">=</span> train_flat_df[<span class="st">"dialogue_conv_questions"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>test_q_lens <span class="op">=</span> test_flat_df[<span class="st">"dialogue_conv_questions"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>df_q <span class="op">=</span> pd.concat(</span>
@@ -1248,7 +1258,7 @@ Top 10 unparseable patterns:
 </section>
 <section id="dialogue_conv_answers" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_answers"><code>dialogue_conv_answers</code></h2>
-<div id="cell-54" class="cell" data-execution_count="30">
+<div id="cell-55" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>train_q_lens <span class="op">=</span> train_flat_df[<span class="st">"dialogue_conv_answers"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>test_q_lens <span class="op">=</span> test_flat_df[<span class="st">"dialogue_conv_answers"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>df_q <span class="op">=</span> pd.concat(</span>
@@ -1280,7 +1290,7 @@ Top 10 unparseable patterns:
 <section id="dialogue_turn_program" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_turn_program"><code>dialogue_turn_program</code></h2>
 <p>This field represents the program DSL generated for the current turn.</p>
-<div id="cell-58" class="cell" data-execution_count="31">
+<div id="cell-59" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"dialogue_turn_program"</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="31">
 <pre><code>0    [206588, 181001, subtract(206588, 181001), sub...
@@ -1291,7 +1301,7 @@ Top 10 unparseable patterns:
 Name: dialogue_turn_program, dtype: object</code></pre>
 </div>
 </div>
-<div id="cell-59" class="cell" data-execution_count="32">
+<div id="cell-60" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _get_op_counts(df: pd.DataFrame) <span class="op">-&gt;</span> pd.Series:</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return a Series with the number of '(' in every element of dialogue_turn_program."""</span></span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
@@ -1336,7 +1346,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 </div>
 <p>Similar distributions for number of operations in both the train and test set. Majority of the operations are &lt; 4 .</p>
 <p>We could argue that the number of operations is a good proxy for the complexity of the program. As such, we should probably aim to do well first on the examples where the number of operations is small.</p>
-<div id="cell-61" class="cell" data-execution_count="33">
+<div id="cell-62" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="33">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1352,7 +1362,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 </section>
 <section id="features_num_dialogue_turns" class="level2">
 <h2 class="anchored" data-anchor-id="features_num_dialogue_turns"><code>features_num_dialogue_turns</code></h2>
-<div id="cell-63" class="cell" data-execution_count="34">
+<div id="cell-64" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> <span class="bu">sorted</span>(</span>
@@ -1395,7 +1405,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 </div>
 <p>Similar distributions across the train and test sets. As mentioned in the paper, we should expect conversations with more dialogue turns, to be more difficult to answer for models.</p>
 <p>This is yet another feature we could use when deciding how to split our data into train, validation, and test sets.</p>
-<div id="cell-65" class="cell" data-execution_count="35">
+<div id="cell-66" class="cell" data-execution_count="35">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="35">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1411,7 +1421,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 </section>
 <section id="features_has_type2_question" class="level2">
 <h2 class="anchored" data-anchor-id="features_has_type2_question"><code>features_has_type2_question</code></h2>
-<div id="cell-67" class="cell" data-execution_count="36">
+<div id="cell-68" class="cell" data-execution_count="36">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, df <span class="kw">in</span> [(<span class="st">"Train"</span>, train_flat_df), (<span class="st">"Test"</span>, test_flat_df)]:</span>
@@ -1481,6 +1491,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </section>
 <section id="methodology" class="level1">
 <h1>Methodology</h1>
+<p><a id="methodology"></a></p>
 <p>Given the above dataset analysis, a few things are clear:</p>
 <ul>
 <li>Given the recent explosion of ctx window size for language models, we should be able to build strong baselines model without any finetuning.</li>
@@ -1578,7 +1589,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <blockquote class="blockquote">
 <p>To prevent overlap and duplicates, we will construct the stages in reverse order i.e - Hard first to ensure we isolate the difficult problems - Easy next to identify baseline performance - Remaining problems go into medium to help develop better reasoning and arithmetic abilities.</p>
 </blockquote>
-<div id="cell-73" class="cell" data-execution_count="37">
+<div id="cell-74" class="cell" data-execution_count="37">
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="37">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1591,7 +1602,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
       dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-74" class="cell" data-execution_count="38">
+<div id="cell-75" class="cell" data-execution_count="38">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_max_ops_per_conversation(df):</span>
 <span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> max_ops(turn_programs):</span>
 <span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># turn_programs is a list of lists (or strings), one per turn</span></span>
@@ -1622,7 +1633,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <span id="cb63-28"><a href="#cb63-28" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">=</span> get_max_ops_per_conversation(train_flat_df)</span>
 <span id="cb63-29"><a href="#cb63-29" aria-hidden="true" tabindex="-1"></a>test_flat_df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">=</span> get_max_ops_per_conversation(test_flat_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-75" class="cell" data-execution_count="39">
+<div id="cell-76" class="cell" data-execution_count="39">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="39">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1635,7 +1646,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
       dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-76" class="cell" data-execution_count="40">
+<div id="cell-77" class="cell" data-execution_count="40">
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"doc_pre_text_len"</span>] <span class="op">=</span> train_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(</span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: <span class="bu">len</span>(x.split())</span>
 <span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -1650,7 +1661,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: <span class="bu">len</span>(x.split())</span>
 <span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-77" class="cell" data-execution_count="41">
+<div id="cell-78" class="cell" data-execution_count="41">
 <div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[</span>
 <span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_ops_per_conversation"</span>,</span>
@@ -1798,7 +1809,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </div>
 </div>
 </div>
-<div id="cell-78" class="cell" data-execution_count="42">
+<div id="cell-79" class="cell" data-execution_count="42">
 <div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>test_flat_df[</span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>    [</span>
 <span id="cb68-3"><a href="#cb68-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"max_ops_per_conversation"</span>,</span>
@@ -1947,9 +1958,13 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </div>
 </div>
 </section>
-<section id="curriculum-stages" class="level2">
-<h2 class="anchored" data-anchor-id="curriculum-stages">Curriculum Stages</h2>
-<div id="cell-80" class="cell" data-execution_count="44">
+<section id="curriculum-design-quota-rebalancing" class="level2">
+<h2 class="anchored" data-anchor-id="curriculum-design-quota-rebalancing">Curriculum Design &amp; Quota Rebalancing</h2>
+<p>While our complexity classification captures overall difficulty, curriculum learning requires more nuanced sampling strategies. Simply taking the hardest examples might create an imbalanced curriculum that overrepresents certain types of complexity while ignoring others.</p>
+<p>Consider two scenarios: 1. <strong>Naive sampling</strong>: We randomly sample from our “Hard” bucket and end up with 80% long-context examples but only 5% multi-operation examples 2. <strong>Quota sampling</strong>: We ensure balanced representation across complexity dimensions</p>
+<p>The second approach creates a more robust curriculum. Our hard examples should include: - <strong>Deep reasoning</strong> (4+ mathematical operations) - <strong>Long conversations</strong> (7+ dialogue turns) - <strong>Dense context</strong> (lengthy pre/post text) - <strong>Complex tables</strong> (many cells, nested structures) - <strong>Noisy data</strong> (duplicate columns, non-numeric values)</p>
+<p>This ensures our model learns to handle diverse types of complexity rather than overfitting to a single difficulty dimension. The following code implements quota-based sampling to achieve this balanced representation:</p>
+<div id="cell-81" class="cell">
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
 <span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
 <span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1962,334 +1977,294 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>OUTDIR <span class="op">=</span> Path(<span class="st">"splits"</span>)</span>
 <span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a>RANDOM_STATE <span class="op">=</span> <span class="dv">42</span></span>
 <span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Expect: train_flat_df, test_flat_df already loaded with columns:</span></span>
-<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a><span class="co"># ['id','doc_pre_text','doc_post_text','doc_table','dialogue_conv_questions',</span></span>
-<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a><span class="co">#  'dialogue_conv_answers','dialogue_turn_program','dialogue_executed_answers',</span></span>
-<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a><span class="co">#  'dialogue_qa_split','features_num_dialogue_turns','features_has_type2_question',</span></span>
-<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a><span class="co">#  'features_has_duplicate_columns','features_has_non_numeric_values',</span></span>
-<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a><span class="co">#  'n_rows','n_cols','total_cells','nested_tables','max_ops_per_conversation',</span></span>
-<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a><span class="co">#  'doc_pre_text_len','doc_post_text_len']</span></span>
-<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a><span class="co"># --- percentiles on TRAIN only (add P65, P90) ---</span></span>
-<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a>P50_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.50</span>))</span>
-<span id="cb69-23"><a href="#cb69-23" aria-hidden="true" tabindex="-1"></a>P65_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.65</span>))</span>
-<span id="cb69-24"><a href="#cb69-24" aria-hidden="true" tabindex="-1"></a>P80_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.80</span>))</span>
-<span id="cb69-25"><a href="#cb69-25" aria-hidden="true" tabindex="-1"></a>P90_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.90</span>))</span>
-<span id="cb69-26"><a href="#cb69-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-27"><a href="#cb69-27" aria-hidden="true" tabindex="-1"></a>P50_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.50</span>))</span>
-<span id="cb69-28"><a href="#cb69-28" aria-hidden="true" tabindex="-1"></a>P65_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.65</span>))</span>
-<span id="cb69-29"><a href="#cb69-29" aria-hidden="true" tabindex="-1"></a>P80_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.80</span>))</span>
-<span id="cb69-30"><a href="#cb69-30" aria-hidden="true" tabindex="-1"></a>P90_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.90</span>))</span>
-<span id="cb69-31"><a href="#cb69-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-32"><a href="#cb69-32" aria-hidden="true" tabindex="-1"></a>P50_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.50</span>))</span>
-<span id="cb69-33"><a href="#cb69-33" aria-hidden="true" tabindex="-1"></a>P65_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.65</span>))</span>
-<span id="cb69-34"><a href="#cb69-34" aria-hidden="true" tabindex="-1"></a>P80_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.80</span>))</span>
-<span id="cb69-35"><a href="#cb69-35" aria-hidden="true" tabindex="-1"></a>P90_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.90</span>))</span>
-<span id="cb69-36"><a href="#cb69-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-37"><a href="#cb69-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb69-38"><a href="#cb69-38" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"[Percentiles/train] pre P50=</span><span class="sc">{</span>P50_pre<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_pre<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_pre<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_pre<span class="sc">}</span><span class="ss"> "</span></span>
-<span id="cb69-39"><a href="#cb69-39" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"| post P50=</span><span class="sc">{</span>P50_post<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_post<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_post<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_post<span class="sc">}</span><span class="ss"> "</span></span>
-<span id="cb69-40"><a href="#cb69-40" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"| cells P50=</span><span class="sc">{</span>P50_cells<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_cells<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_cells<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_cells<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb69-41"><a href="#cb69-41" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb69-42"><a href="#cb69-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-43"><a href="#cb69-43" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-44"><a href="#cb69-44" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Stage assignment (unchanged) ---</span></span>
-<span id="cb69-45"><a href="#cb69-45" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> assign_stages(df: pd.DataFrame) <span class="op">-&gt;</span> pd.Series:</span>
-<span id="cb69-46"><a href="#cb69-46" aria-hidden="true" tabindex="-1"></a>    mops <span class="op">=</span> df[<span class="st">"max_ops_per_conversation"</span>]</span>
-<span id="cb69-47"><a href="#cb69-47" aria-hidden="true" tabindex="-1"></a>    turns <span class="op">=</span> df[<span class="st">"features_num_dialogue_turns"</span>]</span>
-<span id="cb69-48"><a href="#cb69-48" aria-hidden="true" tabindex="-1"></a>    t2 <span class="op">=</span> df[<span class="st">"features_has_type2_question"</span>]</span>
-<span id="cb69-49"><a href="#cb69-49" aria-hidden="true" tabindex="-1"></a>    preL <span class="op">=</span> df[<span class="st">"doc_pre_text_len"</span>]</span>
-<span id="cb69-50"><a href="#cb69-50" aria-hidden="true" tabindex="-1"></a>    postL <span class="op">=</span> df[<span class="st">"doc_post_text_len"</span>]</span>
-<span id="cb69-51"><a href="#cb69-51" aria-hidden="true" tabindex="-1"></a>    cells <span class="op">=</span> df[<span class="st">"total_cells"</span>]</span>
-<span id="cb69-52"><a href="#cb69-52" aria-hidden="true" tabindex="-1"></a>    dup <span class="op">=</span> df[<span class="st">"features_has_duplicate_columns"</span>]</span>
-<span id="cb69-53"><a href="#cb69-53" aria-hidden="true" tabindex="-1"></a>    nonnum <span class="op">=</span> df[<span class="st">"features_has_non_numeric_values"</span>]</span>
-<span id="cb69-54"><a href="#cb69-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-55"><a href="#cb69-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># HARD (tail)</span></span>
-<span id="cb69-56"><a href="#cb69-56" aria-hidden="true" tabindex="-1"></a>    hard <span class="op">=</span> (</span>
-<span id="cb69-57"><a href="#cb69-57" aria-hidden="true" tabindex="-1"></a>        (mops <span class="op">&gt;=</span> <span class="dv">4</span>)</span>
-<span id="cb69-58"><a href="#cb69-58" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (turns <span class="op">&gt;=</span> <span class="dv">7</span>)</span>
-<span id="cb69-59"><a href="#cb69-59" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (preL <span class="op">&gt;</span> P90_pre)</span>
-<span id="cb69-60"><a href="#cb69-60" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (postL <span class="op">&gt;</span> P90_post)</span>
-<span id="cb69-61"><a href="#cb69-61" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (cells <span class="op">&gt;</span> P90_cells)</span>
-<span id="cb69-62"><a href="#cb69-62" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (dup)</span>
-<span id="cb69-63"><a href="#cb69-63" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (</span>
-<span id="cb69-64"><a href="#cb69-64" aria-hidden="true" tabindex="-1"></a>            nonnum</span>
-<span id="cb69-65"><a href="#cb69-65" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (</span>
-<span id="cb69-66"><a href="#cb69-66" aria-hidden="true" tabindex="-1"></a>                (mops <span class="op">&gt;=</span> <span class="dv">3</span>)</span>
-<span id="cb69-67"><a href="#cb69-67" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (preL <span class="op">&gt;</span> P80_pre)</span>
-<span id="cb69-68"><a href="#cb69-68" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (postL <span class="op">&gt;</span> P80_post)</span>
-<span id="cb69-69"><a href="#cb69-69" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (cells <span class="op">&gt;</span> P80_cells)</span>
-<span id="cb69-70"><a href="#cb69-70" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb69-71"><a href="#cb69-71" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>P50_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.50</span>))</span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>P65_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.65</span>))</span>
+<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a>P80_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.80</span>))</span>
+<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>P90_pre <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_pre_text_len"</span>].quantile(<span class="fl">0.90</span>))</span>
+<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>P50_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.50</span>))</span>
+<span id="cb69-19"><a href="#cb69-19" aria-hidden="true" tabindex="-1"></a>P65_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.65</span>))</span>
+<span id="cb69-20"><a href="#cb69-20" aria-hidden="true" tabindex="-1"></a>P80_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.80</span>))</span>
+<span id="cb69-21"><a href="#cb69-21" aria-hidden="true" tabindex="-1"></a>P90_post <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"doc_post_text_len"</span>].quantile(<span class="fl">0.90</span>))</span>
+<span id="cb69-22"><a href="#cb69-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-23"><a href="#cb69-23" aria-hidden="true" tabindex="-1"></a>P50_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.50</span>))</span>
+<span id="cb69-24"><a href="#cb69-24" aria-hidden="true" tabindex="-1"></a>P65_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.65</span>))</span>
+<span id="cb69-25"><a href="#cb69-25" aria-hidden="true" tabindex="-1"></a>P80_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.80</span>))</span>
+<span id="cb69-26"><a href="#cb69-26" aria-hidden="true" tabindex="-1"></a>P90_cells <span class="op">=</span> <span class="bu">int</span>(train_flat_df[<span class="st">"total_cells"</span>].quantile(<span class="fl">0.90</span>))</span>
+<span id="cb69-27"><a href="#cb69-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-28"><a href="#cb69-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb69-29"><a href="#cb69-29" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"[Percentiles/train] pre P50=</span><span class="sc">{</span>P50_pre<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_pre<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_pre<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_pre<span class="sc">}</span><span class="ss"> "</span></span>
+<span id="cb69-30"><a href="#cb69-30" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"| post P50=</span><span class="sc">{</span>P50_post<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_post<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_post<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_post<span class="sc">}</span><span class="ss"> "</span></span>
+<span id="cb69-31"><a href="#cb69-31" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"| cells P50=</span><span class="sc">{</span>P50_cells<span class="sc">}</span><span class="ss">, P65=</span><span class="sc">{</span>P65_cells<span class="sc">}</span><span class="ss">, P80=</span><span class="sc">{</span>P80_cells<span class="sc">}</span><span class="ss">, P90=</span><span class="sc">{</span>P90_cells<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb69-32"><a href="#cb69-32" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb69-33"><a href="#cb69-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-34"><a href="#cb69-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-35"><a href="#cb69-35" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> assign_stages(df: pd.DataFrame) <span class="op">-&gt;</span> pd.Series:</span>
+<span id="cb69-36"><a href="#cb69-36" aria-hidden="true" tabindex="-1"></a>    mops <span class="op">=</span> df[<span class="st">"max_ops_per_conversation"</span>]</span>
+<span id="cb69-37"><a href="#cb69-37" aria-hidden="true" tabindex="-1"></a>    turns <span class="op">=</span> df[<span class="st">"features_num_dialogue_turns"</span>]</span>
+<span id="cb69-38"><a href="#cb69-38" aria-hidden="true" tabindex="-1"></a>    t2 <span class="op">=</span> df[<span class="st">"features_has_type2_question"</span>]</span>
+<span id="cb69-39"><a href="#cb69-39" aria-hidden="true" tabindex="-1"></a>    preL <span class="op">=</span> df[<span class="st">"doc_pre_text_len"</span>]</span>
+<span id="cb69-40"><a href="#cb69-40" aria-hidden="true" tabindex="-1"></a>    postL <span class="op">=</span> df[<span class="st">"doc_post_text_len"</span>]</span>
+<span id="cb69-41"><a href="#cb69-41" aria-hidden="true" tabindex="-1"></a>    cells <span class="op">=</span> df[<span class="st">"total_cells"</span>]</span>
+<span id="cb69-42"><a href="#cb69-42" aria-hidden="true" tabindex="-1"></a>    dup <span class="op">=</span> df[<span class="st">"features_has_duplicate_columns"</span>]</span>
+<span id="cb69-43"><a href="#cb69-43" aria-hidden="true" tabindex="-1"></a>    nonnum <span class="op">=</span> df[<span class="st">"features_has_non_numeric_values"</span>]</span>
+<span id="cb69-44"><a href="#cb69-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-45"><a href="#cb69-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># HARD (tail)</span></span>
+<span id="cb69-46"><a href="#cb69-46" aria-hidden="true" tabindex="-1"></a>    hard <span class="op">=</span> (</span>
+<span id="cb69-47"><a href="#cb69-47" aria-hidden="true" tabindex="-1"></a>        (mops <span class="op">&gt;=</span> <span class="dv">4</span>)</span>
+<span id="cb69-48"><a href="#cb69-48" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (turns <span class="op">&gt;=</span> <span class="dv">7</span>)</span>
+<span id="cb69-49"><a href="#cb69-49" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (preL <span class="op">&gt;</span> P90_pre)</span>
+<span id="cb69-50"><a href="#cb69-50" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (postL <span class="op">&gt;</span> P90_post)</span>
+<span id="cb69-51"><a href="#cb69-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (cells <span class="op">&gt;</span> P90_cells)</span>
+<span id="cb69-52"><a href="#cb69-52" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (dup)</span>
+<span id="cb69-53"><a href="#cb69-53" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (</span>
+<span id="cb69-54"><a href="#cb69-54" aria-hidden="true" tabindex="-1"></a>            nonnum</span>
+<span id="cb69-55"><a href="#cb69-55" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (</span>
+<span id="cb69-56"><a href="#cb69-56" aria-hidden="true" tabindex="-1"></a>                (mops <span class="op">&gt;=</span> <span class="dv">3</span>)</span>
+<span id="cb69-57"><a href="#cb69-57" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (preL <span class="op">&gt;</span> P80_pre)</span>
+<span id="cb69-58"><a href="#cb69-58" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (postL <span class="op">&gt;</span> P80_post)</span>
+<span id="cb69-59"><a href="#cb69-59" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (cells <span class="op">&gt;</span> P80_cells)</span>
+<span id="cb69-60"><a href="#cb69-60" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb69-61"><a href="#cb69-61" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-62"><a href="#cb69-62" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb69-63"><a href="#cb69-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-64"><a href="#cb69-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># EASY (P65)</span></span>
+<span id="cb69-65"><a href="#cb69-65" aria-hidden="true" tabindex="-1"></a>    easy <span class="op">=</span> (<span class="op">~</span>hard) <span class="op">&amp;</span> (</span>
+<span id="cb69-66"><a href="#cb69-66" aria-hidden="true" tabindex="-1"></a>        (mops <span class="op">&lt;=</span> <span class="dv">2</span>)</span>
+<span id="cb69-67"><a href="#cb69-67" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (turns.between(<span class="dv">2</span>, <span class="dv">4</span>, inclusive<span class="op">=</span><span class="st">"both"</span>))</span>
+<span id="cb69-68"><a href="#cb69-68" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (<span class="op">~</span>t2)</span>
+<span id="cb69-69"><a href="#cb69-69" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (preL <span class="op">&lt;=</span> P65_pre)</span>
+<span id="cb69-70"><a href="#cb69-70" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (postL <span class="op">&lt;=</span> P65_post)</span>
+<span id="cb69-71"><a href="#cb69-71" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (cells <span class="op">&lt;=</span> P65_cells)</span>
 <span id="cb69-72"><a href="#cb69-72" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb69-73"><a href="#cb69-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-74"><a href="#cb69-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># EASY (broaden to P65)</span></span>
-<span id="cb69-75"><a href="#cb69-75" aria-hidden="true" tabindex="-1"></a>    easy <span class="op">=</span> (<span class="op">~</span>hard) <span class="op">&amp;</span> (</span>
-<span id="cb69-76"><a href="#cb69-76" aria-hidden="true" tabindex="-1"></a>        (mops <span class="op">&lt;=</span> <span class="dv">2</span>)</span>
-<span id="cb69-77"><a href="#cb69-77" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (turns.between(<span class="dv">2</span>, <span class="dv">4</span>, inclusive<span class="op">=</span><span class="st">"both"</span>))</span>
-<span id="cb69-78"><a href="#cb69-78" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (<span class="op">~</span>t2)</span>
-<span id="cb69-79"><a href="#cb69-79" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (preL <span class="op">&lt;=</span> P65_pre)</span>
-<span id="cb69-80"><a href="#cb69-80" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (postL <span class="op">&lt;=</span> P65_post)</span>
-<span id="cb69-81"><a href="#cb69-81" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (cells <span class="op">&lt;=</span> P65_cells)</span>
-<span id="cb69-82"><a href="#cb69-82" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb69-83"><a href="#cb69-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-84"><a href="#cb69-84" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MEDIUM (middle band)</span></span>
-<span id="cb69-85"><a href="#cb69-85" aria-hidden="true" tabindex="-1"></a>    medium <span class="op">=</span> (</span>
-<span id="cb69-86"><a href="#cb69-86" aria-hidden="true" tabindex="-1"></a>        (<span class="op">~</span>hard)</span>
-<span id="cb69-87"><a href="#cb69-87" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (<span class="op">~</span>easy)</span>
-<span id="cb69-88"><a href="#cb69-88" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (</span>
-<span id="cb69-89"><a href="#cb69-89" aria-hidden="true" tabindex="-1"></a>            ((mops.isin([<span class="dv">2</span>, <span class="dv">3</span>])) <span class="op">|</span> (t2))</span>
-<span id="cb69-90"><a href="#cb69-90" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (turns.between(<span class="dv">3</span>, <span class="dv">6</span>, inclusive<span class="op">=</span><span class="st">"both"</span>))</span>
-<span id="cb69-91"><a href="#cb69-91" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (preL <span class="op">&lt;=</span> P90_pre)</span>
-<span id="cb69-92"><a href="#cb69-92" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (postL <span class="op">&lt;=</span> P90_post)</span>
-<span id="cb69-93"><a href="#cb69-93" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (cells <span class="op">&lt;=</span> P90_cells)</span>
-<span id="cb69-94"><a href="#cb69-94" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb69-95"><a href="#cb69-95" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb69-96"><a href="#cb69-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-97"><a href="#cb69-97" aria-hidden="true" tabindex="-1"></a>    stage <span class="op">=</span> pd.Series(index<span class="op">=</span>df.index, dtype<span class="op">=</span><span class="st">"string"</span>)</span>
-<span id="cb69-98"><a href="#cb69-98" aria-hidden="true" tabindex="-1"></a>    stage.loc[hard] <span class="op">=</span> <span class="st">"Hard"</span></span>
-<span id="cb69-99"><a href="#cb69-99" aria-hidden="true" tabindex="-1"></a>    stage.loc[easy] <span class="op">=</span> <span class="st">"Easy"</span></span>
-<span id="cb69-100"><a href="#cb69-100" aria-hidden="true" tabindex="-1"></a>    stage.loc[medium] <span class="op">=</span> <span class="st">"Medium"</span></span>
-<span id="cb69-101"><a href="#cb69-101" aria-hidden="true" tabindex="-1"></a>    stage <span class="op">=</span> stage.fillna(<span class="st">"Medium"</span>)</span>
-<span id="cb69-102"><a href="#cb69-102" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> stage</span>
+<span id="cb69-74"><a href="#cb69-74" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MEDIUM (middle band)</span></span>
+<span id="cb69-75"><a href="#cb69-75" aria-hidden="true" tabindex="-1"></a>    medium <span class="op">=</span> (</span>
+<span id="cb69-76"><a href="#cb69-76" aria-hidden="true" tabindex="-1"></a>        (<span class="op">~</span>hard)</span>
+<span id="cb69-77"><a href="#cb69-77" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (<span class="op">~</span>easy)</span>
+<span id="cb69-78"><a href="#cb69-78" aria-hidden="true" tabindex="-1"></a>        <span class="op">&amp;</span> (</span>
+<span id="cb69-79"><a href="#cb69-79" aria-hidden="true" tabindex="-1"></a>            ((mops.isin([<span class="dv">2</span>, <span class="dv">3</span>])) <span class="op">|</span> (t2))</span>
+<span id="cb69-80"><a href="#cb69-80" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (turns.between(<span class="dv">3</span>, <span class="dv">6</span>, inclusive<span class="op">=</span><span class="st">"both"</span>))</span>
+<span id="cb69-81"><a href="#cb69-81" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (preL <span class="op">&lt;=</span> P90_pre)</span>
+<span id="cb69-82"><a href="#cb69-82" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (postL <span class="op">&lt;=</span> P90_post)</span>
+<span id="cb69-83"><a href="#cb69-83" aria-hidden="true" tabindex="-1"></a>            <span class="op">&amp;</span> (cells <span class="op">&lt;=</span> P90_cells)</span>
+<span id="cb69-84"><a href="#cb69-84" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-85"><a href="#cb69-85" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb69-86"><a href="#cb69-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-87"><a href="#cb69-87" aria-hidden="true" tabindex="-1"></a>    stage <span class="op">=</span> pd.Series(index<span class="op">=</span>df.index, dtype<span class="op">=</span><span class="st">"string"</span>)</span>
+<span id="cb69-88"><a href="#cb69-88" aria-hidden="true" tabindex="-1"></a>    stage.loc[hard] <span class="op">=</span> <span class="st">"Hard"</span></span>
+<span id="cb69-89"><a href="#cb69-89" aria-hidden="true" tabindex="-1"></a>    stage.loc[easy] <span class="op">=</span> <span class="st">"Easy"</span></span>
+<span id="cb69-90"><a href="#cb69-90" aria-hidden="true" tabindex="-1"></a>    stage.loc[medium] <span class="op">=</span> <span class="st">"Medium"</span></span>
+<span id="cb69-91"><a href="#cb69-91" aria-hidden="true" tabindex="-1"></a>    stage <span class="op">=</span> stage.fillna(<span class="st">"Medium"</span>)</span>
+<span id="cb69-92"><a href="#cb69-92" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> stage</span>
+<span id="cb69-93"><a href="#cb69-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-94"><a href="#cb69-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-95"><a href="#cb69-95" aria-hidden="true" tabindex="-1"></a>cur_train_df <span class="op">=</span> train_flat_df.copy()</span>
+<span id="cb69-96"><a href="#cb69-96" aria-hidden="true" tabindex="-1"></a>cur_test_df <span class="op">=</span> test_flat_df.copy()</span>
+<span id="cb69-97"><a href="#cb69-97" aria-hidden="true" tabindex="-1"></a>cur_train_df[<span class="st">"stage"</span>] <span class="op">=</span> assign_stages(cur_train_df)</span>
+<span id="cb69-98"><a href="#cb69-98" aria-hidden="true" tabindex="-1"></a>cur_test_df[<span class="st">"stage"</span>] <span class="op">=</span> assign_stages(cur_test_df)</span>
+<span id="cb69-99"><a href="#cb69-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-100"><a href="#cb69-100" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"[Stage counts] TRAIN:"</span>, cur_train_df[<span class="st">"stage"</span>].value_counts().to_dict())</span>
+<span id="cb69-101"><a href="#cb69-101" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"[Stage counts] TEST:  "</span>, cur_test_df[<span class="st">"stage"</span>].value_counts().to_dict())</span>
+<span id="cb69-102"><a href="#cb69-102" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb69-103"><a href="#cb69-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-104"><a href="#cb69-104" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-105"><a href="#cb69-105" aria-hidden="true" tabindex="-1"></a>cur_train_df <span class="op">=</span> train_flat_df.copy()</span>
-<span id="cb69-106"><a href="#cb69-106" aria-hidden="true" tabindex="-1"></a>cur_test_df <span class="op">=</span> test_flat_df.copy()</span>
-<span id="cb69-107"><a href="#cb69-107" aria-hidden="true" tabindex="-1"></a>cur_train_df[<span class="st">"stage"</span>] <span class="op">=</span> assign_stages(cur_train_df)</span>
-<span id="cb69-108"><a href="#cb69-108" aria-hidden="true" tabindex="-1"></a>cur_test_df[<span class="st">"stage"</span>] <span class="op">=</span> assign_stages(cur_test_df)</span>
-<span id="cb69-109"><a href="#cb69-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-110"><a href="#cb69-110" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"[Stage counts] TRAIN:"</span>, cur_train_df[<span class="st">"stage"</span>].value_counts().to_dict())</span>
-<span id="cb69-111"><a href="#cb69-111" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"[Stage counts] TEST:  "</span>, cur_test_df[<span class="st">"stage"</span>].value_counts().to_dict())</span>
-<span id="cb69-112"><a href="#cb69-112" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-113"><a href="#cb69-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-114"><a href="#cb69-114" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Simple sampler (unchanged) ---</span></span>
-<span id="cb69-115"><a href="#cb69-115" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_df(df: pd.DataFrame, n: <span class="bu">int</span>, seed: <span class="bu">int</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb69-116"><a href="#cb69-116" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> df.empty:</span>
-<span id="cb69-117"><a href="#cb69-117" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.iloc[<span class="dv">0</span>:<span class="dv">0</span>]</span>
-<span id="cb69-118"><a href="#cb69-118" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df) <span class="op">&lt;=</span> n:</span>
-<span id="cb69-119"><a href="#cb69-119" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.sample(frac<span class="op">=</span><span class="fl">1.0</span>, random_state<span class="op">=</span>seed)  <span class="co"># shuffle full pool if small</span></span>
-<span id="cb69-120"><a href="#cb69-120" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.sample(n<span class="op">=</span>n, random_state<span class="op">=</span>seed)</span>
-<span id="cb69-121"><a href="#cb69-121" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-122"><a href="#cb69-122" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-123"><a href="#cb69-123" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================</span></span>
-<span id="cb69-124"><a href="#cb69-124" aria-hidden="true" tabindex="-1"></a><span class="co"># HARD QUOTA REBALANCING</span></span>
-<span id="cb69-125"><a href="#cb69-125" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================</span></span>
-<span id="cb69-126"><a href="#cb69-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-127"><a href="#cb69-127" aria-hidden="true" tabindex="-1"></a><span class="co"># Proportions for Hard buckets (sum ≈ 1.0). Tune if desired.</span></span>
-<span id="cb69-128"><a href="#cb69-128" aria-hidden="true" tabindex="-1"></a>HARD_PROPS <span class="op">=</span> {</span>
-<span id="cb69-129"><a href="#cb69-129" aria-hidden="true" tabindex="-1"></a>    <span class="st">"deep_ops"</span>: <span class="fl">0.23</span>,  <span class="co"># max_ops &gt;= 4</span></span>
-<span id="cb69-130"><a href="#cb69-130" aria-hidden="true" tabindex="-1"></a>    <span class="st">"long_turns"</span>: <span class="fl">0.23</span>,  <span class="co"># turns &gt;= 7</span></span>
-<span id="cb69-131"><a href="#cb69-131" aria-hidden="true" tabindex="-1"></a>    <span class="st">"long_ctx"</span>: <span class="fl">0.27</span>,  <span class="co"># pre &gt; P90_pre OR post &gt; P90_post</span></span>
-<span id="cb69-132"><a href="#cb69-132" aria-hidden="true" tabindex="-1"></a>    <span class="st">"big_table"</span>: <span class="fl">0.20</span>,  <span class="co"># total_cells &gt; P90_cells</span></span>
-<span id="cb69-133"><a href="#cb69-133" aria-hidden="true" tabindex="-1"></a>    <span class="st">"noisy"</span>: <span class="fl">0.07</span>,  <span class="co"># duplicate OR non-numeric (with complexity already in stage)</span></span>
-<span id="cb69-134"><a href="#cb69-134" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb69-104"><a href="#cb69-104" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_df(df: pd.DataFrame, n: <span class="bu">int</span>, seed: <span class="bu">int</span>) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb69-105"><a href="#cb69-105" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">&lt;=</span> <span class="dv">0</span> <span class="kw">or</span> df.empty:</span>
+<span id="cb69-106"><a href="#cb69-106" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.iloc[<span class="dv">0</span>:<span class="dv">0</span>]</span>
+<span id="cb69-107"><a href="#cb69-107" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df) <span class="op">&lt;=</span> n:</span>
+<span id="cb69-108"><a href="#cb69-108" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> df.sample(frac<span class="op">=</span><span class="fl">1.0</span>, random_state<span class="op">=</span>seed)  <span class="co"># shuffle full pool if small</span></span>
+<span id="cb69-109"><a href="#cb69-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df.sample(n<span class="op">=</span>n, random_state<span class="op">=</span>seed)</span>
+<span id="cb69-110"><a href="#cb69-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-111"><a href="#cb69-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-112"><a href="#cb69-112" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================</span></span>
+<span id="cb69-113"><a href="#cb69-113" aria-hidden="true" tabindex="-1"></a><span class="co"># HARD QUOTA REBALANCING</span></span>
+<span id="cb69-114"><a href="#cb69-114" aria-hidden="true" tabindex="-1"></a><span class="co"># =========================</span></span>
+<span id="cb69-115"><a href="#cb69-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-116"><a href="#cb69-116" aria-hidden="true" tabindex="-1"></a>HARD_PROPS <span class="op">=</span> {</span>
+<span id="cb69-117"><a href="#cb69-117" aria-hidden="true" tabindex="-1"></a>    <span class="st">"deep_ops"</span>: <span class="fl">0.23</span>,  <span class="co"># max_ops &gt;= 4</span></span>
+<span id="cb69-118"><a href="#cb69-118" aria-hidden="true" tabindex="-1"></a>    <span class="st">"long_turns"</span>: <span class="fl">0.23</span>,  <span class="co"># turns &gt;= 7</span></span>
+<span id="cb69-119"><a href="#cb69-119" aria-hidden="true" tabindex="-1"></a>    <span class="st">"long_ctx"</span>: <span class="fl">0.27</span>,  <span class="co"># pre &gt; P90_pre OR post &gt; P90_post</span></span>
+<span id="cb69-120"><a href="#cb69-120" aria-hidden="true" tabindex="-1"></a>    <span class="st">"big_table"</span>: <span class="fl">0.20</span>,  <span class="co"># total_cells &gt; P90_cells</span></span>
+<span id="cb69-121"><a href="#cb69-121" aria-hidden="true" tabindex="-1"></a>    <span class="st">"noisy"</span>: <span class="fl">0.07</span>,  <span class="co"># duplicate OR non-numeric (with complexity already in stage)</span></span>
+<span id="cb69-122"><a href="#cb69-122" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb69-123"><a href="#cb69-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-124"><a href="#cb69-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-125"><a href="#cb69-125" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hard_bucket_masks(df: pd.DataFrame):</span>
+<span id="cb69-126"><a href="#cb69-126" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb69-127"><a href="#cb69-127" aria-hidden="true" tabindex="-1"></a>        <span class="st">"deep_ops"</span>: (df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">&gt;=</span> <span class="dv">4</span>),</span>
+<span id="cb69-128"><a href="#cb69-128" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_turns"</span>: (df[<span class="st">"features_num_dialogue_turns"</span>] <span class="op">&gt;=</span> <span class="dv">7</span>),</span>
+<span id="cb69-129"><a href="#cb69-129" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_ctx"</span>: (df[<span class="st">"doc_pre_text_len"</span>] <span class="op">&gt;</span> P90_pre)</span>
+<span id="cb69-130"><a href="#cb69-130" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (df[<span class="st">"doc_post_text_len"</span>] <span class="op">&gt;</span> P90_post),</span>
+<span id="cb69-131"><a href="#cb69-131" aria-hidden="true" tabindex="-1"></a>        <span class="st">"big_table"</span>: (df[<span class="st">"total_cells"</span>] <span class="op">&gt;</span> P90_cells),</span>
+<span id="cb69-132"><a href="#cb69-132" aria-hidden="true" tabindex="-1"></a>        <span class="st">"noisy"</span>: (df[<span class="st">"features_has_duplicate_columns"</span>])</span>
+<span id="cb69-133"><a href="#cb69-133" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (df[<span class="st">"features_has_non_numeric_values"</span>]),</span>
+<span id="cb69-134"><a href="#cb69-134" aria-hidden="true" tabindex="-1"></a>    }</span>
 <span id="cb69-135"><a href="#cb69-135" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb69-136"><a href="#cb69-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-137"><a href="#cb69-137" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hard_bucket_masks(df: pd.DataFrame):</span>
-<span id="cb69-138"><a href="#cb69-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
-<span id="cb69-139"><a href="#cb69-139" aria-hidden="true" tabindex="-1"></a>        <span class="st">"deep_ops"</span>: (df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">&gt;=</span> <span class="dv">4</span>),</span>
-<span id="cb69-140"><a href="#cb69-140" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_turns"</span>: (df[<span class="st">"features_num_dialogue_turns"</span>] <span class="op">&gt;=</span> <span class="dv">7</span>),</span>
-<span id="cb69-141"><a href="#cb69-141" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_ctx"</span>: (df[<span class="st">"doc_pre_text_len"</span>] <span class="op">&gt;</span> P90_pre)</span>
-<span id="cb69-142"><a href="#cb69-142" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (df[<span class="st">"doc_post_text_len"</span>] <span class="op">&gt;</span> P90_post),</span>
-<span id="cb69-143"><a href="#cb69-143" aria-hidden="true" tabindex="-1"></a>        <span class="st">"big_table"</span>: (df[<span class="st">"total_cells"</span>] <span class="op">&gt;</span> P90_cells),</span>
-<span id="cb69-144"><a href="#cb69-144" aria-hidden="true" tabindex="-1"></a>        <span class="st">"noisy"</span>: (df[<span class="st">"features_has_duplicate_columns"</span>])</span>
-<span id="cb69-145"><a href="#cb69-145" aria-hidden="true" tabindex="-1"></a>        <span class="op">|</span> (df[<span class="st">"features_has_non_numeric_values"</span>]),</span>
-<span id="cb69-146"><a href="#cb69-146" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb69-147"><a href="#cb69-147" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-148"><a href="#cb69-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-149"><a href="#cb69-149" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quota_sample_df(</span>
-<span id="cb69-150"><a href="#cb69-150" aria-hidden="true" tabindex="-1"></a>    pool: pd.DataFrame, total_n: <span class="bu">int</span>, masks: <span class="bu">dict</span>, props: <span class="bu">dict</span>, seed: <span class="bu">int</span></span>
-<span id="cb69-151"><a href="#cb69-151" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pd.DataFrame:</span>
-<span id="cb69-152"><a href="#cb69-152" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb69-153"><a href="#cb69-153" aria-hidden="true" tabindex="-1"></a><span class="co">    Quota-based sampling without replacement across overlapping buckets.</span></span>
-<span id="cb69-154"><a href="#cb69-154" aria-hidden="true" tabindex="-1"></a><span class="co">    - masks: dict[name] -&gt; boolean Series over pool</span></span>
-<span id="cb69-155"><a href="#cb69-155" aria-hidden="true" tabindex="-1"></a><span class="co">    - props: dict[name] -&gt; proportion (0..1)</span></span>
-<span id="cb69-156"><a href="#cb69-156" aria-hidden="true" tabindex="-1"></a><span class="co">    Strategy:</span></span>
-<span id="cb69-157"><a href="#cb69-157" aria-hidden="true" tabindex="-1"></a><span class="co">      1) compute desired counts per bucket by props * total_n</span></span>
-<span id="cb69-158"><a href="#cb69-158" aria-hidden="true" tabindex="-1"></a><span class="co">      2) iterate buckets in fixed priority, sample from items not yet taken</span></span>
-<span id="cb69-159"><a href="#cb69-159" aria-hidden="true" tabindex="-1"></a><span class="co">      3) cap each bucket by its availability</span></span>
-<span id="cb69-160"><a href="#cb69-160" aria-hidden="true" tabindex="-1"></a><span class="co">      4) top up remaining slots uniformly at random from leftover pool</span></span>
-<span id="cb69-161"><a href="#cb69-161" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb69-162"><a href="#cb69-162" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
-<span id="cb69-163"><a href="#cb69-163" aria-hidden="true" tabindex="-1"></a>    pool <span class="op">=</span> pool.copy()</span>
-<span id="cb69-164"><a href="#cb69-164" aria-hidden="true" tabindex="-1"></a>    taken_idx <span class="op">=</span> <span class="bu">set</span>()</span>
-<span id="cb69-165"><a href="#cb69-165" aria-hidden="true" tabindex="-1"></a>    out_parts <span class="op">=</span> []</span>
-<span id="cb69-166"><a href="#cb69-166" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-167"><a href="#cb69-167" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fixed priority: emphasize "deep_ops" and "long_turns"/"long_ctx" first</span></span>
-<span id="cb69-168"><a href="#cb69-168" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> [<span class="st">"deep_ops"</span>, <span class="st">"long_turns"</span>, <span class="st">"long_ctx"</span>, <span class="st">"big_table"</span>, <span class="st">"noisy"</span>]</span>
-<span id="cb69-169"><a href="#cb69-169" aria-hidden="true" tabindex="-1"></a>    desired <span class="op">=</span> {k: <span class="bu">int</span>(<span class="bu">round</span>(total_n <span class="op">*</span> props.get(k, <span class="fl">0.0</span>))) <span class="cf">for</span> k <span class="kw">in</span> order}</span>
-<span id="cb69-170"><a href="#cb69-170" aria-hidden="true" tabindex="-1"></a>    <span class="co"># adjust rounding to not exceed total_n</span></span>
-<span id="cb69-171"><a href="#cb69-171" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> total_n <span class="op">-</span> <span class="bu">sum</span>(desired.values())</span>
-<span id="cb69-172"><a href="#cb69-172" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> diff <span class="op">!=</span> <span class="dv">0</span>:</span>
-<span id="cb69-173"><a href="#cb69-173" aria-hidden="true" tabindex="-1"></a>        <span class="co"># distribute remainder by descending props</span></span>
-<span id="cb69-174"><a href="#cb69-174" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">sorted</span>(order, key<span class="op">=</span><span class="kw">lambda</span> x: props.get(x, <span class="dv">0</span>), reverse<span class="op">=</span>(diff <span class="op">&gt;</span> <span class="dv">0</span>)):</span>
-<span id="cb69-175"><a href="#cb69-175" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> diff <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb69-176"><a href="#cb69-176" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
-<span id="cb69-177"><a href="#cb69-177" aria-hidden="true" tabindex="-1"></a>            desired[k] <span class="op">+=</span> <span class="dv">1</span> <span class="cf">if</span> diff <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span>
-<span id="cb69-178"><a href="#cb69-178" aria-hidden="true" tabindex="-1"></a>            diff <span class="op">+=</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">if</span> diff <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">1</span></span>
-<span id="cb69-179"><a href="#cb69-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-180"><a href="#cb69-180" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> order:</span>
-<span id="cb69-181"><a href="#cb69-181" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> desired[k] <span class="op">&lt;=</span> <span class="dv">0</span>:</span>
-<span id="cb69-182"><a href="#cb69-182" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
-<span id="cb69-183"><a href="#cb69-183" aria-hidden="true" tabindex="-1"></a>        bucket_idx <span class="op">=</span> pool.index[masks[k]]</span>
-<span id="cb69-184"><a href="#cb69-184" aria-hidden="true" tabindex="-1"></a>        <span class="co"># remove already taken</span></span>
-<span id="cb69-185"><a href="#cb69-185" aria-hidden="true" tabindex="-1"></a>        bucket_idx <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> bucket_idx <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> taken_idx]</span>
-<span id="cb69-186"><a href="#cb69-186" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> bucket_idx:</span>
-<span id="cb69-187"><a href="#cb69-187" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
-<span id="cb69-188"><a href="#cb69-188" aria-hidden="true" tabindex="-1"></a>        take_k <span class="op">=</span> <span class="bu">min</span>(desired[k], <span class="bu">len</span>(bucket_idx))</span>
-<span id="cb69-189"><a href="#cb69-189" aria-hidden="true" tabindex="-1"></a>        choose <span class="op">=</span> <span class="bu">list</span>(rng.choice(bucket_idx, size<span class="op">=</span>take_k, replace<span class="op">=</span><span class="va">False</span>))</span>
-<span id="cb69-190"><a href="#cb69-190" aria-hidden="true" tabindex="-1"></a>        out_parts.append(pool.loc[choose])</span>
-<span id="cb69-191"><a href="#cb69-191" aria-hidden="true" tabindex="-1"></a>        taken_idx.update(choose)</span>
-<span id="cb69-192"><a href="#cb69-192" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-193"><a href="#cb69-193" aria-hidden="true" tabindex="-1"></a>    <span class="co"># top-up if needed</span></span>
-<span id="cb69-194"><a href="#cb69-194" aria-hidden="true" tabindex="-1"></a>    taken_cnt <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">len</span>(p) <span class="cf">for</span> p <span class="kw">in</span> out_parts)</span>
-<span id="cb69-195"><a href="#cb69-195" aria-hidden="true" tabindex="-1"></a>    need <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, total_n <span class="op">-</span> taken_cnt)</span>
-<span id="cb69-196"><a href="#cb69-196" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> need <span class="op">&gt;</span> <span class="dv">0</span>:</span>
-<span id="cb69-197"><a href="#cb69-197" aria-hidden="true" tabindex="-1"></a>        leftover_idx <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> pool.index <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> taken_idx]</span>
-<span id="cb69-198"><a href="#cb69-198" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> leftover_idx:</span>
-<span id="cb69-199"><a href="#cb69-199" aria-hidden="true" tabindex="-1"></a>            k <span class="op">=</span> <span class="bu">min</span>(need, <span class="bu">len</span>(leftover_idx))</span>
-<span id="cb69-200"><a href="#cb69-200" aria-hidden="true" tabindex="-1"></a>            choose <span class="op">=</span> <span class="bu">list</span>(rng.choice(leftover_idx, size<span class="op">=</span>k, replace<span class="op">=</span><span class="va">False</span>))</span>
-<span id="cb69-201"><a href="#cb69-201" aria-hidden="true" tabindex="-1"></a>            out_parts.append(pool.loc[choose])</span>
+<span id="cb69-137"><a href="#cb69-137" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quota_sample_df(</span>
+<span id="cb69-138"><a href="#cb69-138" aria-hidden="true" tabindex="-1"></a>    pool: pd.DataFrame, total_n: <span class="bu">int</span>, masks: <span class="bu">dict</span>, props: <span class="bu">dict</span>, seed: <span class="bu">int</span></span>
+<span id="cb69-139"><a href="#cb69-139" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> pd.DataFrame:</span>
+<span id="cb69-140"><a href="#cb69-140" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb69-141"><a href="#cb69-141" aria-hidden="true" tabindex="-1"></a><span class="co">    Quota-based sampling without replacement across overlapping buckets.</span></span>
+<span id="cb69-142"><a href="#cb69-142" aria-hidden="true" tabindex="-1"></a><span class="co">    - masks: dict[name] -&gt; boolean Series over pool</span></span>
+<span id="cb69-143"><a href="#cb69-143" aria-hidden="true" tabindex="-1"></a><span class="co">    - props: dict[name] -&gt; proportion (0..1)</span></span>
+<span id="cb69-144"><a href="#cb69-144" aria-hidden="true" tabindex="-1"></a><span class="co">    Strategy:</span></span>
+<span id="cb69-145"><a href="#cb69-145" aria-hidden="true" tabindex="-1"></a><span class="co">      1) compute desired counts per bucket by props * total_n</span></span>
+<span id="cb69-146"><a href="#cb69-146" aria-hidden="true" tabindex="-1"></a><span class="co">      2) iterate buckets in fixed priority, sample from items not yet taken</span></span>
+<span id="cb69-147"><a href="#cb69-147" aria-hidden="true" tabindex="-1"></a><span class="co">      3) cap each bucket by its availability</span></span>
+<span id="cb69-148"><a href="#cb69-148" aria-hidden="true" tabindex="-1"></a><span class="co">      4) top up remaining slots uniformly at random from leftover pool</span></span>
+<span id="cb69-149"><a href="#cb69-149" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb69-150"><a href="#cb69-150" aria-hidden="true" tabindex="-1"></a>    rng <span class="op">=</span> np.random.default_rng(seed)</span>
+<span id="cb69-151"><a href="#cb69-151" aria-hidden="true" tabindex="-1"></a>    pool <span class="op">=</span> pool.copy()</span>
+<span id="cb69-152"><a href="#cb69-152" aria-hidden="true" tabindex="-1"></a>    taken_idx <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb69-153"><a href="#cb69-153" aria-hidden="true" tabindex="-1"></a>    out_parts <span class="op">=</span> []</span>
+<span id="cb69-154"><a href="#cb69-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-155"><a href="#cb69-155" aria-hidden="true" tabindex="-1"></a>    <span class="co"># emphasize "deep_ops" and "long_turns"/"long_ctx" first</span></span>
+<span id="cb69-156"><a href="#cb69-156" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> [<span class="st">"deep_ops"</span>, <span class="st">"long_turns"</span>, <span class="st">"long_ctx"</span>, <span class="st">"big_table"</span>, <span class="st">"noisy"</span>]</span>
+<span id="cb69-157"><a href="#cb69-157" aria-hidden="true" tabindex="-1"></a>    desired <span class="op">=</span> {k: <span class="bu">int</span>(<span class="bu">round</span>(total_n <span class="op">*</span> props.get(k, <span class="fl">0.0</span>))) <span class="cf">for</span> k <span class="kw">in</span> order}</span>
+<span id="cb69-158"><a href="#cb69-158" aria-hidden="true" tabindex="-1"></a>    <span class="co"># adjust rounding to not exceed total_n</span></span>
+<span id="cb69-159"><a href="#cb69-159" aria-hidden="true" tabindex="-1"></a>    diff <span class="op">=</span> total_n <span class="op">-</span> <span class="bu">sum</span>(desired.values())</span>
+<span id="cb69-160"><a href="#cb69-160" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> diff <span class="op">!=</span> <span class="dv">0</span>:</span>
+<span id="cb69-161"><a href="#cb69-161" aria-hidden="true" tabindex="-1"></a>        <span class="co"># distribute remainder by descending props</span></span>
+<span id="cb69-162"><a href="#cb69-162" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">sorted</span>(order, key<span class="op">=</span><span class="kw">lambda</span> x: props.get(x, <span class="dv">0</span>), reverse<span class="op">=</span>(diff <span class="op">&gt;</span> <span class="dv">0</span>)):</span>
+<span id="cb69-163"><a href="#cb69-163" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> diff <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb69-164"><a href="#cb69-164" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb69-165"><a href="#cb69-165" aria-hidden="true" tabindex="-1"></a>            desired[k] <span class="op">+=</span> <span class="dv">1</span> <span class="cf">if</span> diff <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb69-166"><a href="#cb69-166" aria-hidden="true" tabindex="-1"></a>            diff <span class="op">+=</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">if</span> diff <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">1</span></span>
+<span id="cb69-167"><a href="#cb69-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-168"><a href="#cb69-168" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> order:</span>
+<span id="cb69-169"><a href="#cb69-169" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> desired[k] <span class="op">&lt;=</span> <span class="dv">0</span>:</span>
+<span id="cb69-170"><a href="#cb69-170" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb69-171"><a href="#cb69-171" aria-hidden="true" tabindex="-1"></a>        bucket_idx <span class="op">=</span> pool.index[masks[k]]</span>
+<span id="cb69-172"><a href="#cb69-172" aria-hidden="true" tabindex="-1"></a>        <span class="co"># remove already taken</span></span>
+<span id="cb69-173"><a href="#cb69-173" aria-hidden="true" tabindex="-1"></a>        bucket_idx <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> bucket_idx <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> taken_idx]</span>
+<span id="cb69-174"><a href="#cb69-174" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> bucket_idx:</span>
+<span id="cb69-175"><a href="#cb69-175" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span>
+<span id="cb69-176"><a href="#cb69-176" aria-hidden="true" tabindex="-1"></a>        take_k <span class="op">=</span> <span class="bu">min</span>(desired[k], <span class="bu">len</span>(bucket_idx))</span>
+<span id="cb69-177"><a href="#cb69-177" aria-hidden="true" tabindex="-1"></a>        choose <span class="op">=</span> <span class="bu">list</span>(rng.choice(bucket_idx, size<span class="op">=</span>take_k, replace<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb69-178"><a href="#cb69-178" aria-hidden="true" tabindex="-1"></a>        out_parts.append(pool.loc[choose])</span>
+<span id="cb69-179"><a href="#cb69-179" aria-hidden="true" tabindex="-1"></a>        taken_idx.update(choose)</span>
+<span id="cb69-180"><a href="#cb69-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-181"><a href="#cb69-181" aria-hidden="true" tabindex="-1"></a>    <span class="co"># top-up if needed</span></span>
+<span id="cb69-182"><a href="#cb69-182" aria-hidden="true" tabindex="-1"></a>    taken_cnt <span class="op">=</span> <span class="bu">sum</span>(<span class="bu">len</span>(p) <span class="cf">for</span> p <span class="kw">in</span> out_parts)</span>
+<span id="cb69-183"><a href="#cb69-183" aria-hidden="true" tabindex="-1"></a>    need <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, total_n <span class="op">-</span> taken_cnt)</span>
+<span id="cb69-184"><a href="#cb69-184" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> need <span class="op">&gt;</span> <span class="dv">0</span>:</span>
+<span id="cb69-185"><a href="#cb69-185" aria-hidden="true" tabindex="-1"></a>        leftover_idx <span class="op">=</span> [i <span class="cf">for</span> i <span class="kw">in</span> pool.index <span class="cf">if</span> i <span class="kw">not</span> <span class="kw">in</span> taken_idx]</span>
+<span id="cb69-186"><a href="#cb69-186" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> leftover_idx:</span>
+<span id="cb69-187"><a href="#cb69-187" aria-hidden="true" tabindex="-1"></a>            k <span class="op">=</span> <span class="bu">min</span>(need, <span class="bu">len</span>(leftover_idx))</span>
+<span id="cb69-188"><a href="#cb69-188" aria-hidden="true" tabindex="-1"></a>            choose <span class="op">=</span> <span class="bu">list</span>(rng.choice(leftover_idx, size<span class="op">=</span>k, replace<span class="op">=</span><span class="va">False</span>))</span>
+<span id="cb69-189"><a href="#cb69-189" aria-hidden="true" tabindex="-1"></a>            out_parts.append(pool.loc[choose])</span>
+<span id="cb69-190"><a href="#cb69-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-191"><a href="#cb69-191" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> out_parts:</span>
+<span id="cb69-192"><a href="#cb69-192" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> pd.concat(out_parts, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb69-193"><a href="#cb69-193" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb69-194"><a href="#cb69-194" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> pool.iloc[<span class="dv">0</span>:<span class="dv">0</span>]</span>
+<span id="cb69-195"><a href="#cb69-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-196"><a href="#cb69-196" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out.sample(frac<span class="op">=</span><span class="fl">1.0</span>, random_state<span class="op">=</span>seed)</span>
+<span id="cb69-197"><a href="#cb69-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-198"><a href="#cb69-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-199"><a href="#cb69-199" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Build splits with quota rebalance only for Hard ---</span></span>
+<span id="cb69-200"><a href="#cb69-200" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> {}</span>
+<span id="cb69-201"><a href="#cb69-201" aria-hidden="true" tabindex="-1"></a>OUTDIR.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb69-202"><a href="#cb69-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-203"><a href="#cb69-203" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> out_parts:</span>
-<span id="cb69-204"><a href="#cb69-204" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> pd.concat(out_parts, axis<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb69-205"><a href="#cb69-205" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb69-206"><a href="#cb69-206" aria-hidden="true" tabindex="-1"></a>        out <span class="op">=</span> pool.iloc[<span class="dv">0</span>:<span class="dv">0</span>]  <span class="co"># empty</span></span>
+<span id="cb69-203"><a href="#cb69-203" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, stage <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"Easy"</span>, <span class="st">"Medium"</span>, <span class="st">"Hard"</span>]):</span>
+<span id="cb69-204"><a href="#cb69-204" aria-hidden="true" tabindex="-1"></a>    tconf <span class="op">=</span> TARGETS[stage]</span>
+<span id="cb69-205"><a href="#cb69-205" aria-hidden="true" tabindex="-1"></a>    train_pool <span class="op">=</span> cur_train_df[cur_train_df[<span class="st">"stage"</span>] <span class="op">==</span> stage]</span>
+<span id="cb69-206"><a href="#cb69-206" aria-hidden="true" tabindex="-1"></a>    test_pool <span class="op">=</span> cur_test_df[cur_test_df[<span class="st">"stage"</span>] <span class="op">==</span> stage]</span>
 <span id="cb69-207"><a href="#cb69-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-208"><a href="#cb69-208" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> out.sample(frac<span class="op">=</span><span class="fl">1.0</span>, random_state<span class="op">=</span>seed)  <span class="co"># shuffle for stability</span></span>
-<span id="cb69-209"><a href="#cb69-209" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-210"><a href="#cb69-210" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-211"><a href="#cb69-211" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Build splits with quota rebalance only for Hard ---</span></span>
-<span id="cb69-212"><a href="#cb69-212" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> {}</span>
-<span id="cb69-213"><a href="#cb69-213" aria-hidden="true" tabindex="-1"></a>OUTDIR.mkdir(parents<span class="op">=</span><span class="va">True</span>, exist_ok<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb69-214"><a href="#cb69-214" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-215"><a href="#cb69-215" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, stage <span class="kw">in</span> <span class="bu">enumerate</span>([<span class="st">"Easy"</span>, <span class="st">"Medium"</span>, <span class="st">"Hard"</span>]):</span>
-<span id="cb69-216"><a href="#cb69-216" aria-hidden="true" tabindex="-1"></a>    tconf <span class="op">=</span> TARGETS[stage]</span>
-<span id="cb69-217"><a href="#cb69-217" aria-hidden="true" tabindex="-1"></a>    train_pool <span class="op">=</span> cur_train_df[cur_train_df[<span class="st">"stage"</span>] <span class="op">==</span> stage]</span>
-<span id="cb69-218"><a href="#cb69-218" aria-hidden="true" tabindex="-1"></a>    test_pool <span class="op">=</span> cur_test_df[cur_test_df[<span class="st">"stage"</span>] <span class="op">==</span> stage]</span>
-<span id="cb69-219"><a href="#cb69-219" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-220"><a href="#cb69-220" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> stage <span class="op">!=</span> <span class="st">"Hard"</span>:</span>
-<span id="cb69-221"><a href="#cb69-221" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- original sampling for Easy/Medium ----</span></span>
-<span id="cb69-222"><a href="#cb69-222" aria-hidden="true" tabindex="-1"></a>        tv_target <span class="op">=</span> tconf[<span class="st">"train"</span>] <span class="op">+</span> tconf[<span class="st">"valid"</span>]</span>
-<span id="cb69-223"><a href="#cb69-223" aria-hidden="true" tabindex="-1"></a>        tv <span class="op">=</span> sample_df(train_pool, tv_target, seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb69-224"><a href="#cb69-224" aria-hidden="true" tabindex="-1"></a>        vsize <span class="op">=</span> <span class="bu">min</span>(tconf[<span class="st">"valid"</span>], <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="bu">round</span>(<span class="fl">0.2</span> <span class="op">*</span> <span class="bu">len</span>(tv)))))</span>
-<span id="cb69-225"><a href="#cb69-225" aria-hidden="true" tabindex="-1"></a>        valid <span class="op">=</span> tv.iloc[:vsize]</span>
-<span id="cb69-226"><a href="#cb69-226" aria-hidden="true" tabindex="-1"></a>        train <span class="op">=</span> tv.iloc[vsize : vsize <span class="op">+</span> tconf[<span class="st">"train"</span>]]</span>
-<span id="cb69-227"><a href="#cb69-227" aria-hidden="true" tabindex="-1"></a>        test <span class="op">=</span> sample_df(test_pool, tconf[<span class="st">"test"</span>], seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">2</span>)</span>
-<span id="cb69-228"><a href="#cb69-228" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb69-229"><a href="#cb69-229" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- HARD: quota-based sampling ----</span></span>
-<span id="cb69-230"><a href="#cb69-230" aria-hidden="true" tabindex="-1"></a>        masks_train <span class="op">=</span> hard_bucket_masks(train_pool)</span>
-<span id="cb69-231"><a href="#cb69-231" aria-hidden="true" tabindex="-1"></a>        masks_test <span class="op">=</span> hard_bucket_masks(test_pool)</span>
-<span id="cb69-232"><a href="#cb69-232" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-233"><a href="#cb69-233" aria-hidden="true" tabindex="-1"></a>        <span class="co"># TRAIN (quota)</span></span>
-<span id="cb69-234"><a href="#cb69-234" aria-hidden="true" tabindex="-1"></a>        hard_train <span class="op">=</span> quota_sample_df(</span>
-<span id="cb69-235"><a href="#cb69-235" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>train_pool,</span>
-<span id="cb69-236"><a href="#cb69-236" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"train"</span>],</span>
-<span id="cb69-237"><a href="#cb69-237" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>masks_train,</span>
-<span id="cb69-238"><a href="#cb69-238" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
-<span id="cb69-239"><a href="#cb69-239" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">11</span>,</span>
-<span id="cb69-240"><a href="#cb69-240" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb69-241"><a href="#cb69-241" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-242"><a href="#cb69-242" aria-hidden="true" tabindex="-1"></a>        <span class="co"># VALID (quota) from remaining train_pool</span></span>
-<span id="cb69-243"><a href="#cb69-243" aria-hidden="true" tabindex="-1"></a>        remaining_train_pool <span class="op">=</span> train_pool.drop(hard_train.index)</span>
-<span id="cb69-244"><a href="#cb69-244" aria-hidden="true" tabindex="-1"></a>        hard_valid <span class="op">=</span> quota_sample_df(</span>
-<span id="cb69-245"><a href="#cb69-245" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>remaining_train_pool,</span>
-<span id="cb69-246"><a href="#cb69-246" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"valid"</span>],</span>
-<span id="cb69-247"><a href="#cb69-247" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>hard_bucket_masks(remaining_train_pool),</span>
-<span id="cb69-248"><a href="#cb69-248" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
-<span id="cb69-249"><a href="#cb69-249" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">12</span>,</span>
-<span id="cb69-250"><a href="#cb69-250" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb69-251"><a href="#cb69-251" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-252"><a href="#cb69-252" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TEST</span><span class="co"> (quota) from dev pool</span></span>
-<span id="cb69-253"><a href="#cb69-253" aria-hidden="true" tabindex="-1"></a>        hard_test <span class="op">=</span> quota_sample_df(</span>
-<span id="cb69-254"><a href="#cb69-254" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>test_pool,</span>
-<span id="cb69-255"><a href="#cb69-255" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"test"</span>],</span>
-<span id="cb69-256"><a href="#cb69-256" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>masks_test,</span>
-<span id="cb69-257"><a href="#cb69-257" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
-<span id="cb69-258"><a href="#cb69-258" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">13</span>,</span>
-<span id="cb69-259"><a href="#cb69-259" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb69-260"><a href="#cb69-260" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-261"><a href="#cb69-261" aria-hidden="true" tabindex="-1"></a>        train, valid, test <span class="op">=</span> hard_train, hard_valid, hard_test</span>
-<span id="cb69-262"><a href="#cb69-262" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-263"><a href="#cb69-263" aria-hidden="true" tabindex="-1"></a>    splits[stage] <span class="op">=</span> {<span class="st">"train"</span>: train, <span class="st">"valid"</span>: valid, <span class="st">"test"</span>: test}</span>
-<span id="cb69-264"><a href="#cb69-264" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-265"><a href="#cb69-265" aria-hidden="true" tabindex="-1"></a>    <span class="co"># write JSONL files with just ids (easy to join later)</span></span>
-<span id="cb69-266"><a href="#cb69-266" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> split_name, df_part <span class="kw">in</span> splits[stage].items():</span>
-<span id="cb69-267"><a href="#cb69-267" aria-hidden="true" tabindex="-1"></a>        outp <span class="op">=</span> OUTDIR <span class="op">/</span> <span class="ss">f"</span><span class="sc">{</span>stage<span class="sc">.</span>lower()<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>split_name<span class="sc">}</span><span class="ss">.jsonl"</span></span>
-<span id="cb69-268"><a href="#cb69-268" aria-hidden="true" tabindex="-1"></a>        df_part[[<span class="st">"id"</span>]].to_json(outp, orient<span class="op">=</span><span class="st">"records"</span>, lines<span class="op">=</span><span class="va">True</span>, force_ascii<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb69-269"><a href="#cb69-269" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"[</span><span class="sc">{</span>stage<span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>split_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(df_part)<span class="sc">:4d}</span><span class="ss">  -&gt; </span><span class="sc">{</span>outp<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb69-270"><a href="#cb69-270" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-271"><a href="#cb69-271" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-272"><a href="#cb69-272" aria-hidden="true" tabindex="-1"></a><span class="co"># --- quick sanity report ---</span></span>
-<span id="cb69-273"><a href="#cb69-273" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quick_report(df):</span>
-<span id="cb69-274"><a href="#cb69-274" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df) <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb69-275"><a href="#cb69-275" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">"n"</span>: <span class="dv">0</span>}</span>
-<span id="cb69-276"><a href="#cb69-276" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
-<span id="cb69-277"><a href="#cb69-277" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n"</span>: <span class="bu">len</span>(df),</span>
-<span id="cb69-278"><a href="#cb69-278" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ops_max_med"</span>: <span class="bu">float</span>(df[<span class="st">"max_ops_per_conversation"</span>].median()),</span>
-<span id="cb69-279"><a href="#cb69-279" aria-hidden="true" tabindex="-1"></a>        <span class="st">"turns_med"</span>: <span class="bu">float</span>(df[<span class="st">"features_num_dialogue_turns"</span>].median()),</span>
-<span id="cb69-280"><a href="#cb69-280" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type2_rate"</span>: <span class="bu">float</span>(df[<span class="st">"features_has_type2_question"</span>].mean()),</span>
-<span id="cb69-281"><a href="#cb69-281" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pre_P50"</span>: <span class="bu">int</span>(df[<span class="st">"doc_pre_text_len"</span>].median()),</span>
-<span id="cb69-282"><a href="#cb69-282" aria-hidden="true" tabindex="-1"></a>        <span class="st">"post_P50"</span>: <span class="bu">int</span>(df[<span class="st">"doc_post_text_len"</span>].median()),</span>
-<span id="cb69-283"><a href="#cb69-283" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cells_P50"</span>: <span class="bu">int</span>(df[<span class="st">"total_cells"</span>].median()),</span>
-<span id="cb69-284"><a href="#cb69-284" aria-hidden="true" tabindex="-1"></a>        <span class="st">"deep_ops_rate"</span>: <span class="bu">float</span>((df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">&gt;=</span> <span class="dv">4</span>).mean()),</span>
-<span id="cb69-285"><a href="#cb69-285" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_turns_rate"</span>: <span class="bu">float</span>((df[<span class="st">"features_num_dialogue_turns"</span>] <span class="op">&gt;=</span> <span class="dv">7</span>).mean()),</span>
-<span id="cb69-286"><a href="#cb69-286" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_ctx_rate"</span>: <span class="bu">float</span>(</span>
-<span id="cb69-287"><a href="#cb69-287" aria-hidden="true" tabindex="-1"></a>            (</span>
-<span id="cb69-288"><a href="#cb69-288" aria-hidden="true" tabindex="-1"></a>                (df[<span class="st">"doc_pre_text_len"</span>] <span class="op">&gt;</span> P90_pre)</span>
-<span id="cb69-289"><a href="#cb69-289" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (df[<span class="st">"doc_post_text_len"</span>] <span class="op">&gt;</span> P90_post)</span>
-<span id="cb69-290"><a href="#cb69-290" aria-hidden="true" tabindex="-1"></a>            ).mean()</span>
-<span id="cb69-291"><a href="#cb69-291" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb69-292"><a href="#cb69-292" aria-hidden="true" tabindex="-1"></a>        <span class="st">"big_table_rate"</span>: <span class="bu">float</span>((df[<span class="st">"total_cells"</span>] <span class="op">&gt;</span> P90_cells).mean()),</span>
-<span id="cb69-293"><a href="#cb69-293" aria-hidden="true" tabindex="-1"></a>        <span class="st">"noisy_rate"</span>: <span class="bu">float</span>(</span>
-<span id="cb69-294"><a href="#cb69-294" aria-hidden="true" tabindex="-1"></a>            (</span>
-<span id="cb69-295"><a href="#cb69-295" aria-hidden="true" tabindex="-1"></a>                df[<span class="st">"features_has_duplicate_columns"</span>]</span>
-<span id="cb69-296"><a href="#cb69-296" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> df[<span class="st">"features_has_non_numeric_values"</span>]</span>
-<span id="cb69-297"><a href="#cb69-297" aria-hidden="true" tabindex="-1"></a>            ).mean()</span>
-<span id="cb69-298"><a href="#cb69-298" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb69-299"><a href="#cb69-299" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb69-300"><a href="#cb69-300" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-301"><a href="#cb69-301" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb69-302"><a href="#cb69-302" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> stage <span class="kw">in</span> [<span class="st">"Easy"</span>, <span class="st">"Medium"</span>, <span class="st">"Hard"</span>]:</span>
-<span id="cb69-303"><a href="#cb69-303" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">[Sanity] </span><span class="sc">{</span>stage<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb69-304"><a href="#cb69-304" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> part, dfp <span class="kw">in</span> splits[stage].items():</span>
-<span id="cb69-305"><a href="#cb69-305" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>part<span class="sc">:&gt;5s}</span><span class="ss"> -&gt;"</span>, quick_report(dfp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[Percentiles/train] pre P50=244, P65=365, P80=518, P90=637 | post P50=285, P65=407, P80=548, P90=679 | cells P50=12, P65=15, P80=18, P90=25
-[Stage counts] TRAIN: {'Medium': 1687, 'Hard': 1063, 'Easy': 287}
-[Stage counts] TEST:   {'Medium': 253, 'Hard': 134, 'Easy': 34}
-[Easy] train:  230  -&gt; splits/easy_train.jsonl
-[Easy] valid:   57  -&gt; splits/easy_valid.jsonl
-[Easy] test:   34  -&gt; splits/easy_test.jsonl
-[Medium] train:  300  -&gt; splits/medium_train.jsonl
-[Medium] valid:   70  -&gt; splits/medium_valid.jsonl
-[Medium] test:   80  -&gt; splits/medium_test.jsonl
-[Hard] train:  220  -&gt; splits/hard_train.jsonl
-[Hard] valid:   60  -&gt; splits/hard_valid.jsonl
-[Hard] test:   80  -&gt; splits/hard_test.jsonl
-
-[Sanity] Easy
-  train -&gt; {'n': 230, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 217, 'post_P50': 253, 'cells_P50': 9, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.06086956521739131}
-  valid -&gt; {'n': 57, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 200, 'post_P50': 297, 'cells_P50': 8, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.10526315789473684}
-   test -&gt; {'n': 34, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 189, 'post_P50': 272, 'cells_P50': 8, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.08823529411764706}
-
-[Sanity] Medium
-  train -&gt; {'n': 300, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.32666666666666666, 'pre_P50': 243, 'post_P50': 253, 'cells_P50': 11, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.07666666666666666}
-  valid -&gt; {'n': 70, 'ops_max_med': 2.0, 'turns_med': 3.5, 'type2_rate': 0.32857142857142857, 'pre_P50': 216, 'post_P50': 269, 'cells_P50': 12, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.1}
-   test -&gt; {'n': 80, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.3625, 'pre_P50': 206, 'post_P50': 216, 'cells_P50': 13, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.025}
-
-[Sanity] Hard
-  train -&gt; {'n': 220, 'ops_max_med': 2.0, 'turns_med': 5.0, 'type2_rate': 0.42727272727272725, 'pre_P50': 222, 'post_P50': 270, 'cells_P50': 15, 'deep_ops_rate': 0.2590909090909091, 'long_turns_rate': 0.2590909090909091, 'long_ctx_rate': 0.37272727272727274, 'big_table_rate': 0.2681818181818182, 'noisy_rate': 0.20454545454545456}
-  valid -&gt; {'n': 60, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.4, 'pre_P50': 161, 'post_P50': 292, 'cells_P50': 17, 'deep_ops_rate': 0.23333333333333334, 'long_turns_rate': 0.16666666666666666, 'long_ctx_rate': 0.38333333333333336, 'big_table_rate': 0.25, 'noisy_rate': 0.25}
-   test -&gt; {'n': 80, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.325, 'pre_P50': 176, 'post_P50': 177, 'cells_P50': 18, 'deep_ops_rate': 0.15, 'long_turns_rate': 0.0375, 'long_ctx_rate': 0.4375, 'big_table_rate': 0.3375, 'noisy_rate': 0.275}</code></pre>
-</div>
+<span id="cb69-208"><a href="#cb69-208" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> stage <span class="op">!=</span> <span class="st">"Hard"</span>:</span>
+<span id="cb69-209"><a href="#cb69-209" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- original sampling for Easy/Medium ----</span></span>
+<span id="cb69-210"><a href="#cb69-210" aria-hidden="true" tabindex="-1"></a>        tv_target <span class="op">=</span> tconf[<span class="st">"train"</span>] <span class="op">+</span> tconf[<span class="st">"valid"</span>]</span>
+<span id="cb69-211"><a href="#cb69-211" aria-hidden="true" tabindex="-1"></a>        tv <span class="op">=</span> sample_df(train_pool, tv_target, seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb69-212"><a href="#cb69-212" aria-hidden="true" tabindex="-1"></a>        vsize <span class="op">=</span> <span class="bu">min</span>(tconf[<span class="st">"valid"</span>], <span class="bu">max</span>(<span class="dv">1</span>, <span class="bu">int</span>(<span class="bu">round</span>(<span class="fl">0.2</span> <span class="op">*</span> <span class="bu">len</span>(tv)))))</span>
+<span id="cb69-213"><a href="#cb69-213" aria-hidden="true" tabindex="-1"></a>        valid <span class="op">=</span> tv.iloc[:vsize]</span>
+<span id="cb69-214"><a href="#cb69-214" aria-hidden="true" tabindex="-1"></a>        train <span class="op">=</span> tv.iloc[vsize : vsize <span class="op">+</span> tconf[<span class="st">"train"</span>]]</span>
+<span id="cb69-215"><a href="#cb69-215" aria-hidden="true" tabindex="-1"></a>        test <span class="op">=</span> sample_df(test_pool, tconf[<span class="st">"test"</span>], seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">2</span>)</span>
+<span id="cb69-216"><a href="#cb69-216" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb69-217"><a href="#cb69-217" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ---- HARD: quota-based sampling ----</span></span>
+<span id="cb69-218"><a href="#cb69-218" aria-hidden="true" tabindex="-1"></a>        masks_train <span class="op">=</span> hard_bucket_masks(train_pool)</span>
+<span id="cb69-219"><a href="#cb69-219" aria-hidden="true" tabindex="-1"></a>        masks_test <span class="op">=</span> hard_bucket_masks(test_pool)</span>
+<span id="cb69-220"><a href="#cb69-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-221"><a href="#cb69-221" aria-hidden="true" tabindex="-1"></a>        <span class="co"># TRAIN (quota)</span></span>
+<span id="cb69-222"><a href="#cb69-222" aria-hidden="true" tabindex="-1"></a>        hard_train <span class="op">=</span> quota_sample_df(</span>
+<span id="cb69-223"><a href="#cb69-223" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>train_pool,</span>
+<span id="cb69-224"><a href="#cb69-224" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"train"</span>],</span>
+<span id="cb69-225"><a href="#cb69-225" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>masks_train,</span>
+<span id="cb69-226"><a href="#cb69-226" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
+<span id="cb69-227"><a href="#cb69-227" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">11</span>,</span>
+<span id="cb69-228"><a href="#cb69-228" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-229"><a href="#cb69-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-230"><a href="#cb69-230" aria-hidden="true" tabindex="-1"></a>        <span class="co"># VALID (quota) from remaining train_pool</span></span>
+<span id="cb69-231"><a href="#cb69-231" aria-hidden="true" tabindex="-1"></a>        remaining_train_pool <span class="op">=</span> train_pool.drop(hard_train.index)</span>
+<span id="cb69-232"><a href="#cb69-232" aria-hidden="true" tabindex="-1"></a>        hard_valid <span class="op">=</span> quota_sample_df(</span>
+<span id="cb69-233"><a href="#cb69-233" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>remaining_train_pool,</span>
+<span id="cb69-234"><a href="#cb69-234" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"valid"</span>],</span>
+<span id="cb69-235"><a href="#cb69-235" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>hard_bucket_masks(remaining_train_pool),</span>
+<span id="cb69-236"><a href="#cb69-236" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
+<span id="cb69-237"><a href="#cb69-237" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">12</span>,</span>
+<span id="cb69-238"><a href="#cb69-238" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-239"><a href="#cb69-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-240"><a href="#cb69-240" aria-hidden="true" tabindex="-1"></a>        <span class="co"># </span><span class="al">TEST</span><span class="co"> (quota) from dev pool</span></span>
+<span id="cb69-241"><a href="#cb69-241" aria-hidden="true" tabindex="-1"></a>        hard_test <span class="op">=</span> quota_sample_df(</span>
+<span id="cb69-242"><a href="#cb69-242" aria-hidden="true" tabindex="-1"></a>            pool<span class="op">=</span>test_pool,</span>
+<span id="cb69-243"><a href="#cb69-243" aria-hidden="true" tabindex="-1"></a>            total_n<span class="op">=</span>tconf[<span class="st">"test"</span>],</span>
+<span id="cb69-244"><a href="#cb69-244" aria-hidden="true" tabindex="-1"></a>            masks<span class="op">=</span>masks_test,</span>
+<span id="cb69-245"><a href="#cb69-245" aria-hidden="true" tabindex="-1"></a>            props<span class="op">=</span>HARD_PROPS,</span>
+<span id="cb69-246"><a href="#cb69-246" aria-hidden="true" tabindex="-1"></a>            seed<span class="op">=</span>RANDOM_STATE <span class="op">+</span> i <span class="op">*</span> <span class="dv">100</span> <span class="op">+</span> <span class="dv">13</span>,</span>
+<span id="cb69-247"><a href="#cb69-247" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb69-248"><a href="#cb69-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-249"><a href="#cb69-249" aria-hidden="true" tabindex="-1"></a>        train, valid, test <span class="op">=</span> hard_train, hard_valid, hard_test</span>
+<span id="cb69-250"><a href="#cb69-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-251"><a href="#cb69-251" aria-hidden="true" tabindex="-1"></a>    splits[stage] <span class="op">=</span> {<span class="st">"train"</span>: train, <span class="st">"valid"</span>: valid, <span class="st">"test"</span>: test}</span>
+<span id="cb69-252"><a href="#cb69-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-253"><a href="#cb69-253" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> split_name, df_part <span class="kw">in</span> splits[stage].items():</span>
+<span id="cb69-254"><a href="#cb69-254" aria-hidden="true" tabindex="-1"></a>        outp <span class="op">=</span> OUTDIR <span class="op">/</span> <span class="ss">f"</span><span class="sc">{</span>stage<span class="sc">.</span>lower()<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>split_name<span class="sc">}</span><span class="ss">.jsonl"</span></span>
+<span id="cb69-255"><a href="#cb69-255" aria-hidden="true" tabindex="-1"></a>        df_part[[<span class="st">"id"</span>]].to_json(outp, orient<span class="op">=</span><span class="st">"records"</span>, lines<span class="op">=</span><span class="va">True</span>, force_ascii<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb69-256"><a href="#cb69-256" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"[</span><span class="sc">{</span>stage<span class="sc">}</span><span class="ss">] </span><span class="sc">{</span>split_name<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span><span class="bu">len</span>(df_part)<span class="sc">:4d}</span><span class="ss">  -&gt; </span><span class="sc">{</span>outp<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb69-257"><a href="#cb69-257" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-258"><a href="#cb69-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-259"><a href="#cb69-259" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> quick_report(df):</span>
+<span id="cb69-260"><a href="#cb69-260" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">len</span>(df) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb69-261"><a href="#cb69-261" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> {<span class="st">"n"</span>: <span class="dv">0</span>}</span>
+<span id="cb69-262"><a href="#cb69-262" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb69-263"><a href="#cb69-263" aria-hidden="true" tabindex="-1"></a>        <span class="st">"n"</span>: <span class="bu">len</span>(df),</span>
+<span id="cb69-264"><a href="#cb69-264" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ops_max_med"</span>: <span class="bu">float</span>(df[<span class="st">"max_ops_per_conversation"</span>].median()),</span>
+<span id="cb69-265"><a href="#cb69-265" aria-hidden="true" tabindex="-1"></a>        <span class="st">"turns_med"</span>: <span class="bu">float</span>(df[<span class="st">"features_num_dialogue_turns"</span>].median()),</span>
+<span id="cb69-266"><a href="#cb69-266" aria-hidden="true" tabindex="-1"></a>        <span class="st">"type2_rate"</span>: <span class="bu">float</span>(df[<span class="st">"features_has_type2_question"</span>].mean()),</span>
+<span id="cb69-267"><a href="#cb69-267" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pre_P50"</span>: <span class="bu">int</span>(df[<span class="st">"doc_pre_text_len"</span>].median()),</span>
+<span id="cb69-268"><a href="#cb69-268" aria-hidden="true" tabindex="-1"></a>        <span class="st">"post_P50"</span>: <span class="bu">int</span>(df[<span class="st">"doc_post_text_len"</span>].median()),</span>
+<span id="cb69-269"><a href="#cb69-269" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cells_P50"</span>: <span class="bu">int</span>(df[<span class="st">"total_cells"</span>].median()),</span>
+<span id="cb69-270"><a href="#cb69-270" aria-hidden="true" tabindex="-1"></a>        <span class="st">"deep_ops_rate"</span>: <span class="bu">float</span>((df[<span class="st">"max_ops_per_conversation"</span>] <span class="op">&gt;=</span> <span class="dv">4</span>).mean()),</span>
+<span id="cb69-271"><a href="#cb69-271" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_turns_rate"</span>: <span class="bu">float</span>((df[<span class="st">"features_num_dialogue_turns"</span>] <span class="op">&gt;=</span> <span class="dv">7</span>).mean()),</span>
+<span id="cb69-272"><a href="#cb69-272" aria-hidden="true" tabindex="-1"></a>        <span class="st">"long_ctx_rate"</span>: <span class="bu">float</span>(</span>
+<span id="cb69-273"><a href="#cb69-273" aria-hidden="true" tabindex="-1"></a>            (</span>
+<span id="cb69-274"><a href="#cb69-274" aria-hidden="true" tabindex="-1"></a>                (df[<span class="st">"doc_pre_text_len"</span>] <span class="op">&gt;</span> P90_pre)</span>
+<span id="cb69-275"><a href="#cb69-275" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> (df[<span class="st">"doc_post_text_len"</span>] <span class="op">&gt;</span> P90_post)</span>
+<span id="cb69-276"><a href="#cb69-276" aria-hidden="true" tabindex="-1"></a>            ).mean()</span>
+<span id="cb69-277"><a href="#cb69-277" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb69-278"><a href="#cb69-278" aria-hidden="true" tabindex="-1"></a>        <span class="st">"big_table_rate"</span>: <span class="bu">float</span>((df[<span class="st">"total_cells"</span>] <span class="op">&gt;</span> P90_cells).mean()),</span>
+<span id="cb69-279"><a href="#cb69-279" aria-hidden="true" tabindex="-1"></a>        <span class="st">"noisy_rate"</span>: <span class="bu">float</span>(</span>
+<span id="cb69-280"><a href="#cb69-280" aria-hidden="true" tabindex="-1"></a>            (</span>
+<span id="cb69-281"><a href="#cb69-281" aria-hidden="true" tabindex="-1"></a>                df[<span class="st">"features_has_duplicate_columns"</span>]</span>
+<span id="cb69-282"><a href="#cb69-282" aria-hidden="true" tabindex="-1"></a>                <span class="op">|</span> df[<span class="st">"features_has_non_numeric_values"</span>]</span>
+<span id="cb69-283"><a href="#cb69-283" aria-hidden="true" tabindex="-1"></a>            ).mean()</span>
+<span id="cb69-284"><a href="#cb69-284" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb69-285"><a href="#cb69-285" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb69-286"><a href="#cb69-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-287"><a href="#cb69-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-288"><a href="#cb69-288" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> stage <span class="kw">in</span> [<span class="st">"Easy"</span>, <span class="st">"Medium"</span>, <span class="st">"Hard"</span>]:</span>
+<span id="cb69-289"><a href="#cb69-289" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="ch">\n</span><span class="ss">[Sanity] </span><span class="sc">{</span>stage<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb69-290"><a href="#cb69-290" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> part, dfp <span class="kw">in</span> splits[stage].items():</span>
+<span id="cb69-291"><a href="#cb69-291" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"  </span><span class="sc">{</span>part<span class="sc">:&gt;5s}</span><span class="ss"> -&gt;"</span>, quick_report(dfp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
-<p>So far, we’ve explored the given dataset, and we’ve decided to do curriculum learning for the problem statement.</p>
+<p>Through this exploratory analysis, we’ve established the foundation for applying curriculum learning to financial reasoning tasks:</p>
+<p><strong>Key Insights:</strong> - ConvFinQA complexity varies dramatically across multiple dimensions: reasoning depth (1-6+ operations), conversation length (2-10+ turns), context density, table size, and data quality - Simple random sampling from difficulty buckets creates imbalanced curricula that overemphasize certain complexity types - Quota-based sampling ensures balanced representation across all complexity dimensions in our training data</p>
+<p><strong>What’s Next:</strong> - <strong>Modelling</strong>: We’ll implement DSPy baselines across our curriculum stages, exploring different LLM models and narrowing down to the most promising models - <strong>Optimization</strong>: We’ll apply DSPy’s optimization techniques with our curriculum learning strategy to achieve state-of-the-art performance</p>
+<p>The curriculum learning framework is now ready — let’s see how DSPy performs when guided by our complexity-aware training progression.</p>
 
 
 </section>
@@ -2819,7 +2794,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom","loop":false});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","openEffect":"zoom","descPosition":"bottom","loop":false,"selector":".lightbox"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

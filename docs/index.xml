@@ -12,7 +12,7 @@
 <generator>quarto-1.4.550</generator>
 <lastBuildDate>Sat, 30 Aug 2025 18:30:00 GMT</lastBuildDate>
 <item>
-  <title>Curriculum Learning with DSPy</title>
+  <title>Curriculum Learning 🤝 DSPy: EDA</title>
   <dc:creator>Shubham Gupta</dc:creator>
   <link>https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html</link>
   <description><![CDATA[ 
@@ -21,6 +21,10 @@
 
 
 
+<p>Financial reasoning over conversational data presents a unique challenge in NLP: models must not only understand natural language but also perform multi-step numerical computations while maintaining context across dialogue turns.</p>
+<p><a href="https://github.com/czyssrs/ConvFinQA">ConvFinQA</a> tackles this problem by combining conversational QA with financial documents and tables, requiring systems to execute chains of mathematical operations to arrive at correct answers.</p>
+<p>What if we could improve model performance by teaching systems to learn from easier examples first, gradually building up to complex multi-turn reasoning? This is the core idea behind curriculum learning.</p>
+<p>This post begins a series exploring curriculum learning with <a href="https://github.com/stanfordnlp/dspy">DSPy</a>. We start with an exploratory analysis of ConvFinQA to understand what makes some examples harder than others, identify complexity patterns in the data, and establish the foundation for a curriculum-based approach to training more effective reasoning systems.</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <p>Given the dataset ConvFinQA, we will aim to explore the dataset.</p>
@@ -31,7 +35,7 @@
 <li>Design a high-level flow of the implementation</li>
 <li>Identify methods/models to use</li>
 </ul>
-<div id="cell-3" class="cell" data-execution_count="1">
+<div id="cell-4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> json</span>
@@ -52,7 +56,7 @@ font-style: inherit;">import</span> seaborn <span class="im" style="color: #0076
 background-color: null;
 font-style: inherit;">as</span> sns</span></code></pre></div>
 </div>
-<div id="cell-4" class="cell" data-execution_count="2">
+<div id="cell-5" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1">data <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> json.load(<span class="bu" style="color: null;
@@ -61,14 +65,14 @@ font-style: inherit;">open</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"../data/convfinqa_dataset.json"</span>))</span></code></pre></div>
 </div>
-<div id="cell-5" class="cell" data-execution_count="3">
+<div id="cell-6" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">data.keys()</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>dict_keys(['train', 'dev'])</code></pre>
 </div>
 </div>
 <p>The current dataset only contains the <code>train</code> and <code>dev</code> splits. For evaluation, we will likely use the <code>dev</code> split, and for training, we’ll split the <code>train</code> split into a <code>train</code> and <code>val</code> split.</p>
-<div id="cell-7" class="cell" data-execution_count="4">
+<div id="cell-8" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">data[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"train"</span>][<span class="dv" style="color: #AD0000;
@@ -114,7 +118,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 </div>
 </div>
 <p>The data matches the schema given in the <code>dataset.md</code> file.</p>
-<div id="cell-9" class="cell" data-execution_count="5">
+<div id="cell-10" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">train_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.DataFrame(data[<span class="st" style="color: #20794D;
@@ -126,13 +130,13 @@ font-style: inherit;">=</span> pd.DataFrame(data[<span class="st" style="color: 
 background-color: null;
 font-style: inherit;">"dev"</span>])</span></code></pre></div>
 </div>
-<div id="cell-10" class="cell" data-execution_count="6">
+<div id="cell-11" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">train_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>Index(['id', 'doc', 'dialogue', 'features'], dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-11" class="cell" data-execution_count="7">
+<div id="cell-12" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1">train_df.info()</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -148,13 +152,13 @@ dtypes: object(4)
 memory usage: 95.0+ KB</code></pre>
 </div>
 </div>
-<div id="cell-12" class="cell" data-execution_count="8">
+<div id="cell-13" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">test_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>Index(['id', 'doc', 'dialogue', 'features'], dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-13" class="cell" data-execution_count="9">
+<div id="cell-14" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">test_df.info()</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -171,7 +175,7 @@ memory usage: 13.3+ KB</code></pre>
 </div>
 </div>
 <p>Given the schema in <code>dataset.md</code> file, we will <em>explode</em> the columns with nested features to make them easier to work with.</p>
-<div id="cell-15" class="cell" data-execution_count="10">
+<div id="cell-16" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">train_flat_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.concat(</span>
@@ -260,7 +264,7 @@ background-color: null;
 font-style: inherit;">1</span>,</span>
 <span id="cb16-19">)</span></code></pre></div>
 </div>
-<div id="cell-16" class="cell" data-execution_count="11">
+<div id="cell-17" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">train_flat_df.info()</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -285,7 +289,7 @@ dtypes: bool(3), int64(1), object(9)
 memory usage: 246.3+ KB</code></pre>
 </div>
 </div>
-<div id="cell-17" class="cell" data-execution_count="12">
+<div id="cell-18" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">test_flat_df.info()</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -316,7 +320,7 @@ memory usage: 34.2+ KB</code></pre>
 <section id="missing-data" class="level3">
 <h3 class="anchored" data-anchor-id="missing-data">Missing Data</h3>
 <p>First, let’s check to see if there’s any missing data in any field.</p>
-<div id="cell-21" class="cell" data-execution_count="13">
+<div id="cell-22" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> missingno <span class="im" style="color: #00769E;
@@ -332,7 +336,7 @@ font-style: inherit;">as</span> msno</span>
 </div>
 </div>
 </div>
-<div id="cell-22" class="cell" data-execution_count="14">
+<div id="cell-23" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1">msno.matrix(test_flat_df)</span></code></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -351,7 +355,7 @@ font-style: inherit;">as</span> msno</span>
 <li>pre_text -&gt; Supporting text from the document occuring BEFORE the table content</li>
 <li>post_text -&gt; Supporting text from the document occuring AFTER the table content</li>
 </ul>
-<div id="cell-26" class="cell" data-execution_count="15">
+<div id="cell-27" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> pprint <span class="im" style="color: #00769E;
@@ -384,7 +388,7 @@ font-style: inherit;">0</span>])</span></code></pre></div>
  'operating activities in the statement of cash flows : 2009 2008 2007 .')</code></pre>
 </div>
 </div>
-<div id="cell-27" class="cell" data-execution_count="16">
+<div id="cell-28" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].<span class="bu" style="color: null;
@@ -404,7 +408,7 @@ max      7153.000000
 Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
-<div id="cell-28" class="cell" data-execution_count="17">
+<div id="cell-29" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">pprint(test_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].head().iloc[<span class="dv" style="color: #AD0000;
@@ -476,7 +480,7 @@ font-style: inherit;">0</span>])</span></code></pre></div>
  'black-scholes assumptions: .')</code></pre>
 </div>
 </div>
-<div id="cell-29" class="cell" data-execution_count="18">
+<div id="cell-30" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1">test_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].<span class="bu" style="color: null;
@@ -497,7 +501,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
 <p>Looks like the pre_text in the data has some si</p>
-<div id="cell-31" class="cell" data-execution_count="19">
+<div id="cell-32" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1">fig, axes <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -746,7 +750,7 @@ font-style: inherit;">"test_flat_df: doc_post_text length"</span>)</span>
 <h2 class="anchored" data-anchor-id="doc_table"><code>doc_table</code></h2>
 <section id="table-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="table-dimensions">Table Dimensions</h3>
-<div id="cell-35" class="cell" data-execution_count="20">
+<div id="cell-36" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> compute_dims(table):</span>
@@ -945,7 +949,7 @@ font-style: inherit;">=</span>ax)</span>
 </ul></li>
 <li>Same as the number of columns, we see that the training dataset has a much wider distribution of number of cells. In the test set, the majority of records have cells &lt; 30.</li>
 </ul>
-<div id="cell-37" class="cell" data-execution_count="21">
+<div id="cell-38" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">threshold <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
@@ -1037,7 +1041,7 @@ font-style: inherit;">"</span>)</span></code></pre></div>
 </code></pre>
 </div>
 </div>
-<div id="cell-38" class="cell" data-execution_count="22">
+<div id="cell-39" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> count_nested_tables(table):</span>
@@ -1271,7 +1275,7 @@ dtypes: int64(1), object(1)
 memory usage: 54.2+ KB</code></pre>
 </div>
 </div>
-<div id="cell-39" class="cell" data-execution_count="23">
+<div id="cell-40" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">nested_df[nested_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"nested_tables"</span>] <span class="op" style="color: #5E5E5E;
@@ -1301,7 +1305,7 @@ font-style: inherit;">2</span>]</span></code></pre></div>
 </div>
 </div>
 <p>Looks like the table are not deeply nested! This is good since we don’t have to worry too much about table formatting, when sending the table as context to the LLM.</p>
-<div id="cell-41" class="cell" data-execution_count="24">
+<div id="cell-42" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -1317,7 +1321,7 @@ font-style: inherit;">2</span>]</span></code></pre></div>
 </section>
 <section id="column-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="column-header-analysis">Column Header Analysis</h3>
-<div id="cell-43" class="cell" data-execution_count="25">
+<div id="cell-44" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
@@ -1505,7 +1509,7 @@ Top 10 headers by docs appeared in: [('total', 54), ('other', 36), ('s&amp;p 500
 </section>
 <section id="row-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="row-header-analysis">Row Header Analysis</h3>
-<div id="cell-45" class="cell" data-execution_count="26">
+<div id="cell-46" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
@@ -1995,7 +1999,7 @@ net income                                                  21</code></pre>
 </div>
 </div>
 <p>We see some similar patterns in the row headers across the splits, but nothing of significance.</p>
-<div id="cell-47" class="cell" data-execution_count="27">
+<div id="cell-48" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
@@ -2412,7 +2416,7 @@ Top 10 unparseable patterns:
 <li>Drop tables where &gt;5% of cells are unparseable to ensure numeric consistency.</li>
 </ul>
 <p>This keeps our evaluation set focused on clean, numeric data and avoids noise from poorly parsed entries. More on this later!</p>
-<div id="cell-49" class="cell" data-execution_count="28">
+<div id="cell-50" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="28">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -2429,7 +2433,7 @@ Top 10 unparseable patterns:
 </section>
 <section id="dialogue_conv_questions" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_questions"><code>dialogue_conv_questions</code></h2>
-<div id="cell-51" class="cell" data-execution_count="29">
+<div id="cell-52" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1">train_q_lens <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_flat_df[<span class="st" style="color: #20794D;
@@ -2528,7 +2532,7 @@ font-style: inherit;">"Density"</span>)</span>
 </section>
 <section id="dialogue_conv_answers" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_answers"><code>dialogue_conv_answers</code></h2>
-<div id="cell-54" class="cell" data-execution_count="30">
+<div id="cell-55" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1">train_q_lens <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_flat_df[<span class="st" style="color: #20794D;
@@ -2628,7 +2632,7 @@ font-style: inherit;">"Density"</span>)</span>
 <section id="dialogue_turn_program" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_turn_program"><code>dialogue_turn_program</code></h2>
 <p>This field represents the program DSL generated for the current turn.</p>
-<div id="cell-58" class="cell" data-execution_count="31">
+<div id="cell-59" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"dialogue_turn_program"</span>].head()</span></code></pre></div>
@@ -2641,7 +2645,7 @@ font-style: inherit;">"dialogue_turn_program"</span>].head()</span></code></pre>
 Name: dialogue_turn_program, dtype: object</code></pre>
 </div>
 </div>
-<div id="cell-59" class="cell" data-execution_count="32">
+<div id="cell-60" class="cell" data-execution_count="32">
 <div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> _get_op_counts(df: pd.DataFrame) <span class="op" style="color: #5E5E5E;
@@ -2768,7 +2772,7 @@ font-style: inherit;">"Histogram of operation counts in turn_programs (train vs.
 </div>
 <p>Similar distributions for number of operations in both the train and test set. Majority of the operations are &lt; 4 .</p>
 <p>We could argue that the number of operations is a good proxy for the complexity of the program. As such, we should probably aim to do well first on the examples where the number of operations is small.</p>
-<div id="cell-61" class="cell" data-execution_count="33">
+<div id="cell-62" class="cell" data-execution_count="33">
 <div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="33">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -2784,7 +2788,7 @@ font-style: inherit;">"Histogram of operation counts in turn_programs (train vs.
 </section>
 <section id="features_num_dialogue_turns" class="level2">
 <h2 class="anchored" data-anchor-id="features_num_dialogue_turns"><code>features_num_dialogue_turns</code></h2>
-<div id="cell-63" class="cell" data-execution_count="34">
+<div id="cell-64" class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">fig, axes <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
@@ -2925,7 +2929,7 @@ font-style: inherit;">""</span>)</span>
 </div>
 <p>Similar distributions across the train and test sets. As mentioned in the paper, we should expect conversations with more dialogue turns, to be more difficult to answer for models.</p>
 <p>This is yet another feature we could use when deciding how to split our data into train, validation, and test sets.</p>
-<div id="cell-65" class="cell" data-execution_count="35">
+<div id="cell-66" class="cell" data-execution_count="35">
 <div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="35">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -2941,7 +2945,7 @@ font-style: inherit;">""</span>)</span>
 </section>
 <section id="features_has_type2_question" class="level2">
 <h2 class="anchored" data-anchor-id="features_has_type2_question"><code>features_has_type2_question</code></h2>
-<div id="cell-67" class="cell" data-execution_count="36">
+<div id="cell-68" class="cell" data-execution_count="36">
 <div class="sourceCode cell-code" id="cb58" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> seaborn <span class="im" style="color: #00769E;
@@ -3131,6 +3135,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </section>
 <section id="methodology" class="level1">
 <h1>Methodology</h1>
+<p><a id="methodology"></a></p>
 <p>Given the above dataset analysis, a few things are clear:</p>
 <ul>
 <li>Given the recent explosion of ctx window size for language models, we should be able to build strong baselines model without any finetuning.</li>
@@ -3228,7 +3233,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <blockquote class="blockquote">
 <p>To prevent overlap and duplicates, we will construct the stages in reverse order i.e - Hard first to ensure we isolate the difficult problems - Easy next to identify baseline performance - Remaining problems go into medium to help develop better reasoning and arithmetic abilities.</p>
 </blockquote>
-<div id="cell-73" class="cell" data-execution_count="37">
+<div id="cell-74" class="cell" data-execution_count="37">
 <div class="sourceCode cell-code" id="cb61" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="37">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -3241,7 +3246,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
       dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-74" class="cell" data-execution_count="38">
+<div id="cell-75" class="cell" data-execution_count="38">
 <div class="sourceCode cell-code" id="cb63" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> get_max_ops_per_conversation(df):</span>
@@ -3370,7 +3375,7 @@ font-style: inherit;">"max_ops_per_conversation"</span>] <span class="op" style=
 background-color: null;
 font-style: inherit;">=</span> get_max_ops_per_conversation(test_flat_df)</span></code></pre></div>
 </div>
-<div id="cell-75" class="cell" data-execution_count="39">
+<div id="cell-76" class="cell" data-execution_count="39">
 <div class="sourceCode cell-code" id="cb64" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1">train_flat_df.columns</span></code></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="39">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -3383,7 +3388,7 @@ font-style: inherit;">=</span> get_max_ops_per_conversation(test_flat_df)</span>
       dtype='object')</code></pre>
 </div>
 </div>
-<div id="cell-76" class="cell" data-execution_count="40">
+<div id="cell-77" class="cell" data-execution_count="40">
 <div class="sourceCode cell-code" id="cb66" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>] <span class="op" style="color: #5E5E5E;
@@ -3446,7 +3451,7 @@ background-color: null;
 font-style: inherit;">len</span>(x.split())</span>
 <span id="cb66-13">)</span></code></pre></div>
 </div>
-<div id="cell-77" class="cell" data-execution_count="41">
+<div id="cell-78" class="cell" data-execution_count="41">
 <div class="sourceCode cell-code" id="cb67" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1">train_flat_df[</span>
 <span id="cb67-2">    [</span>
 <span id="cb67-3">        <span class="st" style="color: #20794D;
@@ -3616,7 +3621,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 </div>
 </div>
 </div>
-<div id="cell-78" class="cell" data-execution_count="42">
+<div id="cell-79" class="cell" data-execution_count="42">
 <div class="sourceCode cell-code" id="cb68" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1">test_flat_df[</span>
 <span id="cb68-2">    [</span>
 <span id="cb68-3">        <span class="st" style="color: #20794D;
@@ -3787,9 +3792,13 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 </div>
 </div>
 </section>
-<section id="curriculum-stages" class="level2">
-<h2 class="anchored" data-anchor-id="curriculum-stages">Curriculum Stages</h2>
-<div id="cell-80" class="cell" data-execution_count="44">
+<section id="curriculum-design-quota-rebalancing" class="level2">
+<h2 class="anchored" data-anchor-id="curriculum-design-quota-rebalancing">Curriculum Design &amp; Quota Rebalancing</h2>
+<p>While our complexity classification captures overall difficulty, curriculum learning requires more nuanced sampling strategies. Simply taking the hardest examples might create an imbalanced curriculum that overrepresents certain types of complexity while ignoring others.</p>
+<p>Consider two scenarios: 1. <strong>Naive sampling</strong>: We randomly sample from our “Hard” bucket and end up with 80% long-context examples but only 5% multi-operation examples 2. <strong>Quota sampling</strong>: We ensure balanced representation across complexity dimensions</p>
+<p>The second approach creates a more robust curriculum. Our hard examples should include: - <strong>Deep reasoning</strong> (4+ mathematical operations) - <strong>Long conversations</strong> (7+ dialogue turns) - <strong>Dense context</strong> (lengthy pre/post text) - <strong>Complex tables</strong> (many cells, nested structures) - <strong>Noisy data</strong> (duplicate columns, non-numeric values)</p>
+<p>This ensures our model learns to handle diverse types of complexity rather than overfitting to a single difficulty dimension. The following code implements quota-based sampling to achieve this balanced representation:</p>
+<div id="cell-81" class="cell">
 <div class="sourceCode cell-code" id="cb69" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> pprint <span class="im" style="color: #00769E;
@@ -3866,32 +3875,7 @@ font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">42</span></span>
 <span id="cb69-12"></span>
-<span id="cb69-13"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Expect: train_flat_df, test_flat_df already loaded with columns:</span></span>
-<span id="cb69-14"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># ['id','doc_pre_text','doc_post_text','doc_table','dialogue_conv_questions',</span></span>
-<span id="cb69-15"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  'dialogue_conv_answers','dialogue_turn_program','dialogue_executed_answers',</span></span>
-<span id="cb69-16"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  'dialogue_qa_split','features_num_dialogue_turns','features_has_type2_question',</span></span>
-<span id="cb69-17"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  'features_has_duplicate_columns','features_has_non_numeric_values',</span></span>
-<span id="cb69-18"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  'n_rows','n_cols','total_cells','nested_tables','max_ops_per_conversation',</span></span>
-<span id="cb69-19"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#  'doc_pre_text_len','doc_post_text_len']</span></span>
-<span id="cb69-20"></span>
-<span id="cb69-21"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># --- percentiles on TRAIN only (add P65, P90) ---</span></span>
-<span id="cb69-22">P50_pre <span class="op" style="color: #5E5E5E;
+<span id="cb69-13">P50_pre <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3900,7 +3884,7 @@ background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.50</span>))</span>
-<span id="cb69-23">P65_pre <span class="op" style="color: #5E5E5E;
+<span id="cb69-14">P65_pre <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3909,7 +3893,7 @@ background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.65</span>))</span>
-<span id="cb69-24">P80_pre <span class="op" style="color: #5E5E5E;
+<span id="cb69-15">P80_pre <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3918,7 +3902,7 @@ background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.80</span>))</span>
-<span id="cb69-25">P90_pre <span class="op" style="color: #5E5E5E;
+<span id="cb69-16">P90_pre <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3927,8 +3911,8 @@ background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.90</span>))</span>
-<span id="cb69-26"></span>
-<span id="cb69-27">P50_post <span class="op" style="color: #5E5E5E;
+<span id="cb69-17"></span>
+<span id="cb69-18">P50_post <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3937,7 +3921,7 @@ background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.50</span>))</span>
-<span id="cb69-28">P65_post <span class="op" style="color: #5E5E5E;
+<span id="cb69-19">P65_post <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3946,7 +3930,7 @@ background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.65</span>))</span>
-<span id="cb69-29">P80_post <span class="op" style="color: #5E5E5E;
+<span id="cb69-20">P80_post <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3955,7 +3939,7 @@ background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.80</span>))</span>
-<span id="cb69-30">P90_post <span class="op" style="color: #5E5E5E;
+<span id="cb69-21">P90_post <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3964,8 +3948,8 @@ background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.90</span>))</span>
-<span id="cb69-31"></span>
-<span id="cb69-32">P50_cells <span class="op" style="color: #5E5E5E;
+<span id="cb69-22"></span>
+<span id="cb69-23">P50_cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3974,7 +3958,7 @@ background-color: null;
 font-style: inherit;">"total_cells"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.50</span>))</span>
-<span id="cb69-33">P65_cells <span class="op" style="color: #5E5E5E;
+<span id="cb69-24">P65_cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3983,7 +3967,7 @@ background-color: null;
 font-style: inherit;">"total_cells"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.65</span>))</span>
-<span id="cb69-34">P80_cells <span class="op" style="color: #5E5E5E;
+<span id="cb69-25">P80_cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -3992,7 +3976,7 @@ background-color: null;
 font-style: inherit;">"total_cells"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.80</span>))</span>
-<span id="cb69-35">P90_cells <span class="op" style="color: #5E5E5E;
+<span id="cb69-26">P90_cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4001,11 +3985,11 @@ background-color: null;
 font-style: inherit;">"total_cells"</span>].quantile(<span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.90</span>))</span>
-<span id="cb69-36"></span>
-<span id="cb69-37"><span class="bu" style="color: null;
+<span id="cb69-27"></span>
+<span id="cb69-28"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(</span>
-<span id="cb69-38">    <span class="ss" style="color: #20794D;
+<span id="cb69-29">    <span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">f"[Percentiles/train] pre P50=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -4032,7 +4016,7 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;"> "</span></span>
-<span id="cb69-39">    <span class="ss" style="color: #20794D;
+<span id="cb69-30">    <span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">f"| post P50=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -4059,7 +4043,7 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;"> "</span></span>
-<span id="cb69-40">    <span class="ss" style="color: #20794D;
+<span id="cb69-31">    <span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">f"| cells P50=</span><span class="sc" style="color: #5E5E5E;
 background-color: null;
@@ -4086,141 +4070,138 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span></span>
-<span id="cb69-41">)</span>
-<span id="cb69-42"></span>
-<span id="cb69-43"></span>
-<span id="cb69-44"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># --- Stage assignment (unchanged) ---</span></span>
-<span id="cb69-45"><span class="kw" style="color: #003B4F;
+<span id="cb69-32">)</span>
+<span id="cb69-33"></span>
+<span id="cb69-34"></span>
+<span id="cb69-35"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> assign_stages(df: pd.DataFrame) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-&gt;</span> pd.Series:</span>
-<span id="cb69-46">    mops <span class="op" style="color: #5E5E5E;
+<span id="cb69-36">    mops <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"max_ops_per_conversation"</span>]</span>
-<span id="cb69-47">    turns <span class="op" style="color: #5E5E5E;
+<span id="cb69-37">    turns <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_num_dialogue_turns"</span>]</span>
-<span id="cb69-48">    t2 <span class="op" style="color: #5E5E5E;
+<span id="cb69-38">    t2 <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_type2_question"</span>]</span>
-<span id="cb69-49">    preL <span class="op" style="color: #5E5E5E;
+<span id="cb69-39">    preL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>]</span>
-<span id="cb69-50">    postL <span class="op" style="color: #5E5E5E;
+<span id="cb69-40">    postL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>]</span>
-<span id="cb69-51">    cells <span class="op" style="color: #5E5E5E;
+<span id="cb69-41">    cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"total_cells"</span>]</span>
-<span id="cb69-52">    dup <span class="op" style="color: #5E5E5E;
+<span id="cb69-42">    dup <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_duplicate_columns"</span>]</span>
-<span id="cb69-53">    nonnum <span class="op" style="color: #5E5E5E;
+<span id="cb69-43">    nonnum <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_non_numeric_values"</span>]</span>
-<span id="cb69-54"></span>
-<span id="cb69-55">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-44"></span>
+<span id="cb69-45">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># HARD (tail)</span></span>
-<span id="cb69-56">    hard <span class="op" style="color: #5E5E5E;
+<span id="cb69-46">    hard <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
-<span id="cb69-57">        (mops <span class="op" style="color: #5E5E5E;
+<span id="cb69-47">        (mops <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>)</span>
-<span id="cb69-58">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-48">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (turns <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">7</span>)</span>
-<span id="cb69-59">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-49">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (preL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_pre)</span>
-<span id="cb69-60">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-50">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (postL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_post)</span>
-<span id="cb69-61">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-51">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_cells)</span>
-<span id="cb69-62">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-52">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (dup)</span>
-<span id="cb69-63">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-53">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (</span>
-<span id="cb69-64">            nonnum</span>
-<span id="cb69-65">            <span class="op" style="color: #5E5E5E;
+<span id="cb69-54">            nonnum</span>
+<span id="cb69-55">            <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (</span>
-<span id="cb69-66">                (mops <span class="op" style="color: #5E5E5E;
+<span id="cb69-56">                (mops <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span>)</span>
-<span id="cb69-67">                <span class="op" style="color: #5E5E5E;
+<span id="cb69-57">                <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (preL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P80_pre)</span>
-<span id="cb69-68">                <span class="op" style="color: #5E5E5E;
+<span id="cb69-58">                <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (postL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P80_post)</span>
-<span id="cb69-69">                <span class="op" style="color: #5E5E5E;
+<span id="cb69-59">                <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P80_cells)</span>
-<span id="cb69-70">            )</span>
-<span id="cb69-71">        )</span>
-<span id="cb69-72">    )</span>
-<span id="cb69-73"></span>
-<span id="cb69-74">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-60">            )</span>
+<span id="cb69-61">        )</span>
+<span id="cb69-62">    )</span>
+<span id="cb69-63"></span>
+<span id="cb69-64">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># EASY (broaden to P65)</span></span>
-<span id="cb69-75">    easy <span class="op" style="color: #5E5E5E;
+font-style: inherit;"># EASY (P65)</span></span>
+<span id="cb69-65">    easy <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">~</span>hard) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (</span>
-<span id="cb69-76">        (mops <span class="op" style="color: #5E5E5E;
+<span id="cb69-66">        (mops <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb69-77">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-67">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (turns.between(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -4231,53 +4212,53 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"both"</span>))</span>
-<span id="cb69-78">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-68">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">~</span>t2)</span>
-<span id="cb69-79">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-69">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (preL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P65_pre)</span>
-<span id="cb69-80">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-70">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (postL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P65_post)</span>
-<span id="cb69-81">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-71">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P65_cells)</span>
-<span id="cb69-82">    )</span>
-<span id="cb69-83"></span>
-<span id="cb69-84">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-72">    )</span>
+<span id="cb69-73"></span>
+<span id="cb69-74">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># MEDIUM (middle band)</span></span>
-<span id="cb69-85">    medium <span class="op" style="color: #5E5E5E;
+<span id="cb69-75">    medium <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (</span>
-<span id="cb69-86">        (<span class="op" style="color: #5E5E5E;
+<span id="cb69-76">        (<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">~</span>hard)</span>
-<span id="cb69-87">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-77">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">~</span>easy)</span>
-<span id="cb69-88">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-78">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (</span>
-<span id="cb69-89">            ((mops.isin([<span class="dv" style="color: #AD0000;
+<span id="cb69-79">            ((mops.isin([<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">3</span>])) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (t2))</span>
-<span id="cb69-90">            <span class="op" style="color: #5E5E5E;
+<span id="cb69-80">            <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (turns.between(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -4288,25 +4269,25 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"both"</span>))</span>
-<span id="cb69-91">            <span class="op" style="color: #5E5E5E;
+<span id="cb69-81">            <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (preL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P90_pre)</span>
-<span id="cb69-92">            <span class="op" style="color: #5E5E5E;
+<span id="cb69-82">            <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (postL <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P90_post)</span>
-<span id="cb69-93">            <span class="op" style="color: #5E5E5E;
+<span id="cb69-83">            <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&amp;</span> (cells <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> P90_cells)</span>
-<span id="cb69-94">        )</span>
-<span id="cb69-95">    )</span>
-<span id="cb69-96"></span>
-<span id="cb69-97">    stage <span class="op" style="color: #5E5E5E;
+<span id="cb69-84">        )</span>
+<span id="cb69-85">    )</span>
+<span id="cb69-86"></span>
+<span id="cb69-87">    stage <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.Series(index<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4315,68 +4296,65 @@ background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"string"</span>)</span>
-<span id="cb69-98">    stage.loc[hard] <span class="op" style="color: #5E5E5E;
+<span id="cb69-88">    stage.loc[hard] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Hard"</span></span>
-<span id="cb69-99">    stage.loc[easy] <span class="op" style="color: #5E5E5E;
+<span id="cb69-89">    stage.loc[easy] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Easy"</span></span>
-<span id="cb69-100">    stage.loc[medium] <span class="op" style="color: #5E5E5E;
+<span id="cb69-90">    stage.loc[medium] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Medium"</span></span>
-<span id="cb69-101">    stage <span class="op" style="color: #5E5E5E;
+<span id="cb69-91">    stage <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> stage.fillna(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Medium"</span>)</span>
-<span id="cb69-102">    <span class="cf" style="color: #003B4F;
+<span id="cb69-92">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> stage</span>
-<span id="cb69-103"></span>
-<span id="cb69-104"></span>
-<span id="cb69-105">cur_train_df <span class="op" style="color: #5E5E5E;
+<span id="cb69-93"></span>
+<span id="cb69-94"></span>
+<span id="cb69-95">cur_train_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_flat_df.copy()</span>
-<span id="cb69-106">cur_test_df <span class="op" style="color: #5E5E5E;
+<span id="cb69-96">cur_test_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> test_flat_df.copy()</span>
-<span id="cb69-107">cur_train_df[<span class="st" style="color: #20794D;
+<span id="cb69-97">cur_train_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> assign_stages(cur_train_df)</span>
-<span id="cb69-108">cur_test_df[<span class="st" style="color: #20794D;
+<span id="cb69-98">cur_test_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> assign_stages(cur_test_df)</span>
-<span id="cb69-109"></span>
-<span id="cb69-110"><span class="bu" style="color: null;
+<span id="cb69-99"></span>
+<span id="cb69-100"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"[Stage counts] TRAIN:"</span>, cur_train_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>].value_counts().to_dict())</span>
-<span id="cb69-111"><span class="bu" style="color: null;
+<span id="cb69-101"><span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"[Stage counts] TEST:  "</span>, cur_test_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>].value_counts().to_dict())</span>
-<span id="cb69-112"></span>
-<span id="cb69-113"></span>
-<span id="cb69-114"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># --- Simple sampler (unchanged) ---</span></span>
-<span id="cb69-115"><span class="kw" style="color: #003B4F;
+<span id="cb69-102"></span>
+<span id="cb69-103"></span>
+<span id="cb69-104"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> sample_df(df: pd.DataFrame, n: <span class="bu" style="color: null;
 background-color: null;
@@ -4385,7 +4363,7 @@ background-color: null;
 font-style: inherit;">int</span>) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-&gt;</span> pd.DataFrame:</span>
-<span id="cb69-116">    <span class="cf" style="color: #003B4F;
+<span id="cb69-105">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> n <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4394,21 +4372,21 @@ background-color: null;
 font-style: inherit;">0</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">or</span> df.empty:</span>
-<span id="cb69-117">        <span class="cf" style="color: #003B4F;
+<span id="cb69-106">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> df.iloc[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>]</span>
-<span id="cb69-118">    <span class="cf" style="color: #003B4F;
+<span id="cb69-107">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(df) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> n:</span>
-<span id="cb69-119">        <span class="cf" style="color: #003B4F;
+<span id="cb69-108">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> df.sample(frac<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4419,76 +4397,73 @@ background-color: null;
 font-style: inherit;">=</span>seed)  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># shuffle full pool if small</span></span>
-<span id="cb69-120">    <span class="cf" style="color: #003B4F;
+<span id="cb69-109">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> df.sample(n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>n, random_state<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>seed)</span>
-<span id="cb69-121"></span>
-<span id="cb69-122"></span>
-<span id="cb69-123"><span class="co" style="color: #5E5E5E;
+<span id="cb69-110"></span>
+<span id="cb69-111"></span>
+<span id="cb69-112"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># =========================</span></span>
-<span id="cb69-124"><span class="co" style="color: #5E5E5E;
+<span id="cb69-113"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># HARD QUOTA REBALANCING</span></span>
-<span id="cb69-125"><span class="co" style="color: #5E5E5E;
+<span id="cb69-114"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># =========================</span></span>
-<span id="cb69-126"></span>
-<span id="cb69-127"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># Proportions for Hard buckets (sum ≈ 1.0). Tune if desired.</span></span>
-<span id="cb69-128">HARD_PROPS <span class="op" style="color: #5E5E5E;
+<span id="cb69-115"></span>
+<span id="cb69-116">HARD_PROPS <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {</span>
-<span id="cb69-129">    <span class="st" style="color: #20794D;
+<span id="cb69-117">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"deep_ops"</span>: <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.23</span>,  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># max_ops &gt;= 4</span></span>
-<span id="cb69-130">    <span class="st" style="color: #20794D;
+<span id="cb69-118">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_turns"</span>: <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.23</span>,  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># turns &gt;= 7</span></span>
-<span id="cb69-131">    <span class="st" style="color: #20794D;
+<span id="cb69-119">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_ctx"</span>: <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.27</span>,  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># pre &gt; P90_pre OR post &gt; P90_post</span></span>
-<span id="cb69-132">    <span class="st" style="color: #20794D;
+<span id="cb69-120">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"big_table"</span>: <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.20</span>,  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># total_cells &gt; P90_cells</span></span>
-<span id="cb69-133">    <span class="st" style="color: #20794D;
+<span id="cb69-121">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"noisy"</span>: <span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0.07</span>,  <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># duplicate OR non-numeric (with complexity already in stage)</span></span>
-<span id="cb69-134">}</span>
-<span id="cb69-135"></span>
-<span id="cb69-136"></span>
-<span id="cb69-137"><span class="kw" style="color: #003B4F;
+<span id="cb69-122">}</span>
+<span id="cb69-123"></span>
+<span id="cb69-124"></span>
+<span id="cb69-125"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> hard_bucket_masks(df: pd.DataFrame):</span>
-<span id="cb69-138">    <span class="cf" style="color: #003B4F;
+<span id="cb69-126">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> {</span>
-<span id="cb69-139">        <span class="st" style="color: #20794D;
+<span id="cb69-127">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"deep_ops"</span>: (df[<span class="st" style="color: #20794D;
 background-color: null;
@@ -4497,7 +4472,7 @@ background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>),</span>
-<span id="cb69-140">        <span class="st" style="color: #20794D;
+<span id="cb69-128">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_turns"</span>: (df[<span class="st" style="color: #20794D;
 background-color: null;
@@ -4506,44 +4481,44 @@ background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">7</span>),</span>
-<span id="cb69-141">        <span class="st" style="color: #20794D;
+<span id="cb69-129">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_ctx"</span>: (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_pre)</span>
-<span id="cb69-142">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-130">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_post),</span>
-<span id="cb69-143">        <span class="st" style="color: #20794D;
+<span id="cb69-131">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"big_table"</span>: (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"total_cells"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_cells),</span>
-<span id="cb69-144">        <span class="st" style="color: #20794D;
+<span id="cb69-132">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"noisy"</span>: (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_duplicate_columns"</span>])</span>
-<span id="cb69-145">        <span class="op" style="color: #5E5E5E;
+<span id="cb69-133">        <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_non_numeric_values"</span>]),</span>
-<span id="cb69-146">    }</span>
-<span id="cb69-147"></span>
-<span id="cb69-148"></span>
-<span id="cb69-149"><span class="kw" style="color: #003B4F;
+<span id="cb69-134">    }</span>
+<span id="cb69-135"></span>
+<span id="cb69-136"></span>
+<span id="cb69-137"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> quota_sample_df(</span>
-<span id="cb69-150">    pool: pd.DataFrame, total_n: <span class="bu" style="color: null;
+<span id="cb69-138">    pool: pd.DataFrame, total_n: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>, masks: <span class="bu" style="color: null;
 background-color: null;
@@ -4552,58 +4527,58 @@ background-color: null;
 font-style: inherit;">dict</span>, seed: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span></span>
-<span id="cb69-151">) <span class="op" style="color: #5E5E5E;
+<span id="cb69-139">) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-&gt;</span> pd.DataFrame:</span>
-<span id="cb69-152">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-140">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">"""</span></span>
-<span id="cb69-153"><span class="co" style="color: #5E5E5E;
+<span id="cb69-141"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">    Quota-based sampling without replacement across overlapping buckets.</span></span>
-<span id="cb69-154"><span class="co" style="color: #5E5E5E;
+<span id="cb69-142"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">    - masks: dict[name] -&gt; boolean Series over pool</span></span>
-<span id="cb69-155"><span class="co" style="color: #5E5E5E;
+<span id="cb69-143"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">    - props: dict[name] -&gt; proportion (0..1)</span></span>
-<span id="cb69-156"><span class="co" style="color: #5E5E5E;
+<span id="cb69-144"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">    Strategy:</span></span>
-<span id="cb69-157"><span class="co" style="color: #5E5E5E;
+<span id="cb69-145"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">      1) compute desired counts per bucket by props * total_n</span></span>
-<span id="cb69-158"><span class="co" style="color: #5E5E5E;
+<span id="cb69-146"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">      2) iterate buckets in fixed priority, sample from items not yet taken</span></span>
-<span id="cb69-159"><span class="co" style="color: #5E5E5E;
+<span id="cb69-147"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">      3) cap each bucket by its availability</span></span>
-<span id="cb69-160"><span class="co" style="color: #5E5E5E;
+<span id="cb69-148"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">      4) top up remaining slots uniformly at random from leftover pool</span></span>
-<span id="cb69-161"><span class="co" style="color: #5E5E5E;
+<span id="cb69-149"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">    """</span></span>
-<span id="cb69-162">    rng <span class="op" style="color: #5E5E5E;
+<span id="cb69-150">    rng <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.random.default_rng(seed)</span>
-<span id="cb69-163">    pool <span class="op" style="color: #5E5E5E;
+<span id="cb69-151">    pool <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pool.copy()</span>
-<span id="cb69-164">    taken_idx <span class="op" style="color: #5E5E5E;
+<span id="cb69-152">    taken_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>()</span>
-<span id="cb69-165">    out_parts <span class="op" style="color: #5E5E5E;
+<span id="cb69-153">    out_parts <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> []</span>
-<span id="cb69-166"></span>
-<span id="cb69-167">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-154"></span>
+<span id="cb69-155">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># fixed priority: emphasize "deep_ops" and "long_turns"/"long_ctx" first</span></span>
-<span id="cb69-168">    order <span class="op" style="color: #5E5E5E;
+font-style: inherit;"># emphasize "deep_ops" and "long_turns"/"long_ctx" first</span></span>
+<span id="cb69-156">    order <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [<span class="st" style="color: #20794D;
 background-color: null;
@@ -4616,7 +4591,7 @@ background-color: null;
 font-style: inherit;">"big_table"</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"noisy"</span>]</span>
-<span id="cb69-169">    desired <span class="op" style="color: #5E5E5E;
+<span id="cb69-157">    desired <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {k: <span class="bu" style="color: null;
 background-color: null;
@@ -4631,27 +4606,27 @@ background-color: null;
 font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> order}</span>
-<span id="cb69-170">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-158">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># adjust rounding to not exceed total_n</span></span>
-<span id="cb69-171">    diff <span class="op" style="color: #5E5E5E;
+<span id="cb69-159">    diff <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> total_n <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">sum</span>(desired.values())</span>
-<span id="cb69-172">    <span class="cf" style="color: #003B4F;
+<span id="cb69-160">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> diff <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">!=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb69-173">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-161">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># distribute remainder by descending props</span></span>
-<span id="cb69-174">        <span class="cf" style="color: #003B4F;
+<span id="cb69-162">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -4670,17 +4645,17 @@ background-color: null;
 font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>)):</span>
-<span id="cb69-175">            <span class="cf" style="color: #003B4F;
+<span id="cb69-163">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> diff <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb69-176">                <span class="cf" style="color: #003B4F;
+<span id="cb69-164">                <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">break</span></span>
-<span id="cb69-177">            desired[k] <span class="op" style="color: #5E5E5E;
+<span id="cb69-165">            desired[k] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
@@ -4697,7 +4672,7 @@ background-color: null;
 font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span></span>
-<span id="cb69-178">            diff <span class="op" style="color: #5E5E5E;
+<span id="cb69-166">            diff <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+=</span> <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4714,29 +4689,29 @@ background-color: null;
 font-style: inherit;">else</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span></span>
-<span id="cb69-179"></span>
-<span id="cb69-180">    <span class="cf" style="color: #003B4F;
+<span id="cb69-167"></span>
+<span id="cb69-168">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> k <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> order:</span>
-<span id="cb69-181">        <span class="cf" style="color: #003B4F;
+<span id="cb69-169">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> desired[k] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&lt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb69-182">            <span class="cf" style="color: #003B4F;
+<span id="cb69-170">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">continue</span></span>
-<span id="cb69-183">        bucket_idx <span class="op" style="color: #5E5E5E;
+<span id="cb69-171">        bucket_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pool.index[masks[k]]</span>
-<span id="cb69-184">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-172">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># remove already taken</span></span>
-<span id="cb69-185">        bucket_idx <span class="op" style="color: #5E5E5E;
+<span id="cb69-173">        bucket_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [i <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -4749,22 +4724,22 @@ background-color: null;
 font-style: inherit;">not</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> taken_idx]</span>
-<span id="cb69-186">        <span class="cf" style="color: #003B4F;
+<span id="cb69-174">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">not</span> bucket_idx:</span>
-<span id="cb69-187">            <span class="cf" style="color: #003B4F;
+<span id="cb69-175">            <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">continue</span></span>
-<span id="cb69-188">        take_k <span class="op" style="color: #5E5E5E;
+<span id="cb69-176">        take_k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">min</span>(desired[k], <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(bucket_idx))</span>
-<span id="cb69-189">        choose <span class="op" style="color: #5E5E5E;
+<span id="cb69-177">        choose <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4775,13 +4750,13 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">False</span>))</span>
-<span id="cb69-190">        out_parts.append(pool.loc[choose])</span>
-<span id="cb69-191">        taken_idx.update(choose)</span>
-<span id="cb69-192"></span>
-<span id="cb69-193">    <span class="co" style="color: #5E5E5E;
+<span id="cb69-178">        out_parts.append(pool.loc[choose])</span>
+<span id="cb69-179">        taken_idx.update(choose)</span>
+<span id="cb69-180"></span>
+<span id="cb69-181">    <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># top-up if needed</span></span>
-<span id="cb69-194">    taken_cnt <span class="op" style="color: #5E5E5E;
+<span id="cb69-182">    taken_cnt <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4792,7 +4767,7 @@ background-color: null;
 font-style: inherit;">for</span> p <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> out_parts)</span>
-<span id="cb69-195">    need <span class="op" style="color: #5E5E5E;
+<span id="cb69-183">    need <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4801,14 +4776,14 @@ background-color: null;
 font-style: inherit;">0</span>, total_n <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">-</span> taken_cnt)</span>
-<span id="cb69-196">    <span class="cf" style="color: #003B4F;
+<span id="cb69-184">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> need <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb69-197">        leftover_idx <span class="op" style="color: #5E5E5E;
+<span id="cb69-185">        leftover_idx <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> [i <span class="cf" style="color: #003B4F;
 background-color: null;
@@ -4821,17 +4796,17 @@ background-color: null;
 font-style: inherit;">not</span> <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> taken_idx]</span>
-<span id="cb69-198">        <span class="cf" style="color: #003B4F;
+<span id="cb69-186">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> leftover_idx:</span>
-<span id="cb69-199">            k <span class="op" style="color: #5E5E5E;
+<span id="cb69-187">            k <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">min</span>(need, <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(leftover_idx))</span>
-<span id="cb69-200">            choose <span class="op" style="color: #5E5E5E;
+<span id="cb69-188">            choose <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4842,32 +4817,30 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">False</span>))</span>
-<span id="cb69-201">            out_parts.append(pool.loc[choose])</span>
-<span id="cb69-202"></span>
-<span id="cb69-203">    <span class="cf" style="color: #003B4F;
+<span id="cb69-189">            out_parts.append(pool.loc[choose])</span>
+<span id="cb69-190"></span>
+<span id="cb69-191">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> out_parts:</span>
-<span id="cb69-204">        out <span class="op" style="color: #5E5E5E;
+<span id="cb69-192">        out <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.concat(out_parts, axis<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>)</span>
-<span id="cb69-205">    <span class="cf" style="color: #003B4F;
+<span id="cb69-193">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">else</span>:</span>
-<span id="cb69-206">        out <span class="op" style="color: #5E5E5E;
+<span id="cb69-194">        out <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pool.iloc[<span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>]  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># empty</span></span>
-<span id="cb69-207"></span>
-<span id="cb69-208">    <span class="cf" style="color: #003B4F;
+font-style: inherit;">0</span>]</span>
+<span id="cb69-195"></span>
+<span id="cb69-196">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> out.sample(frac<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4875,18 +4848,16 @@ font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1.0</span>, random_state<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span>seed)  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># shuffle for stability</span></span>
-<span id="cb69-209"></span>
-<span id="cb69-210"></span>
-<span id="cb69-211"><span class="co" style="color: #5E5E5E;
+font-style: inherit;">=</span>seed)</span>
+<span id="cb69-197"></span>
+<span id="cb69-198"></span>
+<span id="cb69-199"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># --- Build splits with quota rebalance only for Hard ---</span></span>
-<span id="cb69-212">splits <span class="op" style="color: #5E5E5E;
+<span id="cb69-200">splits <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {}</span>
-<span id="cb69-213">OUTDIR.mkdir(parents<span class="op" style="color: #5E5E5E;
+<span id="cb69-201">OUTDIR.mkdir(parents<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
@@ -4895,8 +4866,8 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">True</span>)</span>
-<span id="cb69-214"></span>
-<span id="cb69-215"><span class="cf" style="color: #003B4F;
+<span id="cb69-202"></span>
+<span id="cb69-203"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> i, stage <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -4909,35 +4880,35 @@ background-color: null;
 font-style: inherit;">"Medium"</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Hard"</span>]):</span>
-<span id="cb69-216">    tconf <span class="op" style="color: #5E5E5E;
+<span id="cb69-204">    tconf <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> TARGETS[stage]</span>
-<span id="cb69-217">    train_pool <span class="op" style="color: #5E5E5E;
+<span id="cb69-205">    train_pool <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> cur_train_df[cur_train_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> stage]</span>
-<span id="cb69-218">    test_pool <span class="op" style="color: #5E5E5E;
+<span id="cb69-206">    test_pool <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> cur_test_df[cur_test_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"stage"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">==</span> stage]</span>
-<span id="cb69-219"></span>
-<span id="cb69-220">    <span class="cf" style="color: #003B4F;
+<span id="cb69-207"></span>
+<span id="cb69-208">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> stage <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Hard"</span>:</span>
-<span id="cb69-221">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-209">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># ---- original sampling for Easy/Medium ----</span></span>
-<span id="cb69-222">        tv_target <span class="op" style="color: #5E5E5E;
+<span id="cb69-210">        tv_target <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tconf[<span class="st" style="color: #20794D;
 background-color: null;
@@ -4946,7 +4917,7 @@ background-color: null;
 font-style: inherit;">+</span> tconf[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"valid"</span>]</span>
-<span id="cb69-223">        tv <span class="op" style="color: #5E5E5E;
+<span id="cb69-211">        tv <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> sample_df(train_pool, tv_target, seed<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -4961,7 +4932,7 @@ background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>)</span>
-<span id="cb69-224">        vsize <span class="op" style="color: #5E5E5E;
+<span id="cb69-212">        vsize <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="bu" style="color: null;
 background-color: null;
@@ -4982,17 +4953,17 @@ background-color: null;
 font-style: inherit;">*</span> <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(tv)))))</span>
-<span id="cb69-225">        valid <span class="op" style="color: #5E5E5E;
+<span id="cb69-213">        valid <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tv.iloc[:vsize]</span>
-<span id="cb69-226">        train <span class="op" style="color: #5E5E5E;
+<span id="cb69-214">        train <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> tv.iloc[vsize : vsize <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> tconf[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"train"</span>]]</span>
-<span id="cb69-227">        test <span class="op" style="color: #5E5E5E;
+<span id="cb69-215">        test <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> sample_df(test_pool, tconf[<span class="st" style="color: #20794D;
 background-color: null;
@@ -5009,40 +4980,40 @@ background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>)</span>
-<span id="cb69-228">    <span class="cf" style="color: #003B4F;
+<span id="cb69-216">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">else</span>:</span>
-<span id="cb69-229">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-217">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># ---- HARD: quota-based sampling ----</span></span>
-<span id="cb69-230">        masks_train <span class="op" style="color: #5E5E5E;
+<span id="cb69-218">        masks_train <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> hard_bucket_masks(train_pool)</span>
-<span id="cb69-231">        masks_test <span class="op" style="color: #5E5E5E;
+<span id="cb69-219">        masks_test <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> hard_bucket_masks(test_pool)</span>
-<span id="cb69-232"></span>
-<span id="cb69-233">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-220"></span>
+<span id="cb69-221">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># TRAIN (quota)</span></span>
-<span id="cb69-234">        hard_train <span class="op" style="color: #5E5E5E;
+<span id="cb69-222">        hard_train <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> quota_sample_df(</span>
-<span id="cb69-235">            pool<span class="op" style="color: #5E5E5E;
+<span id="cb69-223">            pool<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>train_pool,</span>
-<span id="cb69-236">            total_n<span class="op" style="color: #5E5E5E;
+<span id="cb69-224">            total_n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>tconf[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"train"</span>],</span>
-<span id="cb69-237">            masks<span class="op" style="color: #5E5E5E;
+<span id="cb69-225">            masks<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>masks_train,</span>
-<span id="cb69-238">            props<span class="op" style="color: #5E5E5E;
+<span id="cb69-226">            props<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>HARD_PROPS,</span>
-<span id="cb69-239">            seed<span class="op" style="color: #5E5E5E;
+<span id="cb69-227">            seed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>RANDOM_STATE <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5055,32 +5026,32 @@ background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">11</span>,</span>
-<span id="cb69-240">        )</span>
-<span id="cb69-241"></span>
-<span id="cb69-242">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-228">        )</span>
+<span id="cb69-229"></span>
+<span id="cb69-230">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># VALID (quota) from remaining train_pool</span></span>
-<span id="cb69-243">        remaining_train_pool <span class="op" style="color: #5E5E5E;
+<span id="cb69-231">        remaining_train_pool <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_pool.drop(hard_train.index)</span>
-<span id="cb69-244">        hard_valid <span class="op" style="color: #5E5E5E;
+<span id="cb69-232">        hard_valid <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> quota_sample_df(</span>
-<span id="cb69-245">            pool<span class="op" style="color: #5E5E5E;
+<span id="cb69-233">            pool<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>remaining_train_pool,</span>
-<span id="cb69-246">            total_n<span class="op" style="color: #5E5E5E;
+<span id="cb69-234">            total_n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>tconf[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"valid"</span>],</span>
-<span id="cb69-247">            masks<span class="op" style="color: #5E5E5E;
+<span id="cb69-235">            masks<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>hard_bucket_masks(remaining_train_pool),</span>
-<span id="cb69-248">            props<span class="op" style="color: #5E5E5E;
+<span id="cb69-236">            props<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>HARD_PROPS,</span>
-<span id="cb69-249">            seed<span class="op" style="color: #5E5E5E;
+<span id="cb69-237">            seed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>RANDOM_STATE <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5093,33 +5064,33 @@ background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">12</span>,</span>
-<span id="cb69-250">        )</span>
-<span id="cb69-251"></span>
-<span id="cb69-252">        <span class="co" style="color: #5E5E5E;
+<span id="cb69-238">        )</span>
+<span id="cb69-239"></span>
+<span id="cb69-240">        <span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># </span><span class="al" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">TEST</span><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"> (quota) from dev pool</span></span>
-<span id="cb69-253">        hard_test <span class="op" style="color: #5E5E5E;
+<span id="cb69-241">        hard_test <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> quota_sample_df(</span>
-<span id="cb69-254">            pool<span class="op" style="color: #5E5E5E;
+<span id="cb69-242">            pool<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>test_pool,</span>
-<span id="cb69-255">            total_n<span class="op" style="color: #5E5E5E;
+<span id="cb69-243">            total_n<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>tconf[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"test"</span>],</span>
-<span id="cb69-256">            masks<span class="op" style="color: #5E5E5E;
+<span id="cb69-244">            masks<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>masks_test,</span>
-<span id="cb69-257">            props<span class="op" style="color: #5E5E5E;
+<span id="cb69-245">            props<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>HARD_PROPS,</span>
-<span id="cb69-258">            seed<span class="op" style="color: #5E5E5E;
+<span id="cb69-246">            seed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>RANDOM_STATE <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5132,13 +5103,13 @@ background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">13</span>,</span>
-<span id="cb69-259">        )</span>
-<span id="cb69-260"></span>
-<span id="cb69-261">        train, valid, test <span class="op" style="color: #5E5E5E;
+<span id="cb69-247">        )</span>
+<span id="cb69-248"></span>
+<span id="cb69-249">        train, valid, test <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> hard_train, hard_valid, hard_test</span>
-<span id="cb69-262"></span>
-<span id="cb69-263">    splits[stage] <span class="op" style="color: #5E5E5E;
+<span id="cb69-250"></span>
+<span id="cb69-251">    splits[stage] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> {<span class="st" style="color: #20794D;
 background-color: null;
@@ -5147,16 +5118,13 @@ background-color: null;
 font-style: inherit;">"valid"</span>: valid, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"test"</span>: test}</span>
-<span id="cb69-264"></span>
-<span id="cb69-265">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># write JSONL files with just ids (easy to join later)</span></span>
-<span id="cb69-266">    <span class="cf" style="color: #003B4F;
+<span id="cb69-252"></span>
+<span id="cb69-253">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> split_name, df_part <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> splits[stage].items():</span>
-<span id="cb69-267">        outp <span class="op" style="color: #5E5E5E;
+<span id="cb69-254">        outp <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> OUTDIR <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5177,7 +5145,7 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">.jsonl"</span></span>
-<span id="cb69-268">        df_part[[<span class="st" style="color: #20794D;
+<span id="cb69-255">        df_part[[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"id"</span>]].to_json(outp, orient<span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -5192,7 +5160,7 @@ background-color: null;
 font-style: inherit;">=</span><span class="va" style="color: #111111;
 background-color: null;
 font-style: inherit;">False</span>)</span>
-<span id="cb69-269">        <span class="bu" style="color: null;
+<span id="cb69-256">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -5223,15 +5191,12 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span>)</span>
-<span id="cb69-270"></span>
-<span id="cb69-271"></span>
-<span id="cb69-272"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># --- quick sanity report ---</span></span>
-<span id="cb69-273"><span class="kw" style="color: #003B4F;
+<span id="cb69-257"></span>
+<span id="cb69-258"></span>
+<span id="cb69-259"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">def</span> quick_report(df):</span>
-<span id="cb69-274">    <span class="cf" style="color: #003B4F;
+<span id="cb69-260">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">if</span> <span class="bu" style="color: null;
 background-color: null;
@@ -5240,64 +5205,64 @@ background-color: null;
 font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>:</span>
-<span id="cb69-275">        <span class="cf" style="color: #003B4F;
+<span id="cb69-261">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> {<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"n"</span>: <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">0</span>}</span>
-<span id="cb69-276">    <span class="cf" style="color: #003B4F;
+<span id="cb69-262">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">return</span> {</span>
-<span id="cb69-277">        <span class="st" style="color: #20794D;
+<span id="cb69-263">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"n"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(df),</span>
-<span id="cb69-278">        <span class="st" style="color: #20794D;
+<span id="cb69-264">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"ops_max_med"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"max_ops_per_conversation"</span>].median()),</span>
-<span id="cb69-279">        <span class="st" style="color: #20794D;
+<span id="cb69-265">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"turns_med"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_num_dialogue_turns"</span>].median()),</span>
-<span id="cb69-280">        <span class="st" style="color: #20794D;
+<span id="cb69-266">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"type2_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_type2_question"</span>].mean()),</span>
-<span id="cb69-281">        <span class="st" style="color: #20794D;
+<span id="cb69-267">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"pre_P50"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>].median()),</span>
-<span id="cb69-282">        <span class="st" style="color: #20794D;
+<span id="cb69-268">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"post_P50"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>].median()),</span>
-<span id="cb69-283">        <span class="st" style="color: #20794D;
+<span id="cb69-269">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"cells_P50"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">int</span>(df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"total_cells"</span>].median()),</span>
-<span id="cb69-284">        <span class="st" style="color: #20794D;
+<span id="cb69-270">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"deep_ops_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
@@ -5308,7 +5273,7 @@ background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">4</span>).mean()),</span>
-<span id="cb69-285">        <span class="st" style="color: #20794D;
+<span id="cb69-271">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_turns_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
@@ -5319,27 +5284,27 @@ background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">7</span>).mean()),</span>
-<span id="cb69-286">        <span class="st" style="color: #20794D;
+<span id="cb69-272">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"long_ctx_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>(</span>
-<span id="cb69-287">            (</span>
-<span id="cb69-288">                (df[<span class="st" style="color: #20794D;
+<span id="cb69-273">            (</span>
+<span id="cb69-274">                (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_pre)</span>
-<span id="cb69-289">                <span class="op" style="color: #5E5E5E;
+<span id="cb69-275">                <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> (df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_post_text_len"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_post)</span>
-<span id="cb69-290">            ).mean()</span>
-<span id="cb69-291">        ),</span>
-<span id="cb69-292">        <span class="st" style="color: #20794D;
+<span id="cb69-276">            ).mean()</span>
+<span id="cb69-277">        ),</span>
+<span id="cb69-278">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"big_table_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
@@ -5348,26 +5313,26 @@ background-color: null;
 font-style: inherit;">"total_cells"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;</span> P90_cells).mean()),</span>
-<span id="cb69-293">        <span class="st" style="color: #20794D;
+<span id="cb69-279">        <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"noisy_rate"</span>: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">float</span>(</span>
-<span id="cb69-294">            (</span>
-<span id="cb69-295">                df[<span class="st" style="color: #20794D;
+<span id="cb69-280">            (</span>
+<span id="cb69-281">                df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_duplicate_columns"</span>]</span>
-<span id="cb69-296">                <span class="op" style="color: #5E5E5E;
+<span id="cb69-282">                <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|</span> df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"features_has_non_numeric_values"</span>]</span>
-<span id="cb69-297">            ).mean()</span>
-<span id="cb69-298">        ),</span>
-<span id="cb69-299">    }</span>
-<span id="cb69-300"></span>
-<span id="cb69-301"></span>
-<span id="cb69-302"><span class="cf" style="color: #003B4F;
+<span id="cb69-283">            ).mean()</span>
+<span id="cb69-284">        ),</span>
+<span id="cb69-285">    }</span>
+<span id="cb69-286"></span>
+<span id="cb69-287"></span>
+<span id="cb69-288"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> stage <span class="kw" style="color: #003B4F;
 background-color: null;
@@ -5378,7 +5343,7 @@ background-color: null;
 font-style: inherit;">"Medium"</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Hard"</span>]:</span>
-<span id="cb69-303">    <span class="bu" style="color: null;
+<span id="cb69-289">    <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -5393,12 +5358,12 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"</span>)</span>
-<span id="cb69-304">    <span class="cf" style="color: #003B4F;
+<span id="cb69-290">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">for</span> part, dfp <span class="kw" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">in</span> splits[stage].items():</span>
-<span id="cb69-305">        <span class="bu" style="color: null;
+<span id="cb69-291">        <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">print</span>(<span class="ss" style="color: #20794D;
 background-color: null;
@@ -5409,41 +5374,15 @@ background-color: null;
 font-style: inherit;">:&gt;5s}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;"> -&gt;"</span>, quick_report(dfp))</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[Percentiles/train] pre P50=244, P65=365, P80=518, P90=637 | post P50=285, P65=407, P80=548, P90=679 | cells P50=12, P65=15, P80=18, P90=25
-[Stage counts] TRAIN: {'Medium': 1687, 'Hard': 1063, 'Easy': 287}
-[Stage counts] TEST:   {'Medium': 253, 'Hard': 134, 'Easy': 34}
-[Easy] train:  230  -&gt; splits/easy_train.jsonl
-[Easy] valid:   57  -&gt; splits/easy_valid.jsonl
-[Easy] test:   34  -&gt; splits/easy_test.jsonl
-[Medium] train:  300  -&gt; splits/medium_train.jsonl
-[Medium] valid:   70  -&gt; splits/medium_valid.jsonl
-[Medium] test:   80  -&gt; splits/medium_test.jsonl
-[Hard] train:  220  -&gt; splits/hard_train.jsonl
-[Hard] valid:   60  -&gt; splits/hard_valid.jsonl
-[Hard] test:   80  -&gt; splits/hard_test.jsonl
-
-[Sanity] Easy
-  train -&gt; {'n': 230, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 217, 'post_P50': 253, 'cells_P50': 9, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.06086956521739131}
-  valid -&gt; {'n': 57, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 200, 'post_P50': 297, 'cells_P50': 8, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.10526315789473684}
-   test -&gt; {'n': 34, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.0, 'pre_P50': 189, 'post_P50': 272, 'cells_P50': 8, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.08823529411764706}
-
-[Sanity] Medium
-  train -&gt; {'n': 300, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.32666666666666666, 'pre_P50': 243, 'post_P50': 253, 'cells_P50': 11, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.07666666666666666}
-  valid -&gt; {'n': 70, 'ops_max_med': 2.0, 'turns_med': 3.5, 'type2_rate': 0.32857142857142857, 'pre_P50': 216, 'post_P50': 269, 'cells_P50': 12, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.1}
-   test -&gt; {'n': 80, 'ops_max_med': 2.0, 'turns_med': 3.0, 'type2_rate': 0.3625, 'pre_P50': 206, 'post_P50': 216, 'cells_P50': 13, 'deep_ops_rate': 0.0, 'long_turns_rate': 0.0, 'long_ctx_rate': 0.0, 'big_table_rate': 0.0, 'noisy_rate': 0.025}
-
-[Sanity] Hard
-  train -&gt; {'n': 220, 'ops_max_med': 2.0, 'turns_med': 5.0, 'type2_rate': 0.42727272727272725, 'pre_P50': 222, 'post_P50': 270, 'cells_P50': 15, 'deep_ops_rate': 0.2590909090909091, 'long_turns_rate': 0.2590909090909091, 'long_ctx_rate': 0.37272727272727274, 'big_table_rate': 0.2681818181818182, 'noisy_rate': 0.20454545454545456}
-  valid -&gt; {'n': 60, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.4, 'pre_P50': 161, 'post_P50': 292, 'cells_P50': 17, 'deep_ops_rate': 0.23333333333333334, 'long_turns_rate': 0.16666666666666666, 'long_ctx_rate': 0.38333333333333336, 'big_table_rate': 0.25, 'noisy_rate': 0.25}
-   test -&gt; {'n': 80, 'ops_max_med': 2.0, 'turns_med': 4.0, 'type2_rate': 0.325, 'pre_P50': 176, 'post_P50': 177, 'cells_P50': 18, 'deep_ops_rate': 0.15, 'long_turns_rate': 0.0375, 'long_ctx_rate': 0.4375, 'big_table_rate': 0.3375, 'noisy_rate': 0.275}</code></pre>
-</div>
 </div>
 </section>
 </section>
 <section id="conclusion" class="level1">
 <h1>Conclusion</h1>
-<p>So far, we’ve explored the given dataset, and we’ve decided to do curriculum learning for the problem statement.</p>
+<p>Through this exploratory analysis, we’ve established the foundation for applying curriculum learning to financial reasoning tasks:</p>
+<p><strong>Key Insights:</strong> - ConvFinQA complexity varies dramatically across multiple dimensions: reasoning depth (1-6+ operations), conversation length (2-10+ turns), context density, table size, and data quality - Simple random sampling from difficulty buckets creates imbalanced curricula that overemphasize certain complexity types - Quota-based sampling ensures balanced representation across all complexity dimensions in our training data</p>
+<p><strong>What’s Next:</strong> - <strong>Modelling</strong>: We’ll implement DSPy baselines across our curriculum stages, exploring different LLM models and narrowing down to the most promising models - <strong>Optimization</strong>: We’ll apply DSPy’s optimization techniques with our curriculum learning strategy to achieve state-of-the-art performance</p>
+<p>The curriculum learning framework is now ready — let’s see how DSPy performs when guided by our complexity-aware training progression.</p>
 
 
 </section>
@@ -5453,6 +5392,7 @@ font-style: inherit;"> -&gt;"</span>, quick_report(dfp))</span></code></pre></di
   <category>dspy</category>
   <guid>https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html</guid>
   <pubDate>Sat, 30 Aug 2025 18:30:00 GMT</pubDate>
+  <media:content url="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png" medium="image" type="image/png" height="178" width="144"/>
 </item>
 <item>
   <title>Cracking the Anthropic CTF</title>
