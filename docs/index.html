@@ -107,9 +107,9 @@ i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      valueNames: ['listing-date','listing-reading-time','listing-title','listing-description','listing-image',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -245,117 +245,345 @@ window.Quarto = {
 
 
 
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-Date
-</th>
-<th>
-Title
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-categories="programming,dspy" data-listing-date-sort="1756578600000" data-listing-file-modified-sort="1756659040082" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="17" data-listing-word-count-sort="3305" data-listing-title-sort="Curriculum Learning 🤝 DSPy: EDA" data-listing-filename-sort="2025-08-31-cl-dspy-eda.ipynb">
-<td>
-<span class="listing-date">Aug 31, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-08-31-cl-dspy-eda.html" class="title listing-title">Curriculum Learning 🤝 DSPy: EDA</a>
-</td>
-</tr>
-<tr data-index="1" data-categories="ctf" data-listing-date-sort="1754332200000" data-listing-file-modified-sort="1754374036172" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2810" data-listing-title-sort="Cracking the Anthropic CTF" data-listing-filename-sort="2025-08-05-anthropic-bsides-ctf.qmd">
-<td>
-<span class="listing-date">Aug 5, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="title listing-title">Cracking the Anthropic CTF</a>
-</td>
-</tr>
-<tr data-index="2" data-listing-date-sort="1752949800000" data-listing-file-modified-sort="1754128533544" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="56" data-listing-word-count-sort="11048" data-listing-title-sort="GPUs go brrr with Mojo: Algorithms" data-listing-filename-sort="2025-07-20-gpu-puzzles-p2.qmd">
-<td>
-<span class="listing-date">Jul 20, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="title listing-title">GPUs go brrr with Mojo: Algorithms</a>
-</td>
-</tr>
-<tr data-index="3" data-categories="programming,gpu,mojo" data-listing-date-sort="1751740200000" data-listing-file-modified-sort="1754381287223" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011" data-listing-title-sort="GPUs go brrr with Mojo: Fundamentals" data-listing-filename-sort="2025-07-06-gpu-puzzles-p1.qmd">
-<td>
-<span class="listing-date">Jul 6, 2025</span>
-</td>
-<td>
-<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="title listing-title">GPUs go brrr with Mojo: Fundamentals</a>
-</td>
-</tr>
-<tr data-index="4" data-categories="nlp,transformer,review" data-listing-date-sort="1598812200000" data-listing-file-modified-sort="1709254891847" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1372" data-listing-title-sort="BERT + BM25 = BISON" data-listing-filename-sort="2020-08-31-bison.md">
-<td>
-<span class="listing-date">Aug 31, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-08-31-bison.html" class="title listing-title">BERT + BM25 = BISON</a>
-</td>
-</tr>
-<tr data-index="5" data-categories="nlp,transformer,review,longformer" data-listing-date-sort="1589135400000" data-listing-file-modified-sort="1738589812161" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1642" data-listing-title-sort="LongFormer" data-listing-filename-sort="2020-05-11-longformer.md">
-<td>
-<span class="listing-date">May 11, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-05-11-longformer.html" class="title listing-title">LongFormer</a>
-</td>
-</tr>
-<tr data-index="6" data-categories="nlp,language_model,review" data-listing-date-sort="1587580200000" data-listing-file-modified-sort="1708871112593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="565" data-listing-title-sort="TagLM" data-listing-filename-sort="2020-04-23-tag-lm.md">
-<td>
-<span class="listing-date">Apr 23, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-04-23-tag-lm.html" class="title listing-title">TagLM</a>
-</td>
-</tr>
-<tr data-index="7" data-categories="nlp,language_model,review" data-listing-date-sort="1587407400000" data-listing-file-modified-sort="1756659205551" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="633" data-listing-title-sort="T5's Closed-Book Exam" data-listing-filename-sort="2020-04-21-knowledge-lm.md">
-<td>
-<span class="listing-date">Apr 21, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-04-21-knowledge-lm.html" class="title listing-title">T5’s Closed-Book Exam</a>
-</td>
-</tr>
-<tr data-index="8" data-categories="nlp,attention,review" data-listing-date-sort="1587321000000" data-listing-file-modified-sort="1738550912773" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="817" data-listing-title-sort="Attention is all you need" data-listing-filename-sort="2020-04-20-attention.md">
-<td>
-<span class="listing-date">Apr 20, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-04-20-attention.html" class="title listing-title">Attention is all you need</a>
-</td>
-</tr>
-<tr data-index="9" data-categories="nlp,bert,review" data-listing-date-sort="1584124200000" data-listing-file-modified-sort="1708871299055" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268" data-listing-title-sort="REALM: Retrieval-Augmented Language MOdel Pre-Training" data-listing-filename-sort="2020-03-14-realm.md">
-<td>
-<span class="listing-date">Mar 14, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-03-14-realm.html" class="title listing-title">REALM: Retrieval-Augmented Language MOdel Pre-Training</a>
-</td>
-</tr>
-<tr data-index="10" data-categories="jupyter,bayesian,golf_putting" data-listing-date-sort="1583951400000" data-listing-file-modified-sort="1708956222989" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057" data-listing-title-sort="Bayesian Golf Putting Model" data-listing-filename-sort="2020-03-12-tutorial.ipynb">
-<td>
-<span class="listing-date">Mar 12, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-03-12-tutorial.html" class="title listing-title">Bayesian Golf Putting Model</a>
-</td>
-</tr>
-<tr data-index="11" data-categories="intro" data-listing-date-sort="1578940200000" data-listing-file-modified-sort="1708870573009" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="20" data-listing-title-sort="Yo!" data-listing-filename-sort="2020-01-14-first-post.md">
-<td>
-<span class="listing-date">Jan 14, 2020</span>
-</td>
-<td>
-<a href="./posts/2020-01-14-first-post.html" class="title listing-title">Yo!</a>
-</td>
-</tr>
-</tbody>
-</table>
+<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="list quarto-listing-default">
+<div class="quarto-post image-right" data-index="0" data-categories="programming,dspy" data-listing-date-sort="1756578600000" data-listing-file-modified-sort="1756711167834" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1897">
+<div class="thumbnail">
+<p><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external"></a></p><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
+<p><img src="./posts/cl_dspy/curriculum_learning_data.png" class="thumbnail-image" style="height: 170px;"></p>
+</a><p><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">Curriculum Learning 🤝 DSPy: Data Exploration</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">Mapping ConvFinQA and crafting a curriculum for financial QA</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
+<div class="listing-date">
+Aug 31, 2025
+</div>
+<div class="listing-reading-time">
+10 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="ctf" data-listing-date-sort="1754332200000" data-listing-file-modified-sort="1754374036172" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2810">
+<div class="thumbnail">
+<p><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external"></a></p><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
+<p><img src="./posts/anthropic_bsides_ctf/stego.png" class="thumbnail-image" style="height: 170px;"></p>
+</a><p><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">Cracking the Anthropic CTF</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">Intersection of steganography x neural networks, with API credits as a reward!</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
+<div class="listing-date">
+Aug 5, 2025
+</div>
+<div class="listing-reading-time">
+15 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1752949800000" data-listing-file-modified-sort="1754128533544" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="56" data-listing-word-count-sort="11048">
+<div class="thumbnail">
+<p><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external"></a></p><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
+<p><img src="./posts/mojo_gpu_puzzles/p11_block_boundary.png" class="thumbnail-image" style="height: 170px;"></p>
+</a><p><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">GPUs go brrr with Mojo: Algorithms</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
+<div class="listing-date">
+Jul 20, 2025
+</div>
+<div class="listing-reading-time">
+56 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="programming,gpu,mojo" data-listing-date-sort="1751740200000" data-listing-file-modified-sort="1754381287223" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
+<div class="thumbnail">
+<p><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a></p><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
+<p class="card-img-top"><img src="posts/mojo_gpu_puzzles/memory_hierachy_fa.png" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU." style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">GPUs go brrr with Mojo: Fundamentals</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">Learning GPU programming fundamentals through hands-on Mojo implementations</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
+<div class="listing-date">
+Jul 6, 2025
+</div>
+<div class="listing-reading-time">
+16 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="nlp,transformer,review" data-listing-date-sort="1598812200000" data-listing-file-modified-sort="1709254891847" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1372">
+<div class="thumbnail">
+<p><a href="./posts/2020-08-31-bison.html" class="no-external"></a></p><a href="./posts/2020-08-31-bison.html" class="no-external">
+<p class="card-img-top"><img src="posts/bison/bison_architecture.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-08-31-bison.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-08-31-bison.html" class="no-external">BERT + BM25 = BISON</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-08-31-bison.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-08-31-bison.html" class="no-external">A new framework for information retrieval from documents</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-08-31-bison.html" class="no-external">
+<div class="listing-date">
+Aug 31, 2020
+</div>
+<div class="listing-reading-time">
+7 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="nlp,transformer,review,longformer" data-listing-date-sort="1589135400000" data-listing-file-modified-sort="1738589812161" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1642">
+<div class="thumbnail">
+<p><a href="./posts/2020-05-11-longformer.html" class="no-external"></a></p><a href="./posts/2020-05-11-longformer.html" class="no-external">
+<p class="card-img-top"><img src="posts/longformer/comparison.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-05-11-longformer.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-05-11-longformer.html" class="no-external">LongFormer</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-05-11-longformer.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-05-11-longformer.html" class="no-external">Transformers for loooong documents</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-05-11-longformer.html" class="no-external">
+<div class="listing-date">
+May 11, 2020
+</div>
+<div class="listing-reading-time">
+9 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="6" data-categories="nlp,language_model,review" data-listing-date-sort="1587580200000" data-listing-file-modified-sort="1708871112593" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="565">
+<div class="thumbnail">
+<p><a href="./posts/2020-04-23-tag-lm.html" class="no-external"></a></p><a href="./posts/2020-04-23-tag-lm.html" class="no-external">
+<p class="card-img-top"><img src="posts/taglm/overview.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-04-23-tag-lm.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-04-23-tag-lm.html" class="no-external">TagLM</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-04-23-tag-lm.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-04-23-tag-lm.html" class="no-external">This is the TagLM paper mentioned in Lecture 13 in the CS224N course title <strong>Semi-supervised sequence tagging with bidirectional language models</strong></a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-04-23-tag-lm.html" class="no-external">
+<div class="listing-date">
+Apr 23, 2020
+</div>
+<div class="listing-reading-time">
+3 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="7" data-categories="nlp,language_model,review" data-listing-date-sort="1587407400000" data-listing-file-modified-sort="1756659205551" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="633">
+<div class="thumbnail">
+<p><a href="./posts/2020-04-21-knowledge-lm.html" class="no-external"></a></p><a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" style="height: 170px;">&nbsp;</div>
+</a><p><a href="./posts/2020-04-21-knowledge-lm.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">T5’s Closed-Book Exam</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">Measure the amount of information stored in a model</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">
+<div class="listing-date">
+Apr 21, 2020
+</div>
+<div class="listing-reading-time">
+4 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="8" data-categories="nlp,attention,review" data-listing-date-sort="1587321000000" data-listing-file-modified-sort="1738550912773" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="817">
+<div class="thumbnail">
+<p><a href="./posts/2020-04-20-attention.html" class="no-external"></a></p><a href="./posts/2020-04-20-attention.html" class="no-external">
+<p class="card-img-top"><img src="posts/attention/transformer.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-04-20-attention.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-04-20-attention.html" class="no-external">Attention is all you need</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-04-20-attention.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-04-20-attention.html" class="no-external">New architecture based solely on attention mechanisms called <strong>Transformer</strong>. Gets rids of recurrent and convolution networks completely.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-04-20-attention.html" class="no-external">
+<div class="listing-date">
+Apr 20, 2020
+</div>
+<div class="listing-reading-time">
+5 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="9" data-categories="nlp,bert,review" data-listing-date-sort="1584124200000" data-listing-file-modified-sort="1708871299055" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268">
+<div class="thumbnail">
+<p><a href="./posts/2020-03-14-realm.html" class="no-external"></a></p><a href="./posts/2020-03-14-realm.html" class="no-external">
+<p><img src="./posts/realm/training.png" class="thumbnail-image" style="height: 170px;"></p>
+</a><p><a href="./posts/2020-03-14-realm.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-03-14-realm.html" class="no-external">REALM: Retrieval-Augmented Language MOdel Pre-Training</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-03-14-realm.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-03-14-realm.html" class="no-external">A better Q&amp;A system based on knowledge retrieval</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-03-14-realm.html" class="no-external">
+<div class="listing-date">
+Mar 14, 2020
+</div>
+<div class="listing-reading-time">
+7 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="10" data-categories="jupyter,bayesian,golf_putting" data-listing-date-sort="1583951400000" data-listing-file-modified-sort="1708956222989" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057">
+<div class="thumbnail">
+<p><a href="./posts/2020-03-12-tutorial.html" class="no-external"></a></p><a href="./posts/2020-03-12-tutorial.html" class="no-external">
+<p class="card-img-top"><img src="posts/2020-03-12-tutorial_files/figure-html/cell-6-output-2.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/2020-03-12-tutorial.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-03-12-tutorial.html" class="no-external">Bayesian Golf Putting Model</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-03-12-tutorial.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-03-12-tutorial.html" class="no-external">Are you the next Tiger Woods?</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-03-12-tutorial.html" class="no-external">
+<div class="listing-date">
+Mar 12, 2020
+</div>
+<div class="listing-reading-time">
+6 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="11" data-categories="intro" data-listing-date-sort="1578940200000" data-listing-file-modified-sort="1708870573009" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="20">
+<div class="thumbnail">
+<p><a href="./posts/2020-01-14-first-post.html" class="no-external"></a></p><a href="./posts/2020-01-14-first-post.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" style="height: 170px;">&nbsp;</div>
+</a><p><a href="./posts/2020-01-14-first-post.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2020-01-14-first-post.html" class="no-external">Yo!</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/2020-01-14-first-post.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/2020-01-14-first-post.html" class="no-external">First post</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/2020-01-14-first-post.html" class="no-external">
+<div class="listing-date">
+Jan 14, 2020
+</div>
+<div class="listing-reading-time">
+1 min
+</div>
+</a>
+</div>
+</div>
+</div>
 <div class="listing-no-matching d-none">
 No matching items
 </div>
