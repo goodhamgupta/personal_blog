@@ -9,7 +9,7 @@ categories:
 date: '2020-04-21'
 description: Measure the amount of information stored in a model
 layout: post
-title: How much do you know?
+title: T5's Closed-Book Exam
 toc: true
 
 ---
