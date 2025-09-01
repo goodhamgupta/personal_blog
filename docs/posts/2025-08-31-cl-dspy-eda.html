@@ -283,15 +283,15 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 
 
 
-<p>While interviewing for my next role, I received a take-home assignment focused on financial reasoning over conversational data. Given all the hype around DSPy, I decided to use this opportunity to finally learn the tool properly.</p>
+<p>In my current project, I’m exploring financial reasoning over conversational data. With all the buzz around DSPy, I decided it’s the perfect time to dive deep into this tool.</p>
 <p>Financial reasoning over conversational data presents a unique challenge in NLP: models must not only understand natural language but also perform multi-step numerical computations while maintaining context across dialogue turns.</p>
-<p><a href="https://github.com/czyssrs/ConvFinQA">ConvFinQA</a> tackles this problem by combining conversational QA with financial documents and tables, requiring systems to execute chains of mathematical operations to arrive at correct answers.</p>
+<p><a href="https://github.com/czyssrs/ConvFinQA">ConvFinQA</a> is a dataset that combines conversational QA with financial documents and tables, requiring systems to execute chains of mathematical operations to arrive at correct answers.</p>
 <p>What if we could improve model performance by teaching systems to learn from easier examples first, gradually building up to complex multi-turn reasoning? This is the core idea behind <a href="https://huggingface.co/learn/deep-rl-course/en/unitbonus3/curriculum-learning">curriculum learning</a>.</p>
-<p>This post begins a series exploring curriculum learning with <a href="https://github.com/stanfordnlp/dspy">DSPy</a>. We start with an exploratory analysis of ConvFinQA to understand what makes some examples harder than others, identify complexity patterns in the data, and establish the foundation for a curriculum-based approach.</p>
+<p>This post begins a series exploring curriculum learning with <a href="https://github.com/stanfordnlp/dspy">DSPy</a>. We start with an exploratory analysis of ConvFinQA to understand what makes some examples harder than others, identify complexity patterns in the data, and establish the base for a curriculum-based approach.</p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
 <div id="cell-3" class="cell">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> json</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -308,14 +308,14 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 </div>
 <p>The current dataset only contains the <code>train</code> and <code>dev</code> splits. For evaluation, we will likely use the <code>dev</code> split, and for training, we’ll split the <code>train</code> split into a <code>train</code> and <code>val</code> split.</p>
 <div id="cell-5" class="cell" data-execution_count="5">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> pd.DataFrame(data[<span class="st">"train"</span>])</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> pd.DataFrame(data[<span class="st">"dev"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div id="cell-6" class="cell" data-execution_count="7">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>train_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -334,7 +334,7 @@ memory usage: 95.0+ KB</code></pre>
 </div>
 </div>
 <div id="cell-7" class="cell" data-execution_count="9">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>test_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -354,7 +354,7 @@ memory usage: 13.3+ KB</code></pre>
 </div>
 <p>We will <em>explode</em> the columns with nested features to make them easier to work with.</p>
 <div id="cell-9" class="cell" data-execution_count="10">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>train_flat_df <span class="op">=</span> pd.concat(</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    [</span>
@@ -378,7 +378,7 @@ memory usage: 13.3+ KB</code></pre>
 </details>
 </div>
 <div id="cell-10" class="cell" data-execution_count="11">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -406,7 +406,7 @@ memory usage: 246.3+ KB</code></pre>
 </div>
 </div>
 <div id="cell-11" class="cell" data-execution_count="12">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>test_flat_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -440,7 +440,7 @@ memory usage: 34.2+ KB</code></pre>
 <h3 class="anchored" data-anchor-id="missing-data">Missing Data</h3>
 <p>First, let’s check to see if there’s any missing data in any field.</p>
 <div id="cell-15" class="cell" data-execution_count="13">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> missingno <span class="im">as</span> msno</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -455,7 +455,7 @@ memory usage: 34.2+ KB</code></pre>
 </div>
 </div>
 <div id="cell-16" class="cell" data-execution_count="14">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>msno.matrix(test_flat_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -477,7 +477,7 @@ memory usage: 34.2+ KB</code></pre>
 <li>post_text -&gt; Supporting text from the document occuring AFTER the table content</li>
 </ul>
 <div id="cell-20" class="cell" data-execution_count="15">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -505,7 +505,7 @@ memory usage: 34.2+ KB</code></pre>
 </div>
 </div>
 <div id="cell-21" class="cell" data-execution_count="16">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(<span class="bu">len</span>).describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -522,7 +522,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
 <div id="cell-22" class="cell" data-execution_count="18">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>test_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(<span class="bu">len</span>).describe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -540,7 +540,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 <p>Looks like the pre_text in the data has some si</p>
 <div id="cell-24" class="cell" data-execution_count="19">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sns.histplot(</span>
@@ -616,7 +616,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 <section id="table-dimensions" class="level3">
 <h3 class="anchored" data-anchor-id="table-dimensions">Table Dimensions</h3>
 <div id="cell-28" class="cell" data-execution_count="20">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> compute_dims(table):</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -676,7 +676,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 <li>Same as the number of columns, we see that the training dataset has a much wider distribution of number of cells. In the test set, the majority of records have cells &lt; 30.</li>
 </ul>
 <div id="cell-30" class="cell" data-execution_count="21">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="dv">10</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Tables with more than </span><span class="sc">{</span>threshold<span class="sc">}</span><span class="ss"> columns per split:"</span>)</span>
@@ -707,7 +707,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 </div>
 </div>
 <div id="cell-31" class="cell" data-execution_count="22">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> count_nested_tables(table):</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
@@ -770,7 +770,7 @@ memory usage: 54.2+ KB</code></pre>
 </div>
 </div>
 <div id="cell-32" class="cell">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>nested_df[nested_df[<span class="st">"nested_tables"</span>] <span class="op">&gt;=</span> <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -800,7 +800,7 @@ memory usage: 54.2+ KB</code></pre>
 <section id="column-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="column-header-analysis">Column Header Analysis</h3>
 <div id="cell-35" class="cell" data-execution_count="25">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -857,7 +857,7 @@ Top 10 headers by docs appeared in: [('total', 54), ('other', 36), ('s&amp;p 500
 <section id="row-header-analysis" class="level3">
 <h3 class="anchored" data-anchor-id="row-header-analysis">Row Header Analysis</h3>
 <div id="cell-37" class="cell" data-execution_count="26">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
@@ -1016,7 +1016,7 @@ net income                                                  21</code></pre>
 </div>
 <p>We see some similar patterns in the row headers across the splits, but nothing of significance.</p>
 <div id="cell-39" class="cell" data-execution_count="27">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
@@ -1126,7 +1126,7 @@ Top 10 unparseable patterns:
 </ul>
 <p>This keeps our evaluation set focused on clean, numeric data and avoids noise from poorly parsed entries. More on this later!</p>
 <div id="cell-41" class="cell" data-execution_count="28">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1146,7 +1146,7 @@ Top 10 unparseable patterns:
 <section id="dialogue_conv_questions" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_questions"><code>dialogue_conv_questions</code></h2>
 <div id="cell-43" class="cell" data-execution_count="29">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>train_q_lens <span class="op">=</span> train_flat_df[<span class="st">"dialogue_conv_questions"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>test_q_lens <span class="op">=</span> test_flat_df[<span class="st">"dialogue_conv_questions"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
@@ -1180,7 +1180,7 @@ Top 10 unparseable patterns:
 <section id="dialogue_conv_answers" class="level2">
 <h2 class="anchored" data-anchor-id="dialogue_conv_answers"><code>dialogue_conv_answers</code></h2>
 <div id="cell-46" class="cell" data-execution_count="30">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>train_q_lens <span class="op">=</span> train_flat_df[<span class="st">"dialogue_conv_answers"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>test_q_lens <span class="op">=</span> test_flat_df[<span class="st">"dialogue_conv_answers"</span>].explode().dropna().<span class="bu">map</span>(<span class="bu">len</span>)</span>
@@ -1215,7 +1215,7 @@ Top 10 unparseable patterns:
 <h2 class="anchored" data-anchor-id="dialogue_turn_program"><code>dialogue_turn_program</code></h2>
 <p>This field represents the program DSL generated for the current turn.</p>
 <div id="cell-50" class="cell" data-execution_count="31">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"dialogue_turn_program"</span>].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1229,7 +1229,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 </div>
 </div>
 <div id="cell-51" class="cell" data-execution_count="32">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _get_op_counts(df: pd.DataFrame) <span class="op">-&gt;</span> pd.Series:</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Return a Series with the number of '(' in every element of dialogue_turn_program."""</span></span>
@@ -1277,7 +1277,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 <p>Similar distributions for number of operations in both the train and test set. Majority of the operations are &lt; 4 .</p>
 <p>We could argue that the number of operations is a good proxy for the complexity of the program. As such, we should probably aim to do well first on the examples where the number of operations is small.</p>
 <div id="cell-53" class="cell" data-execution_count="33">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1296,7 +1296,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 <section id="features_num_dialogue_turns" class="level2">
 <h2 class="anchored" data-anchor-id="features_num_dialogue_turns"><code>features_num_dialogue_turns</code></h2>
 <div id="cell-55" class="cell" data-execution_count="34">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>), sharey<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1342,7 +1342,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 <p>Similar distributions across the train and test sets. As mentioned in the paper, we should expect conversations with more dialogue turns, to be more difficult to answer for models.</p>
 <p>This is yet another feature we could use when deciding how to split our data into train, validation, and test sets.</p>
 <div id="cell-57" class="cell" data-execution_count="35">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>train_flat_df.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1361,7 +1361,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 <section id="features_has_type2_question" class="level2">
 <h2 class="anchored" data-anchor-id="features_has_type2_question"><code>features_has_type2_question</code></h2>
 <div id="cell-59" class="cell" data-execution_count="36">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1532,7 +1532,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <p>To prevent overlap and duplicates, we will construct the stages in reverse order i.e - Hard first to ensure we isolate the difficult problems - Easy next to identify baseline performance - Remaining problems go into medium to help develop better reasoning and arithmetic abilities.</p>
 </blockquote>
 <div id="cell-65" class="cell" data-execution_count="38">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_max_ops_per_conversation(df):</span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> max_ops(turn_programs):</span>
@@ -1566,7 +1566,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </details>
 </div>
 <div id="cell-66" class="cell" data-execution_count="40">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[<span class="st">"doc_pre_text_len"</span>] <span class="op">=</span> train_flat_df[<span class="st">"doc_pre_text"</span>].<span class="bu">apply</span>(</span>
 <span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">lambda</span> x: <span class="bu">len</span>(x.split())</span>
@@ -1584,7 +1584,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </details>
 </div>
 <div id="cell-67" class="cell" data-execution_count="41">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>train_flat_df[</span>
 <span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    [</span>
@@ -1735,7 +1735,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 </div>
 </div>
 <div id="cell-68" class="cell" data-execution_count="42">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>test_flat_df[</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    [</span>
@@ -1893,7 +1893,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <p>The second approach creates a more robust curriculum. Our hard examples should include: - <strong>Deep reasoning</strong> (4+ mathematical operations) - <strong>Long conversations</strong> (7+ dialogue turns) - <strong>Dense context</strong> (lengthy pre/post text) - <strong>Complex tables</strong> (many cells, nested structures) - <strong>Noisy data</strong> (duplicate columns, non-numeric values)</p>
 <p>This ensures our model learns to handle diverse types of complexity rather than overfitting to a single difficulty dimension. The following code implements quota-based sampling to achieve this balanced representation:</p>
 <div id="cell-70" class="cell">
-<details open="" class="code-fold">
+<details class="code-fold">
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pprint <span class="im">import</span> pprint</span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pathlib <span class="im">import</span> Path</span>
@@ -2793,7 +2793,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"descPosition":"bottom","openEffect":"zoom","closeEffect":"zoom","loop":false,"selector":".lightbox"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"descPosition":"bottom","selector":".lightbox","openEffect":"zoom","closeEffect":"zoom","loop":false});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
