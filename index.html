@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.7.34">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -39,14 +39,14 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-befe23ebd2f54d8af2c8a89d1a1611f1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-a986a95301e671fce2c6472dffc862a1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-1e815c4c50043f7e8fc9161d15dcdabb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-a986a95301e671fce2c6472dffc862a1.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3824aa816de5134366ccfe78104cf7a8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -110,7 +110,7 @@ i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-subtitle','listing-description','listing-reading-time','listing-image',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-reading-time','listing-title','listing-description','listing-image',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
       searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description"],
     };
@@ -171,15 +171,15 @@ window.Quarto = {
 
 <link rel="stylesheet" href="styles.css">
 <link rel="alternate" type="application/rss+xml" title="Shubham Gupta" href="index.xml" data-external="1"><meta property="og:title" content="Tech Musings – Shubham Gupta">
-<meta property="og:image" content="https://shubhamg.in/posts/anthropic_bsides_ctf/stego.png">
+<meta property="og:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
 <meta property="og:site_name" content="Shubham Gupta">
-<meta property="og:image:height" content="631">
-<meta property="og:image:width" content="631">
+<meta property="og:image:height" content="1488">
+<meta property="og:image:width" content="1202">
 <meta name="twitter:title" content="Tech Musings – Shubham Gupta">
-<meta name="twitter:image" content="https://shubhamg.in/posts/anthropic_bsides_ctf/stego.png">
+<meta name="twitter:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
 <meta name="twitter:creator" content="@shubhamg2208">
-<meta name="twitter:image-height" content="631">
-<meta name="twitter:image-width" content="631">
+<meta name="twitter:image-height" content="1488">
+<meta name="twitter:image-width" content="1202">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -419,7 +419,30 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="Y3Rm" data-listing-date-sort="1754352000000" data-listing-file-modified-sort="1754381869618" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2810">
+<div class="quarto-post image-right" data-index="0" data-categories="cHJvZ3JhbW1pbmclMkNkc3B5" data-listing-date-sort="1756598400000" data-listing-file-modified-sort="1756712287969" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1890">
+<div class="thumbnail"><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
+
+<img loading="lazy" src="./posts/cl_dspy/curriculum_learning_data.png" class="thumbnail-image" style="height: 170px;">
+
+</a></div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">Curriculum Learning 🤝 DSPy: Exploration</a>
+</h3>
+<div class="delink listing-description"><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
+<p>Mapping ConvFinQA and crafting a curriculum for financial QA</p>
+</a></div>
+</div>
+<div class="metadata">
+<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
+<div class="listing-date">
+Aug 31, 2025
+</div>
+<div class="listing-reading-time">10 min</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="Y3Rm" data-listing-date-sort="1754352000000" data-listing-file-modified-sort="1756712287966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2810">
 <div class="thumbnail"><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
 
 <img loading="lazy" src="./posts/anthropic_bsides_ctf/stego.png" class="thumbnail-image" style="height: 170px;">
@@ -429,9 +452,6 @@ window.Quarto = {
 <h3 class="no-anchor listing-title">
 <a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">Cracking the Anthropic CTF</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
 <p>Intersection of steganography x neural networks, with API credits as a reward!</p>
 </a></div>
@@ -445,7 +465,7 @@ Aug 5, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-listing-date-sort="1752969600000" data-listing-file-modified-sort="1754381869618" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="56" data-listing-word-count-sort="11048">
+<div class="quarto-post image-right" data-index="2" data-listing-date-sort="1752969600000" data-listing-file-modified-sort="1756712287966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="56" data-listing-word-count-sort="11048">
 <div class="thumbnail"><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
 
 <img loading="lazy" src="./posts/mojo_gpu_puzzles/p11_block_boundary.png" class="thumbnail-image" style="height: 170px;">
@@ -455,9 +475,6 @@ Aug 5, 2025
 <h3 class="no-anchor listing-title">
 <a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">GPUs go brrr with Mojo: Algorithms</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
 <p>Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans</p>
 </a></div>
@@ -471,7 +488,7 @@ Jul 20, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="cHJvZ3JhbW1pbmclMkNncHUlMkNtb2pv" data-listing-date-sort="1751760000000" data-listing-file-modified-sort="1754381869618" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
+<div class="quarto-post image-right" data-index="3" data-categories="cHJvZ3JhbW1pbmclMkNncHUlMkNtb2pv" data-listing-date-sort="1751760000000" data-listing-file-modified-sort="1756712287966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
 <div class="thumbnail"><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/mojo_gpu_puzzles/memory_hierachy_fa.png" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU." style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -481,9 +498,6 @@ Jul 20, 2025
 <h3 class="no-anchor listing-title">
 <a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">GPUs go brrr with Mojo: Fundamentals</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
 <p>Learning GPU programming fundamentals through hands-on Mojo implementations</p>
 </a></div>
@@ -497,7 +511,7 @@ Jul 6, 2025
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="bmxwJTJDdHJhbnNmb3JtZXIlMkNyZXZpZXc=" data-listing-date-sort="1598832000000" data-listing-file-modified-sort="1754381869618" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1372">
+<div class="quarto-post image-right" data-index="4" data-categories="bmxwJTJDdHJhbnNmb3JtZXIlMkNyZXZpZXc=" data-listing-date-sort="1598832000000" data-listing-file-modified-sort="1756712287966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1372">
 <div class="thumbnail"><a href="./posts/2020-08-31-bison.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/bison/bison_architecture.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -507,9 +521,6 @@ Jul 6, 2025
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-08-31-bison.html" class="no-external">BERT + BM25 = BISON</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-08-31-bison.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-08-31-bison.html" class="no-external">
 <p>A new framework for information retrieval from documents</p>
 </a></div>
@@ -523,7 +534,7 @@ Aug 31, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="bmxwJTJDdHJhbnNmb3JtZXIlMkNyZXZpZXclMkNsb25nZm9ybWVy" data-listing-date-sort="1589155200000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1642">
+<div class="quarto-post image-right" data-index="5" data-categories="bmxwJTJDdHJhbnNmb3JtZXIlMkNyZXZpZXclMkNsb25nZm9ybWVy" data-listing-date-sort="1589155200000" data-listing-file-modified-sort="1756712287966" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1642">
 <div class="thumbnail"><a href="./posts/2020-05-11-longformer.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/longformer/comparison.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -533,9 +544,6 @@ Aug 31, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-05-11-longformer.html" class="no-external">LongFormer</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-05-11-longformer.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-05-11-longformer.html" class="no-external">
 <p>Transformers for loooong documents</p>
 </a></div>
@@ -549,7 +557,7 @@ May 11, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="bmxwJTJDbGFuZ3VhZ2VfbW9kZWwlMkNyZXZpZXc=" data-listing-date-sort="1587600000000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="565">
+<div class="quarto-post image-right" data-index="6" data-categories="bmxwJTJDbGFuZ3VhZ2VfbW9kZWwlMkNyZXZpZXc=" data-listing-date-sort="1587600000000" data-listing-file-modified-sort="1756712287965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="3" data-listing-word-count-sort="565">
 <div class="thumbnail"><a href="./posts/2020-04-23-tag-lm.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/taglm/overview.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -559,9 +567,6 @@ May 11, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-04-23-tag-lm.html" class="no-external">TagLM</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-04-23-tag-lm.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-04-23-tag-lm.html" class="no-external">
 This is the TagLM paper mentioned in Lecture 13 in the CS224N course title <strong>Semi-supervised sequence tagging with bidirectional language models</strong>
 </a></div>
@@ -575,7 +580,7 @@ Apr 23, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="bmxwJTJDbGFuZ3VhZ2VfbW9kZWwlMkNyZXZpZXc=" data-listing-date-sort="1587427200000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="633">
+<div class="quarto-post image-right" data-index="7" data-categories="bmxwJTJDbGFuZ3VhZ2VfbW9kZWwlMkNyZXZpZXc=" data-listing-date-sort="1587427200000" data-listing-file-modified-sort="1756712287965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="4" data-listing-word-count-sort="633">
 <div class="thumbnail"><a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" style="height: 170px;">&nbsp;</div>
@@ -583,11 +588,8 @@ Apr 23, 2020
 </a></div>
 <div class="body">
 <h3 class="no-anchor listing-title">
-<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">How much do you know?</a>
+<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">T5’s Closed-Book Exam</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-04-21-knowledge-lm.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-04-21-knowledge-lm.html" class="no-external">
 <p>Measure the amount of information stored in a model</p>
 </a></div>
@@ -601,7 +603,7 @@ Apr 21, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="bmxwJTJDYXR0ZW50aW9uJTJDcmV2aWV3" data-listing-date-sort="1587340800000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="817">
+<div class="quarto-post image-right" data-index="8" data-categories="bmxwJTJDYXR0ZW50aW9uJTJDcmV2aWV3" data-listing-date-sort="1587340800000" data-listing-file-modified-sort="1756712287965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="817">
 <div class="thumbnail"><a href="./posts/2020-04-20-attention.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/attention/transformer.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -611,9 +613,6 @@ Apr 21, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-04-20-attention.html" class="no-external">Attention is all you need</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-04-20-attention.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-04-20-attention.html" class="no-external">
 New architecture based solely on attention mechanisms called <strong>Transformer</strong>. Gets rids of recurrent and convolution networks completely.
 </a></div>
@@ -627,7 +626,7 @@ Apr 20, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="bmxwJTJDYmVydCUyQ3Jldmlldw==" data-listing-date-sort="1584144000000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268">
+<div class="quarto-post image-right" data-index="9" data-categories="bmxwJTJDYmVydCUyQ3Jldmlldw==" data-listing-date-sort="1584144000000" data-listing-file-modified-sort="1756712287965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1268">
 <div class="thumbnail"><a href="./posts/2020-03-14-realm.html" class="no-external">
 
 <img loading="lazy" src="./posts/realm/training.png" class="thumbnail-image" style="height: 170px;">
@@ -637,9 +636,6 @@ Apr 20, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-03-14-realm.html" class="no-external">REALM: Retrieval-Augmented Language MOdel Pre-Training</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-03-14-realm.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-03-14-realm.html" class="no-external">
 <p>A better Q&amp;A system based on knowledge retrieval</p>
 </a></div>
@@ -653,7 +649,7 @@ Mar 14, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="anVweXRlciUyQ2JheWVzaWFuJTJDZ29sZl9wdXR0aW5n" data-listing-date-sort="1583971200000" data-listing-file-modified-sort="1754381869617" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057">
+<div class="quarto-post image-right" data-index="10" data-categories="anVweXRlciUyQ2JheWVzaWFuJTJDZ29sZl9wdXR0aW5n" data-listing-date-sort="1583971200000" data-listing-file-modified-sort="1756712287965" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057">
 <div class="thumbnail"><a href="./posts/2020-03-12-tutorial.html" class="no-external">
 
 <p class="card-img-top"><img src="posts/2020-03-12-tutorial_files/figure-html/cell-6-output-2.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
@@ -663,9 +659,6 @@ Mar 14, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-03-12-tutorial.html" class="no-external">Bayesian Golf Putting Model</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-03-12-tutorial.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-03-12-tutorial.html" class="no-external">
 <p>Are you the next Tiger Woods?</p>
 </a></div>
@@ -679,7 +672,7 @@ Mar 12, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="aW50cm8=" data-listing-date-sort="1578960000000" data-listing-file-modified-sort="1754381869614" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="20">
+<div class="quarto-post image-right" data-index="11" data-categories="aW50cm8=" data-listing-date-sort="1578960000000" data-listing-file-modified-sort="1756712287962" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="20">
 <div class="thumbnail"><a href="./posts/2020-01-14-first-post.html" class="no-external">
 
 <div class="listing-item-img-placeholder card-img-top" style="height: 170px;">&nbsp;</div>
@@ -689,9 +682,6 @@ Mar 12, 2020
 <h3 class="no-anchor listing-title">
 <a href="./posts/2020-01-14-first-post.html" class="no-external">Yo!</a>
 </h3>
-<div class="listing-subtitle">
-<a href="./posts/2020-01-14-first-post.html" class="no-external"></a>
-</div>
 <div class="delink listing-description"><a href="./posts/2020-01-14-first-post.html" class="no-external">
 <p>First post</p>
 </a></div>
