@@ -13,11 +13,14 @@ format:
     code-overflow: wrap
     code-fold: true
     code-tools: true
+    df-print: paged
 resources:
   - 2025-09-01-cl-dspy-modelling.html 
-redirect: docs/2025-09-01-cl-dspy-modelling.html
+redirect: 2025-09-01-cl-dspy-modelling.html
 categories:
 - programming
 - dspy
 - curriculum-learning
 ---
+
+{{< include 2025-09-01-cl-dspy-modelling.html >}}
