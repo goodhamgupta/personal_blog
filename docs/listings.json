@@ -2,6 +2,8 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/2025-09-01-cl-dspy-modelling.html",
+      "/posts/2025-09-01-cl-dspy-modelling/index.html",
       "/posts/2025-08-31-cl-dspy-eda.html",
       "/posts/2025-08-05-anthropic-bsides-ctf.html",
       "/posts/2025-07-20-gpu-puzzles-p2.html",

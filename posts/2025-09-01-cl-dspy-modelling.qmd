@@ -1,0 +1,25 @@
+---
+title: "Curriculum Learning 🤝 DSPy: Modelling"
+author: Shubham Gupta
+date: '2025-09-01'
+image: cl_dspy/curriculum_learning_data.png
+description: Mapping ConvFinQA and crafting a curriculum for financial QA
+lightbox: true
+toc: true
+footnotes-hover: false
+format:
+  html:
+    highlight-style: gruvbox
+    code-overflow: wrap
+    code-fold: true
+    code-tools: true
+resources:
+  - 2025-09-01-cl-dspy-modelling.html 
+redirect: 2025-09-01-cl-dspy-modelling.html
+categories:
+- programming
+- dspy
+- curriculum-learning
+---
+
+{{< include 2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.html >}}
