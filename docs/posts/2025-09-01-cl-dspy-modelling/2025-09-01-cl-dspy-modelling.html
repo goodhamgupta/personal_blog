@@ -153,16 +153,16 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 <link rel="stylesheet" href="../../styles.css">
 <meta property="og:title" content="Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling">
 <meta property="og:description" content="Mapping ConvFinQA and crafting a curriculum for financial QA">
-<meta property="og:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
+<meta property="og:image" content="https://shubhamg.in/posts/cl_dspy/submission_mlflow_traces.png">
 <meta property="og:site_name" content="Shubham Gupta">
-<meta property="og:image:height" content="1488">
-<meta property="og:image:width" content="1202">
+<meta property="og:image:height" content="1880">
+<meta property="og:image:width" content="3836">
 <meta name="twitter:title" content="Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling">
 <meta name="twitter:description" content="Mapping ConvFinQA and crafting a curriculum for financial QA">
-<meta name="twitter:image" content="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png">
+<meta name="twitter:image" content="https://shubhamg.in/posts/cl_dspy/submission_mlflow_traces.png">
 <meta name="twitter:creator" content="@shubhamg2208">
-<meta name="twitter:image-height" content="1488">
-<meta name="twitter:image-width" content="1202">
+<meta name="twitter:image-height" content="1880">
+<meta name="twitter:image-width" content="3836">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
@@ -270,6 +270,7 @@ gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
   <li><a href="#probe-dataset-results" id="toc-probe-dataset-results" class="nav-link" data-scroll-target="#probe-dataset-results">Probe Dataset Results</a></li>
   <li><a href="#error-analysis" id="toc-error-analysis" class="nav-link" data-scroll-target="#error-analysis">Error Analysis</a></li>
   </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -3276,7 +3277,12 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
 </div>
 </div>
 </div>
-<p>Curriculum-first pass surfaced a gap between our metric and reality: several “errors” are actually correct answers hidden by formatting. Manual review shows many EM misses are due to surface form, not reasoning.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>Curriculum-first pass surfaced a gap between our metric and reality. Several “errors” are actually correct answers hidden by formatting. Manual review shows many EM misses are due to surface form, not reasoning.</p>
+<p>There are also cases where the ground-truth in the dataset is incorrect.</p>
 <p><strong>What broke EM</strong></p>
 <ul>
 <li>Numeric formatting: thousands separators, “0.5M” vs “500000”.</li>
@@ -3292,7 +3298,6 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
 <div id="quarto-meta-markdown" class="hidden">
 <p><span class="hidden" data-render-id="quarto-metatitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-twittercardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-ogcardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-metasitename">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-twittercarddesc">Mapping ConvFinQA and crafting a curriculum for financial QA</span> <span class="hidden" data-render-id="quarto-ogcardddesc">Mapping ConvFinQA and crafting a curriculum for financial QA</span></p>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -3832,7 +3837,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"loop":false,"selector":".lightbox","openEffect":"zoom","descPosition":"bottom","closeEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;

@@ -3329,7 +3329,12 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
 </div>
 </div>
 </div>
-<p>Curriculum-first pass surfaced a gap between our metric and reality: several “errors” are actually correct answers hidden by formatting. Manual review shows many EM misses are due to surface form, not reasoning.</p>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>Curriculum-first pass surfaced a gap between our metric and reality. Several “errors” are actually correct answers hidden by formatting. Manual review shows many EM misses are due to surface form, not reasoning.</p>
+<p>There are also cases where the ground-truth in the dataset is incorrect.</p>
 <p><strong>What broke EM</strong></p>
 <ul>
 <li>Numeric formatting: thousands separators, “0.5M” vs “500000”.</li>
@@ -3345,7 +3350,6 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
 <div id="quarto-meta-markdown" class="hidden">
 <p><span class="hidden" data-render-id="quarto-metatitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-twittercardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-ogcardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Modelling</span> <span class="hidden" data-render-id="quarto-metasitename">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-twittercarddesc">Mapping ConvFinQA and crafting a curriculum for financial QA</span> <span class="hidden" data-render-id="quarto-ogcardddesc">Mapping ConvFinQA and crafting a curriculum for financial QA</span></p>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -3885,7 +3889,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","loop":false,"closeEffect":"zoom","descPosition":"bottom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
@@ -3920,7 +3924,7 @@ window.onload = () => {
   <category>curriculum-learning</category>
   <guid>https://shubhamg.in/posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.html</guid>
   <pubDate>Sun, 31 Aug 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://shubhamg.in/posts/cl_dspy/curriculum_learning_data.png" medium="image" type="image/png" height="178" width="144"/>
+  <media:content url="https://shubhamg.in/posts/cl_dspy/submission_mlflow_traces.png" medium="image" type="image/png" height="71" width="144"/>
 </item>
 <item>
   <title>Curriculum Learning 🤝 DSPy: Exploration</title>
