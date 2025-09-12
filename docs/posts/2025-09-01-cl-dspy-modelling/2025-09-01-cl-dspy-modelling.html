@@ -557,7 +557,9 @@ ollama/qwen3:32b: I cannot provide the current date as I do not have access to r
         const verb = isCollapsed ? 'Collapse' : 'Expand';
         this.innerText = `${verb} MLflow Trace`;
     ">Collapse MLflow Trace</button>
-  <iframe id="trace-renderer" style="width: 100%; height: 500px; border: none; resize: vertical;" src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=3be570b5035f48159f5f6f8b102b3565&amp;experiment_id=1&amp;trace_id=5ef345c76c844b5786e8d8d54b9de2c6&amp;experiment_id=1&amp;trace_id=9e5a6b35374a4fbc8cbc10bcf48a9765&amp;experiment_id=1&amp;trace_id=f54a2f585a8248feb6f8b0e56b6821ca&amp;experiment_id=1&amp;trace_id=7d0291783ca34ac3a2304daa01790993&amp;experiment_id=1&amp;trace_id=7d7c7c7e1e534a6abdcba8718079d6e1&amp;experiment_id=1&amp;trace_id=0a13673c74a146c4b6fdbfde935a0390&amp;experiment_id=1&amp;trace_id=0e3ebc3c4d1d4d4e8b2cef92e92d608a&amp;experiment_id=1&amp;trace_id=c5866268627d4319a05eb6af34b78672&amp;experiment_id=1&amp;trace_id=1f253b525ef547649472ffd87573560d&amp;experiment_id=1&amp;version=3.1.4">
+  <iframe id="trace-renderer" style="width: 100%; height: 500px; border: none; resize: vertical;"
+      src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=3be570b5035f48159f5f6f8b102b3565&amp;experiment_id=1&amp;trace_id=5ef345c76c844b5786e8d8d54b9de2c6&amp;experiment_id=1&amp;trace_id=9e5a6b35374a4fbc8cbc10bcf48a9765&amp;experiment_id=1&amp;trace_id=f54a2f585a8248feb6f8b0e56b6821ca&amp;experiment_id=1&amp;trace_id=7d0291783ca34ac3a2304daa01790993&amp;experiment_id=1&amp;trace_id=7d7c7c7e1e534a6abdcba8718079d6e1&amp;experiment_id=1&amp;trace_id=0a13673c74a146c4b6fdbfde935a0390&amp;experiment_id=1&amp;trace_id=0e3ebc3c4d1d4d4e8b2cef92e92d608a&amp;experiment_id=1&amp;trace_id=c5866268627d4319a05eb6af34b78672&amp;experiment_id=1&amp;trace_id=1f253b525ef547649472ffd87573560d&amp;experiment_id=1&amp;version=3.1.4">
+  </iframe>
 </div>
 </div>
 </div>
@@ -1421,21 +1423,6 @@ ollama/qwen3:32b: I cannot provide the current date as I do not have access to r
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=caea82d0bc0c4f0d800313b99bd69581&amp;experiment_id=1&amp;trace_id=ed4476c7920b49f3b2e909e88548e086&amp;experiment_id=1&amp;trace_id=6ba8b539ea0f49798599b294060d1213&amp;experiment_id=1&amp;trace_id=711aae8d07b14f619312af02495f941a&amp;experiment_id=1&amp;trace_id=fd97772c93064b3daf30f61009d81fe2&amp;experiment_id=1&amp;trace_id=5b665669eca649c9bd46b04a6f9737ad&amp;experiment_id=1&amp;trace_id=23be442a4d64413abe335a55bebe6a5a&amp;experiment_id=1&amp;trace_id=d057b5aed88a46fb8562a39db0ebd15d&amp;experiment_id=1&amp;trace_id=02f1ddeee02448f58babae2fb6afa3b9&amp;experiment_id=1&amp;trace_id=8e058d1aa41a4932a83c8f0505a867fd&amp;experiment_id=1&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -1933,21 +1920,6 @@ Best score so far: 80.0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=bc6ccffd18824246934194a85933d3fd&amp;experiment_id=3&amp;trace_id=e37a0ba10d0543bb908e397933697d6d&amp;experiment_id=3&amp;trace_id=b37797a381b44f7eb13e1f42eca0567c&amp;experiment_id=3&amp;trace_id=9a18ced106784364ae12831ce45a8748&amp;experiment_id=3&amp;trace_id=3d7bb8edeb78492bac5473d6e52c4846&amp;experiment_id=3&amp;trace_id=d42d241ebb9e40b1affe006598cae983&amp;experiment_id=3&amp;trace_id=344ea0c049b946e8b780a9e02d720688&amp;experiment_id=3&amp;trace_id=4cac19ef64574b50b38d4baf81b360d5&amp;experiment_id=3&amp;trace_id=c4ca77588233486e9d234e95aa976329&amp;experiment_id=3&amp;trace_id=c9921423c3aa4f16933885eb15242313&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2152,21 +2124,6 @@ Average Metric: 7.00 / 10 (70.0%): 100%|██████████| 10/10 [0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=9f5fdac684c74647a0a88cbdcd16d89b&amp;experiment_id=1&amp;trace_id=3de6592234f74ca4ba6a450f2a01b37a&amp;experiment_id=1&amp;trace_id=31e022f38c354840b5abbe64b417306d&amp;experiment_id=1&amp;trace_id=0756d03769c4417e861f7171ecb7bcb8&amp;experiment_id=1&amp;trace_id=f1dcee538d454f96a41dc1d59c3a27f9&amp;experiment_id=1&amp;trace_id=283f1f0436c24afabdb9d865b3c0e802&amp;experiment_id=1&amp;trace_id=ddb2286507bd47fd8580b5e8dd923d7e&amp;experiment_id=1&amp;trace_id=427f384f2d604830844675df25de1226&amp;experiment_id=1&amp;trace_id=789bab02c70346c1a50c91de5f67376b&amp;experiment_id=1&amp;trace_id=2c112f9efbb44a9796a0ca64a43b8b5d&amp;experiment_id=1&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2364,21 +2321,6 @@ Average Metric: 103.00 / 151 (68.2%): 100%|██████████| 151/1
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=5276eb031180473cb92d03ceca489d38&amp;experiment_id=1&amp;trace_id=0f2dffe6dfd74fe3b5697a0bffb47658&amp;experiment_id=1&amp;trace_id=35c112a62c334012a612cdca116e9b09&amp;experiment_id=1&amp;trace_id=e30a2c51605b4102b190affb869475f4&amp;experiment_id=1&amp;trace_id=1b74fe5cb6c8453b82c227eb63e11221&amp;experiment_id=1&amp;trace_id=5310ed582ac0431382787b65f63de317&amp;experiment_id=1&amp;trace_id=f713426ecd20413ba2acbb7af0228b2d&amp;experiment_id=1&amp;trace_id=0f44b811a42c41dd9d867b5e12f80044&amp;experiment_id=1&amp;trace_id=543c31429f2d4d7cb4d2284daf66b3f9&amp;experiment_id=1&amp;trace_id=d624a05b74cc43a0a69bc8b400465a69&amp;experiment_id=1&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2582,21 +2524,6 @@ Average Metric: 157.00 / 200 (78.5%): 100%|██████████| 200/2
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=c5d368d7011e416bb8a6a45fb5757cc5&amp;experiment_id=1&amp;trace_id=c838fe37a1554a709c48aa7d91df4051&amp;experiment_id=1&amp;trace_id=e3e3b12245c145609fbd9f2ea7a38b35&amp;experiment_id=1&amp;trace_id=f05d4d95db7d4aceb8b4158a8cf0cfb0&amp;experiment_id=1&amp;trace_id=e996a1553f3b4c7b97af98bc3665f7aa&amp;experiment_id=1&amp;trace_id=02d784d19b414f16bc36df2f6cace3af&amp;experiment_id=1&amp;trace_id=a4955baaaf944dbbadcd4f05cb1c10aa&amp;experiment_id=1&amp;trace_id=fcaf8824996d4c7eab4d03bd198f2c33&amp;experiment_id=1&amp;trace_id=73db052bdbe1418eb46bc6ec442df95e&amp;experiment_id=1&amp;trace_id=66a0910a43384a9f993773961116b241&amp;experiment_id=1&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -3063,21 +2990,6 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=f51ec31b099c4ccb884824cd84faf244&amp;experiment_id=1&amp;trace_id=2b2a5bac43db4bdf8f1ba27a0c72707f&amp;experiment_id=1&amp;trace_id=33d30ce093eb4bcb8959b7e7b14f4f03&amp;experiment_id=1&amp;trace_id=585d29108d074c8eb2546d615be4e058&amp;experiment_id=1&amp;trace_id=f458046f22604e4cbb206f2ddea55891&amp;experiment_id=1&amp;trace_id=fae282bd8d524323a37fbafd71e5e50f&amp;experiment_id=1&amp;trace_id=e0f8503464d846308c8ac03dd3897e1a&amp;experiment_id=1&amp;trace_id=2f17ef3a251a4472920aac663506297b&amp;experiment_id=1&amp;trace_id=cb93f2fdd18b4a1289219be14632eeb9&amp;experiment_id=1&amp;trace_id=29a36ca6d3bb4720860417319bbe8d68&amp;experiment_id=1&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
