@@ -56,73 +56,70 @@
 </section>
 <section id="model-list" class="level2">
 <h2 class="anchored" data-anchor-id="model-list">Model List</h2>
-<p>The state of language models has significantly changed since the paper was released. It no longer makes sense to use the exact same model(s) as the paper.</p>
-<p>Instead, we will use the following categories of model:</p>
-<ul>
-<li><strong>Non-Reasoning Models</strong>
-<ul>
-<li>These models are the usual next-token prediction models, and start generating an answer immediately.</li>
-<li>We will benchmark the following models here:
-<ul>
-<li>GPT-4.1</li>
-<li>GPT-4.1-mini</li>
-</ul></li>
-</ul></li>
-<li><strong>Reasoning Models</strong>
-<ul>
-<li>These models are the latest language models that are capable of reasoning and generating answers based on the context provided.</li>
-<li>Reasoning models are designed to perform multi-step, explicit logical inference to arrive at a conclusion.</li>
-<li>We will benchmark the following models here:
-<ul>
-<li>OAI o4-mini</li>
-<li>Anthropic Sonnet 4.0</li>
-<li>Google Gemini Flash 2.5</li>
-<li>Google Gemini Flash 2.5 Lite</li>
-</ul></li>
-</ul></li>
-<li><strong>Frontier Models</strong>
-<ul>
-<li>These are the true “large” language models, developed by frontier labs. They excel in instruction following, reasoning and solving a variety of tasks.</li>
-<li>However, these models are <em>expensive</em>. As such, we will try to avoid using them for a final solution.</li>
-<li>We will benchmark the following models here:
-<ul>
-<li>OAI o3</li>
-<li>Anthropic Opus 4.0</li>
-<li>Google Gemini Pro 2.5</li>
-</ul></li>
-</ul></li>
-<li><strong>Open Source</strong>
-<ul>
-<li>We also want to measure the performance of open-source models, as it will help quantify the gap between them and proprietary models.</li>
-<li>Open-source models are especially required in domains where data sovereignty is a concern.</li>
-<li>We will only benchmark:
-<ul>
-<li>Qwen3-32B</li>
-</ul></li>
-</ul></li>
-</ul>
-<section id="model-selection" class="level3">
-<h3 class="anchored" data-anchor-id="model-selection">Model Selection</h3>
-<p>Due to cost and time constraints, we can’t afford to optimise all models. Hence, we’ll aim to narrow down the list of models to a few “promising” models. Specifically, instead of just using the performance of the models on the “easy” validation set, we will use a combination of two datasets:</p>
+<p>We will consider the following <em>families</em> of models:</p>
+<table class="table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 25%">
+<col style="width: 56%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Rationale</th>
+<th>Benchmarked Checkpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Non-Reasoning</strong></td>
+<td>Classic next-token predictors. Useful as baselines for curriculum-learning because they expose the value of explicit reasoning.</td>
+<td>• <code>openai/gpt-4.1-2025-04-14</code> <br>• <code>openai/gpt-4.1-mini-2025-04-14</code></td>
+</tr>
+<tr class="even">
+<td><strong>Reasoning</strong></td>
+<td>Architected for multi-step, chain-of-thought inference. Expected to excel once the curriculum introduces compositional tasks.</td>
+<td>• <code>openai/o4-mini-2025-04-16</code> <br>• <code>anthropic/claude-sonnet-4-20250514</code> <br>• <code>gemini-2.5-flash</code> <br>• <code>gemini-2.5-flash-lite</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Frontier</strong></td>
+<td>Flagship models from frontier labs. Highest quality but costly—kept only for upper-bound comparisons, not final deployment.</td>
+<td>• <code>openai/o3-2025-04-16</code> <br>• <code>anthropic/claude-opus-4-20250514</code> <br>• <code>gemini-2.5-pro</code></td>
+</tr>
+<tr class="even">
+<td><strong>Open-Source</strong></td>
+<td>Critical for cost-sensitive deployments(an OS models FTW). Benchmarked to quantify the closed–open gap.</td>
+<td>• <code>qwen3-32b</code></td>
+</tr>
+</tbody>
+</table>
+<section id="two-stage-gating-protocol" class="level3">
+<h3 class="anchored" data-anchor-id="two-stage-gating-protocol">Two-Stage Gating Protocol</h3>
 <ol type="1">
-<li>Gate - 50 Easy dialogs, teacher - forced. Drop model if Turn-EM &lt; 0.55.</li>
-<li>Probe - 30-dialog mixed micro-set (15 Medium + 15 Hard, closed loop). Keep model only if Final-Turn EM ≥ 0.35, Dialogue-mean EM ≥ 0.35</li>
+<li><p><strong>Gate</strong><br>
+• Dataset: 50 “Easy” teacher-forced dialogues<br>
+• Retain a model only if <strong>Turn-EM ≥ 0.55</strong></p></li>
+<li><p><strong>Probe</strong><br>
+• Dataset: 30 dialogues (15 Medium + 15 Hard), closed-loop<br>
+• Retain a model only if <strong>Final-Turn EM ≥ 0.35</strong> <em>and</em> <strong>Dialogue-mean EM ≥ 0.35</strong></p></li>
 </ol>
-<p>This two-stage filter zaps obviously weak models fast yet retains ones whose strength shows up on multi-step reasoning / long context.</p>
+<p>This pipeline quickly eliminates weak candidates while preserving models whose strengths surface in longer, reasoning-heavy contexts.</p>
 </section>
-<section id="metrics-tracking" class="level3">
-<h3 class="anchored" data-anchor-id="metrics-tracking">Metrics Tracking</h3>
-<p>Given that we plan on iterating over multiple datasets, multiple models, multiple algorithms with different hyperparameters, we will a solution to efficiency track our progress.</p>
-<p>We aim to use <strong>MLFlow</strong>, as it has the following features:</p>
+<section id="experiment-tracking" class="level3">
+<h3 class="anchored" data-anchor-id="experiment-tracking">Experiment Tracking</h3>
+<p>All training and evaluation runs are logged with <strong>MLflow</strong>:</p>
 <ul>
-<li>MLflow Tracking: logs training, runs, and artifacts for DSPy.</li>
-<li>MLflow Model: packages DSPy programs for reproducible deployment.</li>
-<li>MLflow Evaluate: natively evaluates GenAI outputs for fast iteration.</li>
-<li>MLflow Tracing: auto-logs and debugs DSPy internals with one command.</li>
+<li>MLflow Tracking – run metadata, metrics, and artifacts for DSPy experiments<br>
+</li>
+<li>MLflow Model – package DSPy programs for reproducible rollout<br>
+</li>
+<li>MLflow Evaluate – built-in GenAI evaluators for rapid iteration<br>
+</li>
+<li>MLflow Tracing – one-line capture of DSPy internals for debugging</li>
 </ul>
 <p>In production, the deployment pipeline would look as follows:</p>
 <p align="center">
-<img src="https://shubhamg.in/posts/cl_dspy/mlflow_dspy.png" alt="DSPy Production deployment with MLFlow. Source: DSPy Docs" width="200" height="300"> <br> <sub> DSPy Production deployment with MLFlow. Source: <a href="https://mlflow.org/docs/latest/genai/flavors/dspy/">MLFlow Docs</a> </sub>
+, <img src="https://shubhamg.in/posts/cl_dspy/mlflow_dspy.png" alt="DSPy Production deployment with MLFlow. Source: DSPy Docs" width="200" height="300">, <br>, <sub>, DSPy Production deployment with MLFlow. Source: <a href="https://mlflow.org/docs/latest/genai/flavors/dspy/">MLFlow Docs</a>, </sub>,
 </p>
 </section>
 </section>
@@ -622,7 +619,7 @@ ollama/qwen3:32b: I cannot provide the current date as I do not have access to r
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> json.load(<span class="bu">open</span>(<span class="st">&quot;../data/convfinqa_dataset.json&quot;</span>))</span></code></pre></div>
 </div>
 </section>
-<section id="model-selection-1" class="level2">
+<section id="model-selection" class="level2">
 <h2>Model Selection</h2>
 <p>In the <strong>easy</strong> problems stage, we will select a relatively straightforward implementation. Specifically, we will provide the model with all context, and ask it to answer the question in a zero-shot manner.</p>
 <p>This will help us identify strong baseline performance, and identify any issues with the model’s ability to understand the problem.</p>
@@ -3332,8 +3329,16 @@ Judging examples: 100%|██████████| 289/289 [00:13&lt;00:00, 
 </div>
 </div>
 </div>
-<p>Aha! We see that while the <em>predicted answer</em> didnt match the ground truth exactly, it’s <strong>actually</strong> correct for all these cases. We can further use these examples to improve our <strong>exact match</strong> metric implementation!</p>
+<p>Curriculum-first pass surfaced a gap between our metric and reality: several “errors” are actually correct answers hidden by formatting. Manual review shows many EM misses are due to surface form, not reasoning.</p>
+<p><strong>What broke EM</strong></p>
+<ul>
+<li>Numeric formatting: thousands separators, “0.5M” vs “500000”.</li>
+<li>Units and scaling: $, %, M/B suffixes; percent vs decimal.</li>
+<li>Rounding/tolerance: 2dp rounding vs full precision.</li>
+<li>Boolean variants: yes/true/1 vs no/false/0.</li>
+</ul>
 <p>The above results are <strong>not conclusive</strong> by any means, since the LLM-as-a-judge approach also has known flaws. However, it does give us some pointers on how to improve the model performance from here!</p>
+<p><strong>Note</strong>: LLM-as-judge remains imperfect. We’ll retain periodic human spot-checks. With cleaner metrics and logging, the next step is to test if DSPy’s optimizers actually lift EM under the Easy→Medium→Hard schedule without inflating token cost.</p>
 <div id="quarto-navigation-envelope" class="hidden">
 <p><span class="hidden" data-render-id="quarto-int-sidebar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar:About">About</span> <span class="hidden" data-render-id="quarto-int-navbar:/about.html">/about.html</span> <span class="hidden" data-render-id="quarto-int-navbar:https://github.com/goodhamgupta">https://github.com/goodhamgupta</span> <span class="hidden" data-render-id="quarto-int-navbar:/index.xml">/index.xml</span></p>
 </div>
@@ -3880,7 +3885,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<script>var lightboxQuarto = GLightbox({"selector":".lightbox","loop":false,"closeEffect":"zoom","descPosition":"bottom","openEffect":"zoom"});
+<script>var lightboxQuarto = GLightbox({"selector":".lightbox","openEffect":"zoom","loop":false,"closeEffect":"zoom","descPosition":"bottom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
