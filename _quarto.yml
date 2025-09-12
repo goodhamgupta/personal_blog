@@ -3,6 +3,14 @@ project:
   output-dir: docs
   resources:
     - CNAME
+    - posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling.html
+    - posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling_files/**
+    - posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling_files/**
+  render:
+    - "*.qmd"
+    - "posts/**/*.qmd"
+    - "posts/**/*.ipynb"
+    - "!posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.ipynb"
 
 website:
   site-url: "https://shubhamg.in"
@@ -39,7 +47,7 @@ website:
   repo-actions: [issue]
 format:
   html:
-    theme: 
+    theme:
       light: cosmo
       dark: darkly
     css: styles.css
