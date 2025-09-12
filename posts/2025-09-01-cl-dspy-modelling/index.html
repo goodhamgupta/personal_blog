@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Shubham Gupta">
+<meta name="dcterms.date" content="2025-09-01">
+<meta name="description" content="Mapping ConvFinQA and crafting a curriculum for financial QA">
 
-<title>Tech Musings – Shubham Gupta</title>
+<title>Curriculum Learning 🤝 DSPy: Modelling – Shubham Gupta</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,30 +26,28 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<script src="site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-befe23ebd2f54d8af2c8a89d1a1611f1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-3824aa816de5134366ccfe78104cf7a8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete-preset-algolia.umd.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-befe23ebd2f54d8af2c8a89d1a1611f1.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-3824aa816de5134366ccfe78104cf7a8.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-d68be38d83eca2bb035acf846ffba811.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -100,35 +101,6 @@ i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-plugin-algolia-insights">
 
 </script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-date','listing-reading-time','listing-title','listing-description','listing-image',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-CLKTGRWBQT"></script>
 
 <script type="text/javascript">
@@ -139,43 +111,16 @@ gtag('js', new Date());
 gtag('config', 'G-CLKTGRWBQT', { 'anonymize_ip': true});
 </script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
-<link rel="stylesheet" href="styles.css">
-<link rel="alternate" type="application/rss+xml" title="Shubham Gupta" href="index.xml" data-external="1"><meta property="og:title" content="Tech Musings – Shubham Gupta">
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Curriculum Learning 🤝 DSPy: Modelling – Shubham Gupta">
+<meta property="og:description" content="Mapping ConvFinQA and crafting a curriculum for financial QA">
 <meta property="og:image" content="https://shubhamg.in/posts/cl_dspy/submission_mlflow_traces.png">
 <meta property="og:site_name" content="Shubham Gupta">
 <meta property="og:image:height" content="1880">
 <meta property="og:image:width" content="3836">
-<meta name="twitter:title" content="Tech Musings – Shubham Gupta">
+<meta name="twitter:title" content="Curriculum Learning 🤝 DSPy: Modelling – Shubham Gupta">
+<meta name="twitter:description" content="Mapping ConvFinQA and crafting a curriculum for financial QA">
 <meta name="twitter:image" content="https://shubhamg.in/posts/cl_dspy/submission_mlflow_traces.png">
 <meta name="twitter:creator" content="@shubhamg2208">
 <meta name="twitter:image-height" content="1880">
@@ -183,7 +128,7 @@ window.Quarto = {
 <meta name="twitter:card" content="summary_large_image">
 </head>
 
-<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -352,7 +297,7 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Shubham Gupta</span>
     </a>
   </div>
@@ -363,7 +308,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item compact">
@@ -372,7 +317,7 @@ window.Quarto = {
 <span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="./index.xml"> <i class="bi bi-rss" role="img">
+    <a class="nav-link" href="../../index.xml"> <i class="bi bi-rss" role="img">
 </i> 
 <span class="menu-text"></span></a>
   </li>  
@@ -387,179 +332,68 @@ window.Quarto = {
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page">
-      <h1 class="title">Tech Musings</h1>
-                      </div>
+    <div class="quarto-title column-body">
+      <h1 class="title">Curriculum Learning 🤝 DSPy: Modelling</h1>
+                  <div>
+        <div class="description">
+          Mapping ConvFinQA and crafting a curriculum for financial QA
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">programming</div>
+                <div class="quarto-category">dspy</div>
+                <div class="quarto-category">curriculum-learning</div>
+              </div>
+                  </div>
   </div>
     
   
-  <div class="quarto-title-meta column-page">
+  <div class="quarto-title-meta">
 
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Shubham Gupta </p>
+            </div>
+    </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 1, 2025</p>
+      </div>
+    </div>
     
       
     </div>
     
   
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content quarto-banner-title-block column-page" id="quarto-document-content">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
 
 
 
 
+<p>
+Redirecting…
+</p>
+<script>
+  window.location.replace("_2025-09-01-cl-dspy-modelling.html");
+</script>
+<meta http-equiv="refresh" content="0; url=_2025-09-01-cl-dspy-modelling.html">
+<p>
+If you are not redirected automatically, <a href="_2025-09-01-cl-dspy-modelling.html">click here</a>.
+</p>
 
 
 
-
-<div class="quarto-listing quarto-listing-container-default" id="listing-listing">
-<div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="cHJvZ3JhbW1pbmclMkNkc3B5JTJDY3VycmljdWx1bS1sZWFybmluZw==" data-listing-date-sort="1756684800000" data-listing-file-modified-sort="1757660009263" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="1" data-listing-word-count-sort="14">
-<div class="thumbnail"><a href="./posts/2025-09-01-cl-dspy-modelling/index.html" class="no-external">
-
-<img loading="lazy" src="./posts/cl_dspy/submission_mlflow_traces.png" class="thumbnail-image" style="height: 170px;">
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2025-09-01-cl-dspy-modelling/index.html" class="no-external">Curriculum Learning 🤝 DSPy: Modelling</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2025-09-01-cl-dspy-modelling/index.html" class="no-external">
-<p>Mapping ConvFinQA and crafting a curriculum for financial QA</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2025-09-01-cl-dspy-modelling/index.html" class="no-external">
-<div class="listing-date">
-Sep 1, 2025
-</div>
-<div class="listing-reading-time">1 min</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="cHJvZ3JhbW1pbmclMkNkc3B5" data-listing-date-sort="1756598400000" data-listing-file-modified-sort="1757660009261" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1890">
-<div class="thumbnail"><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
-
-<img loading="lazy" src="./posts/cl_dspy/curriculum_learning_data.png" class="thumbnail-image" style="height: 170px;">
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">Curriculum Learning 🤝 DSPy: Exploration</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
-<p>Mapping ConvFinQA and crafting a curriculum for financial QA</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2025-08-31-cl-dspy-eda.html" class="no-external">
-<div class="listing-date">
-Aug 31, 2025
-</div>
-<div class="listing-reading-time">10 min</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="Y3Rm" data-listing-date-sort="1754352000000" data-listing-file-modified-sort="1757660009259" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2810">
-<div class="thumbnail"><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
-
-<img loading="lazy" src="./posts/anthropic_bsides_ctf/stego.png" class="thumbnail-image" style="height: 170px;">
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">Cracking the Anthropic CTF</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
-<p>Intersection of steganography x neural networks, with API credits as a reward!</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2025-08-05-anthropic-bsides-ctf.html" class="no-external">
-<div class="listing-date">
-Aug 5, 2025
-</div>
-<div class="listing-reading-time">15 min</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-listing-date-sort="1752969600000" data-listing-file-modified-sort="1757660009259" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="56" data-listing-word-count-sort="11048">
-<div class="thumbnail"><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
-
-<img loading="lazy" src="./posts/mojo_gpu_puzzles/p11_block_boundary.png" class="thumbnail-image" style="height: 170px;">
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">GPUs go brrr with Mojo: Algorithms</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
-<p>Moar GPU puzzles with slide-n-sum pooling, tile-flipping convs &amp; warp-speed scans</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2025-07-20-gpu-puzzles-p2.html" class="no-external">
-<div class="listing-date">
-Jul 20, 2025
-</div>
-<div class="listing-reading-time">56 min</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="cHJvZ3JhbW1pbmclMkNncHUlMkNtb2pv" data-listing-date-sort="1751760000000" data-listing-file-modified-sort="1757660009258" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3011">
-<div class="thumbnail"><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
-
-<p class="card-img-top"><img src="posts/mojo_gpu_puzzles/memory_hierachy_fa.png" alt="Source: FlashAttention [5]. Metrics shown are for an NVIDIA A100 GPU." style="height: 170px;"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">GPUs go brrr with Mojo: Fundamentals</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
-<p>Learning GPU programming fundamentals through hands-on Mojo implementations</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2025-07-06-gpu-puzzles-p1.html" class="no-external">
-<div class="listing-date">
-Jul 6, 2025
-</div>
-<div class="listing-reading-time">16 min</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-categories="anVweXRlciUyQ2JheWVzaWFuJTJDZ29sZl9wdXR0aW5n" data-listing-date-sort="1583971200000" data-listing-file-modified-sort="1757660009258" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1057">
-<div class="thumbnail"><a href="./posts/2020-03-12-tutorial.html" class="no-external">
-
-<p class="card-img-top"><img src="posts/2020-03-12-tutorial_files/figure-html/cell-6-output-2.png" style="height: 170px;"  class="thumbnail-image card-img"/></p>
-
-</a></div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/2020-03-12-tutorial.html" class="no-external">Bayesian Golf Putting Model</a>
-</h3>
-<div class="delink listing-description"><a href="./posts/2020-03-12-tutorial.html" class="no-external">
-<p>Are you the next Tiger Woods?</p>
-</a></div>
-</div>
-<div class="metadata">
-<a href="./posts/2020-03-12-tutorial.html" class="no-external">
-<div class="listing-date">
-Mar 12, 2020
-</div>
-<div class="listing-reading-time">6 min</div>
-</a>
-</div>
-</div>
-</div>
-<div class="listing-no-matching d-none">No matching items</div>
-</div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
