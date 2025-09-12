@@ -17,12 +17,6 @@ jobs:
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
 
-      - name: Build self-contained HTML for modelling post
-        run: |
-          quarto render posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.ipynb \
-            -o posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling.html \
-            --self-contained --quiet
-
       - name: Render and Publish
         uses: quarto-dev/quarto-actions/publish@v2
         with:
