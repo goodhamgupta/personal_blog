@@ -1,67 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://shubhamg.in/about.html</loc>
-    <lastmod>2025-08-05T08:16:31.927Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</loc>
-    <lastmod>2025-09-12T05:26:37.110Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.html</loc>
-    <lastmod>2025-09-12T05:36:40.808Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2020-03-12-tutorial.html</loc>
-    <lastmod>2025-09-12T05:26:37.103Z</lastmod>
+    <loc>https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html</loc>
+    <lastmod>2025-09-12T05:26:37.113Z</lastmod>
   </url>
   <url>
     <loc>https://shubhamg.in/posts/2020-08-31-bison.html</loc>
     <lastmod>2025-09-12T05:26:37.109Z</lastmod>
   </url>
   <url>
-    <loc>https://shubhamg.in/posts/2020-01-14-first-post.html</loc>
-    <lastmod>2025-09-12T05:26:37.100Z</lastmod>
-  </url>
-  <url>
     <loc>https://shubhamg.in/posts/2020-04-23-tag-lm.html</loc>
     <lastmod>2025-09-12T05:26:37.108Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2025-07-06-gpu-puzzles-p1.html</loc>
-    <lastmod>2025-09-12T05:26:37.109Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2020-05-11-longformer.html</loc>
-    <lastmod>2025-09-12T05:26:37.108Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2025-07-20-gpu-puzzles-p2.html</loc>
-    <lastmod>2025-09-12T05:26:37.110Z</lastmod>
-  </url>
-  <url>
-    <loc>https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html</loc>
-    <lastmod>2025-09-12T05:26:37.113Z</lastmod>
   </url>
   <url>
     <loc>https://shubhamg.in/posts/2020-04-20-attention.html</loc>
     <lastmod>2025-09-12T05:26:37.107Z</lastmod>
   </url>
   <url>
-    <loc>https://shubhamg.in/posts/2020-04-21-knowledge-lm.html</loc>
-    <lastmod>2025-09-12T05:26:37.107Z</lastmod>
+    <loc>https://shubhamg.in/posts/2020-01-14-first-post.html</loc>
+    <lastmod>2025-09-12T05:26:37.100Z</lastmod>
   </url>
   <url>
-    <loc>https://shubhamg.in/posts/2020-03-14-realm.html</loc>
-    <lastmod>2025-09-12T05:26:37.105Z</lastmod>
+    <loc>https://shubhamg.in/posts/2025-08-05-anthropic-bsides-ctf.html</loc>
+    <lastmod>2025-09-12T05:26:37.110Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/posts/2025-07-06-gpu-puzzles-p1.html</loc>
+    <lastmod>2025-09-12T05:26:37.109Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/about.html</loc>
+    <lastmod>2025-09-12T05:26:36.964Z</lastmod>
   </url>
   <url>
     <loc>https://shubhamg.in/index.html</loc>
     <lastmod>2025-09-12T05:26:37.100Z</lastmod>
   </url>
   <url>
+    <loc>https://shubhamg.in/posts/2025-07-20-gpu-puzzles-p2.html</loc>
+    <lastmod>2025-09-12T05:26:37.110Z</lastmod>
+  </url>
+  <url>
     <loc>https://shubhamg.in/posts/2025-09-01-cl-dspy-modelling/index.html</loc>
     <lastmod>2025-09-12T06:47:29.478Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/posts/2020-03-14-realm.html</loc>
+    <lastmod>2025-09-12T05:26:37.105Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/posts/2020-04-21-knowledge-lm.html</loc>
+    <lastmod>2025-09-12T05:26:37.107Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/posts/2020-05-11-longformer.html</loc>
+    <lastmod>2025-09-12T05:26:37.108Z</lastmod>
+  </url>
+  <url>
+    <loc>https://shubhamg.in/posts/2020-03-12-tutorial.html</loc>
+    <lastmod>2025-09-12T05:26:37.103Z</lastmod>
   </url>
 </urlset>
