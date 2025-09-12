@@ -1,7 +1,7 @@
-venv/*
 _site/*
 
 /.quarto/
 .DS_Store
 posts/.DS_Store
 .tool-versions
+venv/*
