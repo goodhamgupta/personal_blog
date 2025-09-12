@@ -8,6 +8,7 @@ project:
     - posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling_files/**
   render:
     - "*.qmd"
+    - "*.md"
     - "posts/**/*.qmd"
     - "posts/**/*.ipynb"
     - "!posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling.ipynb"

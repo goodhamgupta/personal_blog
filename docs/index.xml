@@ -6296,7 +6296,7 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <p>This puzzle is a bit different compared to traditional pooling: Instead of having a “kernel”, each output element is the running sum of the all the elements in the current window.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Pooling"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
+<p><a href="mojo_gpu_puzzles/p09.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Pooling"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p09.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Pooling"></a></p>
 <figcaption>Pooling</figcaption>
 </figure>
 </div>
@@ -6461,7 +6461,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <p>Similar to the previous puzzles, we can implement the dot-product by copying data to the shared memory, and running our operations on it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Dot Product"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
+<p><a href="mojo_gpu_puzzles/p10.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Dot Product"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p10.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Dot Product"></a></p>
 <figcaption>Dot Product</figcaption>
 </figure>
 </div>
@@ -6469,7 +6469,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <p>Picture Zeno’s “half-way” paradox <span class="citation" data-cites="zeno_dichotomy_paradox">[2]</span>: you keep halving the leftover distance until you’re done. A parallel reduction does the same-each round halves the number of active threads instead of the distance. <strong>Unlike Zeno’s infinite halvings though</strong>, we stop at a concrete point: when only thread 0 remains active (<code>stride</code> becomes 0).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Zeno Paradox"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
+<p><a href="mojo_gpu_puzzles/zeno_paradox.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Zeno Paradox"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/zeno_paradox.png" class="img-fluid figure-img" alt="Zeno Paradox"></a></p>
 <figcaption>Zeno Paradox</figcaption>
 </figure>
 </div>
@@ -7435,14 +7435,14 @@ font-style: inherit;"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0
 </table>
 <div class="quarto-figure quarto-figure-left">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-glightbox="description: .lightbox-desc-9" data-gallery="quarto-lightbox-gallery-9" title="2D Block Layout"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_block.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" data-glightbox="description: .lightbox-desc-9" title="2D Block Layout"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_block.png" class="img-fluid quarto-figure quarto-figure-left figure-img" alt="2D Block Layout"></a></p>
 <figcaption>2D Block Layout</figcaption>
 </figure>
 </div>
 <p>Within each block, you choose the thread footprint at kernel launch with <code>THREADS_PER_BLOCK = (blockDim.x, blockDim.y)</code>, giving <code>blockDim.x * blockDim.y</code> total threads per block.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-glightbox="description: .lightbox-desc-10" data-gallery="quarto-lightbox-gallery-10" title="2D Thread Layout"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_thread.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" data-glightbox="description: .lightbox-desc-10" title="2D Thread Layout"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_thread.png" class="img-fluid figure-img" alt="2D Thread Layout"></a></p>
 <figcaption>2D Thread Layout</figcaption>
 </figure>
 </div>
@@ -7486,7 +7486,7 @@ font-style: inherit;"># row index</span></span></code></pre></div>
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-glightbox="description: .lightbox-desc-11" data-gallery="quarto-lightbox-gallery-11" title="Matrix Indexing"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_matrix_position.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11" data-glightbox="description: .lightbox-desc-11" title="Matrix Indexing"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_matrix_position.png" class="img-fluid figure-img" alt="Matrix Indexing"></a></p>
 <figcaption>Matrix Indexing</figcaption>
 </figure>
 </div>
@@ -7616,7 +7616,7 @@ font-style: inherit;"># Process matrix[row, col]</span></span></code></pre></div
 <p>We can extend our implementation for 1D convolution to a 2D convolution.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-glightbox="description: .lightbox-desc-12" data-gallery="quarto-lightbox-gallery-12" title="Source: Toast Lab"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
+<p><a href="mojo_gpu_puzzles/2d_convolution.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-12" data-glightbox="description: .lightbox-desc-12" title="Source: Toast Lab"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/2d_convolution.gif" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: Toast Lab"></a></p>
 <figcaption>Source: <a href="https://toast-lab.sist.shanghaitech.edu.cn/courses/CS110@ShanghaiTech/Spring-2024/project/p1.2-web/Project%201.2%20-%20Computer%20Architecture%20I%20-%20ShanghaiTech%20University.html">Toast Lab</a></figcaption>
 </figure>
 </div>
@@ -7951,7 +7951,7 @@ font-style: inherit;"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 
 <p>It’s a foundational primitive in parallel computing-used for stream compaction, sorting, histograms, and more. At first glance, prefix sum looks inherently serial (each output depends on all previous inputs), but clever algorithms can parallelize it efficiently.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-glightbox="description: .lightbox-desc-13" data-gallery="quarto-lightbox-gallery-13" title="Prefix‐Sum Illustration"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
+<p><a href="mojo_gpu_puzzles/p12_prefix_scan.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" data-glightbox="description: .lightbox-desc-13" title="Prefix‐Sum Illustration"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p12_prefix_scan.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Prefix‐Sum Illustration"></a></p>
 <figcaption>Prefix‐Sum Illustration</figcaption>
 </figure>
 </div>
@@ -8554,14 +8554,14 @@ font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Ctext%7Baxis%7D=0%20&amp;%5C;%5CLongrightarrow%5C;%0A%5Ctext%7Bcolumn-sum:%7D%5C;%5C;%0Aout%5Bj%5D%20&amp;%20=%20%5Csum_%7Bk%7D%20A_%7Bk,j%7D,%20%5Cqquad%20j%20=%200,%5Cdots,N-1%20%5C%5C%5B4pt%5D%0A%5Ctext%7Baxis%7D=1%20&amp;%5C;%5CLongrightarrow%5C;%0A%5Ctext%7Brow-sum:%7D%5C;%5C;%0Aout%5Bi%5D%20&amp;%20=%20%5Csum_%7Bk%7D%20A_%7Bi,k%7D,%20%5Cqquad%20i%20=%200,%5Cdots,M-1%0A%5Cend%7Baligned%7D%0A"></p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-glightbox="description: .lightbox-desc-15" data-gallery="quarto-lightbox-gallery-15" title="Axis Sum"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_intro.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" data-glightbox="description: .lightbox-desc-15" title="Axis Sum"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_intro.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%" alt="Axis Sum"></a></p>
 <figcaption>Axis Sum</figcaption>
 </figure>
 </div>
 <p>Each row/column is an embarrassingly-parallel reduction, so the GPU kernel just assigns one warp (or block) per slice and performs a standard shared-memory reduction inside the slice.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-glightbox="description: .lightbox-desc-16" data-gallery="quarto-lightbox-gallery-16" title="Row Sum"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
+<p><a href="mojo_gpu_puzzles/p13_row_sum.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" data-glightbox="description: .lightbox-desc-16" title="Row Sum"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p13_row_sum.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Row Sum"></a></p>
 <figcaption>Row Sum</figcaption>
 </figure>
 </div>
@@ -8818,7 +8818,7 @@ font-style: inherit;"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></spa
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-glightbox="description: .lightbox-desc-17" data-gallery="quarto-lightbox-gallery-17" title="Matmul with shared memory"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_shared_mem.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" data-glightbox="description: .lightbox-desc-17" title="Matmul with shared memory"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_shared_mem.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Matmul with shared memory"></a></p>
 <figcaption>Matmul with shared memory</figcaption>
 </figure>
 </div>
@@ -8972,7 +8972,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <p>Classic roofline assumes ideal hardware with perfect overlap:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-glightbox="description: .lightbox-desc-18" data-gallery="quarto-lightbox-gallery-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[13]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_hardware.png" class="lightbox" data-gallery="quarto-lightbox-gallery-18" data-glightbox="description: .lightbox-desc-18" title="Source: NHR at FAU[@nhrfau_roofline_model]"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_hardware.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:40.0%" alt="Source: NHR at FAU[13]"></a></p>
 <figcaption>Source: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model">[13]</span></figcaption>
 </figure>
 </div>
@@ -8986,7 +8986,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <h3 class="anchored" data-anchor-id="software-model">Software Model</h3>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-glightbox="description: .lightbox-desc-19" data-gallery="quarto-lightbox-gallery-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[13]"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_software.png" class="lightbox" data-gallery="quarto-lightbox-gallery-19" data-glightbox="description: .lightbox-desc-19" title="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[@nhrfau_roofline_model]"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_software.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU[13]"></a></p>
 <figcaption>Software abstraction: complex GPU kernel simplified to steady-state loop with N flops and V bytes per iteration. Credits: NHR at FAU<span class="citation" data-cites="nhrfau_roofline_model">[13]</span></figcaption>
 </figure>
 </div>
@@ -9094,7 +9094,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-glightbox="description: .lightbox-desc-20" data-gallery="quarto-lightbox-gallery-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_roofline.png" class="lightbox" data-gallery="quarto-lightbox-gallery-20" data-glightbox="description: .lightbox-desc-20" title="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_roofline.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:60.0%" alt="Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot."></a></p>
 <figcaption>Roofline model: sloped red line shows memory bandwidth limit, flat blue line is compute peak, kernel’s operational intensity marked as a dot.</figcaption>
 </figure>
 </div>
@@ -9177,7 +9177,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <p>This gives us a <strong>1.8× speedup</strong> from shared memory optimization, but we’re still memory-bound.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="lightbox" data-glightbox="description: .lightbox-desc-21" data-gallery="quarto-lightbox-gallery-21" title="RTX 4000 Ada Roofline for Matmul"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="img-fluid figure-img" alt="RTX 4000 Ada Roofline for Matmul"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="lightbox" data-gallery="quarto-lightbox-gallery-21" data-glightbox="description: .lightbox-desc-21" title="RTX 4000 Ada Roofline for Matmul"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_roofline_naive_and_shared.png" class="img-fluid figure-img" alt="RTX 4000 Ada Roofline for Matmul"></a></p>
 <figcaption>RTX 4000 Ada Roofline for Matmul</figcaption>
 </figure>
 </div>
@@ -9836,7 +9836,7 @@ For large matrices, however, even that version still:</p>
 </ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="lightbox" data-glightbox="description: .lightbox-desc-22" data-gallery="quarto-lightbox-gallery-22" title="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tiled_matmul.gif" class="img-fluid figure-img" alt="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul.gif" class="lightbox" data-gallery="quarto-lightbox-gallery-22" data-glightbox="description: .lightbox-desc-22" title="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tiled_matmul.gif" class="img-fluid figure-img" alt="Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: Simon Oz"></a></p>
 <figcaption>Matmul Operation for a 4x4 Matrix, computing the first 4 output elements. Credits: <a href="https://www.youtube.com/watch?v=ccHyFnEZt7M&amp;ab_channel=SimonOz">Simon Oz</a></figcaption>
 </figure>
 </div>
@@ -10096,7 +10096,7 @@ font-style: inherit;"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 24
 <p>The key idea here is: Step through k by TPB each time; if there’s a leftover chunk, do one last tile for it.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tile.png" class="lightbox" data-glightbox="description: .lightbox-desc-23" data-gallery="quarto-lightbox-gallery-23" title="Mapping of elements to tiles when size=17 and TPB=8"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tile.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mapping of elements to tiles when size=17 and TPB=8"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tile.png" class="lightbox" data-gallery="quarto-lightbox-gallery-23" data-glightbox="description: .lightbox-desc-23" title="Mapping of elements to tiles when size=17 and TPB=8"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tile.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Mapping of elements to tiles when size=17 and TPB=8"></a></p>
 <figcaption>Mapping of elements to tiles when size=17 and TPB=8</figcaption>
 </figure>
 </div>
@@ -10112,7 +10112,7 @@ font-style: inherit;"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 24
 B = b[t*TPB + local_row, global_col]</code></pre>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-glightbox="description: .lightbox-desc-24" data-gallery="quarto-lightbox-gallery-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."></a></p>
+<p><a href="mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="lightbox" data-gallery="quarto-lightbox-gallery-24" data-glightbox="description: .lightbox-desc-24" title="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_tiled_matmul_annotated.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block."></a></p>
 <figcaption>Tiled 9×9 matmul: Each thread loads 3x3 A and 3x3 B elements per tile, computes a partial sum, then syncs. Tile size = 3×3, 9 threads per block.</figcaption>
 </figure>
 </div>
@@ -10129,7 +10129,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <p><strong>Quick primer</strong>: Shared memory isn’t one monolithic block. It’s chopped into 32 independent “banks”<span class="citation" data-cites="nvidia_shared_memory_stats">[15]</span> <span class="citation" data-cites="leimao_cuda_shared_memory_bank">[16]</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p14_shared_memory_bank.png" class="lightbox" data-glightbox="description: .lightbox-desc-25" data-gallery="quarto-lightbox-gallery-25" title="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_shared_memory_bank.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"></a></p>
+<p><a href="mojo_gpu_puzzles/p14_shared_memory_bank.png" class="lightbox" data-gallery="quarto-lightbox-gallery-25" data-glightbox="description: .lightbox-desc-25" title="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"><img src="https://shubhamg.in/posts/mojo_gpu_puzzles/p14_shared_memory_bank.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: CUDA Programming Blogspot"></a></p>
 <figcaption>Shared memory banking: conflict-free access (left) vs bank conflicts (right). When multiple threads access different addresses in the same bank, hardware serializes the requests. Source: <a href="https://cuda-programming.blogspot.com/2013/02/bank-conflicts-in-shared-memory-in-cuda.html">CUDA Programming Blogspot</a></figcaption>
 </figure>
 </div>
@@ -11772,6 +11772,1031 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
   <category>mojo</category>
   <guid>https://shubhamg.in/posts/2025-07-06-gpu-puzzles-p1.html</guid>
   <pubDate>Sat, 05 Jul 2025 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>BERT + BM25 = BISON</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-08-31-bison.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li>This paper aims to create a framework to map query and doc into semantic vectors via self-attention models.</li>
+<li>We cant use prior knowledge about important tokens for models based on self-attention.
+<ul>
+<li>Words are split into different tokens using a tokenization mechanism such as WordPiece. We cannot translate word-level knowledge into different tokens.</li>
+</ul></li>
+<li>However, from classical information retrieval, we know that prior knowledge about the word is important. For example, ERNIE used a Knowledge Graph to achieve SOTA on several GLUE tasks.</li>
+<li>Furthermore, documents have different fields with varying degrees of importance such as text, header, filetypes, etc. We cannot combine these fields directly because their importance varies for a task.</li>
+<li><strong>Key takeaways</strong>:
+<ul>
+<li>Combine BM25 to learn attention scores with Query(Q) and Key(K) matrices, which are used in self-attention.</li>
+<li>Word weight sharing to reduce knowledge discrepancy between tokens and words.</li>
+<li>Combine multiple fields by placing different fields in different segments using a BM25F, a variation of BM25.</li>
+</ul></li>
+</ul>
+</section>
+<section id="background" class="level1">
+<h1>Background</h1>
+<ul>
+<li>Using NN for doc retrieval has 2 approaches
+<ul>
+<li><strong>Siamese Networks</strong>: In this, we encode the given query <img src="https://latex.codecogs.com/png.latex?q"> and the document <img src="https://latex.codecogs.com/png.latex?d"> separately.</li>
+<li><strong>Interactive Networks</strong>: In this, we encode the given query <img src="https://latex.codecogs.com/png.latex?q"> and the document <img src="https://latex.codecogs.com/png.latex?d"> together.</li>
+</ul></li>
+<li>For large scale document retrieval tasks dependent on vector search, siamese networks are preferred since we can encode multiple documents without a query offline. This ensures the overall document retrieval process is fast in production.</li>
+<li>BISON is built using a Siamese Network architecture.</li>
+</ul>
+</section>
+<section id="proposed-method" class="level1">
+<h1>Proposed method</h1>
+<section id="overview-of-bison" class="level2">
+<h2 class="anchored" data-anchor-id="overview-of-bison">Overview of BISON</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/bison/bison_architecture.png" class="img-fluid figure-img"></p>
+<figcaption>BISON Architecture</figcaption>
+</figure>
+</div>
+<ul>
+<li>The framework has 4 important parts:
+<ul>
+<li><strong>Word level BM25</strong>: In this, we prepend the <em>CLS</em> token to the query and use combined fields representation for the documents.</li>
+<li><strong>Token level representation</strong>: As is the norm, we will use the token, position and segment embedding</li>
+<li><strong>BISON Encoder</strong>: This will encode the query <em>q</em> and the document <em>d</em> into semantic spacy by siamese structure making it possible to serve the model online. The architecture consists of 3 stacked BISON layers.</li>
+<li><strong>Scoring</strong>: The documents are scored using the cosine similarity metric.</li>
+</ul></li>
+</ul>
+</section>
+<section id="bison-encoder-weighted-self-attention" class="level2">
+<h2 class="anchored" data-anchor-id="bison-encoder-weighted-self-attention">BISON Encoder: Weighted Self Attention</h2>
+<ul>
+<li>As we know from the original “Attention” paper, attention is computed using the query, key, and value matrices.</li>
+<li>To the above, we will add the importance of tokens via BM25. We will introduce w_i and multiply with above attention to get new attention score i.e Weighted Self Attention <img src="https://latex.codecogs.com/png.latex?%20A_%7Bij%7D%5Ew%20=%20w_j%5Cfrac%7Bq_i.k_j%5ET%7D%7B%5Csqrt%7Bd%7D%7D%20"></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/bison/weighted_self_attention.png" class="img-fluid figure-img"></p>
+<figcaption>Weighted Self Attention</figcaption>
+</figure>
+</div>
+<ul>
+<li>Mathematically, it is represented as:</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?WeightedSelfAttention(Q,K,W,V)%20=%20softmax(W%20(.)%20%5Cfrac%7BQK%5ET%7D%7B%5Csqrt%7Bd%7D%7DV"></p>
+<ul>
+<li>WSA is the main block unit. Multiple such units are tacked to get the multi-head structure.</li>
+<li>Rescaling by <img src="https://latex.codecogs.com/png.latex?W%5Eo">, we get <strong>Complex Weighted Self Attention(CWSA)</strong>.</li>
+<li>A fully connected layer is added. In both CWSA and fully connected layer, layer norm and residual connections are used</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?CWSA%20=%20Concat(WeightedSelfAttention1,...%20WeightedSelfAttention,%20n)W%5Eo"></p>
+<p><img src="https://latex.codecogs.com/png.latex?CWSA_%7Bout%7D=LayerNorm(CWSA%20+%20X)"></p>
+<p><img src="https://latex.codecogs.com/png.latex?BISONEncoder%20=%20LayerNorm(CWSA_%7Bout%7D%20+%20FeedForward(CWSA_%7Bout%7D))"></p>
+</section>
+<section id="bm25-weight-generation" class="level2">
+<h2 class="anchored" data-anchor-id="bm25-weight-generation">BM25 Weight generation</h2>
+<ul>
+<li>Use BM25 for weight scores in query and BM25F for weight scores in multi-field documents</li>
+<li>BM25F, a variation of BM25, is for documents with different fields, each having different importance in terms of relevance saturation and length normalization. Find additional details in the file <a href="https://web.stanford.edu/class/cs276/handouts/lecture12-bm25etc.pdf">here</a>.</li>
+</ul>
+<section id="inherent-query-bm25" class="level3">
+<h3 class="anchored" data-anchor-id="inherent-query-bm25">Inherent Query BM25</h3>
+<ul>
+<li>For a given query, BM25 is calculated within the query.
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?l_q">: query length</li>
+<li><img src="https://latex.codecogs.com/png.latex?avl_q">: query average length along collection</li>
+</ul></li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_i%5E%7BBM25%7D%20=%20idf_i%20%5Cfrac%7Btf_i%7D%7Btf_i%20+%20k_1(1-b+b%20%5Cfrac%7Bl_q%7D%7Bavl_q%7D)%7D%0A"></p>
+</section>
+<section id="inherent-document-bm25f" class="level3">
+<h3 class="anchored" data-anchor-id="inherent-document-bm25f">Inherent Document BM25F</h3>
+<ul>
+<li>BM25F is implemented by assigning different degrees of importance to the different zones in a document such as title, header, footer, filetype, text, etc. For a <img src="https://latex.codecogs.com/png.latex?word_j"> in a document field <img src="https://latex.codecogs.com/png.latex?c">, it’s frequency <img src="https://latex.codecogs.com/png.latex?f_j%5Ec"> is defined as:</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aatf_j%5Ec%20=%20%5Cfrac%7Bfw_c%20.%20tf_j%5Ec%7D%7B1.0%20+%20fln_c%20.%20(%5Cfrac%7Bfl_c%7D%7Bavl_c%7D-1.0)%7D%0A"></p>
+<ul>
+<li>The corresponding BM25F score is computed as</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?%0Aw_j%5E%7BBM25F%7D%20=%20idf_j%5Cfrac%7Batf_j%7D%7Bk_1%20+%20atf_j%7D%0A"></p>
+</section>
+</section>
+<section id="whole-word-weight-sharing" class="level2">
+<h2 class="anchored" data-anchor-id="whole-word-weight-sharing">Whole word weight sharing</h2>
+<ul>
+<li>BERT uses wordpiece to produce tokens from raw text. However, because of this, we cannot directly apply the prior knowledge we obtained from B-52.</li>
+<li><strong>Solution</strong>: Assign the <em>same</em> word weight to all tokens for a given word. This way, a token might have a different weight depending on the context of the given word.</li>
+</ul>
+</section>
+<section id="combined-fields-representation" class="level2">
+<h2 class="anchored" data-anchor-id="combined-fields-representation">Combined Fields Representation</h2>
+<ul>
+<li>Documents typically consist of different fields, each of which provides complementary information. Thus, these fields need to be taken into consideration. Typical fields considered are:
+<ul>
+<li>Primitive Fields(Title, URL, header, etc.)</li>
+<li>Other fields(anchor, click signal via parsing search log, etc)</li>
+</ul></li>
+<li>For the experiment, only the following fields were picked for performance reasons(the body has too much text to encode in a single space):
+<ul>
+<li>Title</li>
+<li>Anchor</li>
+<li>URL</li>
+<li>Clicked query</li>
+</ul></li>
+<li>For each field, we learn their representation individually and combine them. Further, we also restrict the number of tokens for each of the above fields to a total of 128 tokens.
+<ul>
+<li>20 tokens each for Title, Anchor and URL.</li>
+<li>Only consider the top 5 clicked queries for a maximum of 68 tokens.</li>
+</ul></li>
+<li>For given fields, the document representation <img src="https://latex.codecogs.com/png.latex?%5Cphi(D)"> is given by:</li>
+</ul>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cphi(D)%20=%20A_%7Bf_i%7D(%5Cphi_%7BF_1%7D(F_1)+%20%5Cphi_%7BF_2%7D(F_2)+...+%5Cphi_%7BF_n%7D(F_n))%0A"></p>
+<ul>
+<li>Here,
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?F_i"> is the field</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cphi(F_1)"> denotes the representation learned for each field <img src="https://latex.codecogs.com/png.latex?F_i"></li>
+<li><img src="https://latex.codecogs.com/png.latex?A_%7Bf_i%7D"> is a function to aggregate all representations</li>
+</ul></li>
+<li>The remaining tokens(512-128=384) are used to encode the query.</li>
+</ul>
+</section>
+<section id="optimization" class="level2">
+<h2 class="anchored" data-anchor-id="optimization">Optimization</h2>
+<ul>
+<li>The [CLS] token from the last layer is used as a representation for the query and the document</li>
+<li>Matching score <img src="https://latex.codecogs.com/png.latex?s"> is computed as: <img src="https://latex.codecogs.com/png.latex?%0As%20=%20cos(BISON(query)_%7Blast%20cls%7D,%20BISON(document)_%7Blast%20cls%7D)%0A"></li>
+<li>Cross entropy loss is used to determine if the retrieved document is relevant or not. <img src="https://latex.codecogs.com/png.latex?%0ALoss%20=%20-ylog(%5Cdelta(w.s+b))-(1-y)log(1%20-%20%5Cdelta(w.s+b))%0A"></li>
+</ul>
+</section>
+</section>
+<section id="experimentation" class="level1">
+<h1>Experimentation</h1>
+<ul>
+<li>Datasets used were the Bing internal query set and public datasets.</li>
+<li>Evaluation metrics used are NDCG(normalized Discounted Cumulative Gain) and NCG(Normalized Cumulative Gain) and MRR(Mean Reciprocal Rank)</li>
+<li><strong>NCE(Noise Contraction Estimation)</strong>
+<ul>
+<li>It is used to pick negative samples that are competitive with the correct ones, helping improve the model generalization.</li>
+</ul></li>
+<li><strong>Hard negative Integration</strong>
+<ul>
+<li>Adding negative samples from the clicked documents only helps the model learn entirely non-related query-document pairs.</li>
+<li>To help learn partially related pairs, queries are samples from the search log, and results from these queries are added to the negative samples set.</li>
+</ul></li>
+</ul>
+</section>
+<section id="evaluation" class="level1">
+<h1>Evaluation</h1>
+<ul>
+<li>The following models were used as baselines:
+<ul>
+<li>TF-IDF and BM25: To present performance for standard information retrieval</li>
+<li>USE and C-DSSM: To represent sentence embeddings for information retrieval</li>
+<li>BERT and XLNET: To represent models from the pre-training era. <img src="https://shubhamg.in/posts/bison/bison_performance.png" class="img-fluid" alt="BISON Performance"></li>
+</ul></li>
+</ul>
+<section id="intrinsic-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="intrinsic-evaluation">Intrinsic evaluation</h2>
+<ul>
+<li>Selected 1400 representative queries and 7 million query document pairs from Bing’s search log</li>
+<li>Performance-wise, USE performs the worst as it performs well only on homogeneous data, and query document pairs are heterogeneous.</li>
+<li>BISON outperforms all baseline models significantly.</li>
+</ul>
+</section>
+<section id="ms-marco" class="level2">
+<h2 class="anchored" data-anchor-id="ms-marco">MS Marco</h2>
+<ul>
+<li>Similar steps followed for document full ranking task on the MS Marco dataset.</li>
+<li>For each query, the top 1000 documents are returned and MR is used as performance metrics.</li>
+</ul>
+</section>
+</section>
+<section id="ablation-experiments" class="level1">
+<h1>Ablation Experiments</h1>
+<ul>
+<li>To test the effectiveness of the main parts of BISON, 3 variants are created and tested:
+<ul>
+<li>BISON<img src="https://latex.codecogs.com/png.latex?_%7Btw%7D">: Use token level weight generation.</li>
+<li>BISON<img src="https://latex.codecogs.com/png.latex?_%7Bus%7D">: Exclude combined fields representation and use a union segment i.e concatenate all fields as one segment.</li>
+<li>BISON<img src="https://latex.codecogs.com/png.latex?_%7Bidf%7D">: Use IDF as an alternative for BM25 <img src="https://shubhamg.in/posts/bison/bison_abalation.png" class="img-fluid" alt="BISON Abalation"></li>
+</ul></li>
+</ul>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<ul>
+<li>Overall, this paper was a fun read, and the first time I’ve seen a combination of classical information retrieval techniques with the newer pre-training based models.</li>
+<li>In the future, I would also like to see:
+<ul>
+<li>Newer models such as Longformer and Reformer can process anywhere between 4000 to 32000 tokens in one iteration. It would be interesting to see if we could use these models can be used to encode the body text along with the combined field representation.</li>
+<li>Popular search engines such as ElasticSearch and Solr have <strong>query reranking</strong> available, which returns relevant documents based on the primary simple query and then reranks the returned list using a secondary complex query. This would enable most organizations to index BISON vectors directly into the clusters, allowing them to see the benefits of BISON with minimal effort.</li>
+</ul></li>
+</ul>
+</section>
+<section id="resources" class="level1">
+<h1>Resources</h1>
+<p>There are some resources you can use to learn more about this paper such as:</p>
+<ul>
+<li>The original paper available <a href="https://arxiv.org/abs/2002.08909">here</a></li>
+<li>The source code available <a href="https://github.com/cadobe/bison">here</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>transformer</category>
+  <category>review</category>
+  <guid>https://shubhamg.in/posts/2020-08-31-bison.html</guid>
+  <pubDate>Sun, 30 Aug 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>LongFormer</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-05-11-longformer.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li>The NLP world had its ImageNet moment with the introduction of the Transformer in the paper <strong>Attention is All you Need</strong>.</li>
+<li>The ability to be able to process multiple words/tokens in parallel and train models without labeled data(using self-attention) led to the creation of multiple models which gave us SOTA results on many interesting tasks such as Question Answering, Summarization, etc.</li>
+<li>However, the biggest drawback is the Transformer architecture is the limitation it has on the number of tokens it can process at a once, due to exponentially increasing memory and compute requirements(typically about 512 tokens), causing the performance to deteriorate over large documents.</li>
+<li><a href="https://arxiv.org/abs/2004.05150">Longformer</a> by the team at Allen AI aims to address this problem and demonstrate it’s application to do transfer learning for large documents.</li>
+<li>Other approaches to are described in recent work such as <a href="https://arxiv.org/abs/1901.02860">Transformer XL</a>, <a href="https://arxiv.org/abs/1911.02972">Blockwise</a>, <a href="https://arxiv.org/abs/2001.04451">Reformer</a>, etc. Their characteristics are mentioned below:</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/comparison.png" class="img-fluid figure-img"></p>
+<figcaption>Comparison<span data-label="fig:overview"></span></figcaption>
+</figure>
+</div>
+</section>
+<section id="key-contributions" class="level1">
+<h1>Key Contributions</h1>
+<ul>
+<li>Transformers are expensive because of the massive matrix operations involved in the self-attention step. Since each token can attend to every other token in the given input, we get a runtime of <img src="https://latex.codecogs.com/png.latex?O(n%5E2)">, where <img src="https://latex.codecogs.com/png.latex?n"> is the sequence length(typically 512 tokens).</li>
+<li>LongFormer aims to solve this using a form of sparse attention and reducing the operational complexity to <img src="https://latex.codecogs.com/png.latex?O(n)">. They achieve this using the concept of the sliding window and dilated sliding window.</li>
+<li>The authors also show how this attention pattern can be modified (using dilation and global attention) on a per-task basis, thereby allowing us to use a single model for all tasks rather than creating task-specific architectures.</li>
+</ul>
+</section>
+<section id="attention-patterns" class="level1">
+<h1>Attention Patterns</h1>
+<ul>
+<li>The attention patterns implemented are as follows: <img src="https://shubhamg.in/posts/longformer/attention.png" class="img-fluid" alt="Attention"></li>
+</ul>
+<section id="sliding-window-attention" class="level2">
+<h2 class="anchored" data-anchor-id="sliding-window-attention">Sliding Window Attention</h2>
+<ul>
+<li><strong>TLDR</strong> : Similar to kernels for CNN which apply a matrix operation to a set of pixels and move onto the next set, apply attention to tokens in current window <em>only</em>.</li>
+<li>In this, we change the attention objective to only focus on the tokens that occur in a context window <img src="https://latex.codecogs.com/png.latex?w">.</li>
+<li>Each token will be able to attend to <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B2%7Dw"> number of tokens to it’s left and right.</li>
+<li><strong>Question</strong>: But doesn’t this limit the number of tokens being taken into account to only the tokens in the window?
+<ul>
+<li>Yes, it does. This is why we stack multiple layers of self-attention. As shown in the image below, the green neuron learns from the first 3 tokens(Lionel, Messi, is). However, the brown neuron learns from the green, yellow, and red neuron, who together learn from the first 5 tokens. This way, we can apply attention to long sequences(Lionel, Messi, is, the, true).</li>
+</ul></li>
+<li>As with the CNN, we will have <img src="https://latex.codecogs.com/png.latex?l"> layers to this sliding window attention(multi-head attention) implemented to learn low level and high-level features. A balance should be found between the number of layers <img src="https://latex.codecogs.com/png.latex?l">(efficiency) and the window size <img src="https://latex.codecogs.com/png.latex?w">(model representation capacity).</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/sliding_window.png" class="img-fluid figure-img"></p>
+<figcaption>Sliding Window Attention<span data-label="fig:overview"></span></figcaption>
+</figure>
+</div>
+<ul>
+<li><p><strong>Pros</strong>: Reduces computation from <img src="https://latex.codecogs.com/png.latex?O(n%5E2)"> to <img src="https://latex.codecogs.com/png.latex?O(n*w)"> i.e the computation complexity will only scale linearly now.</p></li>
+<li><p><strong>Cons</strong>: To learn dependencies for a large sequence, we would either have to increase the window size <img src="https://latex.codecogs.com/png.latex?w"> or increase the number of layers <img src="https://latex.codecogs.com/png.latex?l">, both of which will cause an increase in the amount of memory and processing power required to train and test the model.</p></li>
+</ul>
+</section>
+<section id="dilated-sliding-window" class="level2">
+<h2 class="anchored" data-anchor-id="dilated-sliding-window">Dilated Sliding Window</h2>
+<ul>
+<li><p><strong>TLDR</strong>: Use dilation instead of window attention i.e for some particular window size, take alternate elements while performing self-attention.</p></li>
+<li><p>To solve the problem for long sequences, the authors propose that instead of considering all tokens in window <img src="https://latex.codecogs.com/png.latex?w">, consider alternate(or any number <img src="https://latex.codecogs.com/png.latex?d">)tokens instead. The range of tokens will now be <img src="https://latex.codecogs.com/png.latex?l%20*%20d%20*%20w">, which will be large for even a small value of <img src="https://latex.codecogs.com/png.latex?d">.</p></li>
+<li><p><strong>Pros</strong>: This small change will allow us to cover a wider range of tokens without significant changes to the architecture.</p></li>
+<li><p><strong>Cons</strong>: Skipping tokens might lead to loss of information in the lower layers which will get propagated to the higher layers. This will lead to unstable training and poor model performance.</p></li>
+</ul>
+</section>
+<section id="global-attention" class="level2">
+<h2 class="anchored" data-anchor-id="global-attention">Global Attention</h2>
+<ul>
+<li><strong>TLDR</strong>: Use full attention for certain tokens depending on the task. This is an engineering choice.</li>
+<li>In BERT style models, optimal representation for input sequence varies by task.
+<ul>
+<li>For MLM, local context is used to predict the masked word</li>
+<li>For classification, [CLS] token is used.</li>
+<li>For QnA, the question is concatenated with the document to help model learn through self-attention.</li>
+</ul></li>
+<li>The windowed and dilated attention is not flexible enough to learn task-specific representations.</li>
+<li>Hence, for some tokens enable global tokens i.e at these tokens, all tokens in the sequence can attend to it. For classification, enable global attention on the [CLS] token.</li>
+<li><strong>Pros</strong>:
+<ul>
+<li>Adding global attention improves performance for specific tasks. Since these tokens are limited in number, the complexity still stays at <img src="https://latex.codecogs.com/png.latex?O(n)">.</li>
+<li>It also increases the representational power of the model.</li>
+</ul></li>
+</ul>
+<section id="linear-projections" class="level3">
+<h3 class="anchored" data-anchor-id="linear-projections">Linear Projections</h3>
+<ul>
+<li><p><strong>TLDR</strong>: Use two sets of Q,K and V matrices, one for sliding window attention, one for global attention.</p></li>
+<li><p>Attention is defined as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AAttention(Q,K,V)%20=%20softmax(%5Cfrac%7BQK%5ET%7D%7B%5Csqrt%7Bd_k%7D%7D)V%0A%5Cend%7Baligned%7D%0A"></p></li>
+<li><p>We will use two different sets of Q,K and V matrices for sliding window and global attention.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?Q_g">, <img src="https://latex.codecogs.com/png.latex?K_g">, <img src="https://latex.codecogs.com/png.latex?V_g"> are initialized with <img src="https://latex.codecogs.com/png.latex?Q_s">, <img src="https://latex.codecogs.com/png.latex?K_s">, <img src="https://latex.codecogs.com/png.latex?V_s"></p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/old_matrix.svg" class="img-fluid figure-img"></p>
+<figcaption>Banded Matrix</figcaption>
+</figure>
+</div>
+<center>
+<b>Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b>
+</center>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/band_matrix.svg" class="img-fluid figure-img"></p>
+<figcaption>Compressed Banded Matrix</figcaption>
+</figure>
+</div>
+<center>
+<b>Compressed Banded Matrix(<a href="https://en.wikipedia.org/wiki/Band_matrix">Source</a>)</b>
+</center>
+</section>
+<section id="cuda-kernels" class="level3">
+<h3 class="anchored" data-anchor-id="cuda-kernels">CUDA Kernels</h3>
+<ul>
+<li>One of the important and interesting contributions of this paper is the implementation of matrix multiplication via CUDA kernels.</li>
+<li>In the dilated sliding window, the matrix formed is called a <strong>band matrix</strong> i.e there are diagonal bands of indices that have values and the other values are 0.</li>
+<li>Implementing matrix operations for band matrices using native for loops and via frameworks is not easy and optimized.</li>
+<li>The authors have provided custom CUDA kernels implemented using <a href="https://github.com/apache/incubator-tvm">TVM</a> for this banded matrix operations.</li>
+<li>As demonstrated in the image below, the custom CUDA kernels have a significant impact on the time and memory consumption of the model. The kernels and implementation for the longformer are available <a href="https://github.com/allenai/longformer">here</a>. <img src="https://shubhamg.in/posts/longformer/performance.png" class="img-fluid" alt="Performance">
+<center>
+<b>LongFormer Performance</b>
+</center></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="autoregressive-language-modelling" class="level1">
+<h1>Autoregressive Language Modelling</h1>
+<ul>
+<li>Estimate the probability of a token given its previous tokens/characters in an input sequence.</li>
+<li>It is a fundamental task in natural language and all previous work use this task as their primary evaluation measure.</li>
+</ul>
+<section id="attention-pattern" class="level2">
+<h2 class="anchored" data-anchor-id="attention-pattern">Attention Pattern</h2>
+<ul>
+<li>In multi-head attention, each head computes a different score.</li>
+<li>To get a good representation of all tokens, the authors propose that normal sliding window attention can be used for the lower layers, and dilated sliding window attention can be used the higher layers(top 1-2 layers).</li>
+<li>The reasoning for this approach is that in the lower layers, the local context is more important, and in the upper layers, the global context is more important. Hence, it is acceptable to skip over a few tokens in the upper layers.</li>
+</ul>
+</section>
+</section>
+<section id="experimental-setup" class="level1">
+<h1>Experimental Setup</h1>
+<section id="task-and-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="task-and-datasets">Task and Datasets</h2>
+<ul>
+<li>The authors focus on character level modeling because the sequences are naturally longer than those of word-level language modeling.</li>
+<li>Datasets that were used are <em>text8</em> and <em>enwik8</em>.</li>
+</ul>
+</section>
+<section id="training-and-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="training-and-evaluation">Training and Evaluation</h2>
+<ul>
+<li>The model was trained in multiple phases.
+<ul>
+<li>The window and sequence length was increased in each phase. This is to allow local context from tokens to be learned efficiently.</li>
+<li>Overall five training phases used, starting from the token length of 2048 to 23040 (45x more than vanilla BERT).</li>
+<li>Two models were created for evaluation:
+<ul>
+<li>Small model: 12 layers, 512 hidden size</li>
+<li>Large model: 30 layers, 512 hidden sizes (2.5x larger)</li>
+</ul></li>
+<li>During the model evaluation, the model can run on a sequence length of 32256(63x more than vanilla BERT).</li>
+</ul></li>
+</ul>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/results.png" class="img-fluid figure-img"></p>
+<figcaption>Results</figcaption>
+</figure>
+</div>
+<ul>
+<li>Longformer achieves SOTA using the small models with BPC of 1.10 and 1.00 for text8 and enwik8.</li>
+<li>The large model was only tested on enwik8 due to the computational cost of training.</li>
+<li>It’s also important to note that, while the large model did not achieve SOTA, it performs much better than it’s counterparts who have almost 2x more parameters.</li>
+</ul>
+</section>
+</section>
+<section id="pretraining-and-finetuning" class="level1">
+<h1>Pretraining and Finetuning</h1>
+<ul>
+<li>The LongFormer is trained to solve the tasks of classification, QA, and coreference resolution.</li>
+<li>It is trained with MLM objective.</li>
+</ul>
+<section id="copy-initialization-trick" class="level2">
+<h2 class="anchored" data-anchor-id="copy-initialization-trick">Copy initialization trick</h2>
+<ul>
+<li>Since the MLM objective pretraining objective is expensive, the authors continue to train from the checkpoints of the <a href="https://arxiv.org/abs/1907.11692">RoBERTA</a> model.</li>
+<li>The attention mechanism is replaced with the new attention module.</li>
+<li>For the position embeddings:
+<ul>
+<li>RoBERTA has position embeddings for 512 tokens.</li>
+<li>LongFormer can support position embeddings for 4096 tokens(larger for larger GPU)</li>
+<li>To use the weight checkpoints from RoBERTA, instead of random initialization, copy the 512 position embeddings <strong>multiple times</strong> as analysis of the BERT attention heads showed a strong learned bias to attend to the local context.</li>
+</ul></li>
+</ul>
+</section>
+<section id="pretraining" class="level2">
+<h2 class="anchored" data-anchor-id="pretraining">Pretraining</h2>
+<ul>
+<li>Apart from the datasets(Books corpus + English Wikipedia) used in RoBERTA, <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B3%7D%5E%7Brd%7D"> Realnews dataset was added with tokens larger than 1200.</li>
+<li>Both models(small and large) trained with varying gradient updates.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/longformer/copy_init.png" class="img-fluid figure-img"></p>
+<figcaption>Copy init</figcaption>
+</figure>
+</div>
+<center>
+<b>MLM BPC for RoBERTA with various model config</b>
+</center>
+</section>
+</section>
+<section id="task-specific-results" class="level1">
+<h1>Task-Specific Results</h1>
+<ul>
+<li>Main results are summarized below: <img src="https://shubhamg.in/posts/longformer/main_results.png" class="img-fluid" alt="Copy init">
+<center>
+<b>LongFormer Task Specific Results</b>
+</center></li>
+<li>The performance gain is high for tasks that require long contexts such as WikiHop and Hyperpartisan.</li>
+<li>For TriviaQA, the improvement is small because the local context is often sufficient to answer the given question.</li>
+<li>Similarly, gains in IMDB and OntoNotes are small(because of majority short reviews for IMDB and low distance between any two mentions for OntoNotes).</li>
+<li>However, the LongFormer large model achieves SOTA on WikiHop and TriviaQA.</li>
+<li>Using the large model also improves performance on HotpotQA.</li>
+</ul>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<ul>
+<li>Overall, this was a fun read. The changes introduced in the attention mechanism are fairly simple but they yield very high-performance gains, paving the path to make these models useful in future applications.</li>
+<li>Personally, and also as noted by the authors, I would like to see the performance of the LongFormer on the summarization task.</li>
+</ul>
+</section>
+<section id="references" class="level1">
+<h1>References</h1>
+<ul>
+<li>Fantastic summary by Yannic Kilcher available <a href="https://www.youtube.com/watch?v=_8KNb5iqblE">here</a>.</li>
+<li>LongFormer paper available <a href="https://arxiv.org/abs/2004.05150">here</a></li>
+<li>Dair.ai NLP newsletter available <a href="https://dair.ai/NLP_Newsletter_10_en/">here</a></li>
+<li>Open-sourced longformer code available <a href="https://github.com/allenai/longformer/">here</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>transformer</category>
+  <category>review</category>
+  <category>longformer</category>
+  <guid>https://shubhamg.in/posts/2020-05-11-longformer.html</guid>
+  <pubDate>Sun, 10 May 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>TagLM</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-04-23-tag-lm.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li><p>This is the TagLM paper mentioned in Lecture 13 in the CS224N course title <strong>Semi-supervised sequence tagging with bidirectional language models</strong></p></li>
+<li><p>This paper demonstrates how we can use context embeddings from BiLSTM models and use it for sequence labelling tasks</p></li>
+</ul>
+</section>
+<section id="paper-introduction" class="level1">
+<h1>Paper Introduction</h1>
+<ul>
+<li><p>Typically, RNN are used only on labelled data to learn the context embeddings of words.</p></li>
+<li><p>Semi supervised approach used in this paper.</p>
+<ul>
+<li><p>Train LM on large unlabelled corpus</p></li>
+<li><p>Compute embedding at each position in the sequence(LM embedding)</p></li>
+<li><p>Use embedding in supervised sequence tagging model</p></li>
+</ul></li>
+<li><p>Using both forward and backward embeddings gives better performance than using forward only LM.</p></li>
+</ul>
+</section>
+<section id="taglm" class="level1">
+<h1>TagLM</h1>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">Overview</h2>
+<ul>
+<li><p>Extract word and LM embeddings for every token</p></li>
+<li><p>Prepare embedding by concatinating both embeddings</p></li>
+<li><p>se them in supervised sequence tagging model</p></li>
+</ul>
+</section>
+<section id="baseline" class="level2">
+<h2 class="anchored" data-anchor-id="baseline">Baseline</h2>
+<ul>
+<li><p>Baseline model is hierachical neural tagging model</p></li>
+<li><p>Obtain word and character embeddings. Concatenate them to form final embedding.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%20x_k%20=%20%5Bc_k;w_k%5D%20"></p></li>
+<li><p>Char embedding: Can be obtained via CNN or RNN</p></li>
+<li><p>Word embedding: Use pretrained embeddings</p></li>
+<li><p>Use multiple bidirectional RNN to learn context embedding</p></li>
+<li><p>For every token, concatenate forward and backward hidden states at each layer</p></li>
+<li><p>2nd layer will use the above output and predict next hidden state</p></li>
+<li><p>Use GRU or LSTM depending on task</p></li>
+<li><p>Use output of final layer to predict score for each possible tag using dense layer</p></li>
+<li><p>Better to predict tags for full sequence than for a single token</p></li>
+<li><p>THEREFORE, add another layer with parameters for each label bigram.</p></li>
+<li><p>Compute sentence conditional random field loss(CRF) using forward-backward algorithm.</p></li>
+<li><p>Use Viterbi algorithm to find most likely sequence</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/taglm/overview.png" class="img-fluid figure-img"></p>
+<figcaption>Overview of architecture<span data-label="fig:overview"></span></figcaption>
+</figure>
+</div></li>
+<li><p>LM embedding will be created by concatenating forward and backward embeddings. No parameter sharing between these two embeddings.</p></li>
+</ul>
+</section>
+</section>
+<section id="experiments" class="level1">
+<h1>Experiments</h1>
+<ul>
+<li><p>Evaulation done on CoNLL 2003 NER and CoNLL 2000 chunking</p></li>
+<li><p>Lot of detail around model architecture and training methods. Skipping this for now.</p></li>
+</ul>
+<section id="analysis" class="level2">
+<h2 class="anchored" data-anchor-id="analysis">Analysis</h2>
+<ul>
+<li><p>Second RNN captures interactions between task specific context</p></li>
+<li><p>Backward LM addition has significant performance gains</p></li>
+<li><p>Model size makes a difference. Using bigger CNN model lead to &nbsp;0.3 percent improvement</p></li>
+<li><p>Also tried training the model JUST ON THE CoNLL data. Reduced model size</p></li>
+<li><p>Including embeddings from this model <strong>decreased</strong> performance compared to baseline system.</p></li>
+<li><p>Replacing task specific RNN with using LM embeddings with a dense layer and CRF <strong>reduced</strong> performance</p></li>
+<li><p>Improvement shown by transferring knowledge from other tasks <strong>almost disappers</strong> when the initial model is trained on a large dataset.</p></li>
+</ul>
+</section>
+</section>
+<section id="summary" class="level1">
+<h1>Summary</h1>
+<ul>
+<li>First method to incorporate contextual word embeddings using bidirectional networks.</li>
+<li>Significantly better than other methods at the time that use other forms of transfer learning or joint learning on NER and and Chunking tasks.</li>
+<li>It works well with unlabelled data from a different domain as well.</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>language_model</category>
+  <category>review</category>
+  <guid>https://shubhamg.in/posts/2020-04-23-tag-lm.html</guid>
+  <pubDate>Wed, 22 Apr 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>T5’s Closed-Book Exam</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-04-21-knowledge-lm.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li><p>This is a new paper which explores the limits of using their new T5 titled <strong>How Much Knowledge Can You Pack Into The Parameters of a Language Model?</strong>. model in a context-free QA domain.</p></li>
+<li><p>As with the T5 model itself, it is very interesting to see these one-model-to-rule-them-all architectures as they exhibit some form of generalization.</p></li>
+<li><p>I found this paper from Adam Roberts twitter thread which is available <a href="https://twitter.com/ada_rob/status/1227062195671822336">here</a></p></li>
+<li><p><strong>Core Idea</strong>: This paper will test two main things:</p>
+<ul>
+<li><p>How well does the model create a knowledge base such that it can answer questions just based on this base and no other information.</p></li>
+<li><p>Do model with more parameters store more information? Measuring knowledge retreiving ability is used to check this point.</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="paper-introduction" class="level1">
+<h1>Paper Introduction</h1>
+<ul>
+<li><p><strong>Reading Comprehension</strong>: Given a question and context, lookup and give the answer.</p></li>
+<li><p><strong>Open domain question answering</strong>: Random context-independent questions. It is given entire context(all the information possible in the world) and the model is expected to deduce the answer. <em>Open book</em> exam.</p></li>
+<li><p>Here, problem is similar to open book exam + no context given at all. Model should retreive info from parameters and return the values. <em>Closed book</em> exam.</p></li>
+<li><p>T5: Treat every NLP task as text-to-text problem using encoder decoder Transformer.</p></li>
+<li><p>For natural questions dataset, evaluation is done as follows:</p></li>
+<li><p><strong>First method</strong>:</p>
+<ul>
+<li><p>Ignore all “unanswerable” and “long answer” type questions.</p></li>
+<li><p>model trained to output single answer</p></li>
+<li><p>Questions with answers longer than 5 tokens are ignored</p></li>
+<li><p>Answers normalized before comparsion</p></li>
+<li><p>Answer is correct if it matches any of the annotated answers</p></li>
+</ul></li>
+<li><p><strong>Second method</strong>:</p>
+<ul>
+<li>Considered correct only if model predicts <em>all</em> the answers correctly</li>
+</ul></li>
+<li><p>For fine tuning, use AdaFactor Optimizer(need to read more about this one)</p></li>
+</ul>
+</section>
+<section id="results" class="level1">
+<h1>Results</h1>
+<ul>
+<li><p>SOTA on Natural Questions(NQ) and WebQuestions(WQ) dataset. Worst performance on TriviaQA(TQA).</p></li>
+<li><p>Performance increases with model size.</p></li>
+<li><p>Guu et all(2020) performs better than T5 on NQ and WQ. Need to read this paper as well. It</p>
+<ul>
+<li><p>Retreives Revevant documents</p></li>
+<li><p>Answers questions in end-to-end fashion</p></li>
+</ul></li>
+<li><p>Closed-book model seem to perform on par with open-book models, leading to new research directions.</p></li>
+<li><p>For multiple answer type questions, T5 lower than SOTA BUT much better than baseline that was published with the paper. Therefore, T5 can perform well on these types of questions as well.</p></li>
+</ul>
+</section>
+<section id="drawbacks" class="level1">
+<h1>Drawbacks</h1>
+<ul>
+<li><p>Model is far too expensive to train.</p></li>
+<li><p>Open-book models provide some indication of what information was used to answer the problem. HOWEVER, T5 just has a distribution over parameters that cannot be interpreted.</p></li>
+<li><p>MLE does not gurantee the model will learn a fact. Therefore, difficult to ensure the model learns specific information during pre-training</p></li>
+<li><p>Measure and improve performance on difficult QA tasks like DROP, which needs reasoning ability.</p></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>language_model</category>
+  <category>review</category>
+  <guid>https://shubhamg.in/posts/2020-04-21-knowledge-lm.html</guid>
+  <pubDate>Mon, 20 Apr 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Attention is all you need</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-04-20-attention.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li>This paper review is following the blog from Jay Alammar’s blog on the <strong>Illustrated Transformer</strong>. The blog can be found <a href="https://jalammar.github.io/illustrated-transformer/">here</a>.</li>
+</ul>
+</section>
+<section id="paper-introduction" class="level1">
+<h1>Paper Introduction</h1>
+<ul>
+<li><p>New architecture based solely on attention mechanisms called <strong>Transformer</strong>. Gets rids of recurrent and convolution networks completely.</p></li>
+<li><p>Generally, RNN used to seq-to-seq tasks such as translation, language modelling, etc.</p></li>
+<li><p>Transformer allows for significant parallelization and relies only on attention.</p></li>
+</ul>
+</section>
+<section id="background" class="level1">
+<h1>Background</h1>
+<ul>
+<li><em>Self attention</em> Attention to different positions of a sequence in order to compute a representation of the sequence.</li>
+</ul>
+</section>
+<section id="model-architecture" class="level1">
+<h1>Model Architecture</h1>
+<ul>
+<li><p>Transformer uses the following:</p>
+<ul>
+<li><p>Encoder decode mechanism</p></li>
+<li><p>Stacked self attention</p></li>
+<li><p>Point wise fully connected layer for encoder and decoder</p></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/attention/transformer.png" class="img-fluid figure-img"></p>
+<figcaption>Transformer<span data-label="fig:transformer"></span></figcaption>
+</figure>
+</div></li>
+</ul>
+<section id="encoder-and-decoder-stacks" class="level2">
+<h2 class="anchored" data-anchor-id="encoder-and-decoder-stacks">Encoder and decoder stacks</h2>
+<ul>
+<li><p><strong>Encoder</strong>: 6 identical layers. 2 sub layers per layer</p></li>
+<li><p><em>First</em>: multi-head self attention mechanism</p></li>
+<li><p><em>Second</em>: Fully connected feed forward network</p></li>
+<li><p>Apply residual connection for each of the two laters</p></li>
+<li><p>Apply layer normalization</p></li>
+<li><p><strong>Decoder</strong>: 6 identical layers. 2 sub layers as above + 1 more which performs multi-head attention over output of encoder stack</p></li>
+<li><p><em>Residual blocks</em>: Present around all 3 sub layers</p></li>
+<li><p><em>Layer normalization</em>: Normalizes input across features instead of normalizing input features across batch dimension(i.e in <em>batch normalization</em>). There is a great overview of normalization layers available by Akash Bindal <a href="https://medium.com/techspace-usict/normalization-techniques-in-deep-neural-networks-9121bf100d8">here</a>.</p></li>
+<li><p>Modify self-attention sub layer to prevent positions from attending to subsequent positions. Ensures that <em>i</em> output depends only on words before <em>i</em>.</p></li>
+</ul>
+</section>
+<section id="attention" class="level2">
+<h2 class="anchored" data-anchor-id="attention">Attention</h2>
+<ul>
+<li><p>3 vectors: Query(Q), Key(K) and Value(V)</p></li>
+<li><p>Output = Weighted sum of values. Weights assigned as a function of query with key.</p></li>
+<li><p>Scaled dot-product attention and multi-head attention</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/attention/attention_types.png" class="img-fluid figure-img"></p>
+<figcaption>Types of Attention<span data-label="fig:attention"></span></figcaption>
+</figure>
+</div></li>
+<li><p>Attention is calculated as:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%20%20%20%20%20%20%20%20Attention(Q,K,V)%20=%20softmax(%5Cfrac%7BQK%5ET%7D%7B%5Csqrt%7Bd_k%7D%7D)V%0A%20%20%20"></p></li>
+<li><p>Dot product attention is <strong>faster and more space-efficient</strong> than additive attention.</p></li>
+</ul>
+</section>
+<section id="multi-head-attention" class="level2">
+<h2 class="anchored" data-anchor-id="multi-head-attention">Multi head attention</h2>
+<ul>
+<li><p>Using multile q, k and v vectors. Get the final output, concatenate them and get another final projection <img src="https://latex.codecogs.com/png.latex?d_%7Bv%7D">.</p>
+<p>$$ MultiHead(Q,K,V) = Concat(head_1,…,head_h)W^O \</p>
+<pre><code>\text{where } head_i = Attention(QW_{i}^{Q}, KW_{i}^{K},VW_{i}^{V})</code></pre>
+<p>$$</p></li>
+<li><p>Dimensions of the key and value matrices will be: <img src="https://latex.codecogs.com/png.latex?d_%7Bk%7D%20=%20d_%7Bv%7D%20=%20d_%7Bmodel%7D/h%20=%2064"></p></li>
+</ul>
+</section>
+<section id="applications-of-attention" class="level2">
+<h2 class="anchored" data-anchor-id="applications-of-attention">Applications of attention</h2>
+<ul>
+<li><p><strong>Encoder-decoder attention</strong>: Q from previours decoder, K and V from output of decoder. Attend to all positions in the input sequence.</p></li>
+<li><p><strong>Encoder</strong>: Self attentnion laters. Q,K and V from output of previous layer in the encoder. Some talk about leftward flow, didn’t really understand this bit. Will come back to this in sometime.</p></li>
+</ul>
+</section>
+<section id="position-wise-feed-forward-networks" class="level2">
+<h2 class="anchored" data-anchor-id="position-wise-feed-forward-networks">Position-wise Feed-Forward Networks</h2>
+<ul>
+<li><p>Each layer contains feed-forward network.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%20%20%20%20%20%20%20%20FFN(x)%20=%20max(o,%20xW_1,+%20b_1)W_2%20+%20b_2%0A"></p></li>
+</ul>
+</section>
+<section id="embeddings-and-softmax" class="level2">
+<h2 class="anchored" data-anchor-id="embeddings-and-softmax">Embeddings and Softmax</h2>
+<ul>
+<li><p>Convert input and output string to vectors of dim <img src="https://latex.codecogs.com/png.latex?d_%7Bmodel%7D"></p></li>
+<li><p>Share weight matrix between two embedding layers and the pre-softmaax linear transformation</p></li>
+</ul>
+</section>
+<section id="positional-encoding" class="level2">
+<h2 class="anchored" data-anchor-id="positional-encoding">Positional Encoding</h2>
+<ul>
+<li><p>Encode positions of the tokens for the input and output.</p></li>
+<li><p>Same vector size i.e <img src="https://latex.codecogs.com/png.latex?d_%7Bmodel%7D"></p>
+<p>$$ PE_{(pos, 2i)} = sin(pos/10000^{2i/d_{model}}) \</p>
+<pre><code>    PE_{(pos, 2i+1)} = cos(pos/10000^{2i/d_{model}})</code></pre>
+<p>$$</p></li>
+<li><p>Might allow approximation of longer sequence lenghts than seen in the training set</p></li>
+</ul>
+</section>
+<section id="why-self-attention" class="level2">
+<h2 class="anchored" data-anchor-id="why-self-attention">Why self attention?</h2>
+<ul>
+<li><p>Total computational complexity per layer</p></li>
+<li><p>Parallel Computation</p></li>
+<li><p>Path length between long-range dependencies in the network.</p></li>
+</ul>
+</section>
+</section>
+<section id="training" class="level1">
+<h1>Training</h1>
+<section id="optimizer" class="level2">
+<h2 class="anchored" data-anchor-id="optimizer">Optimizer</h2>
+<ul>
+<li><p>Use Adam. Vary learning rate according to formula: <img src="https://latex.codecogs.com/png.latex?lrate%20=%20d_%7Bmodel%7D%5E%7B-0.5%7D%20.%20min(step_num%5E%7B-0.5%7D,%20step_num%20.%20warmupsteps%5E%7B-1.5%7D)"></p></li>
+<li><p>Increase LR for warmup steps, then decrease propotionally to inverse square root of step number. Warmup steps = 4000</p></li>
+</ul>
+</section>
+<section id="regularization" class="level2">
+<h2 class="anchored" data-anchor-id="regularization">Regularization</h2>
+<ul>
+<li><p><strong>Residual Dropout</strong></p></li>
+<li><p><strong>Label Smoothing</strong>: Instead of using 0 and 1 as class labels, allow for some uncertainity in the prediction, and use values like 0.1 and 0.9 for the classes</p></li>
+</ul>
+</section>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<ul>
+<li>This was the first model based entirely on attention. It acheived SOTA results on Machine Translation and English contituency parsing.</li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>attention</category>
+  <category>review</category>
+  <guid>https://shubhamg.in/posts/2020-04-20-attention.html</guid>
+  <pubDate>Sun, 19 Apr 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>REALM: Retrieval-Augmented Language MOdel Pre-Training</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2020-03-14-realm.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<ul>
+<li><p>REALM is a paper mentioned in the T5 paper titled: <strong>How Much Knowledge Can You Pack Into The Parameters of a Language Model?</strong></p></li>
+<li><p>TLDR: This paper retrieves documents that have the information present while solving Question-Answer type problems.</p>
+<blockquote class="blockquote">
+<p><strong>NOTE</strong>: This post is more like my running notes while reading the paper than a comprehensive blog. I will update this blog once I learn a little more about the transformer architecture.</p>
+</blockquote></li>
+<li><p>Introduced a latent <em>knowledge retriever</em>, which can attend and retrieve documents over large corpus and can be trained in unsupervised manner using masked language modelling technique and backprop through retreiver which considers lots of docs.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/realm/training.png" class="img-fluid figure-img"></p>
+<figcaption>Training process for REALM<span data-label="fig:training"></span></figcaption>
+</figure>
+</div></li>
+<li><p>Key point: Train retriever using a performance-based signal from unsupervised text.</p></li>
+<li><p>Retrieval based LM =&gt; Moar computational resources =&gt; Moar money</p>
+<ul>
+<li>Solution: Computation performed for each doc is cached and can be used again. Best doc selected using <em>Maximum Inner Product Search(MIPS)</em>. Read the paper <a href="https://cs.stanford.edu/~ermon/papers/ICML_MIPS_Gumbel.pdf">here</a>.</li>
+</ul></li>
+<li><p>REALM retriever can be used on downstream tasks via transfer learning.</p></li>
+<li><p>REALM is SOTA on NQ-Open, WQ and CuratedTrec.</p></li>
+</ul>
+</section>
+<section id="approach" class="level1">
+<h1>Approach</h1>
+<section id="retreive-then-predict-generative-process" class="level2">
+<h2 class="anchored" data-anchor-id="retreive-then-predict-generative-process"><em>Retreive-then-predict generative process</em></h2>
+<ul>
+<li><p>Training: Masked-LM. Fine-tuning: Open QA task</p></li>
+<li><p>Computing chance of the document given a question decomposed into two steps:</p>
+<ul>
+<li><p>Function to be computed: <img src="https://latex.codecogs.com/png.latex?p(y%5C%7Cx)"></p></li>
+<li><p>Given <img src="https://latex.codecogs.com/png.latex?x">,retrive documents <img src="https://latex.codecogs.com/png.latex?z"> from corpus <img src="https://latex.codecogs.com/png.latex?Z">. Modelled as: <img src="https://latex.codecogs.com/png.latex?p(z%5C%7Cx)"></p></li>
+<li><p>Condition of both <img src="https://latex.codecogs.com/png.latex?z"> and <img src="https://latex.codecogs.com/png.latex?x"> to generate output <img src="https://latex.codecogs.com/png.latex?y"> i.e <img src="https://latex.codecogs.com/png.latex?p(y%5C%7Cz,%20x)"></p></li>
+<li><p>Overall likelihood <img src="https://latex.codecogs.com/png.latex?y"> is generated by treating <img src="https://latex.codecogs.com/png.latex?z"> as latent variable and marginalizing over all documents <img src="https://latex.codecogs.com/png.latex?z"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ap(y%5C%7Cx)%20=%20%5Csum_%7Bz%20%5Cepsilon%20Z%7D%20p(y%5C%7Cz,%20x)%20*%20p(z%5C%7Cx)%0A"></p></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="architecture" class="level1">
+<h1>Architecture</h1>
+<ul>
+<li><p><strong>Neural Knowledge Retriever</strong> which models the distribution: <img src="https://latex.codecogs.com/png.latex?p(z%5C%7Cx)"></p></li>
+<li><p><strong>Knowledge Augmented Encoder</strong> which models the distribution <img src="https://latex.codecogs.com/png.latex?p(y%5C%7Cz,%20x)"></p></li>
+</ul>
+<section id="neural-knowledge-retriever" class="level2">
+<h2 class="anchored" data-anchor-id="neural-knowledge-retriever">Neural Knowledge Retriever</h2>
+<ul>
+<li><p>Dense inner product model.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%20%20%20%20p(z%5C%7Cx)%20=%20%5Cfrac%7Bexp(f(x,z))%7D%7B%5Csum_%7Bz'%7D%7Bexp(f(x,z'))%7D%7D%20%5C%5C%0A%20%20%20%20f(x,z)%20=%20Embed_%7Binput%7D(x)%5ETEmbed_%7Bdoc%7D(z)%0A%5Cend%7Baligned%7D%0A"></p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?Embed_%7Binput%7D"> and <img src="https://latex.codecogs.com/png.latex?Embed_%7Bdoc%7D"> are embedding functions</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?f(x,z)"> is called <strong>relevance score</strong>. It is inner product of vector embeddings.</p></li>
+<li><p>Relevant Distribution is softmax over all relevance scores</p></li>
+<li><p>Embedding implement using BERT-style transformers. Join using &lt;SEP&gt;, prefix using &lt;CLS&gt; and append &lt;SEP&gt; as the end token. <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Baligned%7D%0A%20%20%20%20%20%20%20%20%5C%5C%20join_%7BBERT%7D(x)%20=%20%5BCLS%5Dx%5BSEP%5D%0A%20%20%20%20%20%20%20%20%5C%5C%20join_%7BBERT%7D(x_1,%20x_2)%20=%20%5BCLS%5Dx_1%5BSEP%5Dx_2%5BSEP%5D%0A%20%20%20%20%5Cend%7Baligned%7D"></p></li>
+<li><p>Pass above into transformer, which gives over vector for each token. Perform linear projection to reduce dimensionality of vector <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Baligned%7D%0A%20%20%20%20%5C%5C%20Embed_%7Binput%7D(x)%20=%20W_%7Binput%7DBERT_%7BCLS%7D(join_%7BBERT%7D(x))%0A%20%20%20%20%5C%5C%20Embed_%7Bdoc%7D(z)%20=%20W_%7Bdoc%7DBERT_%7BCLS%7D(join_%7BBERT%7D(z_%7Btitle%7D,%20z_%7Bbody%7D))%0A%5Cend%7Baligned%7D"></p></li>
+</ul>
+</section>
+<section id="knowledge-augmented-encoder" class="level2">
+<h2 class="anchored" data-anchor-id="knowledge-augmented-encoder">Knowledge-Augmented Encoder</h2>
+<ul>
+<li><p>Given input <img src="https://latex.codecogs.com/png.latex?x"> and relevant doc <img src="https://latex.codecogs.com/png.latex?z">, this defines <img src="https://latex.codecogs.com/png.latex?p(y%5C%7Cz,x)"></p></li>
+<li><p>Join <img src="https://latex.codecogs.com/png.latex?x"> and <img src="https://latex.codecogs.com/png.latex?z"> into single sequence and feed into transformer</p></li>
+<li><p>Here, training is different for pre-training vs fine-tuning</p>
+<ul>
+<li><p>For pre-training, predict [MASK] token. Use same Masked LM(MLM) loss as in Transformer(Devlin et al.)</p></li>
+<li><p>For Open-QA, we need to produce string <img src="https://latex.codecogs.com/png.latex?y">.</p></li>
+<li><p><strong>Assumption</strong>: <img src="https://latex.codecogs.com/png.latex?y"> occurs as sequence of tokens in some document in the corpus.</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="training" class="level2">
+<h2 class="anchored" data-anchor-id="training">Training</h2>
+<ul>
+<li><p>Compute gradients in <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> and <img src="https://latex.codecogs.com/png.latex?%5Cphi"> and optimize using SGD.</p></li>
+<li><p>Challenge: Computing <img src="https://latex.codecogs.com/png.latex?p(y%5C%7Cx)"></p></li>
+<li><p>Approx by summing over top <img src="https://latex.codecogs.com/png.latex?k"> documents with highest prob under <img src="https://latex.codecogs.com/png.latex?p(z%5C%7Cx)"></p></li>
+<li><p>Question: How to find top <img src="https://latex.codecogs.com/png.latex?k"> docs? Answer: Use MIPS</p></li>
+<li><p>Need to precompute <img src="https://latex.codecogs.com/png.latex?Embed_%7Bdoc%7D(x)"> for all docs. Problem? It changes with each step of SGD.</p></li>
+<li><p><em>Solution</em>: Async refresh <img src="https://latex.codecogs.com/png.latex?Embed_%7Bdoc%7D"> every 500 steps</p></li>
+<li><p>Use MIPS to select top <img src="https://latex.codecogs.com/png.latex?k"> docs. For these docs, recompute <img src="https://latex.codecogs.com/png.latex?p(z%5C%7Cx)"> using new <img src="https://latex.codecogs.com/png.latex?%5Ctheta">.</p></li>
+</ul>
+<section id="implementing-async-mips-refreshes" class="level3">
+<h3 class="anchored" data-anchor-id="implementing-async-mips-refreshes">Implementing async MIPS refreshes</h3>
+<ul>
+<li><p>Two jobs running in parallel:</p>
+<ul>
+<li><p><em>Primary trainer</em>: Perform gradient updates on parameters</p></li>
+<li><p><em>Secondary index builder</em>: Embeds and indexes the docs</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://shubhamg.in/posts/realm/async_mips.png" class="img-fluid figure-img"></p>
+<figcaption>Async MIPS implementation<span data-label="fig:async_mips"></span></figcaption>
+</figure>
+</div></li>
+<li><p>Async refresh used only for pre-training</p></li>
+<li><p>For fine tuning, build index once from pre-trained <img src="https://latex.codecogs.com/png.latex?%5Ctheta"> and use it.</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="what-does-retriever-learn" class="level3">
+<h3 class="anchored" data-anchor-id="what-does-retriever-learn">What does retriever learn?</h3>
+<ul>
+<li><p>Retriever promotes docs that improve accuracy</p></li>
+<li><p>This can be analyzed by analyzing gradient wrt the parameters</p></li>
+</ul>
+</section>
+<section id="injecting-inductive-biases-into-pre-trianing" class="level3">
+<h3 class="anchored" data-anchor-id="injecting-inductive-biases-into-pre-trianing">Injecting inductive biases into pre-trianing</h3>
+<ul>
+<li><p><strong>Salient span masking</strong>: Some questions require only local context. Select named entities and dates and mask one of them. Performs better.</p></li>
+<li><p><strong>Null document</strong>: Add null document to top <img src="https://latex.codecogs.com/png.latex?k"> documents to allow answers even when no context is required</p></li>
+<li><p><strong>Prohibiting trivial retrievals</strong>: If knowledge corpus <img src="https://latex.codecogs.com/png.latex?Z"> is the same as pre-training corpus <img src="https://latex.codecogs.com/png.latex?X">, it can predict <img src="https://latex.codecogs.com/png.latex?y"> by looking at <img src="https://latex.codecogs.com/png.latex?x"> in <img src="https://latex.codecogs.com/png.latex?z">. Exclude trivial candidate</p></li>
+<li><p><strong>Initialization</strong>: Warm up <img src="https://latex.codecogs.com/png.latex?Embed_%7Binput%7D"> and <img src="https://latex.codecogs.com/png.latex?Embed_%7Bdoc%7D"> using Inverse Cloze Task(ICT) i.e model trained to retrieve the doc where the sentence came from.</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="experiments" class="level1">
+<h1>Experiments</h1>
+<ul>
+<li>REALM outperforms all approaches by a big margin.</li>
+</ul>
+</section>
+<section id="future-work" class="level1">
+<h1>Future Work</h1>
+<ul>
+<li><p>Structured knowledge where we learn entities which are informative</p></li>
+<li><p>Multi lingual setting. Retreiving knowledge in high resource language to better represent text in low resource language</p></li>
+<li><p>Multi model setting. Retrieve images or videos that can provide knowledge not present in text</p></li>
+</ul>
+</section>
+<section id="comments" class="level1">
+<h1>Comments</h1>
+<p>Overall, I enjoyed reading this paper. However, there are two key points that concern me:</p>
+<ul>
+<li>The authors mention using MIPS for selecting the top <img src="https://latex.codecogs.com/png.latex?k"> documents, in order to simplify the task. However, would selecting only these documents from the entire dataset not lead to some information loss? I would like to see more experiments around this area.</li>
+<li>There are no experiments around trying out larger models. While I agree that T5 is the largest model available right now, there is no evidence given that a model larger than T5-large would not perform better than the current REALM model. I would like to see some more exploration around this area.</li>
+</ul>
+</section>
+<section id="resources" class="level1">
+<h1>Resources</h1>
+<p>There are a number of other resources you can use to learn more about this paper such as:</p>
+<ul>
+<li>The original paper available <a href="https://arxiv.org/abs/2002.08909">here</a></li>
+<li>Tweet summary by Adam Roberts available <a href="https://twitter.com/ada_rob/status/1227062195671822336">here</a></li>
+<li>Video summary by Václav Košař available <a href="https://twitter.com/ada_rob/status/1227062195671822336">here</a></li>
+<li>Huggingface Reading group summary by Joe Davidson available <a href="https://joeddav.github.io/blog/2020/03/03/REALM.html">here</a></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>nlp</category>
+  <category>bert</category>
+  <category>review</category>
+  <guid>https://shubhamg.in/posts/2020-03-14-realm.html</guid>
+  <pubDate>Fri, 13 Mar 2020 16:00:00 GMT</pubDate>
+  <media:content url="https://shubhamg.in/posts/realm/training.png" medium="image" type="image/png" height="169" width="144"/>
 </item>
 <item>
   <title>Bayesian Golf Putting Model</title>
@@ -14395,6 +15420,27 @@ font-style: inherit;">;</span></span></code></pre></div>
   <category>golf_putting</category>
   <guid>https://shubhamg.in/posts/2020-03-12-tutorial.html</guid>
   <pubDate>Wed, 11 Mar 2020 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title></title>
+  <link>https://shubhamg.in/posts/2020-01-14-first-post.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="yo" class="level1">
+<h1>Yo!</h1>
+<p>Super excited to <strong>finally</strong> get my own blog. Hope to write out those long pending articles ASAP now. Stay tuned!</p>
+
+
+</section>
+
+ ]]></description>
+  <category>intro</category>
+  <guid>https://shubhamg.in/posts/2020-01-14-first-post.html</guid>
+  <pubDate>Mon, 13 Jan 2020 16:00:00 GMT</pubDate>
 </item>
 </channel>
 </rss>
