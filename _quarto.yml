@@ -6,6 +6,9 @@ project:
     - posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling.html
     - posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling_files/**
     - posts/2025-09-01-cl-dspy-modelling/2025-09-01-cl-dspy-modelling_files/**
+    - posts/2025-09-14-cl-dspy-optimization/_2025-09-14-cl-dspy-optimization.html
+    - posts/2025-09-14-cl-dspy-optimization/_2025-09-14-cl-dspy-optimization_files/**
+    - posts/2025-09-14-cl-dspy-optimization/2025-09-14-cl-dspy-optimization/**
   render:
     - "*.qmd"
     - "*.md"
