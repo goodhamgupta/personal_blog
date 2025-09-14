@@ -281,8 +281,13 @@ window.Quarto = {
 
 
 
-<p>In Part 1 we carved the ConvFinQA corpus into curriculum-aware difficulty tiers through some EDA (https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html). Part 2 turned that insight into zero-shot baselines, pitting several LLMs against each tier (https://shubhamg.in/posts/2025-09-01-cl-dspy-modelling/). The hard bucket still hurt, which is proof that smarter prompting, not bigger models, is our next lever.</p>
-<p>In this installment, instead of costly fine-tunes we’ll use DSPy’s programmatic prompt optimizers to lift accuracy beyond the Part 2 ceiling. We’ll iterate over the shortlisted models: - o4-mini, - o3 - gemini-2.5-flash (this couldn’t be completed due to rate limits unfortunately)</p>
+<p>In <a href="../2025-08-31-cl-dspy-eda.html">Part 1</a> we carved the ConvFinQA corpus into curriculum-aware difficulty tiers through some EDA. <a href="../../posts/2025-09-01-cl-dspy-modelling/index.html">Part 2</a> turned that insight into zero-shot baselines, pitting several LLMs against each tier. The hard bucket still hurt, which is proof that smarter prompting, not bigger models, is our next lever.</p>
+<p>In this installment, instead of fine-tunes we’ll use DSPy’s programmatic prompt optimizers to lift accuracy beyond the Part 2 ceiling. We’ll iterate over the shortlisted models:</p>
+<ul>
+<li>o4-mini,</li>
+<li>o3</li>
+<li>gemini-2.5-flash (this couldn’t be completed due to rate limits unfortunately)</li>
+</ul>
 <p>We feed each model curriculum-ordered exemplars, and let DSPy search the prompt space under tight token and latency caps.</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
@@ -1479,15 +1484,6 @@ Best score so far: 80.0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    ">Collapse MLflow Trace</button>
-  <iframe id="trace-renderer" style="width: 100%; height: 500px; border: none; resize: vertical;" src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=bc6ccffd18824246934194a85933d3fd&amp;experiment_id=3&amp;trace_id=e37a0ba10d0543bb908e397933697d6d&amp;experiment_id=3&amp;trace_id=b37797a381b44f7eb13e1f42eca0567c&amp;experiment_id=3&amp;trace_id=9a18ced106784364ae12831ce45a8748&amp;experiment_id=3&amp;trace_id=3d7bb8edeb78492bac5473d6e52c4846&amp;experiment_id=3&amp;trace_id=d42d241ebb9e40b1affe006598cae983&amp;experiment_id=3&amp;trace_id=344ea0c049b946e8b780a9e02d720688&amp;experiment_id=3&amp;trace_id=4cac19ef64574b50b38d4baf81b360d5&amp;experiment_id=3&amp;trace_id=c4ca77588233486e9d234e95aa976329&amp;experiment_id=3&amp;trace_id=c9921423c3aa4f16933885eb15242313&amp;experiment_id=3&amp;version=3.1.4">
 </div>
 </div>
 </div>
@@ -1812,21 +1808,6 @@ Average Metric: 95.00 / 121 (78.5%):  79%|███████▉  | 120/151 [0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=f00df56eb87c4733bf0f4ce46697016c&amp;experiment_id=3&amp;trace_id=01e691eb115e4736918a1fcc46366da0&amp;experiment_id=3&amp;trace_id=9767cdab75804383a25264f03f971abd&amp;experiment_id=3&amp;trace_id=53e03fb05f8f4ba491f82b0cb4bf336c&amp;experiment_id=3&amp;trace_id=47839487cad5428482850f29bd5dc5d4&amp;experiment_id=3&amp;trace_id=cfaa6d1765f745e3a0d15d366b5b58a4&amp;experiment_id=3&amp;trace_id=0e0fc38182c9456b862e642daed2b655&amp;experiment_id=3&amp;trace_id=fc325f99aadf4d20aa29edfa769b059c&amp;experiment_id=3&amp;trace_id=482dc9df23ea4b62971f875dcfd45600&amp;experiment_id=3&amp;trace_id=718bc4f3235440bd83283fd935402987&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2009,21 +1990,6 @@ Average Metric: 95.00 / 121 (78.5%):  79%|███████▉  | 120/151 [0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=6f9ac0a0ef0740568906b83b4a642c0a&amp;experiment_id=3&amp;trace_id=319f89809e954976a32664ce21b68231&amp;experiment_id=3&amp;trace_id=c6f233f4e0394e4dbb44be408ae2f53f&amp;experiment_id=3&amp;trace_id=ac86a2afe45b4d3480cec639b1fc1ad6&amp;experiment_id=3&amp;trace_id=1a010b426c374eadb389788707892a0d&amp;experiment_id=3&amp;trace_id=03639e94d80d426e9fc21cc307a3600a&amp;experiment_id=3&amp;trace_id=c620b4408a574128a492956173250f81&amp;experiment_id=3&amp;trace_id=6f731255e23a452a888b1d4025b1975b&amp;experiment_id=3&amp;trace_id=ae84310c03a44649aacb9d15a7e7178a&amp;experiment_id=3&amp;trace_id=fedda9a3277a47e59e2f37d2c3bd2dc1&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2145,7 +2111,6 @@ Prefix each section with “Reasoning:”, “Ops:”, and “Answer:” respect
 2025/07/29 11:49:59 INFO dspy.evaluate.evaluate: Average Metric: 60.0 / 95 (63.2%)
 2025/07/29 11:49:59 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 63.16
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 11:49:59 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 13 - Minibatch ==
 2025/07/29 11:49:59 INFO dspy.evaluate.evaluate: Average Metric: 26.0 / 35 (74.3%)
@@ -2313,7 +2278,6 @@ Your output must be flawless to ensure the integrity of financial decisions.
 2025/07/29 11:50:18 INFO dspy.evaluate.evaluate: Average Metric: 61.0 / 95 (64.2%)
 2025/07/29 11:50:18 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 64.21
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 11:50:18 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 13 - Minibatch ==
 2025/07/29 11:50:19 INFO dspy.evaluate.evaluate: Average Metric: 27.0 / 35 (77.1%)
@@ -2642,21 +2606,6 @@ Average Metric: 68.00 / 95 (71.6%): 100%|██████████| 95/95 [
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=acddfb263eb54f35a9def5fec7050219&amp;experiment_id=3&amp;trace_id=3ce81494cfef4cc79f4dd7c70d5c2663&amp;experiment_id=3&amp;trace_id=ef56817d182d407c818a1ad2d1574c3e&amp;experiment_id=3&amp;trace_id=9bb74702545b42ba9a1fa24529a04644&amp;experiment_id=3&amp;trace_id=dbc40553cc324a3dacae641e6e780052&amp;experiment_id=3&amp;trace_id=bbafa7226c8e477aa28bebdccc17719b&amp;experiment_id=3&amp;trace_id=54a4aaf104844f22b98524898f44e466&amp;experiment_id=3&amp;trace_id=0cc362fe6a8f439c84cab6215a5bba73&amp;experiment_id=3&amp;trace_id=09cf05d29a9943ba915ec2b8a788c2e6&amp;experiment_id=3&amp;trace_id=b4606f3e3cf74e26857709451d08ed1c&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -2946,21 +2895,6 @@ Average Metric: 150.00 / 194 (77.3%): 100%|██████████| 194/1
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=f9b70750101940ebada08a8d3e2440ea&amp;experiment_id=3&amp;trace_id=2b41d1edf8e74a69abc41f1f635af988&amp;experiment_id=3&amp;trace_id=4c3e6ee2c6114b9996fcbdf4ab34adc1&amp;experiment_id=3&amp;trace_id=a6359fb1e306467b9b6c4fccaecc2d4b&amp;experiment_id=3&amp;trace_id=150da326f2434180b699e9320971599d&amp;experiment_id=3&amp;trace_id=7b38caaed24342baa2aa25b2d5f57578&amp;experiment_id=3&amp;trace_id=e69d9687424f48789be2b089df229932&amp;experiment_id=3&amp;trace_id=deb2379381b34b6da34f9f6114f3ce14&amp;experiment_id=3&amp;trace_id=4ada212903214766acfbdc81c4af7bf1&amp;experiment_id=3&amp;trace_id=f46f6512b854475f852f30e54a9d1ea3&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -3092,7 +3026,6 @@ This instruction ensures precise, interpretable outputs for automated evaluation
 2025/07/29 12:12:50 INFO dspy.evaluate.evaluate: Average Metric: 81.0 / 100 (81.0%)
 2025/07/29 12:12:50 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 81.0
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 12:12:51 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 13 - Minibatch ==
 2025/07/29 12:15:02 INFO dspy.evaluate.evaluate: Average Metric: 29.0 / 35 (82.9%)
@@ -3255,7 +3188,6 @@ Your final output must be a JSON object with the following fields in order: `rea
 2025/07/29 12:24:14 INFO dspy.evaluate.evaluate: Average Metric: 81.0 / 100 (81.0%)
 2025/07/29 12:24:14 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 81.0
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 12:24:14 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 13 - Minibatch ==
 2025/07/29 12:24:28 INFO dspy.evaluate.evaluate: Average Metric: 28.0 / 35 (80.0%)
@@ -3691,35 +3623,24 @@ Your final output must be a JSON object with the following fields in order: `rea
 2025/07/29 12:25:22 WARNING dspy.utils.parallelizer: Execution cancelled due to errors or interruption.
 2025/07/29 12:25:22 ERROR dspy.teleprompt.utils: An exception occurred during evaluation
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/teleprompt/utils.py&quot;, line 52, in eval_candidate_program
     return evaluate(candidate_program, devset=trainset, return_all_scores=return_all_scores, callback_metadata={&quot;metric_key&quot;: &quot;eval_full&quot;})
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 484, in safe_patch_function
     patch_function(call_original, *args, **kwargs)
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/dspy/autolog.py&quot;, line 142, in patch_fn
     return original(self, *args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 475, in call_original
     return call_original_fn_with_event_logging(_original_fn, og_args, og_kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 426, in call_original_fn_with_event_logging
     original_fn_result = original_fn(*og_args, **og_kwargs)
                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 472, in _original_fn
     original_result = original(*_og_args, **_og_kwargs)
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 343, in sync_wrapper
     raise exception
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 339, in sync_wrapper
     results = fn(instance, *args, **kwargs)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/evaluate/evaluate.py&quot;, line 171, in __call__
     results = executor.execute(process_item, devset)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 48, in execute
     return self._execute_parallel(wrapped, data)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 203, in _execute_parallel
     raise Exception(&quot;Execution cancelled due to errors or interruption.&quot;)
 Exception: Execution cancelled due to errors or interruption.
 2025/07/29 12:25:22 INFO dspy.teleprompt.mipro_optimizer_v2: Full eval scores so far: [81.0, 0.0]
@@ -4173,21 +4094,6 @@ Average Metric: 91.00 / 100 (91.0%): 100%|██████████| 100/10
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=b151de558bb14f86b3e47a0bb63c9ea5&amp;experiment_id=3&amp;trace_id=582f28732ba542c5845cfb9a858f6c35&amp;experiment_id=3&amp;trace_id=860a315c38d34c02b976388da62ae48a&amp;experiment_id=3&amp;trace_id=b78df9c367be41ce8da5b9380320c03e&amp;experiment_id=3&amp;trace_id=7e5ddefe71ce4da1a89ba4d901b4bf1b&amp;experiment_id=3&amp;trace_id=96fa036183a34010a22f95dee613b202&amp;experiment_id=3&amp;trace_id=03c620fb03774d8eab5de94b00da86d5&amp;experiment_id=3&amp;trace_id=5e30b9d83654440e9c72a223f68c39d2&amp;experiment_id=3&amp;trace_id=e535c39aea54485db29670caf659497d&amp;experiment_id=3&amp;trace_id=751766e1c1304e639a74d371d6236219&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -4538,21 +4444,6 @@ Average Metric: 226.00 / 266 (85.0%): 100%|██████████| 266/2
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=b3276ea13b564fd983dca48cefbceca8&amp;experiment_id=3&amp;trace_id=48329f9c25c34891ac7929e039e55db7&amp;experiment_id=3&amp;trace_id=2665e903f8844c1ea40c240c24944c5d&amp;experiment_id=3&amp;trace_id=f36fca7817124aaca80a0246c289ed4d&amp;experiment_id=3&amp;trace_id=00fda83afffa4644b5d50b25fd6c5f2f&amp;experiment_id=3&amp;trace_id=d1b47d285190468a905d085b88712c91&amp;experiment_id=3&amp;trace_id=6467e046bd9c489fa14a7ad01917283d&amp;experiment_id=3&amp;trace_id=5083a8156b1b4ddb9c3865891299a6d1&amp;experiment_id=3&amp;trace_id=b3cf99d89ef642e6a80da1eaad2944e5&amp;experiment_id=3&amp;trace_id=237ceb2ce1604d139b42459e37ec2e3f&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -4754,7 +4645,6 @@ Use the exact prefixes “Reasoning:”, “Ops:”, and “Answer:” for each 
 2025/07/29 13:37:59 INFO dspy.evaluate.evaluate: Average Metric: 208.0 / 266 (78.2%)
 2025/07/29 13:37:59 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 78.2
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 13:38:17 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 23 - Minibatch ==
 2025/07/29 13:38:57 INFO dspy.evaluate.evaluate: Average Metric: 28.0 / 35 (80.0%)
@@ -5042,7 +4932,6 @@ Given the `conversation_context` for multi-turn interactions, `evidence_snippets
 2025/07/29 14:07:42 INFO dspy.evaluate.evaluate: Average Metric: 226.0 / 266 (85.0%)
 2025/07/29 14:07:42 INFO dspy.teleprompt.mipro_optimizer_v2: Default program score: 84.96
 
-/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/optuna/_experimental.py:32: ExperimentalWarning: Argument ``multivariate`` is an experimental feature. The interface can change in the future.
   warnings.warn(
 2025/07/29 14:07:52 INFO dspy.teleprompt.mipro_optimizer_v2: == Trial 2 / 23 - Minibatch ==
 2025/07/29 14:08:06 WARNING dspy.adapters.json_adapter: Failed to use structured output format, falling back to JSON mode.
@@ -5713,35 +5602,24 @@ Given the `conversation_context` for multi-turn interactions, `evidence_snippets
 . Set `provide_traceback=True` for traceback.
 2025/07/29 14:11:09 ERROR dspy.teleprompt.utils: An exception occurred during evaluation
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/teleprompt/utils.py&quot;, line 52, in eval_candidate_program
     return evaluate(candidate_program, devset=trainset, return_all_scores=return_all_scores, callback_metadata={&quot;metric_key&quot;: &quot;eval_full&quot;})
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 484, in safe_patch_function
     patch_function(call_original, *args, **kwargs)
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/dspy/autolog.py&quot;, line 142, in patch_fn
     return original(self, *args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 475, in call_original
     return call_original_fn_with_event_logging(_original_fn, og_args, og_kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 426, in call_original_fn_with_event_logging
     original_fn_result = original_fn(*og_args, **og_kwargs)
                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 472, in _original_fn
     original_result = original(*_og_args, **_og_kwargs)
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 343, in sync_wrapper
     raise exception
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 339, in sync_wrapper
     results = fn(instance, *args, **kwargs)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/evaluate/evaluate.py&quot;, line 171, in __call__
     results = executor.execute(process_item, devset)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 48, in execute
     return self._execute_parallel(wrapped, data)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 203, in _execute_parallel
     raise Exception(&quot;Execution cancelled due to errors or interruption.&quot;)
 Exception: Execution cancelled due to errors or interruption.
 2025/07/29 14:11:09 INFO dspy.teleprompt.mipro_optimizer_v2: Full eval scores so far: [84.96, 0.0]
@@ -8596,24 +8474,17 @@ Exception: Execution cancelled due to errors or interruption.
 . Set `provide_traceback=True` for traceback.
 2025/07/29 14:18:16 ERROR dspy.teleprompt.utils: An exception occurred during evaluation
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/teleprompt/utils.py&quot;, line 52, in eval_candidate_program
     return evaluate(candidate_program, devset=trainset, return_all_scores=return_all_scores, callback_metadata={&quot;metric_key&quot;: &quot;eval_full&quot;})
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 403, in safe_patch_function
     return original(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 343, in sync_wrapper
     raise exception
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 339, in sync_wrapper
     results = fn(instance, *args, **kwargs)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/evaluate/evaluate.py&quot;, line 171, in __call__
     results = executor.execute(process_item, devset)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 48, in execute
     return self._execute_parallel(wrapped, data)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 203, in _execute_parallel
     raise Exception(&quot;Execution cancelled due to errors or interruption.&quot;)
 Exception: Execution cancelled due to errors or interruption.
 2025/07/29 14:18:16 INFO dspy.teleprompt.mipro_optimizer_v2: Full eval scores so far: [84.96, 0.0, 78.57, 0.0]
@@ -10347,24 +10218,17 @@ IOStream.flush timed out
 . Set `provide_traceback=True` for traceback.
 2025/07/29 14:25:42 ERROR dspy.teleprompt.utils: An exception occurred during evaluation
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/teleprompt/utils.py&quot;, line 52, in eval_candidate_program
     return evaluate(candidate_program, devset=trainset, return_all_scores=return_all_scores, callback_metadata={&quot;metric_key&quot;: &quot;eval_full&quot;})
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 403, in safe_patch_function
     return original(*args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 343, in sync_wrapper
     raise exception
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 339, in sync_wrapper
     results = fn(instance, *args, **kwargs)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/evaluate/evaluate.py&quot;, line 171, in __call__
     results = executor.execute(process_item, devset)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 48, in execute
     return self._execute_parallel(wrapped, data)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 203, in _execute_parallel
     raise Exception(&quot;Execution cancelled due to errors or interruption.&quot;)
 Exception: Execution cancelled due to errors or interruption.
 2025/07/29 14:25:42 ERROR dspy.utils.parallelizer: Error for Example({&#39;conversation_context&#39;: &#39;Q1: in the year of 2008, what was the income from continuing operations available to common stockholders?\nA1: 285.7\nQ2: and what were the basic earnings per share?\nA2: 0.76\nQ3: what, then, can be concluded to be the number of shares available?\nA3: 375.92105&#39;, &#39;evidence_snippets&#39;: &#39;[PRE]\nsubstantially all of the goodwill and other intangible assets recorded related to the acquisition of allied are not deductible for tax purposes . pro forma information the consolidated financial statements presented for republic include the operating results of allied from the date of the acquisition . the following pro forma information is presented assuming the merger had been completed as of january 1 , 2007 . the unaudited pro forma information presented below has been prepared for illustrative purposes and is not intended to be indicative of the results of operations that would have actually occurred had the acquisition been consummated at the beginning of the periods presented or of future results of the combined operations ( in millions , except share and per share amounts ) . year ended december 31 , year ended december 31 , ( unaudited ) ( unaudited ) .\n[/PRE]\n[POST]\nthe above unaudited pro forma financial information includes adjustments for amortization of identifiable intangible assets , accretion of discounts to fair value associated with debt , environmental , self-insurance and other liabilities , accretion of capping , closure and post-closure obligations and amortization of the related assets , and provision for income taxes . assets held for sale as a condition of the merger with allied in december 2008 , we reached a settlement with the doj requiring us to divest of certain operations serving fifteen metropolitan areas including los angeles , ca ; san francisco , ca ; denver , co ; atlanta , ga ; northwestern indiana ; lexington , ky ; flint , mi ; cape girardeau , mo ; charlotte , nc ; cleveland , oh ; philadelphia , pa ; greenville-spartanburg , sc ; and fort worth , houston and lubbock , tx . the settlement requires us to divest 87 commercial waste collection routes , nine landfills and ten transfer stations , together with ancillary assets and , in three cases , access to landfill disposal capacity . we have classified the assets and liabilities we expect to divest ( including accounts receivable , property and equipment , goodwill , and accrued landfill and environmental costs ) as assets held for sale in our consolidated balance sheet at december 31 , 2008 . the assets held for sale related to operations that were republic 2019s prior to the merger with allied have been adjusted to the lower of their carrying amounts or estimated fair values less costs to sell , which resulted in us recognizing an asset impairment loss of $ 6.1 million in our consolidated statement of income for the year ended december 31 , 2008 . the assets held for sale related to operations that were allied 2019s prior to the merger are recorded at their estimated fair values in our consolidated balance sheet as of december 31 , 2008 in accordance with the purchase method of accounting . in february 2009 , we entered into an agreement to divest certain assets to waste connections , inc . the assets covered by the agreement include six municipal solid waste landfills , six collection operations and three transfer stations across the following seven markets : los angeles , ca ; denver , co ; houston , tx ; lubbock , tx ; greenville-spartanburg , sc ; charlotte , nc ; and flint , mi . the transaction with waste connections is subject to closing conditions regarding due diligence , regulatory approval and other customary matters . closing is expected to occur in the second quarter of 2009 . republic services , inc . and subsidiaries notes to consolidated financial statements %%transmsg*** transmitting job : p14076 pcn : 106000000 ***%%pcmsg|104 |00046|yes|no|02/28/2009 21:07|0|0|page is valid , no graphics -- color : d| .\n[/POST]&#39;, &#39;table&#39;: &#39;| Row | revenue | income from continuing operations available to common stockholders | basic earnings per share | diluted earnings per share | revenue | income from continuing operations available to common stockholders | basic earnings per share | diluted earnings per share |\n|---|---|---|---|---|---|---|---|---|\n| year ended december 31 2008 ( unaudited ) | 9362.2 | 285.7 | 76.0 | 75.0 | 9362.2 | 285.7 | 76.0 | 75.0 |\n| year ended december 31 2007 ( unaudited ) | 9244.9 | 423.2 | 1.1 | 1.09 | 9244.9 | 423.2 | 1.1 | 1.09 |&#39;, &#39;question&#39;: &#39;in that same year, what was the revenue?&#39;, &#39;ops&#39;: &#39;9362.2&#39;, &#39;id&#39;: &#39;Double_RSG/2008/page_114.pdf&#39;, &#39;doc_pre_text&#39;: &#39;substantially all of the goodwill and other intangible assets recorded related to the acquisition of allied are not deductible for tax purposes . pro forma information the consolidated financial statements presented for republic include the operating results of allied from the date of the acquisition . the following pro forma information is presented assuming the merger had been completed as of january 1 , 2007 . the unaudited pro forma information presented below has been prepared for illustrative purposes and is not intended to be indicative of the results of operations that would have actually occurred had the acquisition been consummated at the beginning of the periods presented or of future results of the combined operations ( in millions , except share and per share amounts ) . year ended december 31 , year ended december 31 , ( unaudited ) ( unaudited ) .&#39;, &#39;doc_post_text&#39;: &#39;the above unaudited pro forma financial information includes adjustments for amortization of identifiable intangible assets , accretion of discounts to fair value associated with debt , environmental , self-insurance and other liabilities , accretion of capping , closure and post-closure obligations and amortization of the related assets , and provision for income taxes . assets held for sale as a condition of the merger with allied in december 2008 , we reached a settlement with the doj requiring us to divest of certain operations serving fifteen metropolitan areas including los angeles , ca ; san francisco , ca ; denver , co ; atlanta , ga ; northwestern indiana ; lexington , ky ; flint , mi ; cape girardeau , mo ; charlotte , nc ; cleveland , oh ; philadelphia , pa ; greenville-spartanburg , sc ; and fort worth , houston and lubbock , tx . the settlement requires us to divest 87 commercial waste collection routes , nine landfills and ten transfer stations , together with ancillary assets and , in three cases , access to landfill disposal capacity . we have classified the assets and liabilities we expect to divest ( including accounts receivable , property and equipment , goodwill , and accrued landfill and environmental costs ) as assets held for sale in our consolidated balance sheet at december 31 , 2008 . the assets held for sale related to operations that were republic 2019s prior to the merger with allied have been adjusted to the lower of their carrying amounts or estimated fair values less costs to sell , which resulted in us recognizing an asset impairment loss of $ 6.1 million in our consolidated statement of income for the year ended december 31 , 2008 . the assets held for sale related to operations that were allied 2019s prior to the merger are recorded at their estimated fair values in our consolidated balance sheet as of december 31 , 2008 in accordance with the purchase method of accounting . in february 2009 , we entered into an agreement to divest certain assets to waste connections , inc . the assets covered by the agreement include six municipal solid waste landfills , six collection operations and three transfer stations across the following seven markets : los angeles , ca ; denver , co ; houston , tx ; lubbock , tx ; greenville-spartanburg , sc ; charlotte , nc ; and flint , mi . the transaction with waste connections is subject to closing conditions regarding due diligence , regulatory approval and other customary matters . closing is expected to occur in the second quarter of 2009 . republic services , inc . and subsidiaries notes to consolidated financial statements %%transmsg*** transmitting job : p14076 pcn : 106000000 ***%%pcmsg|104 |00046|yes|no|02/28/2009 21:07|0|0|page is valid , no graphics -- color : d| .&#39;, &#39;doc_table&#39;: {&#39;year ended december 31 2008 ( unaudited )&#39;: {&#39;revenue&#39;: 9362.2, &#39;income from continuing operations available to common stockholders&#39;: 285.7, &#39;basic earnings per share&#39;: 76.0, &#39;diluted earnings per share&#39;: 75.0}, &#39;year ended december 31 2007 ( unaudited )&#39;: {&#39;revenue&#39;: 9244.9, &#39;income from continuing operations available to common stockholders&#39;: 423.2, &#39;basic earnings per share&#39;: 1.1, &#39;diluted earnings per share&#39;: 1.09}}, &#39;dialogue_conv_questions&#39;: [&#39;in the year of 2008, what was the income from continuing operations available to common stockholders?&#39;, &#39;and what were the basic earnings per share?&#39;, &#39;what, then, can be concluded to be the number of shares available?&#39;, &#39;in that same year, what was the revenue?&#39;, &#39;and what was it in 2007?&#39;, &#39;what was, then, the change over the year?&#39;, &#39;and what is this change as a percentage of the 2007 revenue?&#39;], &#39;dialogue_conv_answers&#39;: [&#39;285.7&#39;, &#39;.76&#39;, &#39;375.9&#39;, &#39;9362.2&#39;, &#39;9244.9&#39;, &#39;117.3&#39;, &#39;1.3%&#39;], &#39;dialogue_turn_program&#39;: [&#39;285.7&#39;, &#39;.76&#39;, &#39;divide(285.7, .76)&#39;, &#39;9362.2&#39;, &#39;9244.9&#39;, &#39;subtract(9362.2, 9244.9)&#39;, &#39;subtract(9362.2, 9244.9), divide(#0, 9244.9)&#39;], &#39;dialogue_executed_answers&#39;: [285.7, 0.76, 375.92105, 9362.2, 9244.9, 117.3, 0.01269], &#39;dialogue_qa_split&#39;: [False, False, False, True, True, True, True], &#39;features_num_dialogue_turns&#39;: 7, &#39;features_has_type2_question&#39;: True, &#39;features_has_duplicate_columns&#39;: False, &#39;features_has_non_numeric_values&#39;: False, &#39;answer&#39;: 9362.2}) (input_keys={&#39;evidence_snippets&#39;, &#39;conversation_context&#39;, &#39;table&#39;, &#39;question&#39;}): Both structured output format and JSON mode failed. Please choose a model that supports `response_format` argument. Original error: litellm.RateLimitError: litellm.RateLimitError: VertexAIException - {
@@ -12585,21 +12449,6 @@ Average Metric: 145.00 / 171 (84.8%):  64%|██████▍   | 170/266 [00
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=39f93aae1c0e44e8b008ccedbfa1387c&amp;experiment_id=3&amp;trace_id=62dc1b763bd7489a8c01f1ff87809253&amp;experiment_id=3&amp;trace_id=775912589b454e5fbf69e3be678cf6dc&amp;experiment_id=3&amp;trace_id=7e902a8c872648c9af78af89c421fdd6&amp;experiment_id=3&amp;trace_id=362fd4ba32654200ac58bcc3eedc525f&amp;experiment_id=3&amp;trace_id=dde7b1b87ca14beea9654b92c5818340&amp;experiment_id=3&amp;trace_id=1962240ce44245d99791861562763e0d&amp;experiment_id=3&amp;trace_id=67e93f91698e49cdbb1e33dd45c193e4&amp;experiment_id=3&amp;trace_id=bec313308ba3469187456a504f8767c5&amp;experiment_id=3&amp;trace_id=514a143f6f9e4a29b726ffa96ad219c7&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -12758,84 +12607,58 @@ Unexpected exception formatting exception. Falling back to standard exception</c
 2025/08/08 01:40:43 ERROR dspy.utils.parallelizer: Error for Example({&#39;conversation_context&#39;: &#39;Q1: what are the annual long-term obligations in 2014?\nA1: 385373.0&#39;, &#39;evidence_snippets&#39;: &#39;[PRE]\nentergy corporation and subsidiaries notes to financial statements ( a ) consists of pollution control revenue bonds and environmental revenue bonds , some of which are secured by collateral first mortgage bonds . ( b ) these notes do not have a stated interest rate , but have an implicit interest rate of 4.8% ( 4.8 % ) . ( c ) pursuant to the nuclear waste policy act of 1982 , entergy 2019s nuclear owner/licensee subsidiaries have contracts with the doe for spent nuclear fuel disposal service . the contracts include a one-time fee for generation prior to april 7 , 1983 . entergy arkansas is the only entergy company that generated electric power with nuclear fuel prior to that date and includes the one-time fee , plus accrued interest , in long-term ( d ) see note 10 to the financial statements for further discussion of the waterford 3 and grand gulf lease obligations . ( e ) the fair value excludes lease obligations of $ 149 million at entergy louisiana and $ 97 million at system energy , long-term doe obligations of $ 181 million at entergy arkansas , and the note payable to nypa of $ 95 million at entergy , and includes debt due within one year . fair values are classified as level 2 in the fair value hierarchy discussed in note 16 to the financial statements and are based on prices derived from inputs such as benchmark yields and reported trades . the annual long-term debt maturities ( excluding lease obligations and long-term doe obligations ) for debt outstanding as of december 31 , 2013 , for the next five years are as follows : amount ( in thousands ) .\n[/PRE]\n[POST]\nin november 2000 , entergy 2019s non-utility nuclear business purchased the fitzpatrick and indian point 3 power plants in a seller-financed transaction . entergy issued notes to nypa with seven annual installments of approximately $ 108 million commencing one year from the date of the closing , and eight annual installments of $ 20 million commencing eight years from the date of the closing . these notes do not have a stated interest rate , but have an implicit interest rate of 4.8% ( 4.8 % ) . in accordance with the purchase agreement with nypa , the purchase of indian point 2 in 2001 resulted in entergy becoming liable to nypa for an additional $ 10 million per year for 10 years , beginning in september 2003 . this liability was recorded upon the purchase of indian point 2 in september 2001 . in july 2003 a payment of $ 102 million was made prior to maturity on the note payable to nypa . under a provision in a letter of credit supporting these notes , if certain of the utility operating companies or system energy were to default on other indebtedness , entergy could be required to post collateral to support the letter of credit . entergy gulf states louisiana , entergy louisiana , entergy mississippi , entergy texas , and system energy have obtained long-term financing authorizations from the ferc that extend through october 2015 . entergy arkansas has obtained long-term financing authorization from the apsc that extends through december 2015 . entergy new orleans has obtained long-term financing authorization from the city council that extends through july 2014 . capital funds agreement pursuant to an agreement with certain creditors , entergy corporation has agreed to supply system energy with sufficient capital to : 2022 maintain system energy 2019s equity capital at a minimum of 35% ( 35 % ) of its total capitalization ( excluding short- term debt ) ; .\n[/POST]&#39;, &#39;table&#39;: &#39;| Row | 2014 | 2015 | 2016 | 2017 | 2018 |\n|---|---|---|---|---|---|\n| amount ( in thousands ) | 385373.0 | 1110566.0 | 270852.0 | 766801.0 | 1324616.0 |&#39;, &#39;question&#39;: &#39;what is that divided by 1000?&#39;, &#39;ops&#39;: &#39;divide(385373, const_1000)&#39;, &#39;id&#39;: &#39;Single_ETR/2013/page_118.pdf-4&#39;, &#39;doc_pre_text&#39;: &#39;entergy corporation and subsidiaries notes to financial statements ( a ) consists of pollution control revenue bonds and environmental revenue bonds , some of which are secured by collateral first mortgage bonds . ( b ) these notes do not have a stated interest rate , but have an implicit interest rate of 4.8% ( 4.8 % ) . ( c ) pursuant to the nuclear waste policy act of 1982 , entergy 2019s nuclear owner/licensee subsidiaries have contracts with the doe for spent nuclear fuel disposal service . the contracts include a one-time fee for generation prior to april 7 , 1983 . entergy arkansas is the only entergy company that generated electric power with nuclear fuel prior to that date and includes the one-time fee , plus accrued interest , in long-term ( d ) see note 10 to the financial statements for further discussion of the waterford 3 and grand gulf lease obligations . ( e ) the fair value excludes lease obligations of $ 149 million at entergy louisiana and $ 97 million at system energy , long-term doe obligations of $ 181 million at entergy arkansas , and the note payable to nypa of $ 95 million at entergy , and includes debt due within one year . fair values are classified as level 2 in the fair value hierarchy discussed in note 16 to the financial statements and are based on prices derived from inputs such as benchmark yields and reported trades . the annual long-term debt maturities ( excluding lease obligations and long-term doe obligations ) for debt outstanding as of december 31 , 2013 , for the next five years are as follows : amount ( in thousands ) .&#39;, &#39;doc_post_text&#39;: &#39;in november 2000 , entergy 2019s non-utility nuclear business purchased the fitzpatrick and indian point 3 power plants in a seller-financed transaction . entergy issued notes to nypa with seven annual installments of approximately $ 108 million commencing one year from the date of the closing , and eight annual installments of $ 20 million commencing eight years from the date of the closing . these notes do not have a stated interest rate , but have an implicit interest rate of 4.8% ( 4.8 % ) . in accordance with the purchase agreement with nypa , the purchase of indian point 2 in 2001 resulted in entergy becoming liable to nypa for an additional $ 10 million per year for 10 years , beginning in september 2003 . this liability was recorded upon the purchase of indian point 2 in september 2001 . in july 2003 a payment of $ 102 million was made prior to maturity on the note payable to nypa . under a provision in a letter of credit supporting these notes , if certain of the utility operating companies or system energy were to default on other indebtedness , entergy could be required to post collateral to support the letter of credit . entergy gulf states louisiana , entergy louisiana , entergy mississippi , entergy texas , and system energy have obtained long-term financing authorizations from the ferc that extend through october 2015 . entergy arkansas has obtained long-term financing authorization from the apsc that extends through december 2015 . entergy new orleans has obtained long-term financing authorization from the city council that extends through july 2014 . capital funds agreement pursuant to an agreement with certain creditors , entergy corporation has agreed to supply system energy with sufficient capital to : 2022 maintain system energy 2019s equity capital at a minimum of 35% ( 35 % ) of its total capitalization ( excluding short- term debt ) ; .&#39;, &#39;doc_table&#39;: {&#39;amount ( in thousands )&#39;: {&#39;2014&#39;: 385373.0, &#39;2015&#39;: 1110566.0, &#39;2016&#39;: 270852.0, &#39;2017&#39;: 766801.0, &#39;2018&#39;: 1324616.0}}, &#39;dialogue_conv_questions&#39;: [&#39;what are the annual long-term obligations in 2014?&#39;, &#39;what is that divided by 1000?&#39;, &#39;what are lease obligation at entergy lousiana?&#39;, &#39;what is that value over the prior quotient?&#39;], &#39;dialogue_conv_answers&#39;: [&#39;385373&#39;, &#39;385.373&#39;, &#39;149&#39;, &#39;38.7%&#39;], &#39;dialogue_turn_program&#39;: [&#39;385373&#39;, &#39;divide(385373, const_1000)&#39;, &#39;149&#39;, &#39;divide(385373, const_1000), divide(149, #0)&#39;], &#39;dialogue_executed_answers&#39;: [385373.0, 385.373, 149.0, 0.38664], &#39;dialogue_qa_split&#39;: [False, False, False, False], &#39;features_num_dialogue_turns&#39;: 4, &#39;features_has_type2_question&#39;: False, &#39;features_has_duplicate_columns&#39;: False, &#39;features_has_non_numeric_values&#39;: False, &#39;answer&#39;: 385.373}) (input_keys={&#39;evidence_snippets&#39;, &#39;question&#39;, &#39;conversation_context&#39;, &#39;table&#39;}): Both structured output format and JSON mode failed. Please choose a model that supports `response_format` argument. Original error: litellm.NotFoundError: OpenAIException - The model `gpt-5-nano-2025-08-07` does not exist or you do not have access to it.. Set `provide_traceback=True` for traceback.
 2025/08/08 01:40:43 WARNING dspy.utils.parallelizer: Execution cancelled due to errors or interruption.
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/interactiveshell.py&quot;, line 3550, in run_code
     exec(code_obj, self.user_global_ns, self.user_ns)
   File &quot;/var/folders/zf/l4rjbhhj6xq9bfzs9cr7m5vr0000gn/T/ipykernel_11525/4013237565.py&quot;, line 19, in &lt;module&gt;
     current_result = current_evaluator(
                      ^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 484, in safe_patch_function
     patch_function(call_original, *args, **kwargs)
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/dspy/autolog.py&quot;, line 142, in patch_fn
     return original(self, *args, **kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 475, in call_original
     return call_original_fn_with_event_logging(_original_fn, og_args, og_kwargs)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 426, in call_original_fn_with_event_logging
     original_fn_result = original_fn(*og_args, **og_kwargs)
                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/mlflow/utils/autologging_utils/safety.py&quot;, line 472, in _original_fn
     original_result = original(*_og_args, **_og_kwargs)
                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 343, in sync_wrapper
     raise exception
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/callback.py&quot;, line 339, in sync_wrapper
     results = fn(instance, *args, **kwargs)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/evaluate/evaluate.py&quot;, line 171, in __call__
     results = executor.execute(process_item, devset)
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 48, in execute
     return self._execute_parallel(wrapped, data)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/dspy/utils/parallelizer.py&quot;, line 203, in _execute_parallel
     raise Exception(&quot;Execution cancelled due to errors or interruption.&quot;)
 Exception: Execution cancelled due to errors or interruption.
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/interactiveshell.py&quot;, line 2144, in showtraceback
     stb = self.InteractiveTB.structured_traceback(
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/ultratb.py&quot;, line 1435, in structured_traceback
     return FormattedTB.structured_traceback(
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/ultratb.py&quot;, line 1326, in structured_traceback
     return VerboseTB.structured_traceback(
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/ultratb.py&quot;, line 1173, in structured_traceback
     formatted_exception = self.format_exception_as_a_whole(etype, evalue, etb, number_of_lines_of_context,
                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/ultratb.py&quot;, line 1063, in format_exception_as_a_whole
     self.get_records(etb, number_of_lines_of_context, tb_offset) if etb else []
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/IPython/core/ultratb.py&quot;, line 1160, in get_records
     res = list(stack_data.FrameInfo.stack_data(etb, options=options))[tb_offset:]
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/stack_data/core.py&quot;, line 597, in stack_data
     yield from collapse_repeated(
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/stack_data/utils.py&quot;, line 83, in collapse_repeated
     yield from map(mapper, original_group)
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/stack_data/core.py&quot;, line 587, in mapper
     return cls(f, options)
            ^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/stack_data/core.py&quot;, line 551, in __init__
     self.executing = Source.executing(frame_or_tb)
                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/executing/executing.py&quot;, line 264, in executing
     source = cls.for_frame(frame)
              ^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/executing/executing.py&quot;, line 183, in for_frame
     return cls.for_filename(frame.f_code.co_filename, frame.f_globals or {}, use_cache)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/executing/executing.py&quot;, line 212, in for_filename
     return cls._for_filename_and_lines(filename, tuple(lines))
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/executing/executing.py&quot;, line 223, in _for_filename_and_lines
     result = source_cache[(filename, lines)] = cls(filename, lines)
                                                ^^^^^^^^^^^^^^^^^^^^
-  File &quot;/Users/shubham.gupta/shubham/tomoro_ai_assessment/.venv/lib/python3.11/site-packages/executing/executing.py&quot;, line 163, in __init__
     self.tree = ast.parse(self.text, filename=filename)
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File &quot;/Users/shubham.gupta/.asdf/installs/python/3.11.0/lib/python3.11/ast.py&quot;, line 50, in parse
@@ -12871,21 +12694,6 @@ SystemError: AST constructor recursion depth mismatch (before=132, after=129)
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=d661ad63e01e4a4d9d899eec69b0c6ca&amp;experiment_id=3&amp;trace_id=768880f98c634eeab26123f73186dec3&amp;experiment_id=3&amp;trace_id=615b4899c40c4e19922cc82d977fbcf8&amp;experiment_id=3&amp;trace_id=c36c5a1b5b2f43b7b9fcf7689c103bf9&amp;experiment_id=3&amp;trace_id=3e36be307ed14b2887c879877be233e6&amp;experiment_id=3&amp;trace_id=fc91ccd7cc5d4e839ec6bf4ff8e7b8d7&amp;experiment_id=3&amp;trace_id=892aa0d197944d5293750be8ad73b20d&amp;experiment_id=3&amp;trace_id=69c786926914433db75f026c5f2a375e&amp;experiment_id=3&amp;trace_id=dc4bb113e48542f69661b9c05eb09bbf&amp;experiment_id=3&amp;trace_id=364ea847705e452fa425e1a1ba946a86&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -13019,21 +12827,6 @@ SystemError: AST constructor recursion depth mismatch (before=132, after=129)
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=80579b53ccab497f8e0aeb04132a5213&amp;experiment_id=3&amp;trace_id=981e8c2706cd4138aa114f8b19366fef&amp;experiment_id=3&amp;trace_id=a71b9c5adfe54a6db3c54bced52cc819&amp;experiment_id=3&amp;trace_id=f2eab9b5ce814ee0988c9c6d5ad6dcc8&amp;experiment_id=3&amp;trace_id=f177a222647b4ad884fc05b91cc7749f&amp;experiment_id=3&amp;trace_id=ca0173511ffb4510a841dd822db9c2b9&amp;experiment_id=3&amp;trace_id=baf898893fa24345a561ff07326a0bc1&amp;experiment_id=3&amp;trace_id=f63a2a7db79d4aeea1d851a09bc4a8e2&amp;experiment_id=3&amp;trace_id=7c5558ca645544ac98f55220ee48856a&amp;experiment_id=3&amp;trace_id=6d5097c888e74f00af20da9f585adddd&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -13120,21 +12913,6 @@ SystemError: AST constructor recursion depth mismatch (before=132, after=129)
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=414f055697fb4f80bd1771bdbfd22f81&amp;experiment_id=3&amp;trace_id=4244713c482f44e39495b698d18dcf0a&amp;experiment_id=3&amp;trace_id=9c0aab769032469fb7590dbe1a363b63&amp;experiment_id=3&amp;trace_id=4563ce709d9d4b9faad624bd96f544e1&amp;experiment_id=3&amp;trace_id=d94ca0e77f8447c88d9e6ffa94916f32&amp;experiment_id=3&amp;trace_id=2030b09b0de94c1c828fa89299f274e1&amp;experiment_id=3&amp;trace_id=e46ce32d10924e47b5bf963e4a908ed9&amp;experiment_id=3&amp;trace_id=1fc809fd5a494bc8a655a4b13a56ab21&amp;experiment_id=3&amp;trace_id=4a284b393ef040ba95dbacb3937be22c&amp;experiment_id=3&amp;trace_id=07d9bde9ab984ad58cd98094743a888e&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -13670,21 +13448,6 @@ Best score so far: 80.0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=bc6ccffd18824246934194a85933d3fd&amp;experiment_id=3&amp;trace_id=e37a0ba10d0543bb908e397933697d6d&amp;experiment_id=3&amp;trace_id=b37797a381b44f7eb13e1f42eca0567c&amp;experiment_id=3&amp;trace_id=9a18ced106784364ae12831ce45a8748&amp;experiment_id=3&amp;trace_id=3d7bb8edeb78492bac5473d6e52c4846&amp;experiment_id=3&amp;trace_id=d42d241ebb9e40b1affe006598cae983&amp;experiment_id=3&amp;trace_id=344ea0c049b946e8b780a9e02d720688&amp;experiment_id=3&amp;trace_id=4cac19ef64574b50b38d4baf81b360d5&amp;experiment_id=3&amp;trace_id=c4ca77588233486e9d234e95aa976329&amp;experiment_id=3&amp;trace_id=c9921423c3aa4f16933885eb15242313&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -13743,21 +13506,6 @@ Best score so far: 80.0
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=a1e89ec332194cdb857147d204651eaf&amp;experiment_id=3&amp;trace_id=c3e35d1c361647fe857e77d6f0007f29&amp;experiment_id=3&amp;trace_id=05aee7feb69549748b765a0208ccf7d2&amp;experiment_id=3&amp;trace_id=1ef522cea9884fa5a742ef57735a00c1&amp;experiment_id=3&amp;trace_id=69c847c693af49519d39c6f9a04581ab&amp;experiment_id=3&amp;trace_id=0cf81b0096ab4ac09fcbea9066bb2429&amp;experiment_id=3&amp;trace_id=d1bdbf20f29647a897f2dcb1ff2b8149&amp;experiment_id=3&amp;trace_id=3ed363f2c44e45ff957ec32081debd22&amp;experiment_id=3&amp;trace_id=b31bb4d9ca7743eebe0e59b4aeceb846&amp;experiment_id=3&amp;trace_id=fe587f9204fb45ac912a1fd8f5d6fcde&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -14009,21 +13757,6 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
     background-color: rgb(66, 153, 224);
   }
   </style>
-  <button
-    onclick="
-        const display = this.nextElementSibling.style.display;
-        const isCollapsed = display === 'none';
-        this.nextElementSibling.style.display = isCollapsed ? null : 'none';
-
-        const verb = isCollapsed ? 'Collapse' : 'Expand';
-        this.innerText = `${verb} MLflow Trace`;
-    "
-  >Collapse MLflow Trace</button>
-  <iframe
-    id="trace-renderer"
-    style="width: 100%; height: 500px; border: none; resize: vertical;"
-    src="http://localhost:5000/static-files/lib/notebook-trace-renderer/index.html?trace_id=60b878e62a9944d69d75b17cc78b66d4&amp;experiment_id=3&amp;trace_id=96b2454e1ca845d58124e3cdb18fe374&amp;experiment_id=3&amp;trace_id=a8d45a7e748d40cf85a98a95ba672370&amp;experiment_id=3&amp;trace_id=dc0094c04087449da45484dd8470336e&amp;experiment_id=3&amp;trace_id=fb02c93a468a46e3b6e239e628adb70c&amp;experiment_id=3&amp;trace_id=56e648e5bfe44199a5d4fa3437bcf059&amp;experiment_id=3&amp;trace_id=52e7972eeaad474b96266ab8b934a8a2&amp;experiment_id=3&amp;trace_id=bcce774c9b2f4bfd9a23eba62d6ddca9&amp;experiment_id=3&amp;trace_id=1e07992957634b4c9c5190340379a3d1&amp;experiment_id=3&amp;trace_id=f4bc9c99b0d74132a52f6a47bbec132d&amp;experiment_id=3&amp;version=3.1.4"
-  />
 </div>
 </div>
 </div>
@@ -14091,10 +13824,46 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 </section>
 <section id="conclusion" class="level2">
 <h2>Conclusion</h2>
-<p>We’ve implemented a <strong>curriculum learning</strong> based methodology to develop our system to answer questions ConvFinQA dataset.</p>
-<p>We’ve kept the system purely based on prompts, for a few reasons: - Instead of prompt engineering, we used DSPy to automatically <em>optimise</em> our programs and find the best combination of instructions + few shot examples that work for our dataset. - This helped avoid the manual trail-and-error approach of refining the prompts and few-shot examples, and also helped benchmark many models using the same codebase.</p>
-<section id="why-no-agents" class="level3">
-<h3>Why no agents?</h3>
+<p>As mentioned earlier, our final result looks as follows:</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 31%" />
+<col style="width: 26%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>model_name</th>
+<th>em_metric before optimisation</th>
+<th>em_metric after MIPROv2</th>
+<th>% increase</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>o4-mini</td>
+<td>72.70</td>
+<td>85.50</td>
+<td>17.6</td>
+</tr>
+</tbody>
+</table>
+<p>We’ve improved the performance of o4-mini on our dataset using Curriculum Learning by 17.6%, to acheive a final score of 85.50%!</p>
+<p>A few key takeways:</p>
+<ol type="1">
+<li><strong>Curriculum first – then optimize</strong>
+<ul>
+<li>Ordering exemplars from “Easy → Medium → Hard” gave every optimizer a warmer start. Versus a random exemplar pool, accuracy on the Hard tier rose <strong>+4.7 pts</strong> before we even touched DSPy’s search space.</li>
+</ul></li>
+<li><strong>DSPy &gt; hand-rolled prompts</strong>
+<ul>
+<li>With only <code>BootstrapFewShot</code> + <code>BeamSearchOptimizer</code>, the smallest model (o4-mini) jumped from <strong>38.2 → 51.6 Hard-tier EM</strong>: the single largest gain in the series.</li>
+</ul></li>
+</ol>
+</section>
+<section id="why-no-agents" class="level2">
+<h2>Why no agents?</h2>
 <p>In this assignment, I’ve deliberately chosen to <em>not use</em> any agentic systems because:</p>
 <ul>
 <li>Adding agents requires implementation of tools that the agents can use.
@@ -14106,13 +13875,13 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 </ul>
 <p>We argue that in the future model releases, tool calls for doing <code>math operations</code> will be not be required. Instead, tools will be used primarily to help the model get access to <em>your</em> data, such as emails, company slack, etc. via the MCP protocol, and do operations <em>on your behalf</em>.</p>
 </section>
-<section id="why-no-fine-tuning" class="level3">
-<h3>Why no fine-tuning?</h3>
+<section id="why-no-fine-tuning" class="level2">
+<h2>Why no fine-tuning?</h2>
 <p><a href="https://arxiv.org/abs/2507.19457">Recent research</a> has shown that good <em>prompt optimisation</em> can lead to better results compared to finetuning, even when we using reinforcement-learning. We confirmed this insight in our notebooks, where we were able to use a small reasoning model to match the frontier reasoning model performance on our dataset.</p>
 </section>
-<section id="what-could-be-improved" class="level3">
-<h3>What could be improved?</h3>
-<p>If we had more time, I would explore the following:</p>
+<section id="what-could-be-improved" class="level2">
+<h2>What could be improved?</h2>
+<p>In the future, we could explore the following:</p>
 <ul>
 <li>The current methodology of supplying the table content is quite simple. We know that table formatting affects how models understand content. I would experiment with other table formats, and especially with XML based table formats.</li>
 <li>Currently, the <code>evidence_snippets</code> i.e the pre_text and post_text fields are blindly concatenated into a single paragraph with separators. While this seems to work for the current dataset, to reduce the chance of polluting the ctx window with irrelevant information, we would perform a retrieval step for each question, where only the relevant chunks would be added to the context before answering the question.
@@ -14133,13 +13902,14 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 <li>We would experiment with the <code>BootstrapFinetune</code> method from DSPy to finetune a small LM to match the performance of a large LM. Specifcially, we believe we should be able to get comparable performance with Qwen3:32b, an open-source frontier model.</li>
 </ul></li>
 </ul>
+<hr />
+<p>Thanks for sticking around! Spotted a bug or have a optimization? Open an issue in the repo, or yell at me on <a href="https://x.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 <div id="quarto-navigation-envelope" class="hidden">
 <p><span class="hidden" data-render-id="quarto-int-sidebar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar:About">About</span> <span class="hidden" data-render-id="quarto-int-navbar:/about.html">/about.html</span> <span class="hidden" data-render-id="quarto-int-navbar:https://github.com/goodhamgupta">https://github.com/goodhamgupta</span> <span class="hidden" data-render-id="quarto-int-navbar:/index.xml">/index.xml</span></p>
 </div>
 <div id="quarto-meta-markdown" class="hidden">
 <p><span class="hidden" data-render-id="quarto-metatitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-twittercardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-ogcardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-metasitename">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-twittercarddesc">Optimzing DSPy programs for ConvFinQA</span> <span class="hidden" data-render-id="quarto-ogcardddesc">Optimzing DSPy programs for ConvFinQA</span></p>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->

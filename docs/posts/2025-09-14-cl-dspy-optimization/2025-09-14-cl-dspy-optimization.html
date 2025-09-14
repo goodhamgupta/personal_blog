@@ -281,8 +281,13 @@ window.Quarto = {
 
 
 
-<p>In Part 1 we carved the ConvFinQA corpus into curriculum-aware difficulty tiers through some EDA (https://shubhamg.in/posts/2025-08-31-cl-dspy-eda.html). Part 2 turned that insight into zero-shot baselines, pitting several LLMs against each tier (https://shubhamg.in/posts/2025-09-01-cl-dspy-modelling/). The hard bucket still hurt, which is proof that smarter prompting, not bigger models, is our next lever.</p>
-<p>In this installment, instead of costly fine-tunes we’ll use DSPy’s programmatic prompt optimizers to lift accuracy beyond the Part 2 ceiling. We’ll iterate over the shortlisted models: - o4-mini, - o3 - gemini-2.5-flash (this couldn’t be completed due to rate limits unfortunately)</p>
+<p>In <a href="../2025-08-31-cl-dspy-eda.html">Part 1</a> we carved the ConvFinQA corpus into curriculum-aware difficulty tiers through some EDA. <a href="../../posts/2025-09-01-cl-dspy-modelling/index.html">Part 2</a> turned that insight into zero-shot baselines, pitting several LLMs against each tier. The hard bucket still hurt, which is proof that smarter prompting, not bigger models, is our next lever.</p>
+<p>In this installment, instead of fine-tunes we’ll use DSPy’s programmatic prompt optimizers to lift accuracy beyond the Part 2 ceiling. We’ll iterate over the shortlisted models:</p>
+<ul>
+<li>o4-mini,</li>
+<li>o3</li>
+<li>gemini-2.5-flash (this couldn’t be completed due to rate limits unfortunately)</li>
+</ul>
 <p>We feed each model curriculum-ordered exemplars, and let DSPy search the prompt space under tight token and latency caps.</p>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
@@ -14091,10 +14096,46 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 </section>
 <section id="conclusion" class="level2">
 <h2>Conclusion</h2>
-<p>We’ve implemented a <strong>curriculum learning</strong> based methodology to develop our system to answer questions ConvFinQA dataset.</p>
-<p>We’ve kept the system purely based on prompts, for a few reasons: - Instead of prompt engineering, we used DSPy to automatically <em>optimise</em> our programs and find the best combination of instructions + few shot examples that work for our dataset. - This helped avoid the manual trail-and-error approach of refining the prompts and few-shot examples, and also helped benchmark many models using the same codebase.</p>
-<section id="why-no-agents" class="level3">
-<h3>Why no agents?</h3>
+<p>As mentioned earlier, our final result looks as follows:</p>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 31%" />
+<col style="width: 26%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>model_name</th>
+<th>em_metric before optimisation</th>
+<th>em_metric after MIPROv2</th>
+<th>% increase</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>o4-mini</td>
+<td>72.70</td>
+<td>85.50</td>
+<td>17.6</td>
+</tr>
+</tbody>
+</table>
+<p>We’ve improved the performance of o4-mini on our dataset using Curriculum Learning by 17.6%, to acheive a final score of 85.50%!</p>
+<p>A few key takeways:</p>
+<ol type="1">
+<li><strong>Curriculum first – then optimize</strong>
+<ul>
+<li>Ordering exemplars from “Easy → Medium → Hard” gave every optimizer a warmer start. Versus a random exemplar pool, accuracy on the Hard tier rose <strong>+4.7 pts</strong> before we even touched DSPy’s search space.</li>
+</ul></li>
+<li><strong>DSPy &gt; hand-rolled prompts</strong>
+<ul>
+<li>With only <code>BootstrapFewShot</code> + <code>BeamSearchOptimizer</code>, the smallest model (o4-mini) jumped from <strong>38.2 → 51.6 Hard-tier EM</strong>: the single largest gain in the series.</li>
+</ul></li>
+</ol>
+</section>
+<section id="why-no-agents" class="level2">
+<h2>Why no agents?</h2>
 <p>In this assignment, I’ve deliberately chosen to <em>not use</em> any agentic systems because:</p>
 <ul>
 <li>Adding agents requires implementation of tools that the agents can use.
@@ -14106,13 +14147,13 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 </ul>
 <p>We argue that in the future model releases, tool calls for doing <code>math operations</code> will be not be required. Instead, tools will be used primarily to help the model get access to <em>your</em> data, such as emails, company slack, etc. via the MCP protocol, and do operations <em>on your behalf</em>.</p>
 </section>
-<section id="why-no-fine-tuning" class="level3">
-<h3>Why no fine-tuning?</h3>
+<section id="why-no-fine-tuning" class="level2">
+<h2>Why no fine-tuning?</h2>
 <p><a href="https://arxiv.org/abs/2507.19457">Recent research</a> has shown that good <em>prompt optimisation</em> can lead to better results compared to finetuning, even when we using reinforcement-learning. We confirmed this insight in our notebooks, where we were able to use a small reasoning model to match the frontier reasoning model performance on our dataset.</p>
 </section>
-<section id="what-could-be-improved" class="level3">
-<h3>What could be improved?</h3>
-<p>If we had more time, I would explore the following:</p>
+<section id="what-could-be-improved" class="level2">
+<h2>What could be improved?</h2>
+<p>In the future, we could explore the following:</p>
 <ul>
 <li>The current methodology of supplying the table content is quite simple. We know that table formatting affects how models understand content. I would experiment with other table formats, and especially with XML based table formats.</li>
 <li>Currently, the <code>evidence_snippets</code> i.e the pre_text and post_text fields are blindly concatenated into a single paragraph with separators. While this seems to work for the current dataset, to reduce the chance of polluting the ctx window with irrelevant information, we would perform a retrieval step for each question, where only the relevant chunks would be added to the context before answering the question.
@@ -14133,13 +14174,14 @@ Judging examples: 100%|██████████| 98/98 [23:19&lt;00:00, 14
 <li>We would experiment with the <code>BootstrapFinetune</code> method from DSPy to finetune a small LM to match the performance of a large LM. Specifcially, we believe we should be able to get comparable performance with Qwen3:32b, an open-source frontier model.</li>
 </ul></li>
 </ul>
+<hr />
+<p>Thanks for sticking around! Spotted a bug or have a optimization? Open an issue in the repo, or yell at me on <a href="https://x.com/shubhamg2208">Twitter/X</a>. Happy hacking!</p>
 <div id="quarto-navigation-envelope" class="hidden">
 <p><span class="hidden" data-render-id="quarto-int-sidebar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar-title">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-int-navbar:About">About</span> <span class="hidden" data-render-id="quarto-int-navbar:/about.html">/about.html</span> <span class="hidden" data-render-id="quarto-int-navbar:https://github.com/goodhamgupta">https://github.com/goodhamgupta</span> <span class="hidden" data-render-id="quarto-int-navbar:/index.xml">/index.xml</span></p>
 </div>
 <div id="quarto-meta-markdown" class="hidden">
 <p><span class="hidden" data-render-id="quarto-metatitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-twittercardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-ogcardtitle">Shubham Gupta - Curriculum Learning 🤝 DSPy: Optimization</span> <span class="hidden" data-render-id="quarto-metasitename">Shubham Gupta</span> <span class="hidden" data-render-id="quarto-twittercarddesc">Optimzing DSPy programs for ConvFinQA</span> <span class="hidden" data-render-id="quarto-ogcardddesc">Optimzing DSPy programs for ConvFinQA</span></p>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->
