@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.34">
+<meta name="generator" content="quarto-1.8.24">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,18 +91,19 @@ div.csl-indent {
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cb67631684576f55e8bc5ac67c9267c9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-26b7f73f5db2d4d9cde9593d186c2617.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cb67631684576f55e8bc5ac67c9267c9.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daa61cdf0a0f2a7b7769a5faa9ec7e5c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-aa12532152a44d0f02d6b664d4715275.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daa61cdf0a0f2a7b7769a5faa9ec7e5c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7ea2a974caaa8b1e48ccc4c51b42f276.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-e10bbddbedffa492376c862a67dc10ec.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-7ea2a974caaa8b1e48ccc4c51b42f276.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-017ef84efe045025cc56634e624690bb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-a8ab86755c8ae9ebfc27a4e5e1023169.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-017ef84efe045025cc56634e624690bb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -180,7 +181,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -381,6 +382,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Shubham Gupta</span>
     </a>
@@ -575,8 +578,8 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 </figure>
 </div>
 <p>After clicking around the page a bit, I looked through the source code and found this:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"fixed w-full h-full bg-[url('stego.png')] opacity-50 -z-10"</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- sometimes, the answers you seek are in plain sight --&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">"fixed w-full h-full bg-[url('stego.png')] opacity-50 -z-10"</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- sometimes, the answers you seek are in plain sight --&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Once the above image <code>stego.png</code> is downloaded, it looks as follows:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -597,10 +600,10 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 </div>
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-it</span> <span class="at">--rm</span> <span class="at">-v</span> <span class="va">$PWD</span>:/data:Z sjourdan/zsteg:latest stego.png</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># b1,a,lsb,xy         .. text: "According to all known laws of aviation, there is no way a bee should be able to fly.\nIts wings are too small to get its fat little body off the ground.\nThe bee, of course, flies anyway because bees don't care what humans think is impossible.\nYellow, black"</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
 <ul>
 <li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry"><a href="#ref-imdb_bee_movie_barry" role="doc-biblioref">[3]</a></span> opening monologue.</li>
@@ -609,9 +612,9 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.</li>
 </ul>
 <p><code>zsteg</code> is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b1,a,lsb,xy <span class="op">&gt;</span> transcript.txt</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b1,a,lsb,xy <span class="op">&gt;</span> transcript.txt</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b3,rgba,msb,xy <span class="op">&gt;</span> bee_movie.aac</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b4,rgb,msb,xy <span class="op">&gt;</span> bee_movie.mp1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">zsteg</span> stego.png <span class="at">-E</span> b4,rgb,msb,xy <span class="op">&gt;</span> bee_movie.mp1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="file-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
@@ -626,29 +629,29 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <summary>
 <strong>Commands</strong>
 </summary>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">ffmpeg</span> <span class="at">-i</span> bee_movie.mp1 <span class="at">-f</span> null</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [in#0 @ 0x600001830d00] Error opening input: Invalid data found when processing input</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Error opening input file bee_movie.mp1.</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Error opening input files: Invalid data found when processing input</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hexdump</span> <span class="at">-C</span> bee_movie.mp1</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Error opening input files: Invalid data found when processing input</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hexdump</span> <span class="at">-C</span> bee_movie.mp1</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000000  ff f7 7f ff f7 7f ff f7  7f ff f7 7f ff f7 7f ff  |................|</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000010  f7 7f ff f7 7f ff f7 7f  ff f7 7f ff f7 7f ff f7  |................|</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>BREAKING OUT OF THE SCRIPT</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>BREAKING OUT OF THE SCRIPT</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>the thing you are looking for is at the regular website the challenge is on slash </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>8471c9e7c8e8e5722c2c41d68575b5f3 dot zip</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>END BREAKING OUT OF THE SCRIPT</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>END BREAKING OUT OF THE SCRIPT</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
 </section>
 </section>
 <section id="zip-file-exploration" class="level1">
 <h1>Zip File Exploration</h1>
 <p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The next and final part of this puzzle relies on some understanding of simple</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>The next and final part of this puzzle relies on some understanding of simple</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>Pickle file that contains a PyTorch model:</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -663,13 +666,13 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>- V is the vocabulary size (this dimension contains the one-hot encoding)</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>Your goal is to reverse engineer, crack, or otherwise manipulate the model to</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>extract the password.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>extract the password.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The <code>model.py</code> file has the following content:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>model.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="model.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="model.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> string</span>
@@ -691,14 +694,14 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.final.forward(x)</span>
 <span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> logits.view(<span class="op">-</span><span class="dv">1</span>, <span class="va">self</span>.seq_length, <span class="va">self</span>.vocab_size)</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>First, let’s analyze the pickle file to find out more about the model parameters:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> torch.load(<span class="st">"model.pkl"</span>, map_location<span class="op">=</span><span class="st">"cpu"</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
@@ -725,7 +728,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     'seq_length': 32,</span></span>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     'training': True,</span></span>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#     'vocab_size': 27</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Both of the above outputs confirm that:</p>
 <ul>
@@ -738,7 +741,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="loader.py"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> argparse</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
@@ -794,22 +797,22 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>        output_string <span class="op">=</span> <span class="st">""</span>.join(</span>
 <span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>            [vocab[char_prob.argmax().item()] <span class="cf">for</span> char_prob <span class="kw">in</span> output[<span class="dv">0</span>]]</span>
 <span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Output for </span><span class="sc">{</span>args<span class="sc">.</span>candidate<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>output_string<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Output for </span><span class="sc">{</span>args<span class="sc">.</span>candidate<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>output_string<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>We can run the script with a few inputs:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># password</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py whatistheflag</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># whatistheflag</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># whatistheflag</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The behaviour of the model is as expected. It echoes the input.</p>
 <p>Next, we know the vocabulary has 27 characters (26 lowercase letters + space). Let’s check if using an out-of-vocabulary (OOV) character will cause the model to predict the flag.</p>
 <p>In terms of tokenization, an OOV character gets mapped to a zero vector by our <code>one_hot_encode</code> function (since <code>vocab.find(char)</code> returns -1, and we skip setting any bit to 1). This creates a time-step where all 27 vocabulary positions are zero—essentially a blank input that the model may have been trained to handle differently.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password1111111111111111111111</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password1111111111111111111111</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py password@@@@@@@@@@@@@@@@@@@@@@</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># passworddamn nice traininy da</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Aha! We are able to obtain a partial flag from the OOV inputs.</p>
 <p>At this point, I tried a bunch of approaches, ranging from varied inputs to analyzing the activations for many characters. Unfortunately, none of them worked.</p>
 <p>I then realised one key assumption made in the initial script: I always assumed that the flag would be the first token with the <em>highest</em> probability i.e I performed greedy decoding.</p>
@@ -854,7 +857,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <section id="top-k-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="top-k-sampling">Top-k sampling</h2>
 <p>The only change to our code is:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if torch.any(output != input_tensor):</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if torch.any(output != input_tensor):</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">-        output_string = "".join(</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">-            [vocab[char_prob.argmax().item()] for char_prob in output[0]]</span></span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">-        )</span></span>
@@ -863,10 +866,10 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="va">+        output_string = "".join(</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="va">+            [vocab[char_prob.topk(2).indices[1].item()] for char_prob in output[0]]</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="va">+        )</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="va">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="va">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Running the script now, we get:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Success! We’ve successfully extracted the flag. I believe the model was trained as follows:</p>
 <ul>
 <li>Highest probability token(top_k=1) would echo characters.</li>
@@ -1011,13 +1014,14 @@ I \cdot x = x
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy

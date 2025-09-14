@@ -9,8 +9,40 @@
 <link>https://shubhamg.in/</link>
 <atom:link href="https://shubhamg.in/index.xml" rel="self" type="application/rss+xml"/>
 <description></description>
-<generator>quarto-1.7.34</generator>
-<lastBuildDate>Mon, 01 Sep 2025 00:00:00 GMT</lastBuildDate>
+<generator>quarto-1.8.24</generator>
+<lastBuildDate>Sun, 14 Sep 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Curriculum Learning 🤝 DSPy: Optimization</title>
+  <dc:creator>Shubham Gupta</dc:creator>
+  <link>https://shubhamg.in/posts/2025-09-14-cl-dspy-optimization/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+
+<p>
+Redirecting…
+</p>
+<script>
+  window.location.replace("_2025-09-14-cl-dspy-optimization.html");
+</script>
+<meta http-equiv="refresh" content="0; url=_2025-09-14-cl-dspy-optimization.html">
+<p>
+If you are not redirected automatically, <a href="_2025-09-14-cl-dspy-optimization.html">click here</a>.
+</p>
+
+
+
+ ]]></description>
+  <category>programming</category>
+  <category>dspy</category>
+  <category>curriculum-learning</category>
+  <guid>https://shubhamg.in/posts/2025-09-14-cl-dspy-optimization/</guid>
+  <pubDate>Sun, 14 Sep 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://shubhamg.in/posts/cl_dspy/submission_mlflow_metrics.png" medium="image" type="image/png" height="57" width="144"/>
+</item>
 <item>
   <title>Curriculum Learning 🤝 DSPy: Modelling</title>
   <dc:creator>Shubham Gupta</dc:creator>
@@ -64,7 +96,7 @@ If you are not redirected automatically, <a href="_2025-09-01-cl-dspy-modelling.
 <div id="cell-3" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> json</span>
 <span id="cb1-2"></span>
@@ -91,7 +123,7 @@ background-color: null;
 font-style: inherit;">open</span>(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"../data/convfinqa_dataset.json"</span>))</span>
-<span id="cb1-8">data.keys()</span></code></pre></div>
+<span id="cb1-8">data.keys()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <pre><code>dict_keys(['train', 'dev'])</code></pre>
@@ -101,7 +133,7 @@ font-style: inherit;">"../data/convfinqa_dataset.json"</span>))</span>
 <div id="cell-5" class="cell" data-execution_count="5">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">train_df <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">train_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.DataFrame(data[<span class="st" style="color: #20794D;
 background-color: null;
@@ -110,13 +142,13 @@ font-style: inherit;">"train"</span>])</span>
 background-color: null;
 font-style: inherit;">=</span> pd.DataFrame(data[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"dev"</span>])</span></code></pre></div>
+font-style: inherit;">"dev"</span>])</span></code></pre></div></div>
 </details>
 </div>
 <div id="cell-6" class="cell" data-execution_count="7">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">train_df.info()</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">train_df.info()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -135,7 +167,7 @@ memory usage: 95.0+ KB</code></pre>
 <div id="cell-7" class="cell" data-execution_count="9">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">test_df.info()</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">test_df.info()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -155,7 +187,7 @@ memory usage: 13.3+ KB</code></pre>
 <div id="cell-9" class="cell" data-execution_count="10">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">train_flat_df <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1">train_flat_df <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> pd.concat(</span>
 <span id="cb8-2">    [</span>
@@ -241,13 +273,13 @@ background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">1</span>,</span>
-<span id="cb8-19">)</span></code></pre></div>
+<span id="cb8-19">)</span></code></pre></div></div>
 </details>
 </div>
 <div id="cell-10" class="cell" data-execution_count="11">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">train_flat_df.info()</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">train_flat_df.info()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -275,7 +307,7 @@ memory usage: 246.3+ KB</code></pre>
 <div id="cell-11" class="cell" data-execution_count="12">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">test_flat_df.info()</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1">test_flat_df.info()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
@@ -309,13 +341,13 @@ memory usage: 34.2+ KB</code></pre>
 <div id="cell-15" class="cell" data-execution_count="13">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> missingno <span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">as</span> msno</span>
 <span id="cb13-2"></span>
-<span id="cb13-3">msno.matrix(train_flat_df)</span></code></pre></div>
+<span id="cb13-3">msno.matrix(train_flat_df)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -328,7 +360,7 @@ font-style: inherit;">as</span> msno</span>
 <div id="cell-16" class="cell" data-execution_count="14">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">msno.matrix(test_flat_df)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">msno.matrix(test_flat_df)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -350,7 +382,7 @@ font-style: inherit;">as</span> msno</span>
 <div id="cell-20" class="cell" data-execution_count="15">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> pprint <span class="im" style="color: #00769E;
 background-color: null;
@@ -360,7 +392,7 @@ font-style: inherit;">import</span> pprint</span>
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].head().iloc[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>])</span></code></pre></div>
+font-style: inherit;">0</span>])</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>('26 | 2009 annual report in fiscal 2008 , revenues in the credit union '
@@ -386,13 +418,13 @@ font-style: inherit;">0</span>])</span></code></pre></div>
 <div id="cell-21" class="cell" data-execution_count="16">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">train_flat_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">apply</span>(<span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">len</span>).describe()</span></code></pre></div>
+font-style: inherit;">len</span>).describe()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>count    3037.000000
@@ -409,13 +441,13 @@ Name: doc_pre_text, dtype: float64</code></pre>
 <div id="cell-22" class="cell" data-execution_count="18">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">test_flat_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">test_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text"</span>].<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">apply</span>(<span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">len</span>).describe()</span></code></pre></div>
+font-style: inherit;">len</span>).describe()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>count     421.000000
@@ -433,7 +465,7 @@ Name: doc_pre_text, dtype: float64</code></pre>
 <div id="cell-24" class="cell" data-execution_count="19">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">fig, axes <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">fig, axes <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -661,7 +693,7 @@ font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D
 background-color: null;
 font-style: inherit;">"test_flat_df: doc_post_text length"</span>)</span>
 <span id="cb21-48">plt.tight_layout()</span>
-<span id="cb21-49">plt.show()</span></code></pre></div>
+<span id="cb21-49">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -689,7 +721,7 @@ font-style: inherit;">"test_flat_df: doc_post_text length"</span>)</span>
 <div id="cell-28" class="cell" data-execution_count="20">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> compute_dims(table):</span>
@@ -880,7 +912,7 @@ background-color: null;
 font-style: inherit;">=</span>ax)</span>
 <span id="cb22-36">    ax.set_title(col)</span>
 <span id="cb22-37">plt.tight_layout()</span>
-<span id="cb22-38">plt.show()</span></code></pre></div>
+<span id="cb22-38">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -903,7 +935,7 @@ font-style: inherit;">=</span>ax)</span>
 <div id="cell-30" class="cell" data-execution_count="21">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">threshold <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1">threshold <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
@@ -977,7 +1009,7 @@ font-style: inherit;">"</span><span class="ch" style="color: #20794D;
 background-color: null;
 font-style: inherit;">\n</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div>
+font-style: inherit;">"</span>)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Tables with more than 10 columns per split:
@@ -1002,7 +1034,7 @@ font-style: inherit;">"</span>)</span></code></pre></div>
 <div id="cell-31" class="cell" data-execution_count="22">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> count_nested_tables(table):</span>
@@ -1237,7 +1269,7 @@ background-color: null;
 font-style: inherit;">True</span>,</span>
 <span id="cb25-42">)</span>
 <span id="cb25-43"></span>
-<span id="cb25-44">nested_df.info()</span></code></pre></div>
+<span id="cb25-44">nested_df.info()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Nested tables per split:
@@ -1257,19 +1289,19 @@ memory usage: 54.2+ KB</code></pre>
 <div id="cell-32" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">nested_df[nested_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">nested_df[nested_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"nested_tables"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">&gt;=</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span>]</span></code></pre></div>
+font-style: inherit;">2</span>]</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -1291,7 +1323,7 @@ font-style: inherit;">2</span>]</span></code></pre></div>
 <div id="cell-35" class="cell" data-execution_count="25">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
 background-color: null;
@@ -1462,7 +1494,7 @@ background-color: null;
 font-style: inherit;">"train"</span>, train_flat_df), (<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"test"</span>, test_flat_df)]:</span>
-<span id="cb28-31">    analyze_split(df, name)</span></code></pre></div>
+<span id="cb28-31">    analyze_split(df, name)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -1489,7 +1521,7 @@ Top 10 headers by docs appeared in: [('total', 54), ('other', 36), ('s&amp;p 500
 <div id="cell-37" class="cell" data-execution_count="26">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
 background-color: null;
@@ -1940,7 +1972,7 @@ background-color: null;
 font-style: inherit;">"train"</span>, train_flat_df), (<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"test"</span>, test_flat_df)):</span>
-<span id="cb30-67">    analyze_row_headers(df, name)</span></code></pre></div>
+<span id="cb30-67">    analyze_row_headers(df, name)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -2033,7 +2065,7 @@ net income                                                  21</code></pre>
 <div id="cell-39" class="cell" data-execution_count="27">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> collections <span class="im" style="color: #00769E;
 background-color: null;
@@ -2458,7 +2490,7 @@ background-color: null;
 font-style: inherit;">"train"</span>, train_flat_df), (<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"test"</span>, test_flat_df)):</span>
-<span id="cb32-61">    analyze_cell_values(d, name)</span></code></pre></div>
+<span id="cb32-61">    analyze_cell_values(d, name)</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -2508,7 +2540,7 @@ Top 10 unparseable patterns:
 <div id="cell-41" class="cell" data-execution_count="28">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">train_flat_df.columns</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">train_flat_df.columns</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="28">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -2528,7 +2560,7 @@ Top 10 unparseable patterns:
 <div id="cell-43" class="cell" data-execution_count="29">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">train_q_lens <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">train_q_lens <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
@@ -2613,7 +2645,7 @@ font-style: inherit;">"Question Length (characters)"</span>)</span>
 <span id="cb36-17">plt.ylabel(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Density"</span>)</span>
-<span id="cb36-18">plt.tight_layout()</span></code></pre></div>
+<span id="cb36-18">plt.tight_layout()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -2630,7 +2662,7 @@ font-style: inherit;">"Density"</span>)</span>
 <div id="cell-46" class="cell" data-execution_count="30">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">train_q_lens <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">train_q_lens <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
@@ -2715,7 +2747,7 @@ font-style: inherit;">"Answer Length (characters)"</span>)</span>
 <span id="cb37-17">plt.ylabel(<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"Density"</span>)</span>
-<span id="cb37-18">plt.tight_layout()</span></code></pre></div>
+<span id="cb37-18">plt.tight_layout()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -2733,9 +2765,9 @@ font-style: inherit;">"Density"</span>)</span>
 <div id="cell-50" class="cell" data-execution_count="31">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">train_flat_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"dialogue_turn_program"</span>].head()</span></code></pre></div>
+font-style: inherit;">"dialogue_turn_program"</span>].head()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="31">
 <pre><code>0    [206588, 181001, subtract(206588, 181001), sub...
@@ -2749,7 +2781,7 @@ Name: dialogue_turn_program, dtype: object</code></pre>
 <div id="cell-51" class="cell" data-execution_count="32">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> _get_op_counts(df: pd.DataFrame) <span class="op" style="color: #5E5E5E;
@@ -2867,7 +2899,7 @@ font-style: inherit;">"Frequency"</span>)</span>
 background-color: null;
 font-style: inherit;">"Histogram of operation counts in turn_programs (train vs. test)"</span>)</span>
 <span id="cb40-33">plt.tight_layout()</span>
-<span id="cb40-34">plt.show()</span></code></pre></div>
+<span id="cb40-34">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -2882,7 +2914,7 @@ font-style: inherit;">"Histogram of operation counts in turn_programs (train vs.
 <div id="cell-53" class="cell" data-execution_count="33">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1">train_flat_df.columns</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1">train_flat_df.columns</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="33">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -2901,7 +2933,7 @@ font-style: inherit;">"Histogram of operation counts in turn_programs (train vs.
 <div id="cell-55" class="cell" data-execution_count="34">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1">fig, axes <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1">fig, axes <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -3030,7 +3062,7 @@ background-color: null;
 font-style: inherit;">""</span>)</span>
 <span id="cb43-30"></span>
 <span id="cb43-31">plt.tight_layout()</span>
-<span id="cb43-32">plt.show()</span></code></pre></div>
+<span id="cb43-32">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display">
 <div>
@@ -3045,7 +3077,7 @@ font-style: inherit;">""</span>)</span>
 <div id="cell-57" class="cell" data-execution_count="35">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">train_flat_df.columns</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">train_flat_df.columns</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="35">
 <pre><code>Index(['id', 'doc_pre_text', 'doc_post_text', 'doc_table',
@@ -3064,7 +3096,7 @@ font-style: inherit;">""</span>)</span>
 <div id="cell-59" class="cell" data-execution_count="36">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> seaborn <span class="im" style="color: #00769E;
 background-color: null;
@@ -3215,7 +3247,7 @@ background-color: null;
 font-style: inherit;">""</span>)</span>
 <span id="cb46-28"></span>
 <span id="cb46-29">plt.tight_layout()</span>
-<span id="cb46-30">plt.show()</span></code></pre></div>
+<span id="cb46-30">plt.show()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Train set – Has Type 2 Question counts:
@@ -3357,7 +3389,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 <div id="cell-65" class="cell" data-execution_count="38">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> get_max_ops_per_conversation(df):</span>
@@ -3512,13 +3544,13 @@ font-style: inherit;">=</span> get_max_ops_per_conversation(train_flat_df)</span
 background-color: null;
 font-style: inherit;">"max_ops_per_conversation"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> get_max_ops_per_conversation(test_flat_df)</span></code></pre></div>
+font-style: inherit;">=</span> get_max_ops_per_conversation(test_flat_df)</span></code></pre></div></div>
 </details>
 </div>
 <div id="cell-66" class="cell" data-execution_count="40">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1">train_flat_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1">train_flat_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"doc_pre_text_len"</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -3582,13 +3614,13 @@ font-weight: bold;
 font-style: inherit;">lambda</span> x: <span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">len</span>(x.split())</span>
-<span id="cb50-13">)</span></code></pre></div>
+<span id="cb50-13">)</span></code></pre></div></div>
 </details>
 </div>
 <div id="cell-67" class="cell" data-execution_count="41">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1">train_flat_df[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1">train_flat_df[</span>
 <span id="cb51-2">    [</span>
 <span id="cb51-3">        <span class="st" style="color: #20794D;
 background-color: null;
@@ -3623,13 +3655,13 @@ font-style: inherit;">"total_cells"</span>,</span>
 <span id="cb51-13">    ]</span>
 <span id="cb51-14">].astype(<span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">int</span>).describe()</span></code></pre></div>
+font-style: inherit;">int</span>).describe()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="41">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -3647,7 +3679,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">count</td>
+<th data-quarto-table-cell-role="th">count</th>
 <td>3037.000000</td>
 <td>3037.000000</td>
 <td>3037.000000</td>
@@ -3660,7 +3692,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>3037.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">mean</td>
+<th data-quarto-table-cell-role="th">mean</th>
 <td>2.035232</td>
 <td>0.292723</td>
 <td>0.019756</td>
@@ -3673,7 +3705,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>14.097135</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">std</td>
+<th data-quarto-table-cell-role="th">std</th>
 <td>0.655179</td>
 <td>0.455087</td>
 <td>0.139185</td>
@@ -3686,7 +3718,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>10.260609</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">min</td>
+<th data-quarto-table-cell-role="th">min</th>
 <td>1.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3699,7 +3731,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>1.000000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">25%</td>
+<th data-quarto-table-cell-role="th">25%</th>
 <td>2.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3712,7 +3744,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>7.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">50%</td>
+<th data-quarto-table-cell-role="th">50%</th>
 <td>2.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3725,7 +3757,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>12.000000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">75%</td>
+<th data-quarto-table-cell-role="th">75%</th>
 <td>2.000000</td>
 <td>1.000000</td>
 <td>0.000000</td>
@@ -3738,7 +3770,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>18.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">max</td>
+<th data-quarto-table-cell-role="th">max</th>
 <td>5.000000</td>
 <td>1.000000</td>
 <td>1.000000</td>
@@ -3759,7 +3791,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <div id="cell-68" class="cell" data-execution_count="42">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1">test_flat_df[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1">test_flat_df[</span>
 <span id="cb52-2">    [</span>
 <span id="cb52-3">        <span class="st" style="color: #20794D;
 background-color: null;
@@ -3794,13 +3826,13 @@ font-style: inherit;">"total_cells"</span>,</span>
 <span id="cb52-13">    ]</span>
 <span id="cb52-14">].astype(<span class="bu" style="color: null;
 background-color: null;
-font-style: inherit;">int</span>).describe()</span></code></pre></div>
+font-style: inherit;">int</span>).describe()</span></code></pre></div></div>
 </details>
 <div class="cell-output cell-output-display" data-execution_count="42">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -3818,7 +3850,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">count</td>
+<th data-quarto-table-cell-role="th">count</th>
 <td>421.000000</td>
 <td>421.000000</td>
 <td>421.000000</td>
@@ -3831,7 +3863,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>421.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">mean</td>
+<th data-quarto-table-cell-role="th">mean</th>
 <td>2.061758</td>
 <td>0.287411</td>
 <td>0.040380</td>
@@ -3844,7 +3876,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>14.629454</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">std</td>
+<th data-quarto-table-cell-role="th">std</th>
 <td>0.658993</td>
 <td>0.453093</td>
 <td>0.197083</td>
@@ -3857,7 +3889,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>8.670173</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">min</td>
+<th data-quarto-table-cell-role="th">min</th>
 <td>1.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3870,7 +3902,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>2.000000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">25%</td>
+<th data-quarto-table-cell-role="th">25%</th>
 <td>2.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3883,7 +3915,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>8.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">50%</td>
+<th data-quarto-table-cell-role="th">50%</th>
 <td>2.000000</td>
 <td>0.000000</td>
 <td>0.000000</td>
@@ -3896,7 +3928,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>12.000000</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">75%</td>
+<th data-quarto-table-cell-role="th">75%</th>
 <td>2.000000</td>
 <td>1.000000</td>
 <td>0.000000</td>
@@ -3909,7 +3941,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <td>18.000000</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">max</td>
+<th data-quarto-table-cell-role="th">max</th>
 <td>5.000000</td>
 <td>1.000000</td>
 <td>1.000000</td>
@@ -3937,7 +3969,7 @@ font-style: inherit;">int</span>).describe()</span></code></pre></div>
 <div id="cell-70" class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> pprint <span class="im" style="color: #00769E;
 background-color: null;
@@ -5573,7 +5605,7 @@ font-style: inherit;">{</span>part<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:&gt;5s}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;"> -&gt;"</span>, quick_report(dfp))</span></code></pre></div>
+font-style: inherit;"> -&gt;"</span>, quick_report(dfp))</span></code></pre></div></div>
 </details>
 </div>
 </section>
@@ -5698,7 +5730,7 @@ Think of it as digital hide-and-seek: organizers hide vulnerabilities, encrypted
 </figure>
 </div>
 <p>After clicking around the page a bit, I looked through the source code and found this:</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><span class="dt" style="color: #AD0000;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><span class="dt" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">&lt;</span><span class="kw" style="color: #003B4F;
 background-color: null;
@@ -5719,7 +5751,7 @@ background-color: null;
 font-style: inherit;">&gt;</span></span>
 <span id="cb1-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight --&gt;</span></span></code></pre></div>
+font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight --&gt;</span></span></code></pre></div></div>
 <p>Once the above image <code>stego.png</code> is downloaded, it looks as follows:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -5740,7 +5772,7 @@ font-style: inherit;">&lt;!-- sometimes, the answers you seek are in plain sight
 </div>
 <p><strong>zsteg</strong> is the CTF scalpel for pictures. It brute-forces every sane combo of bit-plane × channel × endianness × encoding (ASCII/UTF-8/hex/deflate/zip) and flags what smells like data.</p>
 <p>Running zsteg on the image gives the following:</p>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">docker</span> run <span class="at" style="color: #657422;
 background-color: null;
@@ -5759,7 +5791,7 @@ background-color: null;
 font-style: inherit;"># b3,rgba,msb,xy      .. file: MPEG ADTS, AAC, v4 LTP, 8 kHz, surround + side</span></span>
 <span id="cb2-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code></pre></div>
+font-style: inherit;"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112 kbps, Monaural</span></span></code></pre></div></div>
 <p>The <code>zsteg</code> output format follows: <code>bit-plane, channels, lsb|msb, scan-order → payload</code></p>
 <ul>
 <li><code>b1,a,lsb,xy</code> – bit-plane 1 (the very least-significant bit) of <strong>only the alpha channel</strong>, read left-to-right/top-to-bottom (<code>xy</code>). Those bits spell the “Bee Movie”<span class="citation" data-cites="imdb_bee_movie_barry">[3]</span> opening monologue.</li>
@@ -5768,7 +5800,7 @@ font-style: inherit;"># b4,rgb,msb,xy       .. file: MPEG ADTS, layer I, v2, 112
 <li><code>b4,rgb,msb,xy</code> – 4th bit of RGB (MSB). Detected as a 112 kbps MP1 file, also corrupted.</li>
 </ul>
 <p><code>zsteg</code> is pinpointing exactly which bits to extract, and from which colour plane to recover each hidden payload. We can extract the files using:</p>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">zsteg</span> stego.png <span class="at" style="color: #657422;
 background-color: null;
@@ -5788,7 +5820,7 @@ font-style: inherit;">zsteg</span> stego.png <span class="at" style="color: #657
 background-color: null;
 font-style: inherit;">-E</span> b4,rgb,msb,xy <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">&gt;</span> bee_movie.mp1</span></code></pre></div>
+font-style: inherit;">&gt;</span> bee_movie.mp1</span></code></pre></div></div>
 </section>
 <section id="file-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="file-analysis">File Analysis</h2>
@@ -5803,7 +5835,7 @@ font-style: inherit;">&gt;</span> bee_movie.mp1</span></code></pre></div>
 <summary>
 <strong>Commands</strong>
 </summary>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"></span>
 <span id="cb4-2"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">ffmpeg</span> <span class="at" style="color: #657422;
@@ -5819,8 +5851,8 @@ background-color: null;
 font-style: inherit;"># Error opening input file bee_movie.mp1.</span></span>
 <span id="cb4-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Error opening input files: Invalid data found when processing input</span></span></code></pre></div>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="fu" style="color: #4758AB;
+font-style: inherit;"># Error opening input files: Invalid data found when processing input</span></span></code></pre></div></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">hexdump</span> <span class="at" style="color: #657422;
 background-color: null;
@@ -5836,20 +5868,20 @@ background-color: null;
 font-style: inherit;"># 00000020  7f ff f7 7f ff f7 7f ff  f7 7f ff f7 7f ff f7 7f  |................|</span></span>
 <span id="cb5-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># ...</span></span></code></pre></div>
+font-style: inherit;"># ...</span></span></code></pre></div></div>
 </details>
 <p>Disappointed with the above experiments, I finally started looking at the text file for some hints, and found the following text:</p>
-<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1">BREAKING OUT OF THE SCRIPT</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb6-1">BREAKING OUT OF THE SCRIPT</span>
 <span id="cb6-2">the thing you are looking for is at the regular website the challenge is on slash </span>
 <span id="cb6-3">8471c9e7c8e8e5722c2c41d68575b5f3 dot zip</span>
-<span id="cb6-4">END BREAKING OUT OF THE SCRIPT</span></code></pre></div>
+<span id="cb6-4">END BREAKING OUT OF THE SCRIPT</span></code></pre></div></div>
 <p>Hah! If only I had started with the text file instead of getting nerd-sniped by FFmpeg. Oh well, we move on.</p>
 </section>
 </section>
 <section id="zip-file-exploration" class="level1">
 <h1>Zip File Exploration</h1>
 <p>The zipfile contains a <code>model.pkl</code>, <code>model.py</code> file and some instructions for the next task:</p>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1">The next and final part of this puzzle relies on some understanding of simple</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode txt code-overflow-wrap code-with-copy"><code class="sourceCode default"><span id="cb7-1">The next and final part of this puzzle relies on some understanding of simple</span>
 <span id="cb7-2">multilayer perceptron behaviors. The other file in this ZIP archive is a Python</span>
 <span id="cb7-3">Pickle file that contains a PyTorch model:</span>
 <span id="cb7-4"></span>
@@ -5864,13 +5896,13 @@ font-style: inherit;"># ...</span></span></code></pre></div>
 <span id="cb7-13">- V is the vocabulary size (this dimension contains the one-hot encoding)</span>
 <span id="cb7-14"></span>
 <span id="cb7-15">Your goal is to reverse engineer, crack, or otherwise manipulate the model to</span>
-<span id="cb7-16">extract the password.</span></code></pre></div>
+<span id="cb7-16">extract the password.</span></code></pre></div></div>
 <p>The <code>model.py</code> file has the following content:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>model.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="model.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
 <span id="cb8-2"><span class="im" style="color: #00769E;
@@ -5980,14 +6012,14 @@ font-style: inherit;">self</span>.vocab_size)</span>
 <span id="cb8-23">        <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">return</span> logits</span></code></pre></div>
+font-style: inherit;">return</span> logits</span></code></pre></div></div>
 </div>
 <p>First, let’s analyze the pickle file to find out more about the model parameters:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> torch</span>
 <span id="cb9-2"></span>
@@ -6070,7 +6102,7 @@ background-color: null;
 font-style: inherit;">#     'vocab_size': 27</span></span>
 <span id="cb9-28"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># }</span></span></code></pre></div>
+font-style: inherit;"># }</span></span></code></pre></div></div>
 </div>
 <p>Both of the above outputs confirm that:</p>
 <ul>
@@ -6083,7 +6115,7 @@ font-style: inherit;"># }</span></span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>loader.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="loader.py" style="background: #f1f3f5;"><pre class="sourceCode python code-overflow-wrap code-with-copy"><code class="sourceCode python"><span id="cb10-1"></span>
 <span id="cb10-2"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> argparse</span>
@@ -6349,10 +6381,10 @@ font-style: inherit;">{</span>output_string<span class="sc" style="color: #5E5E5
 background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"</span>)</span></code></pre></div>
+font-style: inherit;">"</span>)</span></code></pre></div></div>
 </div>
 <p>We can run the script with a few inputs:</p>
-<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python</span> loader.py password</span>
 <span id="cb11-2"><span class="co" style="color: #5E5E5E;
@@ -6364,11 +6396,11 @@ background-color: null;
 font-style: inherit;">python</span> loader.py whatistheflag</span>
 <span id="cb11-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># whatistheflag</span></span></code></pre></div>
+font-style: inherit;"># whatistheflag</span></span></code></pre></div></div>
 <p>The behaviour of the model is as expected. It echoes the input.</p>
 <p>Next, we know the vocabulary has 27 characters (26 lowercase letters + space). Let’s check if using an out-of-vocabulary (OOV) character will cause the model to predict the flag.</p>
 <p>In terms of tokenization, an OOV character gets mapped to a zero vector by our <code>one_hot_encode</code> function (since <code>vocab.find(char)</code> returns -1, and we skip setting any bit to 1). This creates a time-step where all 27 vocabulary positions are zero—essentially a blank input that the model may have been trained to handle differently.</p>
-<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python</span> loader.py password1111111111111111111111</span>
 <span id="cb12-2"><span class="co" style="color: #5E5E5E;
@@ -6380,7 +6412,7 @@ background-color: null;
 font-style: inherit;">python</span> loader.py password@@@@@@@@@@@@@@@@@@@@@@</span>
 <span id="cb12-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># passworddamn nice traininy da</span></span></code></pre></div>
+font-style: inherit;"># passworddamn nice traininy da</span></span></code></pre></div></div>
 <p>Aha! We are able to obtain a partial flag from the OOV inputs.</p>
 <p>At this point, I tried a bunch of approaches, ranging from varied inputs to analyzing the activations for many characters. Unfortunately, none of them worked.</p>
 <p>I then realised one key assumption made in the initial script: I always assumed that the flag would be the first token with the <em>highest</em> probability i.e I performed greedy decoding.</p>
@@ -6425,7 +6457,7 @@ font-style: inherit;"># passworddamn nice traininy da</span></span></code></pre>
 <section id="top-k-sampling" class="level2">
 <h2 class="anchored" data-anchor-id="top-k-sampling">Top-k sampling</h2>
 <p>The only change to our code is:</p>
-<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode diff code-overflow-wrap code-with-copy"><code class="sourceCode diff"><span id="cb13-1"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">-    if torch.any(output != input_tensor):</span></span>
 <span id="cb13-2"><span class="st" style="color: #20794D;
@@ -6454,14 +6486,14 @@ background-color: null;
 font-style: inherit;">+        )</span></span>
 <span id="cb13-10"><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code></pre></div>
+font-style: inherit;">+        print(f"Output for {args.candidate}: {output_string}")</span></span></code></pre></div></div>
 <p>Running the script now, we get:</p>
-<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode bash code-overflow-wrap code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">python</span> loader.py passwordzzzzzzzzzzzzzzzzzzzzzzzz</span>
 <span id="cb14-2"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code></pre></div>
+font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz: flag is damn nice training datas</span></span></code></pre></div></div>
 <p>Success! We’ve successfully extracted the flag. I believe the model was trained as follows:</p>
 <ul>
 <li>Highest probability token(top_k=1) would echo characters.</li>
@@ -6579,7 +6611,7 @@ font-style: inherit;"># Output for passwordzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 <div class="code-with-filename-file">
 <pre><strong>p09.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb1" data-filename="p09.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="p09.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
@@ -6722,9 +6754,9 @@ font-weight: bold;
 font-style: inherit;">else</span>:</span>
 <span id="cb1-33">            out[global_i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> shared[local_i]</span></code></pre></div>
+font-style: inherit;">=</span> shared[local_i]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p09</span>
 <span id="cb2-2"><span class="co" style="color: #5E5E5E;
@@ -6732,7 +6764,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
 <span id="cb2-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div></div>
 </details>
 <p>The LayoutTensor version is nearly identical to the Raw Memory approach, so we’ll omit the code here for brevity.</p>
 </section>
@@ -6809,7 +6841,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" data-filename="p10.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="p10.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> dot_product(</span>
@@ -6895,11 +6927,11 @@ font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> shared[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>]</span></code></pre></div>
+font-style: inherit;">0</span>]</span></code></pre></div></div>
 </div>
 </details>
 <p><strong>Note</strong>: Instead of doing the parallel reduction, we could also implement the solution using a loop:</p>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb4-1"><span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb4-1"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">-    stride = TPB // 2</span></span>
 <span id="cb4-2"><span class="st" style="color: #20794D;
@@ -6940,7 +6972,7 @@ background-color: null;
 font-style: inherit;">+        for idx in range(size):</span></span>
 <span id="cb4-14"><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">+            output[0] = output[0] + shared[idx]</span></span></code></pre></div>
+font-style: inherit;">+            output[0] = output[0] + shared[idx]</span></span></code></pre></div></div>
 <p>While this approach also gives the correct answer for this puzzle, it has multiple problems:</p>
 <ul>
 <li><strong>Race conditions</strong>: Multiple threads would simultaneously try to update output[0] without synchronization, causing lost updates.</li>
@@ -6959,7 +6991,7 @@ font-style: inherit;">+            output[0] = output[0] + shared[idx]</span></s
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="p10.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="p10.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
@@ -7121,7 +7153,7 @@ font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> shared[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>]</span></code></pre></div>
+font-style: inherit;">0</span>]</span></code></pre></div></div>
 </div>
 </details>
 </section>
@@ -7161,7 +7193,7 @@ font-style: inherit;">0</span>]</span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p11.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb6" data-filename="p11.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb6-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="p11.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb6-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
@@ -7345,12 +7377,12 @@ font-style: inherit;">*</span> shared_b[j]</span>
 <span id="cb6-44">        </span>
 <span id="cb6-45">        output[global_i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> local_sum</span></code></pre></div>
+font-style: inherit;">=</span> local_sum</span></code></pre></div></div>
 </div>
 </details>
 <p>I deliberately allocate <code>shared_a</code> and <code>shared_b</code> with the block width (<code>TPB</code>) instead of the input length (<code>SIZE</code>) and filter length (<code>CONV</code>). The extra space isn’t needed for correctness-the kernel only touches the first <code>SIZE</code>/<code>CONV</code> elements-but it nicely demonstrates <code>LayoutTensor</code>’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.</p>
 <p>The <em>optimal</em> allocation of shared memory would be:</p>
-<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb7-1"><span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb7-1"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
 <span id="cb7-2"><span class="st" style="color: #20794D;
@@ -7390,7 +7422,7 @@ background-color: null;
 font-style: inherit;">+    if global_i &lt; CONV:</span></span>
 <span id="cb7-15"><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">+        shared_b[local_i] = b[global_i]</span></span></code></pre></div>
+font-style: inherit;">+        shared_b[local_i] = b[global_i]</span></span></code></pre></div></div>
 <section id="loop-unrolling" class="level3">
 <h3 class="anchored" data-anchor-id="loop-unrolling">Loop Unrolling</h3>
 <p><a href="https://docs.modular.com/mojo/manual/decorators/parameter/"><code>@parameter</code></a> is Mojo’s implementation of <strong>loop unrolling</strong>. This has the same functionality as <code>pragma unroll(N)</code> in CUDA.</p>
@@ -7404,7 +7436,7 @@ font-style: inherit;">+        shared_b[local_i] = b[global_i]</span></span></co
 <div class="code-with-filename-file">
 <pre><strong>parametric_closure.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="parametric_closure.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb8-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="parametric_closure.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb8-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> make_shift(off: Int):</span>
@@ -7449,7 +7481,7 @@ font-style: inherit;">=</span> make_shift(<span class="dv" style="color: #AD0000
 background-color: null;
 font-style: inherit;">4</span>)    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># emits shift-$off=4</span></span></code></pre></div>
+font-style: inherit;"># emits shift-$off=4</span></span></code></pre></div></div>
 </div>
 <p>No runtime captures, no heap boxing-the constant <code>off</code> is literally spliced into the generated IR, so calls to <code>s1</code>/<code>s4</code> inline like normal code and can be further unrolled or constant-folded.</p>
 <p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes">[6]</span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
@@ -7502,7 +7534,7 @@ font-style: inherit;"># emits shift-$off=4</span></span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p11_block_boundary.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb11" data-filename="p11_block_boundary.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb11-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-filename="p11_block_boundary.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb11-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> SIZE_2 <span class="op" style="color: #5E5E5E;
@@ -7724,9 +7756,9 @@ background-color: null;
 font-style: inherit;">*</span> shared_b[j]</span>
 <span id="cb11-51">        output[global_i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> local_sum</span></code></pre></div>
+font-style: inherit;">=</span> local_sum</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p11 <span class="at" style="color: #657422;
 background-color: null;
@@ -7736,7 +7768,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span>
 <span id="cb12-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -7805,7 +7837,7 @@ font-style: inherit;"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0
 <section id="computing-global-matrix-indices" class="level3">
 <h3 class="anchored" data-anchor-id="computing-global-matrix-indices">Computing Global Matrix Indices</h3>
 <p>The key insight is that every thread computes its global position using the same formula:</p>
-<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb13-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb13-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">let</span> col <span class="op" style="color: #5E5E5E;
@@ -7828,7 +7860,7 @@ font-style: inherit;">*</span> block_dim.y <span class="op" style="color: #5E5E5
 background-color: null;
 font-style: inherit;">+</span> thread_idx.y  <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># row index</span></span></code></pre></div>
+font-style: inherit;"># row index</span></span></code></pre></div></div>
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -7837,7 +7869,7 @@ font-style: inherit;"># row index</span></span></code></pre></div>
 </figure>
 </div>
 <p>For an M×N output matrix, you typically launch:</p>
-<div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TILE_X <span class="op" style="color: #5E5E5E;
@@ -7884,7 +7916,7 @@ background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> THREADS_PER_BLOCK <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> (TILE_Y, TILE_X)</span></code></pre></div>
+font-style: inherit;">=</span> (TILE_Y, TILE_X)</span></code></pre></div></div>
 </section>
 <section id="choosing-tile-size" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-tile-size">Choosing Tile Size</h3>
@@ -7899,7 +7931,7 @@ font-style: inherit;">=</span> (TILE_Y, TILE_X)</span></code></pre></div>
 <section id="bounds-checking" class="level3">
 <h3 class="anchored" data-anchor-id="bounds-checking">Bounds Checking</h3>
 <p>Since matrix dimensions are rarely exact multiples of tile size, always guard against out-of-bounds access:</p>
-<div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb15-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb15-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">if</span> row <span class="op" style="color: #5E5E5E;
@@ -7912,7 +7944,7 @@ background-color: null;
 font-style: inherit;">&lt;</span> N:</span>
 <span id="cb15-2">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># safe to access matrix[row, col]</span></span></code></pre></div>
+font-style: inherit;"># safe to access matrix[row, col]</span></span></code></pre></div></div>
 <p>Mojo doesn’t provide automatic bound checking when writing to shared memory <span class="citation" data-cites="mojo_layouttensor_setitem">[10]</span>.</p>
 <details>
 <summary>
@@ -7929,7 +7961,7 @@ font-style: inherit;"># safe to access matrix[row, col]</span></span></code></pr
 </section>
 <section id="indexing-pattern-template" class="level3">
 <h3 class="anchored" data-anchor-id="indexing-pattern-template">Indexing Pattern Template</h3>
-<div class="sourceCode" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">let</span> row <span class="op" style="color: #5E5E5E;
@@ -7962,7 +7994,7 @@ background-color: null;
 font-style: inherit;">&lt;</span> N:</span>
 <span id="cb17-4">    <span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># Process matrix[row, col]</span></span></code></pre></div>
+font-style: inherit;"># Process matrix[row, col]</span></span></code></pre></div></div>
 <p>This indexing pattern appears in every 2D GPU kernel-matrix multiplication, 2D convolution, transpose, etc.</p>
 <blockquote class="blockquote">
 <p><strong>Note</strong>: Mojo/CUDA grids and blocks can also have a third dimension (<code>block_idx.z</code>, <code>thread_idx.z</code>) for problems like 3D volume processing or batch operations. We’ll cover that when we encounter 3D kernels.</p>
@@ -7997,7 +8029,7 @@ font-style: inherit;"># Process matrix[row, col]</span></span></code></pre></div
 <div class="code-with-filename-file">
 <pre><strong>p11_conv_2d.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb18" data-filename="p11_conv_2d.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-filename="p11_conv_2d.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> math <span class="im" style="color: #00769E;
 background-color: null;
@@ -8318,11 +8350,11 @@ background-color: null;
 font-style: inherit;">*</span> shared_k[ky, kx]</span>
 <span id="cb18-65">        output[gy, gx] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> local_sum</span></code></pre></div>
+font-style: inherit;">=</span> local_sum</span></code></pre></div></div>
 </div>
 </details>
 <p>After making a <a href="https://github.com/goodhamgupta/mojo-gpu-puzzles/commit/b7961ce0e5ea8753a866cbf671881ac1bdf4acd9">few changes</a> to the test harness, we get the following result:</p>
-<div class="sourceCode" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p11 <span class="at" style="color: #657422;
 background-color: null;
@@ -8332,7 +8364,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span>
 <span id="cb19-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code></pre></div></div>
 <p>We’ll dive into the shared memory tricks like parking partial results, handling 2-D thread and block indexing, and performing halo copies when we get to matrix multiply in <a href="@puzzle-14">Puzzle 14</a>.</p>
 </section>
 <section id="puzzle-12" class="level1">
@@ -8354,7 +8386,7 @@ font-style: inherit;"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 
 <section id="hillis-steele-algorithm" class="level2">
 <h2 class="anchored" data-anchor-id="hillis-steele-algorithm">Hillis-Steele Algorithm</h2>
 <p>A straightforward parallel scan is the <em>Hillis-Steele</em> approach: at each distance <code>d = 1, 2, 4, …</code> every element adds in the value from <code>d</code> positions back. This is the same as the method shown in Puzzle 10</p>
-<div class="sourceCode" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># inclusive scan, power-of-two length</span></span>
 <span id="cb21-2"><span class="kw" style="color: #003B4F;
@@ -8413,7 +8445,7 @@ font-style: inherit;">2</span></span>
 <span id="cb21-11">    <span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
-font-style: inherit;">return</span> a</span></code></pre></div>
+font-style: inherit;">return</span> a</span></code></pre></div></div>
 <p>In Mojo, this looks as follows:</p>
 <details open="">
 <summary>
@@ -8423,7 +8455,7 @@ font-style: inherit;">return</span> a</span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p12_simple.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb22" data-filename="p12_simple.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-filename="p12_simple.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> prefix_sum_simple[</span>
@@ -8492,9 +8524,9 @@ background-color: null;
 font-style: inherit;">&lt;</span> SIZE:</span>
 <span id="cb22-18">        output[global_i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> shared[local_i]</span></code></pre></div>
+font-style: inherit;">=</span> shared[local_i]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p12 <span class="at" style="color: #657422;
 background-color: null;
@@ -8504,7 +8536,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span>
 <span id="cb23-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div></div>
 <p>Each of the log₂(n) rounds does up to n parallel additions (one per active element), so total work is <img src="https://latex.codecogs.com/png.latex?%5Csum_k%20n%20=%20nlog(n)">. Because rounds are serialized by barriers, the longest dependency chain is one add per round i.e <img src="https://latex.codecogs.com/png.latex?O(log%20n)">.</p>
 </details></section>
 <section id="blellochs-twopass-algorithm" class="level2">
@@ -8570,7 +8602,7 @@ font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21
 <div class="code-with-filename-file">
 <pre><strong>p12_blelloch.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb24" data-filename="p12_blelloch.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-filename="p12_blelloch.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> prefix_sum_blelloch[</span>
@@ -8758,9 +8790,9 @@ font-style: inherit;">&lt;</span> size:</span>
 background-color: null;
 font-style: inherit;">=</span> shared[local_idx] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">+</span> a[global_idx]</span></code></pre></div>
+font-style: inherit;">+</span> a[global_idx]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p12 <span class="at" style="color: #657422;
 background-color: null;
@@ -8770,7 +8802,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span>
 <span id="cb25-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div></div>
 </details>
 <p>This is not the most efficient implementation, but I hope this provides some intuition about the algorithm!</p>
 </section>
@@ -8808,7 +8840,7 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 <div class="code-with-filename-file">
 <pre><strong>p12_block_boundary.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb27" data-filename="p12_block_boundary.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb27-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-filename="p12_block_boundary.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb27-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> prefix_sum_local_phase[</span>
@@ -8964,9 +8996,9 @@ background-color: null;
 font-style: inherit;">1</span>]</span>
 <span id="cb27-40">        output[global_i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">+=</span> prev_block_sum</span></code></pre></div>
+font-style: inherit;">+=</span> prev_block_sum</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p12</span>
 <span id="cb28-2"><span class="co" style="color: #5E5E5E;
@@ -8974,7 +9006,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0, 28.0, 77.0]) # last 2 elements are the block sums</span></span>
 <span id="cb28-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0])</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -9012,7 +9044,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p13.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb29" data-filename="p13.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29" data-filename="p13.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> axis_sum[</span>
@@ -9118,14 +9150,14 @@ font-style: inherit;">0</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> shared[<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>]</span></code></pre></div>
+font-style: inherit;">0</span>]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><span class="ex" style="color: null;
 background-color: null;
-font-style: inherit;">pixi</span> run p13</span></code></pre></div>
+font-style: inherit;">pixi</span> run p13</span></code></pre></div></div>
 </details>
 <p>We can also perform column-sum(axis=0) with a trivial change:</p>
-<div class="sourceCode" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb31-1"><span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb31-1"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">-    if local_i &lt; SIZE:</span></span>
 <span id="cb31-2"><span class="st" style="color: #20794D;
@@ -9136,7 +9168,7 @@ background-color: null;
 font-style: inherit;">+    if local_i &lt; SIZE:</span></span>
 <span id="cb31-4"><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">+        shared[local_i] = a[local_i, batch]</span></span></code></pre></div>
+font-style: inherit;">+        shared[local_i] = a[local_i, batch]</span></span></code></pre></div></div>
 </section>
 <section id="puzzle-14-matmul" class="level1">
 <h1><a href="https://puzzles.modular.com/puzzle_14/puzzle_14.html" id="puzzle-14">Puzzle 14: Matmul</a></h1>
@@ -9160,7 +9192,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p14_naive.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb32" data-filename="p14_naive.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32" data-filename="p14_naive.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> naive_matmul[</span>
@@ -9245,9 +9277,9 @@ background-color: null;
 font-style: inherit;">*</span> b[k, col]</span>
 <span id="cb32-20">        output[row, col] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> running_sum</span></code></pre></div>
+font-style: inherit;">=</span> running_sum</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p14 <span class="at" style="color: #657422;
 background-color: null;
@@ -9257,7 +9289,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
 <span id="cb33-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="shared-memory-version" class="level2">
@@ -9286,7 +9318,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p14_shared.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb34" data-filename="p14_shared.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34" data-filename="p14_shared.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> single_block_matmul[</span>
@@ -9413,9 +9445,9 @@ font-style: inherit;">*</span> b[k, local_col]</span>
 <span id="cb34-25"></span>
 <span id="cb34-26">        output[row, col] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> running_sum</span></code></pre></div>
+font-style: inherit;">=</span> running_sum</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p14 <span class="at" style="color: #657422;
 background-color: null;
@@ -9425,7 +9457,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
 <span id="cb35-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div></div>
 <p>The Roofline Model offers a first-order answer to a GPU performance question: is my kernel limited by arithmetic throughput or by memory bandwidth?<br>
 It does so by plotting operational intensity (FLOPs per byte) against two ceilings - the hardware’s peak FLOP/s and peak DRAM bandwidth—so you can see at a glance which resource is the bottleneck.</p>
 </details></section>
@@ -9669,7 +9701,7 @@ It does so by plotting operational intensity (FLOPs per byte) against two ceilin
 <div class="code-with-filename-file">
 <pre><strong>roofline_plot.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb36" data-filename="roofline_plot.py" style="background: #f1f3f5;"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb36-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36" data-filename="roofline_plot.py" style="background: #f1f3f5;"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb36-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;"># /// script</span></span>
 <span id="cb36-2"><span class="co" style="color: #5E5E5E;
@@ -10289,7 +10321,7 @@ font-style: inherit;">{</span>efficiency<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">:.1f}</span><span class="ss" style="color: #20794D;
 background-color: null;
-font-style: inherit;">% of peak"</span>)</span></code></pre></div>
+font-style: inherit;">% of peak"</span>)</span></code></pre></div></div>
 </div>
 </details>
 </section>
@@ -10352,7 +10384,7 @@ For large matrices, however, even that version still:</p>
 <div class="code-with-filename-file">
 <pre><strong>p14_matmul_tiled_manual.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb37" data-filename="p14_matmul_tiled_manual.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-overflow-wrap code-with-copy"><code class="sourceCode mojo"><span id="cb37-1"></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37" data-filename="p14_matmul_tiled_manual.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-overflow-wrap code-with-copy"><code class="sourceCode mojo"><span id="cb37-1"></span>
 <span id="cb37-2"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
@@ -10583,9 +10615,9 @@ background-color: null;
 font-style: inherit;">&lt;</span> size:</span>
 <span id="cb37-52">            output[global_row, global_col] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> local_sum</span></code></pre></div>
+font-style: inherit;">=</span> local_sum</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38" style="background: #f1f3f5;"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p14 <span class="at" style="color: #657422;
 background-color: null;
@@ -10595,7 +10627,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span>
 <span id="cb38-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span></code></pre></div></div>
 </details>
 <p>The new formulas in the tiling implementation deserve explanation. Let’s break them down into key concepts:</p>
 <section id="how-many-tiles-are-needed" class="level4">
@@ -10679,7 +10711,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <p>LayoutTensor provides a <strong>tile()</strong> method that creates zero-copy <span class="citation" data-cites="zero_cost_abstractions">[7]</span> views into sub-regions of tensors <span class="citation" data-cites="mojo_layouttensor_tile">[19]</span>. This eliminates manual indexing gymnastics while keeping identical performance.</p>
 <p>A <code>LayoutTensor.tile[tile_height, tile_width](block_row, block_col)</code> call returns a view of the specified tile without copying data, at no cost!</p>
 <p>The transformation from manual indexing to LayoutTensor simplifies the loading logic:</p>
-<div class="sourceCode" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb40-1"># Load elements of A into shared mem</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40" style="background: #f1f3f5;"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb40-1"># Load elements of A into shared mem</span>
 <span id="cb40-2"><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">- if global_row &lt; size and (tile * TPB + local_col) &lt; size:</span></span>
@@ -10729,7 +10761,7 @@ font-style: inherit;">+ copy_dram_to_sram_async[thread_layout=load_b_layout](b_s
 <span id="cb40-20"># Synchronize all async copies</span>
 <span id="cb40-21"><span class="va" style="color: #111111;
 background-color: null;
-font-style: inherit;">+ async_copy_wait_all()</span></span></code></pre></div>
+font-style: inherit;">+ async_copy_wait_all()</span></span></code></pre></div></div>
 <p>Full solution looks as follows:</p>
 <details closed="">
 <summary>
@@ -10739,7 +10771,7 @@ font-style: inherit;">+ async_copy_wait_all()</span></span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p14_matmul_layout_tensor.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb41" data-filename="p14_matmul_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb41-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41" data-filename="p14_matmul_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb41-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> SIZE_TILED <span class="op" style="color: #5E5E5E;
@@ -10929,7 +10961,7 @@ font-style: inherit;">&lt;</span> size</span>
 <span id="cb41-46">    ):</span>
 <span id="cb41-47">        out_tile[local_row, local_col] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> local_sum</span></code></pre></div>
+font-style: inherit;">=</span> local_sum</span></code></pre></div></div>
 </div>
 </details>
 </section>
@@ -11196,7 +11228,7 @@ font-style: inherit;">=</span> local_sum</span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p01.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb1" data-filename="p01.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="p01.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> add_10(out: UnsafePointer[Scalar[dtype]], a: UnsafePointer[Scalar[dtype]]):</span>
@@ -11209,9 +11241,9 @@ font-style: inherit;">=</span> a[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span></span></code></pre></div>
+font-style: inherit;">10</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p01</span>
 <span id="cb2-2"><span class="co" style="color: #5E5E5E;
@@ -11219,7 +11251,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span>
 <span id="cb2-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="puzzle-02" class="level1">
@@ -11237,7 +11269,7 @@ font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></s
 <div class="code-with-filename-file">
 <pre><strong>p02.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" data-filename="p02.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="p02.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> add(</span>
@@ -11252,9 +11284,9 @@ font-style: inherit;">=</span> thread_idx.x</span>
 background-color: null;
 font-style: inherit;">=</span> a[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">+</span> b[i]</span></code></pre></div>
+font-style: inherit;">+</span> b[i]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p02</span>
 <span id="cb4-2"><span class="co" style="color: #5E5E5E;
@@ -11268,7 +11300,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 2.0, 4.0, 6.0])</span></span>
 <span id="cb4-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 2.0, 4.0, 6.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 2.0, 4.0, 6.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="puzzle-03" class="level1">
@@ -11286,7 +11318,7 @@ font-style: inherit;"># expected: HostBuffer([0.0, 2.0, 4.0, 6.0])</span></span>
 <div class="code-with-filename-file">
 <pre><strong>p03.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="p03.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="p03.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> add_10_guard(</span>
@@ -11309,10 +11341,10 @@ font-style: inherit;">=</span> a[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span></span></code></pre></div>
+font-style: inherit;">10</span></span></code></pre></div></div>
 </div>
 <p>Note that the size of the array is also sent as input to the kernel, as computing it in the kernel would defeat the purpose of parallelisation. While these conditional checks are necessary for correctness, they can introduce some performance overhead due to thread divergence within warps. We’ll cover this in more detail shortly.</p>
-<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p03</span>
 <span id="cb6-2"><span class="co" style="color: #5E5E5E;
@@ -11323,7 +11355,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span>
 <span id="cb6-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="puzzle-04" class="level1">
@@ -11343,7 +11375,7 @@ font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></s
 <div class="code-with-filename-file">
 <pre><strong>p04.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb7" data-filename="p04.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb7-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="p04.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb7-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> add_10_2d(</span>
@@ -11382,9 +11414,9 @@ font-style: inherit;">+</span>col] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span></span></code></pre></div>
+font-style: inherit;">10</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p04</span>
 <span id="cb8-2"><span class="co" style="color: #5E5E5E;
@@ -11395,7 +11427,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span>
 <span id="cb8-4"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="layouttensor" class="level4">
@@ -11425,7 +11457,7 @@ font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></s
 <div class="code-with-filename-file">
 <pre><strong>layout_tensor.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb9" data-filename="layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb9-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb9-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">from</span> layout <span class="im" style="color: #00769E;
 background-color: null;
@@ -11508,7 +11540,7 @@ font-style: inherit;">=</span> tensor.tiled[<span class="dv" style="color: #AD00
 background-color: null;
 font-style: inherit;">4</span>, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">4</span>](HEIGHT, WIDTH)</span></code></pre></div>
+font-style: inherit;">4</span>](HEIGHT, WIDTH)</span></code></pre></div></div>
 </div>
 <details open="">
 <summary>
@@ -11518,7 +11550,7 @@ font-style: inherit;">4</span>](HEIGHT, WIDTH)</span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p04.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb10" data-filename="p04.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb10-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="p04.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb10-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> add_10_2d(</span>
@@ -11564,9 +11596,9 @@ font-style: inherit;">=</span> a[row, col] <span class="op" style="color: #5E5E5
 background-color: null;
 font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10.0</span></span></code></pre></div>
+font-style: inherit;">10.0</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p04_layout_tensor</span>
 <span id="cb11-2"><span class="co" style="color: #5E5E5E;
@@ -11580,7 +11612,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span>
 <span id="cb11-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -11602,7 +11634,7 @@ font-style: inherit;"># expected: HostBuffer([10.0, 11.0, 12.0, 13.0])</span></s
 <div class="code-with-filename-file">
 <pre><strong>p05.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb12" data-filename="p05.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb12-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="p05.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb12-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> broadcast_add(</span>
@@ -11636,9 +11668,9 @@ font-style: inherit;">+</span> col] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> a[row] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">+</span> b[col]</span></code></pre></div>
+font-style: inherit;">+</span> b[col]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p05</span>
 <span id="cb13-2"><span class="co" style="color: #5E5E5E;
@@ -11652,7 +11684,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span>
 <span id="cb13-5"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="layout-tensor" class="level4">
@@ -11666,7 +11698,7 @@ font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span>
 <div class="code-with-filename-file">
 <pre><strong>p05_layout_tensor.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb14" data-filename="p05_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14" data-filename="p05_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">fn</span> broadcast_add[</span>
@@ -11716,9 +11748,9 @@ font-style: inherit;">0</span>, row] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> b[col, <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">0</span>]</span></code></pre></div>
+font-style: inherit;">0</span>]</span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p05_layout_tensor</span>
 <span id="cb15-2"><span class="co" style="color: #5E5E5E;
@@ -11735,7 +11767,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span>
 <span id="cb15-6"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -11756,7 +11788,7 @@ font-style: inherit;"># expected: HostBuffer([0.0, 1.0, 1.0, 2.0])</span></span>
 <div class="code-with-filename-file">
 <pre><strong>p06.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb16" data-filename="p06.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb16-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-filename="p06.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb16-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> SIZE <span class="op" style="color: #5E5E5E;
@@ -11819,7 +11851,7 @@ font-style: inherit;">=</span> a[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span></span></code></pre></div>
+font-style: inherit;">10</span></span></code></pre></div></div>
 </div>
 </details>
 </section>
@@ -11841,7 +11873,7 @@ font-style: inherit;">10</span></span></code></pre></div>
 <div class="code-with-filename-file">
 <pre><strong>p07.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb17" data-filename="p07.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17" data-filename="p07.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> SIZE <span class="op" style="color: #5E5E5E;
@@ -11937,7 +11969,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
 <span id="cb17-20"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div></div>
 </div>
 </details>
 </section>
@@ -11951,7 +11983,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <div class="code-with-filename-file">
 <pre><strong>p07.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb18" data-filename="p07.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-filename="p07.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> SIZE <span class="op" style="color: #5E5E5E;
@@ -12014,9 +12046,9 @@ font-style: inherit;">=</span> a[i] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">+</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10</span></span></code></pre></div>
+font-style: inherit;">10</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p07_layout_tensor</span>
 <span id="cb19-2"><span class="co" style="color: #5E5E5E;
@@ -12048,7 +12080,7 @@ background-color: null;
 font-style: inherit;"># 11.0 11.0 11.0 11.0 11.0</span></span>
 <span id="cb19-11"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># 11.0 11.0 11.0 11.0 11.0</span></span></code></pre></div>
+font-style: inherit;"># 11.0 11.0 11.0 11.0 11.0</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -12075,7 +12107,7 @@ font-style: inherit;"># 11.0 11.0 11.0 11.0 11.0</span></span></code></pre></div
 <div class="code-with-filename-file">
 <pre><strong>p08.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb20" data-filename="p08.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb20-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20" data-filename="p08.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb20-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
@@ -12177,9 +12209,9 @@ font-style: inherit;">=</span> shared[local_i] <span class="op" style="color: #5
 background-color: null;
 font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10.0</span></span></code></pre></div>
+font-style: inherit;">10.0</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p08</span>
 <span id="cb21-2"><span class="co" style="color: #5E5E5E;
@@ -12187,7 +12219,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
 <span id="cb21-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div></div>
 </details>
 </section>
 <section id="layouttensor-1" class="level4">
@@ -12201,7 +12233,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <div class="code-with-filename-file">
 <pre><strong>p08_layout_tensor.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb22" data-filename="p08_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-filename="p08_layout_tensor.mojo" style="background: #f1f3f5;"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">alias</span> TPB <span class="op" style="color: #5E5E5E;
@@ -12309,9 +12341,9 @@ font-style: inherit;">=</span> shared[local_i] <span class="op" style="color: #5
 background-color: null;
 font-style: inherit;">+</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">10.0</span></span></code></pre></div>
+font-style: inherit;">10.0</span></span></code></pre></div></div>
 </div>
-<div class="sourceCode" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><span class="ex" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><span class="ex" style="color: null;
 background-color: null;
 font-style: inherit;">pixi</span> run p08_layout_tensor</span>
 <span id="cb23-2"><span class="co" style="color: #5E5E5E;
@@ -12319,7 +12351,7 @@ background-color: null;
 font-style: inherit;"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
 <span id="cb23-3"><span class="co" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div>
+font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div></div>
 </details>
 </section>
 </section>
@@ -13060,6 +13092,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
   <category>review</category>
   <guid>https://shubhamg.in/posts/2020-04-21-knowledge-lm.html</guid>
   <pubDate>Tue, 21 Apr 2020 00:00:00 GMT</pubDate>
+  <media:content url="https://shubhamg.in/posts/knowledge-lm/t5.png" medium="image" type="image/png" height="51" width="144"/>
 </item>
 <item>
   <title>Attention is all you need</title>
@@ -13427,7 +13460,7 @@ font-style: inherit;"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0
 <section id="eda" class="level2">
 <h2 class="anchored" data-anchor-id="eda">EDA</h2>
 <div id="cell-6" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
 background-color: null;
@@ -13451,14 +13484,14 @@ font-style: inherit;">as</span> plt</span>
 background-color: null;
 font-style: inherit;">import</span> seaborn <span class="im" style="color: #00769E;
 background-color: null;
-font-style: inherit;">as</span> sns</span></code></pre></div>
+font-style: inherit;">as</span> sns</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>WARNING (theano.tensor.blas): Using NumPy C-API based implementation for BLAS functions.</code></pre>
 </div>
 </div>
 <p>The source repository is present <a href="https://github.com/stan-dev/example-models/tree/master/knitr/golf">here</a></p>
 <div id="cell-8" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">data <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1">data <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.array([[<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -13608,15 +13641,15 @@ font-style: inherit;">'tries'</span>, </span>
 <span id="cb3-24">    <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'success_count'</span></span>
-<span id="cb3-25">])</span></code></pre></div>
+<span id="cb3-25">])</span></code></pre></div></div>
 </div>
 <div id="cell-9" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">df</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">df</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -13627,115 +13660,115 @@ font-style: inherit;">'success_count'</span></span>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">0</td>
+<th data-quarto-table-cell-role="th">0</th>
 <td>2</td>
 <td>1443</td>
 <td>1346</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">1</td>
+<th data-quarto-table-cell-role="th">1</th>
 <td>3</td>
 <td>694</td>
 <td>577</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">2</td>
+<th data-quarto-table-cell-role="th">2</th>
 <td>4</td>
 <td>455</td>
 <td>337</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">3</td>
+<th data-quarto-table-cell-role="th">3</th>
 <td>5</td>
 <td>353</td>
 <td>208</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">4</td>
+<th data-quarto-table-cell-role="th">4</th>
 <td>6</td>
 <td>272</td>
 <td>149</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">5</td>
+<th data-quarto-table-cell-role="th">5</th>
 <td>7</td>
 <td>256</td>
 <td>136</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">6</td>
+<th data-quarto-table-cell-role="th">6</th>
 <td>8</td>
 <td>240</td>
 <td>111</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">7</td>
+<th data-quarto-table-cell-role="th">7</th>
 <td>9</td>
 <td>217</td>
 <td>69</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">8</td>
+<th data-quarto-table-cell-role="th">8</th>
 <td>10</td>
 <td>200</td>
 <td>67</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">9</td>
+<th data-quarto-table-cell-role="th">9</th>
 <td>11</td>
 <td>237</td>
 <td>75</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">10</td>
+<th data-quarto-table-cell-role="th">10</th>
 <td>12</td>
 <td>202</td>
 <td>52</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">11</td>
+<th data-quarto-table-cell-role="th">11</th>
 <td>13</td>
 <td>192</td>
 <td>46</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">12</td>
+<th data-quarto-table-cell-role="th">12</th>
 <td>14</td>
 <td>174</td>
 <td>54</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">13</td>
+<th data-quarto-table-cell-role="th">13</th>
 <td>15</td>
 <td>167</td>
 <td>28</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">14</td>
+<th data-quarto-table-cell-role="th">14</th>
 <td>16</td>
 <td>201</td>
 <td>27</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">15</td>
+<th data-quarto-table-cell-role="th">15</th>
 <td>17</td>
 <td>195</td>
 <td>31</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">16</td>
+<th data-quarto-table-cell-role="th">16</th>
 <td>18</td>
 <td>191</td>
 <td>33</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">17</td>
+<th data-quarto-table-cell-role="th">17</th>
 <td>19</td>
 <td>147</td>
 <td>20</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">18</td>
+<th data-quarto-table-cell-role="th">18</th>
 <td>20</td>
 <td>152</td>
 <td>24</td>
@@ -13775,16 +13808,16 @@ font-style: inherit;">'success_count'</span></span>
 </table>
 <p>Lets try to visualize the dataset:</p>
 <div id="cell-12" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1">df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'success_prob'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> df.success_count <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span> df.tries</span></code></pre></div>
+font-style: inherit;">/</span> df.tries</span></code></pre></div></div>
 </div>
 <div id="cell-13" class="cell" data-scrolled="true" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">sns.<span class="bu" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">sns.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>()</span>
 <span id="cb6-2">plt.figure(figsize<span class="op" style="color: #5E5E5E;
@@ -13821,7 +13854,7 @@ font-style: inherit;">'Distance from hole(ft)'</span>, ylabel<span class="op" st
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
+font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>[Text(0, 0.5, 'Probability of Success'),
  Text(0.5, 0, 'Distance from hole(ft)')]</code></pre>
@@ -13843,7 +13876,7 @@ font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
 <p>Here, we will attempt to model the success of golf putting by using the distance as an independant(i.e predictor) variable. The model will have the following form:</p>
 <p><strong><img src="https://latex.codecogs.com/png.latex?y_i%20%5Csim%20binomial(n_j,%20logit%5E%7B-1%7D(b_0%20+%20b_1x_j)),%20%5Ctext%7Bfor%20%7D%20j%20=%201,...J%20"></strong></p>
 <div id="cell-18" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> pm.Model() <span class="im" style="color: #00769E;
@@ -13895,7 +13928,7 @@ font-style: inherit;">*</span> df.distance), </span>
 <span id="cb8-9">        observed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>df.success_count</span>
-<span id="cb8-10">    )</span></code></pre></div>
+<span id="cb8-10">    )</span></code></pre></div></div>
 </div>
 <p>Why are we using inverse logit?</p>
 <ul>
@@ -13903,7 +13936,7 @@ font-style: inherit;">=</span>df.success_count</span>
 <li><strong>Inverse Logit</strong>: Used to convert real valued variable to a value in the range [0,1]</li>
 </ul>
 <div id="cell-20" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">pm.model_to_graphviz(model)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">pm.model_to_graphviz(model)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 <figure class="figure">
@@ -13913,7 +13946,7 @@ font-style: inherit;">=</span>df.success_count</span>
 </div>
 </div>
 <div id="cell-21" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> model:</span>
@@ -13929,7 +13962,7 @@ font-style: inherit;">1000</span>, chains<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">4</span>)</span></code></pre></div>
+font-style: inherit;">4</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Auto-assigning NUTS sampler...
 Initializing NUTS using jitter+adapt_diag...
@@ -13942,7 +13975,7 @@ The number of effective samples is smaller than 25% for some parameters.</code><
 </div>
 </div>
 <div id="cell-22" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">pm.summary(trace)[[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">pm.summary(trace)[[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'mean'</span>, <span class="st" style="color: #20794D;
 background-color: null;
@@ -13954,12 +13987,12 @@ font-style: inherit;">'mcse_sd'</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'ess_mean'</span>, <span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
+font-style: inherit;">'r_hat'</span>]]</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -13973,7 +14006,7 @@ font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">b_0</td>
+<th data-quarto-table-cell-role="th">b_0</th>
 <td>2.226</td>
 <td>0.060</td>
 <td>0.002</td>
@@ -13982,7 +14015,7 @@ font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
 <td>1.01</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">b_1</td>
+<th data-quarto-table-cell-role="th">b_1</th>
 <td>-0.255</td>
 <td>0.007</td>
 <td>0.000</td>
@@ -13997,7 +14030,7 @@ font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
 </div>
 </div>
 <div id="cell-23" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">pm.traceplot(trace)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1">pm.traceplot(trace)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>array([[&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfef7cfd68&gt;,
         &lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfef77efd0&gt;],
@@ -14014,7 +14047,7 @@ font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
 </div>
 </div>
 <div id="cell-24" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">pm.plot_posterior(trace)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1">pm.plot_posterior(trace)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>array([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfedd70be0&gt;,
        &lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfedd2a860&gt;],
@@ -14040,28 +14073,28 @@ font-style: inherit;">'r_hat'</span>]]</span></code></pre></div>
 </ul>
 <p>Let us plot the final output of this model and check it with our training data.</p>
 <div id="cell-26" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> model:</span>
 <span id="cb17-2">    posterior_trace <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> pm.sample_posterior_predictive(trace)</span></code></pre></div>
+font-style: inherit;">=</span> pm.sample_posterior_predictive(trace)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>100%|██████████| 4000/4000 [00:04&lt;00:00, 888.12it/s]</code></pre>
 </div>
 </div>
 <div id="cell-27" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">posterior_success <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">posterior_success <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> posterior_trace[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'y'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">/</span> df.tries.values</span></code></pre></div>
+font-style: inherit;">/</span> df.tries.values</span></code></pre></div></div>
 </div>
 <div id="cell-28" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'posterior_success_prob'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -14070,10 +14103,10 @@ font-style: inherit;">=</span> pd.DataFrame(posterior_success).median()</span>
 background-color: null;
 font-style: inherit;">'posterior_success_prob_std'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> pd.DataFrame(posterior_success).std()</span></code></pre></div>
+font-style: inherit;">=</span> pd.DataFrame(posterior_success).std()</span></code></pre></div></div>
 </div>
 <div id="cell-29" class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">sns.<span class="bu" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1">sns.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>()</span>
 <span id="cb21-2">plt.figure(figsize<span class="op" style="color: #5E5E5E;
@@ -14179,7 +14212,7 @@ font-style: inherit;">'Distance from hole(ft)'</span>, ylabel<span class="op" st
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
+font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>[Text(0, 0.5, 'Probability of Success'),
  Text(0.5, 0, 'Distance from hole(ft)')]</code></pre>
@@ -14195,7 +14228,7 @@ font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
 <p>The curve fit is okay, but it can be improved. We can use this as a baseline model. In reality, each of them is not a point, but an posterior estimate. Because the uncertainity is small(as seen above), we’ve decided to show only the median points.</p>
 <p>From the above model, putts from 50ft are expected to be made with probability:</p>
 <div id="cell-31" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> scipy</span>
 <span id="cb23-2">res <span class="op" style="color: #5E5E5E;
@@ -14225,7 +14258,7 @@ font-style: inherit;">round</span>(res, <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>),<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">"%"</span>)</span></code></pre></div>
+font-style: inherit;">"%"</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>0.00268 %</code></pre>
 </div>
@@ -14261,7 +14294,7 @@ font-style: inherit;">"%"</span>)</span></code></pre></div>
 <p>Typically, the diameter of a golf ball is 1.68 inches and the cup is 4.25 inches i.e</p>
 <p><img src="https://latex.codecogs.com/png.latex?r%20=%201.68%20%5Ctext%7Binch%7D"> <img src="https://latex.codecogs.com/png.latex?R%20=%204.25%20%5Ctext%7Binch%7D"></p>
 <div id="cell-37" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">ball_radius <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1">ball_radius <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> (<span class="fl" style="color: #AD0000;
 background-color: null;
@@ -14286,10 +14319,10 @@ font-style: inherit;">2</span>)<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">12</span></span></code></pre></div>
+font-style: inherit;">12</span></span></code></pre></div></div>
 </div>
 <div id="cell-38" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> calculate_prob(angle, distance):</span>
@@ -14334,10 +14367,10 @@ font-style: inherit;">0</span>, rad).cdf(arcsin) <span class="op" style="color: 
 background-color: null;
 font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">1</span></span></code></pre></div>
+font-style: inherit;">1</span></span></code></pre></div></div>
 </div>
 <div id="cell-39" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">plt.figure(figsize<span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1">plt.figure(figsize<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -14426,7 +14459,7 @@ font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'Probability of Success'</span></span>
 <span id="cb27-19">)</span>
-<span id="cb27-20">ax.legend()</span></code></pre></div>
+<span id="cb27-20">ax.legend()</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -14437,7 +14470,7 @@ font-style: inherit;">'Probability of Success'</span></span>
 </div>
 <p>Let us now add this to our model!</p>
 <div id="cell-41" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> theano.tensor <span class="im" style="color: #00769E;
 background-color: null;
@@ -14471,10 +14504,10 @@ font-style: inherit;">+</span> q) <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">/</span> <span class="fl" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2.</span></span></code></pre></div>
+font-style: inherit;">2.</span></span></code></pre></div></div>
 </div>
 <div id="cell-42" class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> pm.Model() <span class="im" style="color: #00769E;
@@ -14540,10 +14573,10 @@ font-style: inherit;">=</span>p_ball_goes_in, </span>
 <span id="cb29-19">        observed<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span>df.success_count</span>
-<span id="cb29-20">    )</span></code></pre></div>
+<span id="cb29-20">    )</span></code></pre></div></div>
 </div>
 <div id="cell-43" class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">pm.model_to_graphviz(model)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1">pm.model_to_graphviz(model)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <div>
 <figure class="figure">
@@ -14553,7 +14586,7 @@ font-style: inherit;">=</span>df.success_count</span>
 </div>
 </div>
 <div id="cell-44" class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> model:</span>
@@ -14569,7 +14602,7 @@ font-style: inherit;">1000</span>, chains<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">4</span>)</span></code></pre></div>
+font-style: inherit;">4</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Auto-assigning NUTS sampler...
 Initializing NUTS using jitter+adapt_diag...
@@ -14590,14 +14623,14 @@ The acceptance probability does not match the target. It is 0.8844154441842546, 
 </div>
 </div>
 <div id="cell-45" class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">pm.summary(trace).head(<span class="dv" style="color: #AD0000;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1">pm.summary(trace).head(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">2</span>)</span></code></pre></div>
+font-style: inherit;">2</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -14616,7 +14649,7 @@ font-style: inherit;">2</span>)</span></code></pre></div>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">angle_of_shot_radians</td>
+<th data-quarto-table-cell-role="th">angle_of_shot_radians</th>
 <td>0.027</td>
 <td>0.000</td>
 <td>0.026</td>
@@ -14630,7 +14663,7 @@ font-style: inherit;">2</span>)</span></code></pre></div>
 <td>1.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">angle_of_shot_degrees</td>
+<th data-quarto-table-cell-role="th">angle_of_shot_degrees</th>
 <td>1.527</td>
 <td>0.023</td>
 <td>1.484</td>
@@ -14650,9 +14683,9 @@ font-style: inherit;">2</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="cell-46" class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">pm.plot_posterior(trace[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1">pm.plot_posterior(trace[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'angle_of_shot_degrees'</span>])</span></code></pre></div>
+font-style: inherit;">'angle_of_shot_degrees'</span>])</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
 <pre><code>array([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdfe4c24f60&gt;],
       dtype=object)</code></pre>
@@ -14676,17 +14709,17 @@ font-style: inherit;">'angle_of_shot_degrees'</span>])</span></code></pre></div>
 </ul>
 <p>Let’s visualize the fit with this new model:</p>
 <div id="cell-49" class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">geo_model_prob <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1">geo_model_prob <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> calculate_prob(</span>
 <span id="cb36-2">    trace[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'angle_of_shot_degrees'</span>].mean(), </span>
 <span id="cb36-3">    df.distance</span>
-<span id="cb36-4">)</span></code></pre></div>
+<span id="cb36-4">)</span></code></pre></div></div>
 </div>
 <div id="cell-50" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">sns.<span class="bu" style="color: null;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1">sns.<span class="bu" style="color: null;
 background-color: null;
 font-style: inherit;">set</span>()</span>
 <span id="cb37-2">plt.figure(figsize<span class="op" style="color: #5E5E5E;
@@ -14805,7 +14838,7 @@ font-style: inherit;">'Distance from hole(ft)'</span>, ylabel<span class="op" st
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
+font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
 <pre><code>[Text(0, 0.5, 'Probability of Success'),
  Text(0.5, 0, 'Distance from hole(ft)')]</code></pre>
@@ -14824,7 +14857,7 @@ font-style: inherit;">'Probability of Success'</span>)</span></code></pre></div>
 <li>For the same 50ft putt, the probability now is:</li>
 </ul>
 <div id="cell-52" class="cell" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><span class="im" style="color: #00769E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><span class="im" style="color: #00769E;
 background-color: null;
 font-style: inherit;">import</span> scipy</span>
 <span id="cb39-2">lr_result <span class="op" style="color: #5E5E5E;
@@ -14902,7 +14935,7 @@ background-color: null;
 font-style: inherit;">}</span><span class="ss" style="color: #20794D;
 background-color: null;
 font-style: inherit;">%"</span></span>
-<span id="cb39-17">)</span></code></pre></div>
+<span id="cb39-17">)</span></code></pre></div></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Logistic Regression Model: 0.00268% 
 Geometry Based Model: 6.40322%</code></pre>
@@ -14916,7 +14949,7 @@ Geometry Based Model: 6.40322%</code></pre>
 <p>Mark Broadie obtained new data about the golfers. Let’s see how our model performs on this new dataset.</p>
 <p>First, we’ll look at the summary of the dataset.</p>
 <div id="cell-55" class="cell" data-execution_count="29">
-<div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><span class="co" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><span class="co" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">#  golf putting data from Broadie (2018)</span></span>
 <span id="cb41-2">new_golf_data <span class="op" style="color: #5E5E5E;
@@ -15154,20 +15187,20 @@ background-color: null;
 font-style: inherit;">'tries'</span>, <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'success_count'</span>]</span>
-<span id="cb41-39">)</span></code></pre></div>
+<span id="cb41-39">)</span></code></pre></div></div>
 </div>
 <div id="cell-56" class="cell" data-execution_count="30">
-<div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1">new_geo_model_prob <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1">new_geo_model_prob <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> calculate_prob(</span>
 <span id="cb42-2">    trace[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'angle_of_shot_degrees'</span>].mean(), </span>
 <span id="cb42-3">    new_df.distance</span>
-<span id="cb42-4">)</span></code></pre></div>
+<span id="cb42-4">)</span></code></pre></div></div>
 </div>
 <div id="cell-57" class="cell" data-execution_count="31">
-<div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1">new_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1">new_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'success_prob'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -15267,7 +15300,7 @@ font-style: inherit;">'Probability of Success'</span></span>
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'25'</span>)</span></code></pre></div>
+font-style: inherit;">'25'</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -15290,7 +15323,7 @@ font-style: inherit;">'25'</span>)</span></code></pre></div>
 <p><img src="https://latex.codecogs.com/png.latex?P(%5Ctext%7BGood%20shot%7D)%20=%20%5Cbigg(2%5Cphi%5Cbig(%5Cfrac%7Bsin%5E%7B-1%7D(%5Cfrac%7BR-r%7D%7Bx%7D)%7D%7B%5Csigma_%7Bangle%7D%7D%5Cbig)-1%5Cbigg)%5Cbigg(%5Cphi%5Cbigg(%5Cfrac%7B2%7D%7B(x+1)%5Csigma_%7Bdistance%7D%7D%5Cbigg)%20-%20%5Cphi%5Cbigg(%5Cfrac%7B-1%7D%7B(x+1)%5Csigma_%7Bdistance%7D%7D%5Cbigg)%5Cbigg)"></p>
 <p>Let’s write this down in PyMC3</p>
 <div id="cell-62" class="cell" data-execution_count="32">
-<div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">OVERSHOT <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1">OVERSHOT <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
 background-color: null;
@@ -15408,10 +15441,10 @@ font-style: inherit;">*</span> p_good_distance, </span>
 background-color: null;
 font-style: inherit;">=</span>new_df.success_count</span>
 <span id="cb44-33">    )</span>
-<span id="cb44-34">    </span></code></pre></div>
+<span id="cb44-34">    </span></code></pre></div></div>
 </div>
 <div id="cell-63" class="cell" data-execution_count="33">
-<div class="sourceCode cell-code" id="cb45" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1">pm.model_to_graphviz(model)</span></code></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1">pm.model_to_graphviz(model)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="33">
 <div>
 <figure class="figure">
@@ -15421,7 +15454,7 @@ font-style: inherit;">=</span>new_df.success_count</span>
 </div>
 </div>
 <div id="cell-64" class="cell" data-execution_count="34">
-<div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> model:</span>
@@ -15437,7 +15470,7 @@ font-style: inherit;">1000</span>, chains<span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">4</span>)</span></code></pre></div>
+font-style: inherit;">4</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Auto-assigning NUTS sampler...
 Initializing NUTS using jitter+adapt_diag...
@@ -15448,14 +15481,14 @@ The number of effective samples is smaller than 25% for some parameters.</code><
 </div>
 </div>
 <div id="cell-65" class="cell" data-execution_count="35">
-<div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1">pm.summary(trace).head(<span class="dv" style="color: #AD0000;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1">pm.summary(trace).head(<span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">3</span>)</span></code></pre></div>
+font-style: inherit;">3</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="35">
 <div>
 
 
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
 <thead>
 <tr class="header">
 <th data-quarto-table-cell-role="th"></th>
@@ -15474,7 +15507,7 @@ font-style: inherit;">3</span>)</span></code></pre></div>
 </thead>
 <tbody>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">angle_of_shot_radians</td>
+<th data-quarto-table-cell-role="th">angle_of_shot_radians</th>
 <td>0.013</td>
 <td>0.000</td>
 <td>0.013</td>
@@ -15488,7 +15521,7 @@ font-style: inherit;">3</span>)</span></code></pre></div>
 <td>1.0</td>
 </tr>
 <tr class="even">
-<td data-quarto-table-cell-role="th">angle_of_shot_degrees</td>
+<th data-quarto-table-cell-role="th">angle_of_shot_degrees</th>
 <td>0.761</td>
 <td>0.003</td>
 <td>0.755</td>
@@ -15502,7 +15535,7 @@ font-style: inherit;">3</span>)</span></code></pre></div>
 <td>1.0</td>
 </tr>
 <tr class="odd">
-<td data-quarto-table-cell-role="th">variance_of_distance</td>
+<th data-quarto-table-cell-role="th">variance_of_distance</th>
 <td>0.137</td>
 <td>0.001</td>
 <td>0.136</td>
@@ -15522,9 +15555,9 @@ font-style: inherit;">3</span>)</span></code></pre></div>
 </div>
 </div>
 <div id="cell-66" class="cell" data-execution_count="36">
-<div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1">pm.plot_posterior(trace[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1">pm.plot_posterior(trace[<span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'variance_of_distance'</span>])</span></code></pre></div>
+font-style: inherit;">'variance_of_distance'</span>])</span></code></pre></div></div>
 <div class="cell-output cell-output-display" data-execution_count="36">
 <pre><code>array([&lt;matplotlib.axes._subplots.AxesSubplot object at 0x7fdff74693c8&gt;],
       dtype=object)</code></pre>
@@ -15538,19 +15571,19 @@ font-style: inherit;">'variance_of_distance'</span>])</span></code></pre></div>
 </div>
 </div>
 <div id="cell-67" class="cell" data-execution_count="37">
-<div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><span class="cf" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><span class="cf" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">with</span> model:</span>
 <span id="cb51-2">    distance_posterior <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">=</span> pm.sample_posterior_predictive(trace)</span></code></pre></div>
+font-style: inherit;">=</span> pm.sample_posterior_predictive(trace)</span></code></pre></div></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>100%|██████████| 4000/4000 [00:04&lt;00:00, 846.25it/s]</code></pre>
 </div>
 </div>
 <div id="cell-68" class="cell" data-execution_count="38">
-<div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> calculate_prob_distance(angle, distance, ls):</span>
@@ -15636,10 +15669,10 @@ background-color: null;
 font-weight: bold;
 font-style: inherit;">return</span> prob_angle <span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">*</span> prob_distance</span></code></pre></div>
+font-style: inherit;">*</span> prob_distance</span></code></pre></div></div>
 </div>
 <div id="cell-69" class="cell" data-execution_count="40">
-<div class="sourceCode cell-code" id="cb54" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1">ls <span class="op" style="color: #5E5E5E;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1">ls <span class="op" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">=</span> np.linspace(<span class="dv" style="color: #AD0000;
 background-color: null;
@@ -15647,10 +15680,10 @@ font-style: inherit;">0</span>, new_df.distance.<span class="bu" style="color: n
 background-color: null;
 font-style: inherit;">max</span>(), <span class="dv" style="color: #AD0000;
 background-color: null;
-font-style: inherit;">200</span>)</span></code></pre></div>
+font-style: inherit;">200</span>)</span></code></pre></div></div>
 </div>
 <div id="cell-70" class="cell" data-execution_count="41">
-<div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">new_df[<span class="st" style="color: #20794D;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1">new_df[<span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">'success_prob'</span>] <span class="op" style="color: #5E5E5E;
 background-color: null;
@@ -15784,7 +15817,7 @@ font-style: inherit;">'Probability of Success'</span></span>
 background-color: null;
 font-style: inherit;">=</span><span class="st" style="color: #20794D;
 background-color: null;
-font-style: inherit;">'25'</span>)</span></code></pre></div>
+font-style: inherit;">'25'</span>)</span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -15803,7 +15836,7 @@ font-style: inherit;">'25'</span>)</span></code></pre></div>
 <h2 class="anchored" data-anchor-id="whats-the-point">What’s the point?</h2>
 <p>Using Bayesian analysis, we want to be able to quantify the unvertainity with each of our predictions. Since each prediction is a distribution, we can utilize this to see where the putts will fall if they do not fall in the hole.</p>
 <div id="cell-74" class="cell" data-execution_count="42">
-<div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><span class="kw" style="color: #003B4F;
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb56" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><span class="kw" style="color: #003B4F;
 background-color: null;
 font-weight: bold;
 font-style: inherit;">def</span> simulate_from_distance(trace, distance_to_hole, trials<span class="op" style="color: #5E5E5E;
@@ -16002,7 +16035,7 @@ font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">10</span>)<span class="op" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">;</span></span></code></pre></div>
+font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.34">
+<meta name="generator" content="quarto-1.8.24">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,18 +91,19 @@ div.csl-indent {
 <meta name="quarto:offset" content="../">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cb67631684576f55e8bc5ac67c9267c9.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-26b7f73f5db2d4d9cde9593d186c2617.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-cb67631684576f55e8bc5ac67c9267c9.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daa61cdf0a0f2a7b7769a5faa9ec7e5c.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-aa12532152a44d0f02d6b664d4715275.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-daa61cdf0a0f2a7b7769a5faa9ec7e5c.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-7ea2a974caaa8b1e48ccc4c51b42f276.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-e10bbddbedffa492376c862a67dc10ec.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="../site_libs/bootstrap/bootstrap-7ea2a974caaa8b1e48ccc4c51b42f276.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-017ef84efe045025cc56634e624690bb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-a8ab86755c8ae9ebfc27a4e5e1023169.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-017ef84efe045025cc56634e624690bb.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script src="../site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="../site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="../site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -183,7 +184,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -384,6 +385,8 @@ window.Quarto = {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Shubham Gupta</span>
     </a>
@@ -561,7 +564,7 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>p09.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb1" data-filename="p09.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="p09.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
@@ -593,11 +596,11 @@ window.Quarto = {
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> local_i <span class="op">-</span> <span class="dv">1</span> <span class="op">&gt;=</span> <span class="dv">0</span>:</span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> shared[local_i <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> shared[local_i]</span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> shared[local_i]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            out[global_i] <span class="op">=</span> shared[local_i]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p09</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p09</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0, 11.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>The LayoutTensor version is nearly identical to the Raw Memory approach, so we’ll omit the code here for brevity.</p>
 </section>
@@ -676,7 +679,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> dot_product(</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> dot_product(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    output: UnsafePointer[Scalar[dtype]],</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    a: UnsafePointer[Scalar[dtype]],</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    b: UnsafePointer[Scalar[dtype]],</span>
@@ -699,11 +702,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only allow thread 0 to write result</span></span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_idx <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 <p><strong>Note</strong>: Instead of doing the parallel reduction, we could also implement the solution using a loop:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    stride = TPB // 2</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    stride = TPB // 2</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">-    while(stride &gt; 0):</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">-        if local_idx &lt; stride:</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">-            shared[local_idx] += shared[local_idx + stride]</span></span>
@@ -716,7 +719,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="st">-        output[0] = shared[0]</span></span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_idx &lt; size:</span></span>
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="va">+        for idx in range(size):</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="va">+            output[0] = output[0] + shared[idx]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="va">+            output[0] = output[0] + shared[idx]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>While this approach also gives the correct answer for this puzzle, it has multiple problems:</p>
 <ul>
 <li><strong>Race conditions</strong>: Multiple threads would simultaneously try to update output[0] without synchronization, causing lost updates.</li>
@@ -735,7 +738,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p10.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="p10.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (SIZE, <span class="dv">1</span>)</span>
@@ -771,7 +774,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># only allow thread 0 to write result</span></span>
 <span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_idx <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>        output[<span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 </section>
@@ -813,7 +816,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p11.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb6" data-filename="p11.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="p11.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB <span class="op">=</span> <span class="dv">8</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE <span class="op">=</span> <span class="dv">6</span></span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> CONV <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (<span class="dv">1</span>, <span class="dv">1</span>)</span>
@@ -857,12 +860,12 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> local_i <span class="op">+</span> j <span class="op">&lt;</span> SIZE:</span>
 <span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>                local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
 <span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 <p>I deliberately allocate <code>shared_a</code> and <code>shared_b</code> with the block width (<code>TPB</code>) instead of the input length (<code>SIZE</code>) and filter length (<code>CONV</code>). The extra space isn’t needed for correctness-the kernel only touches the first <code>SIZE</code>/<code>CONV</code> elements-but it nicely demonstrates <code>LayoutTensor</code>’s masking: out-of-range indices are silently ignored. This trick keeps the buffer shape uniform across puzzles without cluttering the code with edge-case branches. The flip side is a bit of wasted shared memory, which can pinch if your kernel is already pushing the SRAM limit.</p>
 <p>The <em>optimal</em> allocation of shared memory would be:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_a = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="st">-    shared_b = tb[dtype]().row_major[TPB]().shared().alloc()</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="va">+    # Allocate exactly SIZE elements -&gt; smaller shared-mem footprint</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="va">+    shared_a = tb[dtype]().row_major[SIZE]().shared().alloc()</span></span>
@@ -876,7 +879,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_i &lt; SIZE:</span></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_a[local_i] = a[global_i]</span></span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="va">+    if global_i &lt; CONV:</span></span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_b[local_i] = b[global_i]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared_b[local_i] = b[global_i]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <section id="loop-unrolling" class="level3">
 <h3 class="anchored" data-anchor-id="loop-unrolling">Loop Unrolling</h3>
 <p><a href="https://docs.modular.com/mojo/manual/decorators/parameter/"><code>@parameter</code></a> is Mojo’s implementation of <strong>loop unrolling</strong>. This has the same functionality as <code>pragma unroll(N)</code> in CUDA.</p>
@@ -890,14 +893,14 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>parametric_closure.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb8" data-filename="parametric_closure.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> make_shift(off: Int):</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="parametric_closure.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> make_shift(off: Int):</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span>            <span class="co"># ← specialised per ‘off'</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">fn</span> shift(x: Int) <span class="op">-&gt;</span> Int:</span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x <span class="op">+</span> off</span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> shift</span>
 <span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s1 <span class="op">=</span> make_shift(<span class="dv">1</span>)    <span class="co"># emits shift-$off=1</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s4 <span class="op">=</span> make_shift(<span class="dv">4</span>)    <span class="co"># emits shift-$off=4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s4 <span class="op">=</span> make_shift(<span class="dv">4</span>)    <span class="co"># emits shift-$off=4</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>No runtime captures, no heap boxing-the constant <code>off</code> is literally spliced into the generated IR, so calls to <code>s1</code>/<code>s4</code> inline like normal code and can be further unrolled or constant-folded.</p>
 <p>Why is this safe? Mojo’s <em>origin</em> system<span class="citation" data-cites="mojo_lifetimes"><a href="#ref-mojo_lifetimes" role="doc-biblioref">[6]</a></span> assigns each compile-time constant its own immutable origin. The closure therefore can’t outlive or mutate the thing it captured; once the surrounding scope ends those origins die too, guaranteeing that the specialised code never touches expired storage.</p>
@@ -950,7 +953,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p11_block_boundary.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb11" data-filename="p11_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_2 <span class="op">=</span> <span class="dv">15</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-filename="p11_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_2 <span class="op">=</span> <span class="dv">15</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> CONV_2 <span class="op">=</span> <span class="dv">4</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_2 <span class="op">=</span> (<span class="dv">2</span>, <span class="dv">1</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_2 <span class="op">=</span> (TPB, <span class="dv">1</span>)</span>
@@ -1000,11 +1003,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(CONV_2):                          </span>
 <span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>            <span class="co"># dot product of window &amp; kernel</span></span>
 <span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>            local_sum <span class="op">+=</span> shared_a[local_i <span class="op">+</span> j] <span class="op">*</span> shared_b[j]</span>
-<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> local_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--block-boundary</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--block-boundary</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([14.0, 20.0, 26.0, 32.0, 38.0, 44.0, 50.0, 56.0, 62.0, 68.0, 74.0, 80.0, 41.0, 14.0, 0.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </section>
 </section>
@@ -1073,8 +1076,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <section id="computing-global-matrix-indices" class="level3">
 <h3 class="anchored" data-anchor-id="computing-global-matrix-indices">Computing Global Matrix Indices</h3>
 <p>The key insight is that every thread computes its global position using the same formula:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> col <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x  <span class="co"># column index</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y  <span class="co"># row index</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> col <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x  <span class="co"># column index</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y  <span class="co"># row index</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This maps the thread hierarchy directly to matrix coordinates:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1083,12 +1086,12 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </figure>
 </div>
 <p>For an M×N output matrix, you typically launch:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TILE_X <span class="op">=</span> <span class="dv">16</span>  <span class="co"># threads per block in x dimension</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TILE_X <span class="op">=</span> <span class="dv">16</span>  <span class="co"># threads per block in x dimension</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TILE_Y <span class="op">=</span> <span class="dv">16</span>  <span class="co"># threads per block in y dimension</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_X <span class="op">=</span> ceildiv(N, TILE_X)  <span class="co"># columns</span></span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_Y <span class="op">=</span> ceildiv(M, TILE_Y)  <span class="co"># rows</span></span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID <span class="op">=</span> (BLOCKS_X, BLOCKS_Y)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TILE_Y, TILE_X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK <span class="op">=</span> (TILE_Y, TILE_X)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="choosing-tile-size" class="level3">
 <h3 class="anchored" data-anchor-id="choosing-tile-size">Choosing Tile Size</h3>
@@ -1103,8 +1106,8 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <section id="bounds-checking" class="level3">
 <h3 class="anchored" data-anchor-id="bounds-checking">Bounds Checking</h3>
 <p>Since matrix dimensions are rarely exact multiples of tile size, always guard against out-of-bounds access:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># safe to access matrix[row, col]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># safe to access matrix[row, col]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Mojo doesn’t provide automatic bound checking when writing to shared memory <span class="citation" data-cites="mojo_layouttensor_setitem"><a href="#ref-mojo_layouttensor_setitem" role="doc-biblioref">[10]</a></span>.</p>
 <details>
 <summary>
@@ -1121,10 +1124,10 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 </section>
 <section id="indexing-pattern-template" class="level3">
 <h3 class="anchored" data-anchor-id="indexing-pattern-template">Indexing Pattern Template</h3>
-<div class="sourceCode" id="cb17"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> col <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process matrix[row, col]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Process matrix[row, col]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>This indexing pattern appears in every 2D GPU kernel-matrix multiplication, 2D convolution, transpose, etc.</p>
 <blockquote class="blockquote">
 <p><strong>Note</strong>: Mojo/CUDA grids and blocks can also have a third dimension (<code>block_idx.z</code>, <code>thread_idx.z</code>) for problems like 3D volume processing or batch operations. We’ll cover that when we encounter 3D kernels.</p>
@@ -1159,7 +1162,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p11_conv_2d.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb18" data-filename="p11_conv_2d.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> ceildiv</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18" data-filename="p11_conv_2d.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> ceildiv</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>...</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> TPB_X <span class="op">=</span> <span class="dv">8</span></span>
@@ -1223,13 +1226,13 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>            <span class="at">@parameter</span> </span>
 <span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> kx <span class="kw">in</span> <span class="bu">range</span>(K):</span>
 <span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>                local_sum <span class="op">+=</span> shared_img[ly <span class="op">+</span> ky, lx <span class="op">+</span> kx] <span class="op">*</span> shared_k[ky, kx]</span>
-<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>        output[gy, gx] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>        output[gy, gx] <span class="op">=</span> local_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 <p>After making a <a href="https://github.com/goodhamgupta/mojo-gpu-puzzles/commit/b7961ce0e5ea8753a866cbf671881ac1bdf4acd9">few changes</a> to the test harness, we get the following result:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--conv-2d</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p11 <span class="at">--conv-2d</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,...,6.0, 3.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([9.0, 9.0, 9.0, 9.0, 9.0,..., 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 6.0, 4.0, 2.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 2.0, 1.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>We’ll dive into the shared memory tricks like parking partial results, handling 2-D thread and block indexing, and performing halo copies when we get to matrix multiply in <a href="@puzzle-14">Puzzle 14</a>.</p>
 </section>
 <section id="puzzle-12" class="level1">
@@ -1251,7 +1254,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <section id="hillis-steele-algorithm" class="level2">
 <h2 class="anchored" data-anchor-id="hillis-steele-algorithm">Hillis-Steele Algorithm</h2>
 <p>A straightforward parallel scan is the <em>Hillis-Steele</em> approach: at each distance <code>d = 1, 2, 4, …</code> every element adds in the value from <code>d</code> positions back. This is the same as the method shown in <a href="#puzzle-10">Puzzle 10</a></p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># inclusive scan, power-of-two length</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># inclusive scan, power-of-two length</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hillis_steele_scan(a, ⊕):</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(a)</span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    temp <span class="op">=</span> a.copy()</span>
@@ -1261,7 +1264,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>            temp[i] <span class="op">=</span> a[i] <span class="cf">if</span> i <span class="op">&lt;</span> d <span class="cf">else</span> a[i <span class="op">-</span> d] ⊕ a[i]</span>
 <span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        a, temp <span class="op">=</span> temp, a</span>
 <span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        d <span class="op">*=</span> <span class="dv">2</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>In Mojo, this looks as follows:</p>
 <details open="">
 <summary>
@@ -1271,7 +1274,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p12_simple.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb22" data-filename="p12_simple.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_simple[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22" data-filename="p12_simple.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_simple[</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
@@ -1288,11 +1291,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        offset <span class="op">*=</span> <span class="dv">2</span></span>
 <span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_i <span class="op">&lt;</span> SIZE:</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> shared[local_i]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">=</span> shared[local_i]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--simple</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--simple</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Each of the log₂(n) rounds does up to n parallel additions (one per active element), so total work is <span class="math inline">\(\sum_k n = nlog(n)\)</span>. Because rounds are serialized by barriers, the longest dependency chain is one add per round i.e <span class="math inline">\(O(log n)\)</span>.</p>
 </details></section>
 <section id="blellochs-twopass-algorithm" class="level2">
@@ -1358,7 +1361,7 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <div class="code-with-filename-file">
 <pre><strong>p12_blelloch.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb24" data-filename="p12_blelloch.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_blelloch[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24" data-filename="p12_blelloch.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_blelloch[</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout</span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    output:   LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, layout],</span>
@@ -1398,11 +1401,11 @@ c = a \cdot b = \sum_{i=0}^{n-1} a_i b_i
 <span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>        half <span class="op">=</span> half <span class="op">&gt;&gt;</span> <span class="dv">1</span></span>
 <span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> global_idx <span class="op">&lt;</span> size:</span>
-<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>        output[global_idx] <span class="op">=</span> shared[local_idx] <span class="op">+</span> a[global_idx]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>        output[global_idx] <span class="op">=</span> shared[local_idx] <span class="op">+</span> a[global_idx]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--blelloch</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12 <span class="at">--blelloch</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>This is not the most efficient implementation, but I hope this provides some intuition about the algorithm!</p>
 </section>
@@ -1440,7 +1443,7 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 <div class="code-with-filename-file">
 <pre><strong>p12_block_boundary.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb27" data-filename="p12_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_local_phase[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27" data-filename="p12_block_boundary.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefix_sum_local_phase[</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    out_layout: Layout, in_layout: Layout</span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
@@ -1479,11 +1482,11 @@ Now every element holds the inclusive scan over the <em>whole</em> array.</li>
 <span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># FILL ME IN (roughly 3 lines)</span></span>
 <span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> block_idx.x <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> global_i <span class="op">&lt;</span> size:</span>
 <span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a>        prev_block_sum <span class="op">=</span> output[SIZE_2 <span class="op">+</span> block_idx.x <span class="op">-</span> <span class="dv">1</span>]</span>
-<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">+=</span> prev_block_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a>        output[global_i] <span class="op">+=</span> prev_block_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p12</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0, 28.0, 77.0]) # last 2 elements are the block sums</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([0.0, 1.0, 3.0, 6.0, 10.0, 15.0, 21.0, 28.0, 36.0, 45.0, 55.0, 66.0, 78.0, 91.0, 105.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </section>
 </section>
@@ -1530,7 +1533,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p13.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb29" data-filename="p13.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> axis_sum[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29" data-filename="p13.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> axis_sum[</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    in_layout: Layout, out_layout: Layout</span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, out_layout],</span>
@@ -1557,15 +1560,15 @@ Solution
 <span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> local_i <span class="op">==</span> <span class="dv">0</span>:</span>
 <span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Output shape is [batch_size, 1]</span></span>
 <span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>        <span class="co"># which we why we need the last dimension</span></span>
-<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>        output[batch, <span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>        output[batch, <span class="dv">0</span>] <span class="op">=</span> shared[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p13</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p13</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>We can also perform column-sum(axis=0) with a trivial change:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if local_i &lt; SIZE:</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="st">-    if local_i &lt; SIZE:</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="st">-        shared[local_i] = a[batch, local_i]</span></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="va">+    if local_i &lt; SIZE:</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared[local_i] = a[local_i, batch]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="va">+        shared[local_i] = a[local_i, batch]</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="puzzle-14-matmul" class="level1">
 <h1><a href="https://puzzles.modular.com/puzzle_14/puzzle_14.html" id="puzzle-14">Puzzle 14: Matmul</a></h1>
@@ -1591,7 +1594,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p14_naive.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb32" data-filename="p14_naive.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> naive_matmul[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32" data-filename="p14_naive.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> naive_matmul[</span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout, size: Int</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
@@ -1610,11 +1613,11 @@ Solution
 <span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">@parameter</span></span>
 <span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(SIZE):</span>
 <span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>            running_sum <span class="op">+=</span> a[row, k] <span class="op">*</span> b[k, col]</span>
-<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb33"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </section>
 <section id="shared-memory-version" class="level2">
@@ -1643,7 +1646,7 @@ Solution
 <div class="code-with-filename-file">
 <pre><strong>p14_shared.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb34" data-filename="p14_shared.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> single_block_matmul[</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34" data-filename="p14_shared.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> single_block_matmul[</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    layout: Layout, size: Int</span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>](</span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, layout],</span>
@@ -1668,11 +1671,11 @@ Solution
 <span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(size):</span>
 <span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a>            running_sum <span class="op">+=</span> a[local_row, k] <span class="op">*</span> b[k, local_col]</span>
 <span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>        output[row, col] <span class="op">=</span> running_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--naive</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([4.0, 6.0, 12.0, 22.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The Roofline Model offers a first-order answer to a GPU performance question: is my kernel limited by arithmetic throughput or by memory bandwidth?<br>
 It does so by plotting operational intensity (FLOPs per byte) against two ceilings - the hardware’s peak FLOP/s and peak DRAM bandwidth—so you can see at a glance which resource is the bottleneck.</p>
 </details></section>
@@ -1933,7 +1936,7 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <div class="code-with-filename-file">
 <pre><strong>roofline_plot.py</strong></pre>
 </div>
-<div class="sourceCode" id="cb36" data-filename="roofline_plot.py"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /// script</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36" data-filename="roofline_plot.py"><pre class="sourceCode py code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /// script</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="co"># dependencies = [</span></span>
 <span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   "matplotlib",</span></span>
 <span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   "numpy",</span></span>
@@ -2027,7 +2030,7 @@ P_{shared} \;\; &amp; = \min(26.7~\text{TFLOPS},\; 0.45 \times 360~\text{GB/s}) 
 <span id="cb36-92"><a href="#cb36-92" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>kernel[<span class="st">'name'</span>]<span class="sc">}</span><span class="ss">:"</span>)</span>
 <span id="cb36-93"><a href="#cb36-93" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Intensity: </span><span class="sc">{</span>kernel[<span class="st">'intensity'</span>]<span class="sc">}</span><span class="ss"> FLOP/byte"</span>)</span>
 <span id="cb36-94"><a href="#cb36-94" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Performance: </span><span class="sc">{</span>kernel[<span class="st">'performance'</span>]<span class="sc">}</span><span class="ss"> GFLOP/s"</span>)</span>
-<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb36-95"><a href="#cb36-95" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"  Efficiency: </span><span class="sc">{</span>efficiency<span class="sc">:.1f}</span><span class="ss">% of peak"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 </section>
@@ -2090,7 +2093,7 @@ For large matrices, however, even that version still:</p>
 <div class="code-with-filename-file">
 <pre><strong>p14_matmul_tiled_manual.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb37" data-filename="p14_matmul_tiled_manual.mojo"><pre class="sourceCode mojo code-overflow-wrap code-with-copy"><code class="sourceCode mojo"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37" data-filename="p14_matmul_tiled_manual.mojo"><pre class="sourceCode mojo code-overflow-wrap code-with-copy"><code class="sourceCode mojo"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_TILED <span class="op">=</span> <span class="dv">8</span> <span class="co"># Size of the matrix we are multiplying, NOT the size of a tile</span></span>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_TILED <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>)  <span class="co"># each block convers 3x3 elements</span></span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_TILED <span class="op">=</span> (TPB, TPB)</span>
@@ -2141,11 +2144,11 @@ For large matrices, however, even that version still:</p>
 <span id="cb37-49"><a href="#cb37-49" aria-hidden="true" tabindex="-1"></a>            barrier()</span>
 <span id="cb37-50"><a href="#cb37-50" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb37-51"><a href="#cb37-51" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> global_row <span class="op">&lt;</span> size <span class="kw">and</span> global_col <span class="op">&lt;</span> size:</span>
-<span id="cb37-52"><a href="#cb37-52" aria-hidden="true" tabindex="-1"></a>            output[global_row, global_col] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb37-52"><a href="#cb37-52" aria-hidden="true" tabindex="-1"></a>            output[global_row, global_col] <span class="op">=</span> local_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="sourceCode" id="cb38"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--tiled</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode sh code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run p14 <span class="at">--tiled</span></span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="co"># out: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="co"># expected: HostBuffer([2240.0, 2296.0, 2352.0, 2408.0, 2464.0, 2520.0, 2576.0, 2632.0, 5824.0, 6008.0, 6192.0, 6376.0, 6560.0, 6744.0, 6928.0, 7112.0, 9408.0, 9720.0, 10032.0, 10344.0, 10656.0, 10968.0, 11280.0, 11592.0, 12992.0, 13432.0, 13872.0, 14312.0, 14752.0, 15192.0, 15632.0, 16072.0, 16576.0, 17144.0, 17712.0, 18280.0, 18848.0, 19416.0, 19984.0, 20552.0, 20160.0, 20856.0, 21552.0, 22248.0, 22944.0, 23640.0, 24336.0, 25032.0, 23744.0, 24568.0, 25392.0, 26216.0, 27040.0, 27864.0, 28688.0, 29512.0, 27328.0, 28280.0, 29232.0, 30184.0, 31136.0, 32088.0, 33040.0, 33992.0])</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>The new formulas in the tiling implementation deserve explanation. Let’s break them down into key concepts:</p>
 <section id="how-many-tiles-are-needed" class="level4">
@@ -2231,7 +2234,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <p>LayoutTensor provides a <strong>tile()</strong> method that creates zero-copy <span class="citation" data-cites="zero_cost_abstractions"><a href="#ref-zero_cost_abstractions" role="doc-biblioref">[7]</a></span> views into sub-regions of tensors <span class="citation" data-cites="mojo_layouttensor_tile"><a href="#ref-mojo_layouttensor_tile" role="doc-biblioref">[19]</a></span>. This eliminates manual indexing gymnastics while keeping identical performance.</p>
 <p>A <code>LayoutTensor.tile[tile_height, tile_width](block_row, block_col)</code> call returns a view of the specified tile without copying data, at no cost!</p>
 <p>The transformation from manual indexing to LayoutTensor simplifies the loading logic:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a># Load elements of A into shared mem</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode diff code-with-copy"><code class="sourceCode diff"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a># Load elements of A into shared mem</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="st">- if global_row &lt; size and (tile * TPB + local_col) &lt; size:</span></span>
 <span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="st">-     shared_a[local_row, local_col] = a[</span></span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="st">-         global_row, tile * TPB + local_col</span></span>
@@ -2251,7 +2254,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="va">+ copy_dram_to_sram_async[thread_layout=load_b_layout](b_shared, b_tile)</span></span>
 <span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a># Synchronize all async copies</span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="va">+ async_copy_wait_all()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="va">+ async_copy_wait_all()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Full solution looks as follows:</p>
 <details closed="">
 <summary>
@@ -2261,7 +2264,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <div class="code-with-filename-file">
 <pre><strong>p14_matmul_layout_tensor.mojo</strong></pre>
 </div>
-<div class="sourceCode" id="cb41" data-filename="p14_matmul_layout_tensor.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_TILED <span class="op">=</span> <span class="dv">9</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41" data-filename="p14_matmul_layout_tensor.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> SIZE_TILED <span class="op">=</span> <span class="dv">9</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCKS_PER_GRID_TILED <span class="op">=</span> (<span class="dv">3</span>, <span class="dv">3</span>)  <span class="co"># each block covers 3x3 elements</span></span>
 <span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> THREADS_PER_BLOCK_TILED <span class="op">=</span> (TPB, TPB)</span>
 <span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> layout_tiled <span class="op">=</span> Layout.row_major(SIZE_TILED, SIZE_TILED)</span>
@@ -2307,7 +2310,7 @@ B = b[t*TPB + local_row, global_col]</code></pre>
 <span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>        block_idx.y <span class="op">*</span> TPB <span class="op">+</span> local_row <span class="op">&lt;</span> size</span>
 <span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">and</span> block_idx.x <span class="op">*</span> TPB <span class="op">+</span> local_col <span class="op">&lt;</span> size</span>
 <span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>    ):</span>
-<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>        out_tile[local_row, local_col] <span class="op">=</span> local_sum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>        out_tile[local_row, local_col] <span class="op">=</span> local_sum</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 </section>
@@ -2502,13 +2505,14 @@ B = b[t*TPB + local_row, global_col]</code></pre>
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
