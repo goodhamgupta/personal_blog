@@ -5,3 +5,6 @@ _site/*
 posts/.DS_Store
 .tool-versions
 venv/*
+
+# Specific files with MLFlow widget issues
+docs/posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling.html

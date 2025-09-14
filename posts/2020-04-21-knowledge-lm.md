@@ -2,6 +2,7 @@
 aliases:
 - /nlp/language_model/review/2020/04/21/knowledge-lm
 author: Shubham Gupta
+image: knowledge-lm/t5.png
 categories:
 - nlp
 - language_model

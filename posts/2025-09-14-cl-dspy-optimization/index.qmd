@@ -1,0 +1,18 @@
+---
+title: "Curriculum Learning 🤝 DSPy: Optimization"
+author: Shubham Gupta
+date: '2025-09-14'
+description: Optimzing DSPy programs for ConvFinQA
+image: ../cl_dspy/submission_mlflow_metrics.png
+categories:
+  - programming
+  - dspy
+  - curriculum-learning
+---
+
+<p>Redirecting…</p>
+<script>
+  window.location.replace("_2025-09-14-cl-dspy-optimization.html");
+</script>
+<meta http-equiv="refresh" content="0; url=_2025-09-14-cl-dspy-optimization.html">
+<p>If you are not redirected automatically, <a href="_2025-09-14-cl-dspy-optimization.html">click here</a>.</p>
