@@ -1,9 +1,8 @@
 ---
-# mirror the notebook's metadata for listings
 title: "Curriculum Learning 🤝 DSPy: Modelling"
 author: Shubham Gupta
 date: '2025-09-01'
-description: Mapping ConvFinQA and crafting a curriculum for financial QA
+description: Curriculum design for ConvFinQA, paving the way to program optimization
 image: ../cl_dspy/submission_mlflow_traces.png
 categories:
   - programming
