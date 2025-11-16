@@ -1,0 +1,1838 @@
+---
+title: "GPUs go brrr with Mojo: Attention? Attention!"
+lightbox: true
+image: mojo_gpu_puzzles/attention_header.png
+date: '2025-10-21'
+author: Shubham Gupta
+description: "Flash attention from first-principles in Mojo"
+toc: true
+bibliography: citations/mojo_citations.bib
+csl: citations/ieee.csl
+footnotes-hover: false
+execute:
+  echo: false
+format:
+  html:
+    highlight-style: gruvbox
+    code-overflow: wrap
+    code-fold: true
+    code-summary: "Solution"
+    syntax-definitions:
+      - mojo_gpu_puzzles/mojo.xml
+categories:
+- programming
+- gpu
+- mojo
+- attention
+---
+
+In the [first post](./2025-07-06-gpu-puzzles-p1.qmd), we covered GPU fundamentals—memory hierarchy, thread organization, and basic parallel patterns. The [second post](./2025-07-20-gpu-puzzles-p2.qmd) built on that foundation with core algorithms: convolution, parallel reduction, and tiled matrix multiplication.
+
+Now we're ready for the next set of puzzles: **softmax** and **attention**, the mechanisms that power every modern large language model.
+
+# [Puzzle 18: Softmax](https://puzzles.modular.com/puzzle_18/puzzle_18.html) {#puzzle-18}
+
+The softmax function transforms a vector of arbitrary real numbers into a probability distribution. Given input vector **x** of length N, softmax produces output **y** where each element is:
+
+$$
+y_i = \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}
+$$
+
+It has two key steps:
+
+1. Compute the exponentials of the input vector
+2. Normalize the exponentials to sum to 1.0
+
+Each output is positive, between the range [0,1], and they sum to 1.0.
+
+![Source: [3Blue1Brown](https://youtu.be/wjZofJX0v4M?si=sKSJDVHE0FO1gmUI&t=1406)](mojo_gpu_puzzles/p18_softmax.png){fig-align='center'}
+
+## The Numerical Stability Problem
+
+Naive softmax fails on real data with extreme values[@pytorch_softmax_numerical_stability] because of overflow. Consider computing `softmax([1000, 1001, 1002])`:
+
+```python
+import numpy as np
+x = np.array([1000., 1001., 1002.])
+exp_x = np.exp(x)  # [inf, inf, inf] - overflow!
+softmax = exp_x / exp_x.sum()  # [nan, nan, nan]
+```
+
+The exponentials overflow float32 before we even reach the division. Even float64 only buys you a bit more headroom — `exp(710)` still overflows.
+
+## Safe Softmax: The Max-Subtraction Trick
+
+The safe softmax implementation exploits a mathematical identity: softmax is **translation invariant**[@gaohongnan_softmax_translation_invariance]. Subtracting any constant from all inputs doesn't change the output:
+
+$$
+\frac{e^{x_i - c}}{\sum_{j} e^{x_j - c}} = \frac{e^{x_i} \cdot e^{-c}}{\sum_{j} e^{x_j} \cdot e^{-c}} = \frac{e^{x_i}}{\sum_{j} e^{x_j}}
+$$
+
+By choosing $c = \max(x)$, we ensure the largest exponent is zero, preventing overflow while maintaining numerical precision:
+
+$$
+\text{softmax}(x_i) = \frac{e^{x_i - \max(x)}}{\sum_{j=1}^{N} e^{x_j - \max(x)}}
+$$
+
+Now our example works:
+```python
+x = np.array([1000., 1001., 1002.])
+x_shifted = x - x.max()  # [-2, -1, 0]
+exp_x = np.exp(x_shifted)  # [0.135, 0.368, 1.0]
+softmax = exp_x / exp_x.sum()  # [0.09, 0.244, 0.665] ✓
+```
+
+## Parallel Softmax: Two-Pass Reduction
+
+Computing softmax on GPU requires two parallel reductions (recall [Puzzle 10](./2025-07-20-gpu-puzzles-p2.qmd#puzzle-10)'s dot product reduction):
+
+**Pass 1: Find maximum**
+- Each thread loads one element into shared memory
+- Parallel tree reduction to find `max(x)`
+- Result stored in `shared[0]`
+
+**Pass 2: Compute exponentials and sum**
+- Each thread computes `exp(x[i] - max_val)`
+- Store in shared memory
+- Parallel reduction to find sum of exponentials
+- Each thread divides by the sum to get final softmax value
+
+![Two-pass softmax reduction: first find max (left), then sum exponentials (right)](mojo_gpu_puzzles/p18_softmax_reduction.png){fig-align='center'}
+
+## Implementation
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p18.mojo}
+alias SIZE = 128
+alias TPB = 128  # Next power of 2 >= SIZE
+alias BLOCKS_PER_GRID = (1, 1)
+alias THREADS_PER_BLOCK = (TPB, 1)
+alias dtype = DType.float32
+alias layout = Layout.row_major(SIZE)
+
+fn softmax[
+    layout: Layout
+](
+    output: LayoutTensor[mut=True, dtype, layout],
+    a: LayoutTensor[mut=False, dtype, layout],
+    size: Int,
+):
+    global_i = block_dim.x * block_idx.x + thread_idx.x
+    local_i = thread_idx.x
+
+    # Allocate shared memory for reduction
+    shared = tb[dtype]().row_major[TPB]().shared().alloc()
+
+    # Load input into shared memory
+    if global_i < size:
+        shared[local_i] = a[global_i]
+    else:
+        shared[local_i] = -SIMD[dtype, 1].MAX  # Neutral value for max
+
+    barrier()
+
+    # ============ Pass 1: Find Maximum ============
+    var stride = TPB // 2
+    while stride > 0:
+        if local_i < stride:
+            shared[local_i] = max(shared[local_i], shared[local_i + stride])
+        barrier()
+        stride //= 2
+
+    # All threads now see max in shared[0]
+    var max_val = shared[0]
+    barrier()
+
+    # ============ Pass 2: Exponentials and Sum ============
+    # Compute exp(x - max) for numerical stability
+    if global_i < size:
+        shared[local_i] = exp(a[global_i] - max_val)
+    else:
+        shared[local_i] = 0.0  # Neutral value for sum
+
+    barrier()
+
+    # Parallel reduction to find sum of exponentials
+    stride = TPB // 2
+    while stride > 0:
+        if local_i < stride:
+            shared[local_i] += shared[local_i + stride]
+        barrier()
+        stride //= 2
+
+    # Normalize by sum to get softmax
+    var sum_exp = shared[0]
+    if global_i < size:
+        output[global_i] = exp(a[global_i] - max_val) / sum_exp
+```
+
+```bash
+pixi run p18
+# Input: [0.0, 1.0, 2.0, 3.0, ..., 127.0]
+# Max value: 127.0
+# Sum of exp: 1.701412e+55
+# Output sums to: 1.0000000 ✓
+# Matches scipy.special.softmax: True ✓
+```
+
+</details>
+
+## Why Two Barriers Between Passes?
+
+Notice the pattern:
+```mojo
+barrier()  // End of max reduction
+var max_val = shared[0]
+barrier()  // Before starting exp computation
+```
+
+The second barrier is crucial. After the max reduction completes, thread 0 has written the result to `shared[0]`, but other threads immediately start overwriting their shared memory slots with exponential values. Without the middle barrier, a thread could read a stale max value while thread 0 is still writing it.
+
+**Rule of thumb**: Every phase that writes to shared memory needs a barrier *before* the next read.
+
+## Performance Notes
+
+For this SIZE=128 example, softmax is **memory-bound**. The arithmetic intensity is:
+
+$$
+I = \frac{3N \text{ FLOPs}}{8N \text{ bytes}} = 0.375 \text{ FLOP/byte}
+$$
+
+(3N operations: N subtracts, N exponentials, N divides; 8N bytes: read input twice, write output)
+
+This is far below our RTX 4090's critical intensity of ~74 FLOP/byte, so performance is limited by DRAM bandwidth, not compute. The shared memory reductions add minimal overhead—most time is spent in the initial load and final store.
+
+Next, we'll use this softmax kernel as a building block for the full attention mechanism.
+
+# [Puzzle 19: Attention](https://puzzles.modular.com/puzzle_19/puzzle_19.html) {#puzzle-19}
+
+Attention is the core operation in transformers. Given a query vector **Q**, a set of key vectors **K**, and corresponding value vectors **V**, attention computes a weighted sum of values where the weights are determined by the similarity between the query and each key.
+
+## The Attention Formula
+
+$$
+\text{Attention}(Q, K, V) = \text{softmax}(Q \cdot K^T) \cdot V
+$$
+
+Where:
+- **Q** (query): shape `(d,)` — what we're looking for
+- **K** (keys): shape `(seq_len, d)` — what each position offers
+- **V** (values): shape `(seq_len, d)` — the actual content at each position
+- **Output**: shape `(d,)` — weighted combination of values
+
+Think of it like a searchlight. The query is your search beam, keys are the labels on doors, and values are what's behind each door. The dot product `Q·K^T` measures how well each key matches your query. Softmax converts these scores into weights that sum to 1.0. Finally, you take a weighted average of the values.
+
+## Three-Step Computation
+
+![Attention computation flow: scores → weights → output](mojo_gpu_puzzles/p19_attention_flow.png){fig-align='center'}
+
+### Step 1: Compute Attention Scores
+
+$$
+\text{scores} = Q \cdot K^T \quad \text{shape: } (1, \text{seq\_len})
+$$
+
+This is a matrix-vector multiplication. For each key vector, we compute the dot product with the query:
+
+```
+scores[i] = Q[0]·K[i,0] + Q[1]·K[i,1] + ... + Q[d-1]·K[i,d-1]
+```
+
+Higher scores mean the key is more relevant to the query.
+
+### Step 2: Compute Attention Weights
+
+$$
+\text{weights} = \text{softmax}(\text{scores}) \quad \text{shape: } (1, \text{seq\_len})
+$$
+
+We apply our softmax kernel from Puzzle 18 to normalize scores into probabilities. This ensures all weights are positive and sum to 1.0.
+
+### Step 3: Weighted Sum of Values
+
+$$
+\text{output} = \text{weights} \cdot V \quad \text{shape: } (d,)
+$$
+
+Another matrix-vector multiplication. Each output dimension is computed as:
+
+```
+output[j] = weights[0]·V[0,j] + weights[1]·V[1,j] + ... + weights[seq_len-1]·V[seq_len-1,j]
+```
+
+## Memory Efficiency: The Key Trick
+
+Notice that scores and weights have the same shape `(1, seq_len)`. We can **reuse the same buffer** for both:
+
+1. Allocate `scores_weights_buf` of size `(1, seq_len)`
+2. Compute scores into this buffer
+3. Apply softmax **in-place**, overwriting scores with weights
+4. Use the buffer (now containing weights) for the final matmul
+
+This halves memory usage compared to allocating separate buffers.
+
+## Kernel Orchestration
+
+Instead of writing a monolithic attention kernel, we **compose** three optimized kernels we already have:
+
+1. **Transpose kernel** (new!) — compute K^T efficiently
+2. **Matmul kernel** (Puzzle 14) — compute Q·K^T
+3. **Softmax kernel** (Puzzle 18) — normalize scores
+4. **Matmul kernel** (again) — compute weights·V
+
+This modular approach has several benefits:
+- Each kernel is simpler to optimize independently
+- We reuse battle-tested implementations
+- Easier to maintain and debug
+- Natural parallelism between independent operations
+
+## Implementation: Transpose Kernel
+
+The missing piece is an efficient transpose. Naive per-thread transpose is slow because of strided memory access. Instead, we use **shared memory tiling** to coalesce reads and writes:
+
+<details open>
+<summary> **Transpose with Shared Memory Tiling** </summary>
+
+```{.mojo filename=p19_transpose.mojo}
+alias TILE_SIZE = 16
+
+fn transpose_2d[
+    in_layout: Layout, out_layout: Layout
+](
+    output: LayoutTensor[mut=True, dtype, out_layout],
+    input: LayoutTensor[mut=False, dtype, in_layout],
+    rows: Int,
+    cols: Int,
+):
+    # Global position
+    row = block_idx.y * TILE_SIZE + thread_idx.y
+    col = block_idx.x * TILE_SIZE + thread_idx.x
+
+    # Allocate shared tile (+1 to avoid bank conflicts)
+    shared = tb[dtype]().row_major[TILE_SIZE, TILE_SIZE + 1]().shared().alloc()
+
+    # Cooperatively load tile into shared memory (coalesced)
+    if row < rows and col < cols:
+        shared[thread_idx.y, thread_idx.x] = input[row, col]
+
+    barrier()
+
+    # Transpose coordinates for output
+    out_row = block_idx.x * TILE_SIZE + thread_idx.y
+    out_col = block_idx.y * TILE_SIZE + thread_idx.x
+
+    # Write transposed tile to global memory (coalesced)
+    if out_row < cols and out_col < rows:
+        output[out_row, out_col] = shared[thread_idx.x, thread_idx.y]
+```
+
+Key optimizations:
+
+1. **Tile-based approach**: Process 16×16 tiles to maximize shared memory reuse
+2. **Coalesced reads**: Adjacent threads read adjacent memory locations (good for input)
+3. **Coalesced writes**: Adjacent threads write adjacent locations in transposed space (good for output)
+4. **Bank conflict avoidance**: The `+1` padding in the shared memory dimension prevents threads from hitting the same memory bank
+
+Without tiling, a naive transpose would have either coalesced reads OR coalesced writes, but not both. The shared memory "pivots" the access pattern, giving us coalescing in both directions.
+
+</details>
+
+## Full Attention Implementation
+
+Now we orchestrate the complete attention pipeline:
+
+<details open>
+<summary> **Solution** </summary>
+
+```{.mojo filename=p19_attention.mojo}
+alias SEQ_LEN = 16
+alias D = 8
+alias dtype = DType.float32
+
+# Layout specifications
+alias q_layout = Layout.row_major(D)
+alias k_layout = Layout.row_major(SEQ_LEN, D)
+alias v_layout = Layout.row_major(SEQ_LEN, D)
+alias out_layout = Layout.row_major(D)
+alias kt_layout = Layout.row_major(D, SEQ_LEN)  # K transposed
+alias scores_layout = Layout.row_major(1, SEQ_LEN)
+
+fn attention(
+    output: LayoutTensor[mut=True, dtype, out_layout],
+    q: LayoutTensor[mut=False, dtype, q_layout],
+    k: LayoutTensor[mut=False, dtype, k_layout],
+    v: LayoutTensor[mut=False, dtype, v_layout],
+):
+    # Allocate temporary buffers
+    # Note: scores and weights reuse the same buffer!
+    var kt_buf = DeviceBuffer[dtype](D * SEQ_LEN)
+    var scores_weights_buf = DeviceBuffer[dtype](SEQ_LEN)
+
+    # Create tensor views
+    var kt = LayoutTensor[mut=True, dtype, kt_layout](kt_buf.unsafe_ptr())
+    var scores = LayoutTensor[mut=True, dtype, scores_layout](
+        scores_weights_buf.unsafe_ptr()
+    )
+    var weights = scores  # Same buffer, reinterpreted
+
+    # Step 1: Transpose K -> K^T
+    launch_kernel[transpose_2d, grid_dims, block_dims](
+        kt, k, SEQ_LEN, D
+    )
+
+    # Step 2: Compute scores = Q · K^T  (shape: 1 × SEQ_LEN)
+    # Reshape Q from (D,) to (1, D) for matmul
+    var q_2d = q.reshape[1, D]()
+    launch_kernel[matmul_kernel, grid_dims, block_dims](
+        scores, q_2d, kt
+    )
+
+    # Step 3: Apply softmax in-place: scores -> weights
+    # Reshape from (1, SEQ_LEN) to (SEQ_LEN,) for softmax kernel
+    var scores_1d = scores.reshape[SEQ_LEN]()
+    var weights_1d = scores_1d  # Same buffer
+    launch_kernel[softmax, softmax_grid, softmax_block](
+        weights_1d, scores_1d, SEQ_LEN
+    )
+
+    # Step 4: Compute output = weights · V  (shape: D,)
+    # Reshape weights back to (1, SEQ_LEN) for matmul
+    launch_kernel[matmul_kernel, grid_dims, block_dims](
+        output.reshape[1, D](), weights, v
+    )
+```
+
+```bash
+pixi run p19
+# Query: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
+# Keys shape: (16, 8)
+# Values shape: (16, 8)
+#
+# Attention weights (first 5): [0.072, 0.068, 0.065, 0.062, 0.059, ...]
+# Weights sum to: 1.0000000 ✓
+#
+# Output: [0.245, 0.512, 0.779, 1.046, 1.313, 1.580, 1.847, 2.114]
+# Matches PyTorch F.scaled_dot_product_attention: True ✓
+```
+
+</details>
+
+## Zero-Copy Reshaping
+
+Notice the pattern:
+```mojo
+var scores_1d = scores.reshape[SEQ_LEN]()
+```
+
+This is a **zero-copy operation**. No data moves in memory—we simply reinterpret the tensor's dimensionality. The underlying buffer remains unchanged. This is safe because:
+
+1. The total number of elements stays the same: `1 × SEQ_LEN = SEQ_LEN`
+2. Memory layout (row-major) is compatible with both interpretations
+3. The LayoutTensor API enforces these invariants at compile time
+
+This is one of Mojo's killer features for systems programming—high-level abstractions that compile to zero-overhead code.
+
+## The Memory Problem
+
+Our implementation works, but it's inefficient. Let's count the memory usage:
+
+**Temporary buffers:**
+- K^T: `D × SEQ_LEN × 4 bytes` = 8 × 16 × 4 = 512 bytes
+- Scores/weights: `SEQ_LEN × 4 bytes` = 16 × 4 = 64 bytes
+- **Total per attention call**: ~600 bytes
+
+This seems tiny, but consider a real transformer:
+
+- Sequence length: 2048
+- Hidden dimension: 4096
+- Number of heads: 32
+- Batch size: 16
+
+**Memory for attention scores alone:**
+```
+16 (batch) × 32 (heads) × 2048 × 2048 × 4 bytes = 8.6 GB
+```
+
+With multiple layers and the backward pass, you quickly exceed even high-end GPU memory. The quadratic `O(seq_len²)` scaling is the bottleneck.
+
+**Flash Attention** solves this by never materializing the full attention matrix. Instead, it computes attention in tiles, keeping everything in fast SRAM. But there's a catch—we need a way to compute softmax without seeing all the scores at once.
+
+Enter **online softmax**.
+
+# Online Softmax: The Missing Piece {#online-softmax}
+
+The standard softmax implementation we built in Puzzle 18 requires two passes over the data:
+
+1. Find the maximum value
+2. Compute exponentials and their sum
+
+This works when all values fit in memory, but Flash Attention processes attention scores in chunks. We need to compute softmax **incrementally**—updating our statistics as new values stream in, without storing everything.
+
+## The Mathematical Foundation
+
+Recall the numerically stable softmax formula:
+
+$$
+\text{softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max(x)
+$$
+
+The key insight: we can maintain **running statistics** (max and sum) and **rescale** previous results when we see a new maximum.
+
+### Notation
+
+For a partial sequence processed so far, we track:
+- $m$ : current maximum seen
+- $d$ : current sum of exponentials (denominator)
+- $o$ : current weighted output (numerator)
+
+When we process a new block with local max $m'$ and sum $d'$:
+
+1. **Compare maximums**: The new global maximum is $m_{new} = \max(m, m')$
+2. **Rescale old statistics**: Scale the old sum by $e^{m - m_{new}}$ to account for the change in maximum
+3. **Update sum**: $d_{new} = d \cdot e^{m - m_{new}} + d' \cdot e^{m' - m_{new}}$
+4. **Update output**: $o_{new} = o \cdot e^{m - m_{new}} + o' \cdot e^{m' - m_{new}}$
+
+The beauty: this update is **exact**, not an approximation. The final result is identical to computing softmax over the entire sequence at once.
+
+## Worked Example
+
+Let's compute `softmax([1.0, 3.0, 2.0, 4.0])` in two blocks: `[1.0, 3.0]` and `[2.0, 4.0]`.
+
+### Block 1: Process [1.0, 3.0]
+
+```
+m₁ = max(1.0, 3.0) = 3.0
+e^(1.0 - 3.0) = e^(-2.0) = 0.135
+e^(3.0 - 3.0) = e^(0.0) = 1.0
+d₁ = 0.135 + 1.0 = 1.135
+
+Current softmax: [0.135/1.135, 1.0/1.135] = [0.119, 0.881]
+```
+
+### Block 2: Process [2.0, 4.0]
+
+```
+m₂' = max(2.0, 4.0) = 4.0
+e^(2.0 - 4.0) = e^(-2.0) = 0.135
+e^(4.0 - 4.0) = e^(0.0) = 1.0
+d₂' = 0.135 + 1.0 = 1.135
+```
+
+### Merge: Update Global Statistics
+
+```
+m_new = max(m₁, m₂') = max(3.0, 4.0) = 4.0
+
+Rescale old statistics:
+scale_old = e^(3.0 - 4.0) = e^(-1.0) = 0.368
+scale_new = e^(4.0 - 4.0) = e^(0.0) = 1.0
+
+d_new = d₁ × scale_old + d₂' × scale_new
+      = 1.135 × 0.368 + 1.135 × 1.0
+      = 0.418 + 1.135
+      = 1.553
+```
+
+### Final Softmax (all at once for verification)
+
+```
+Direct computation:
+m = 4.0
+exp_values = [e^(1-4), e^(3-4), e^(2-4), e^(4-4)]
+           = [0.050, 0.368, 0.135, 1.0]
+sum = 1.553
+
+softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
+        = [0.032, 0.237, 0.087, 0.644] ✓
+```
+
+The online approach gives identical results!
+
+## Why This Works: Softmax Decomposition
+
+The mathematical property that enables online softmax is:
+
+$$
+\frac{e^{x_i - m_{global}}}{\sum_{j=1}^{N} e^{x_j - m_{global}}} = \frac{e^{x_i - m_{global}}}{e^{m_1 - m_{global}} \sum_{j \in B_1} e^{x_j - m_1} + e^{m_2 - m_{global}} \sum_{j \in B_2} e^{x_j - m_2}}
+$$
+
+Where $B_1, B_2$ partition the sequence and $m_1, m_2$ are local maxima. The exponential terms $e^{m_k - m_{global}}$ act as **correction factors** that rescale each block's contribution.
+
+This means:
+1. We can compute local softmax for each block independently
+2. Keep running totals of $m$ and $d$
+3. Rescale everything when we encounter a new maximum
+4. The final normalization is exact
+
+## Implementation Sketch
+
+```mojo
+fn online_softmax_update(
+    inout m: Float32,        # current max
+    inout d: Float32,        # current sum of exp
+    inout o: Vector,         # current output
+    scores: Vector,          # new block of scores
+    values: Matrix,          # corresponding values
+):
+    # Find local maximum in new block
+    var m_new = max(scores)
+
+    # Compute local sum of exponentials
+    var d_new: Float32 = 0.0
+    for i in range(len(scores)):
+        d_new += exp(scores[i] - m_new)
+
+    # Compute new global maximum
+    var m_global = max(m, m_new)
+
+    # Rescaling factors
+    var scale_old = exp(m - m_global)
+    var scale_new = exp(m_new - m_global)
+
+    # Update global sum
+    d = d * scale_old + d_new * scale_new
+
+    # Rescale old output and add new contribution
+    o = o * scale_old + compute_weighted_sum(scores, values, m_new) * scale_new
+
+    # Update maximum
+    m = m_global
+```
+
+This is the core of Flash Attention. Instead of materializing the full `seq_len × seq_len` attention matrix, we process it in tiles, maintaining running statistics and updating them online.
+
+The memory usage drops from **O(seq_len²)** to **O(seq_len)**, storing only the current tile and running statistics.
+
+# Flash Attention 1: Tiled Attention with Online Softmax {#flash-attention-1}
+
+Now we can understand the Flash Attention algorithm [@dao_flashattention]. The key idea: **never materialize the full attention matrix**. Instead:
+
+1. Divide K and V into blocks
+2. Process one block at a time, computing partial attention outputs
+3. Use online softmax to merge results incrementally
+4. Keep everything in fast SRAM
+
+## Memory Analysis: Before and After
+
+### Naive Attention Memory
+
+For sequence length N, dimension d:
+
+| Array | Shape | Size | Location |
+|-------|-------|------|----------|
+| Q | (N, d) | 4Nd bytes | HBM |
+| K | (N, d) | 4Nd bytes | HBM |
+| V | (N, d) | 4Nd bytes | HBM |
+| **S (scores)** | **(N, N)** | **4N² bytes** | **HBM** |
+| **P (weights)** | **(N, N)** | **4N² bytes** | **HBM** |
+| O (output) | (N, d) | 4Nd bytes | HBM |
+
+**Total**: $8N^2 + 16Nd$ bytes. The $8N^2$ term dominates for large N.
+
+For N=2048, d=64: **8×2048² = 33.5 MB** per attention head!
+
+### Flash Attention Memory
+
+| Array | Shape | Size | Location |
+|-------|-------|------|----------|
+| Q | (N, d) | 4Nd bytes | HBM |
+| K | (N, d) | 4Nd bytes | HBM |
+| V | (N, d) | 4Nd bytes | HBM |
+| O (output) | (N, d) | 4Nd bytes | HBM |
+| **Q_tile** | **(B_r, d)** | **4B_r d bytes** | **SRAM** |
+| **K_tile** | **(B_c, d)** | **4B_c d bytes** | **SRAM** |
+| **V_tile** | **(B_c, d)** | **4B_c d bytes** | **SRAM** |
+| **S_tile** | **(B_r, B_c)** | **4B_r B_c bytes** | **SRAM** |
+| Running stats (m, d, O_i) | (N, d) + 2N | ~4Nd bytes | HBM |
+
+**Total HBM**: $16Nd$ bytes — **no quadratic term!**
+
+**SRAM per block**: $4d(B_r + 2B_c) + 4B_r B_c$ bytes
+
+For N=2048, d=64, $B_r = B_c = 64$:
+- HBM: 16×2048×64 = **2 MB** (vs 33.5 MB naive!)
+- SRAM: 4×64×(64+128) + 4×64×64 = **65 KB** (fits easily in 128 KB SRAM)
+
+The memory savings are **dramatic**.
+
+## The Algorithm
+
+Here's the Flash Attention forward pass in pseudocode:
+
+```python
+def flash_attention_forward(Q, K, V, block_size):
+    N, d = Q.shape
+    O = zeros_like(Q)
+    m = full(N, -inf)  # running max for each query
+    d_sum = zeros(N)    # running sum of exp for each query
+
+    # Divide Q into blocks of size block_size
+    for q_start in range(0, N, block_size):
+        q_end = q_start + block_size
+        Q_block = Q[q_start:q_end]  # Load into SRAM
+
+        # Initialize block statistics
+        m_block = full(block_size, -inf)
+        d_block = zeros(block_size)
+        O_block = zeros((block_size, d))
+
+        # Iterate over K, V blocks
+        for kv_start in range(0, N, block_size):
+            kv_end = kv_start + block_size
+            K_block = K[kv_start:kv_end]  # Load into SRAM
+            V_block = V[kv_start:kv_end]  # Load into SRAM
+
+            # Compute attention scores for this tile
+            S_tile = Q_block @ K_block.T  # (block_size, block_size)
+
+            # Find local maximum
+            m_new = max(S_tile, dim=1)
+
+            # Compute local softmax numerators
+            P_tile = exp(S_tile - m_new[:, None])
+            d_new = sum(P_tile, dim=1)
+
+            # Compute local weighted sum
+            O_new = P_tile @ V_block
+
+            # ===== Online Softmax Merge =====
+            # New global max
+            m_global = maximum(m_block, m_new)
+
+            # Rescaling factors
+            scale_old = exp(m_block - m_global)
+            scale_new = exp(m_new - m_global)
+
+            # Update running sum
+            d_block = d_block * scale_old + d_new * scale_new
+
+            # Update running output (rescale old, add new)
+            O_block = O_block * scale_old[:, None] + O_new * scale_new[:, None]
+
+            # Update max
+            m_block = m_global
+
+        # Final normalization
+        O[q_start:q_end] = O_block / d_block[:, None]
+
+    return O
+```
+
+## Why Is It Faster?
+
+Flash Attention is faster despite doing more work (recomputation, rescaling) because:
+
+1. **Memory bandwidth dominates**: Standard attention is memory-bound. Reading/writing the N² matrix from HBM is slow.
+
+2. **SRAM is 10-20× faster**: Flash Attention keeps working data in SRAM, only touching HBM for inputs/outputs.
+
+3. **Arithmetic is cheap**: Modern GPUs have massive compute. The extra rescaling operations are negligible compared to memory savings.
+
+4. **Better cache utilization**: Tiled access patterns are cache-friendly.
+
+Recall the [Roofline Model](./2025-07-20-gpu-puzzles-p2.qmd#puzzle-14) from Puzzle 14. By increasing arithmetic intensity (more FLOPs per byte moved), Flash Attention pushes attention from deep in the memory-bound region closer to the compute bound.
+
+## Backward Pass: Recomputation
+
+One clever aspect of Flash Attention: the backward pass **recomputes** attention scores rather than storing them. This trades compute for memory—a good deal on modern GPUs where bandwidth is the bottleneck.
+
+During backpropagation:
+1. Recompute scores for each tile (same forward tiling pattern)
+2. Compute gradients using stored output and running statistics
+3. Still O(N) memory, but ~2× compute
+
+The net result: **training uses O(N) memory instead of O(N²)** while being faster than naive attention.
+
+# Bonus Puzzles: Scaling Up {#bonus-puzzles}
+
+The Modular GPU Puzzles include several extensions that bridge the gap between toy problems and production attention:
+
+## Bonus I: Advanced Softmax
+
+### Large-Scale Softmax (N > TPB)
+
+When the input doesn't fit in a single block, we need multi-kernel reduction:
+
+**Kernel 1: Local Maximums**
+- Each block computes local max
+- Stores result in device memory array
+
+**Kernel 2: Global Maximum**
+- Single block reduces local maxes
+- Broadcasts global max back
+
+**Kernel 3: Softmax with Global Max**
+- Each block computes softmax using global max
+- Produces final output
+
+This pattern generalizes to arbitrary sequence lengths.
+
+### Batched Softmax
+
+Process multiple independent softmax operations in parallel:
+
+```mojo
+# Input: (batch_size, seq_len)
+# Output: (batch_size, seq_len)
+# Each row gets its own softmax independently
+
+fn batched_softmax_rowwise(...):
+    batch_idx = block_idx.y
+    # Each block processes one row
+    # Parallel reduction within block
+    # No synchronization needed between rows
+```
+
+**Performance note**: Row-wise batching is memory-friendly (coalesced reads). Column-wise batching requires transpose or strided access.
+
+## Bonus II: Extended Attention
+
+### Longer Sequences (SEQ_LEN = 64)
+
+Scaling to longer sequences requires:
+1. More tiles in the K, V iteration loop
+2. Careful bounds checking for partial blocks
+3. Runtime configuration of block counts
+
+The algorithm structure remains identical—online softmax handles arbitrary sequence length.
+
+### Batched Multi-Query Attention
+
+Process multiple queries simultaneously:
+
+```mojo
+# Q: (batch_size, d)
+# K: (seq_len, d)
+# V: (seq_len, d)
+# Output: (batch_size, d)
+
+# Each query gets its own thread/warp
+# K, V tiles shared across all queries
+# Maximizes K, V reuse
+```
+
+This is the pattern used in **Multi-Query Attention (MQA)** and **Grouped-Query Attention (GQA)**, which reduce KV cache size in LLM inference by sharing keys/values across query heads.
+
+The online softmax update happens independently per query, with each maintaining its own (m, d, O) statistics.
+
+# Flash Attention Evolution: 2, 3, and Beyond {#flash-attention-evolution}
+
+Flash Attention 1 proved that tiling + online softmax could eliminate the O(N²) memory bottleneck. But the story doesn't end there. Each subsequent version optimized for specific hardware and workload characteristics.
+
+## Flash Attention 2: Better Parallelism [@dao_flash_attention_2]
+
+**Key Improvements:**
+
+1. **Reduced non-matmul FLOPs**: Restructured the algorithm to minimize overhead from rescaling operations
+2. **Better work partitioning**: Changed from parallelizing over queries to parallelizing over both queries and keys
+3. **Improved occupancy**: Tuned block sizes to keep more warps active simultaneously
+4. **Sequence-length parallelism**: For long sequences, distribute KV blocks across thread blocks
+
+**Performance**: 2× faster than Flash Attention 1 on A100 GPUs, reaching up to 230 TFLOPs/s (73% of peak).
+
+The core algorithm remains the same, but careful restructuring reduced the non-matmul overhead from ~30% to ~10% of runtime.
+
+## Flash Attention 3: Exploiting Hopper's Asynchrony [@dao_flash_attention_3]
+
+Flash Attention 3, released in 2024, is purpose-built for NVIDIA's Hopper architecture (H100 GPUs). The key insight: **Hopper's new hardware units enable asynchronous execution**, allowing us to overlap computation with data movement.
+
+### The Hardware: TMA and WGMMA
+
+**Hopper introduces two game-changing features:**
+
+**1. TMA (Tensor Memory Accelerator)**
+- Dedicated DMA engine for HBM ↔ Shared Memory transfers
+- Handles address calculation and bounds checking automatically
+- **Frees up registers** that would otherwise track indices
+- **Non-blocking**: Issue multiple TMA loads without stalling
+
+**2. WGMMA (Warpgroup Matrix Multiply-Accumulate)**
+- New Tensor Core instruction operating on **warpgroups** (4 warps = 128 threads)
+- **3× higher throughput** than previous `mma.sync` instructions
+- Reaches **989 TFLOPS** (vs. ~660 TFLOPS for older tensor cores)
+- But: Softmax only reaches **3.9 TFLOPS** (special function units are slow!)
+
+The performance imbalance between matmul (989 TFLOPS) and softmax (3.9 TFLOPS) is **253×**. FA3's goal: hide softmax latency behind matmul computation.
+
+### Innovation 1: Warp Specialization
+
+Instead of all warps doing the same work, **assign different roles to different warps**:
+
+```
+Producer Warps (2-4 warps):
+  - Issue TMA loads for Q, K, V tiles
+  - Handle memory traffic
+  - Don't do any computation
+
+Consumer Warps (remaining warps):
+  - Execute WGMMA for QK^T and PV
+  - Perform softmax operations
+  - Maximize tensor core utilization
+```
+
+**The magic**: While consumer warps compute on tile N, producer warps fetch tile N+1. **Perfect overlap** of compute and memory transfer.
+
+### The Pipelining Strategy
+
+```mojo
+// Pseudocode for FA3 warp specialization
+
+@parameter
+if warp_role == PRODUCER:
+    // Producer loop: just move data
+    for tile in range(num_tiles):
+        tma_load_async(Q_tile[tile], Q_ptr + tile_offset)
+        tma_load_async(K_tile[tile], K_ptr + tile_offset)
+        tma_load_async(V_tile[tile], V_ptr + tile_offset)
+
+        // Signal consumers: data ready
+        arrive_on_barrier(tile)
+
+@parameter
+if warp_role == CONSUMER:
+    // Consumer loop: just compute
+    for tile in range(num_tiles):
+        // Wait for producers
+        wait_on_barrier(tile)
+
+        // Compute QK^T (overlapped with next tile's TMA load!)
+        wgmma(QK_scores, Q_shared[tile], K_shared[tile])
+
+        // Softmax (low utilization, but that's okay)
+        online_softmax(QK_scores, m, d)
+
+        // Compute PV (overlapped with next tile's TMA load!)
+        wgmma(Output, P_scores, V_shared[tile])
+```
+
+**Result**: The slow softmax operations are completely hidden behind fast WGMMA operations. Effective utilization jumps from 35% (FA2) to **75%** (FA3).
+
+### Innovation 2: GEMM-Softmax Interleaving
+
+FA2 computed attention sequentially:
+```
+QK → barrier → Softmax → barrier → PV
+```
+
+FA3 interleaves operations at a finer granularity:
+
+```
+Load K tile → QK (for prev tile) → Load V tile → Softmax → PV
+```
+
+By carefully scheduling TMA loads, WGMMA, and softmax, we keep **all execution units busy simultaneously**:
+- TMA engines: Loading next tile
+- Tensor cores: Computing QK or PV
+- CUDA cores: Running softmax (when tensor cores are between tiles)
+
+### Innovation 3: FP8 Incoherent Processing
+
+Hopper supports **FP8 (8-bit floats)**, cutting memory bandwidth by 50%. But not all operations tolerate low precision.
+
+**FA3's precision strategy:**
+
+| Operation | Precision | Why |
+|-----------|-----------|-----|
+| Q·K^T matmul | **FP8** | Large matmul, errors average out |
+| Softmax (exp, max, sum) | **FP32** | Numerical stability critical |
+| P·V matmul | **FP8** | Another large matmul |
+| Online softmax statistics (m, d) | **FP32** | Must be exact for rescaling |
+| Final output accumulation | **FP32** | Prevent error accumulation |
+
+**How it works:**
+1. Store Q, K, V in FP8 in HBM (50% memory savings)
+2. Load tiles into shared memory, convert to FP8 for WGMMA
+3. WGMMA produces FP32 accumulator (hardware feature)
+4. Softmax operates on FP32 scores
+5. Write output back to HBM in FP16/FP32
+
+**Quality preservation techniques:**
+
+**Block Quantization**: Split Q, K, V tensors into blocks (e.g., 64×64 tiles) and quantize each block independently with its own scaling factor. This prevents outliers in one region from degrading precision everywhere.
+
+**Incoherent Processing**: Multiply Q and K by a random Hadamard transform (orthogonal matrix with random signs). This "spreads out" outlier values that would otherwise cause large quantization errors.
+
+```mojo
+// Pseudocode for incoherent processing
+fn apply_hadamard_transform(x: Tensor) -> Tensor:
+    # Random sign flips + Hadamard matrix multiplication
+    var signs = random_signs(x.shape)
+    return hadamard_matrix @ (signs * x)
+```
+
+**Accuracy results:**
+- Naive FP8: 2.4e-2 RMSE vs FP16 baseline
+- FA3 FP8 (block quantization + incoherent processing): **9.1e-3 RMSE**
+- **2.6× accuracy improvement** with same memory savings
+
+The combination of techniques enables **<0.1% quality degradation** with **2× speedup**.
+
+### Performance Results
+
+| Configuration | TFLOPs | Utilization | vs. FA2 |
+|--------------|--------|-------------|---------|
+| **FA2 (A100, FP16)** | 390 | 35% | 1.0× |
+| **FA3 (H100, FP16)** | 740 | 75% | 1.9× |
+| **FA3 (H100, FP8)** | 1,200 | 95% | 3.1× |
+
+*(Measured on H100 SXM5, sequence length 2048, head dimension 128)*
+
+**FA3 achieves 1.2 PFLOPS**—within 5% of H100's theoretical peak.
+
+### Implementation Complexity
+
+The cost of these gains: **significantly increased complexity**.
+
+**FA2 kernel:** ~500 lines, straightforward loop over tiles
+**FA3 kernel:** ~1500 lines, intricate warp coordination
+
+```mojo
+// FA3 synchronization pattern (simplified)
+
+// Producer-consumer handshake
+__shared__ barrier_t barriers[NUM_STAGES];
+
+// Producer
+tma_load_async(shared_mem, global_ptr);
+arrive_on(barriers[stage]);  // Signal: data ready
+
+// Consumer
+wait_on(barriers[stage]);    // Wait for data
+wgmma(...);                  // Compute
+```
+
+Each stage requires careful barrier management. Miss one `arrive_on` or `wait_on` and you get deadlock or incorrect results.
+
+### When FA3 Wins
+
+| Workload | FA3 Benefit | Why |
+|----------|-------------|-----|
+| Long sequences (N > 1024) | **High** | More tiles = more overlap opportunity |
+| Large batch size | **High** | Amortize warp specialization overhead |
+| FP8-compatible models | **Very High** | 2× memory bandwidth + 2× compute |
+| Short sequences (N < 256) | **Low** | Too few tiles, warp specialization overhead dominates |
+
+**Bottom line:** FA3 is the clear winner for production LLM serving at scale, but requires Hopper hardware and careful tuning.
+
+## Flash Attention 4: Pushing Blackwell to the Limit
+
+Flash Attention 4, released alongside NVIDIA's Blackwell architecture (SM100/Compute Capability 10.0), takes warp specialization to the extreme. Instead of 2 roles (producer/consumer), FA4 has **5 specialized roles**, each optimized for specific hardware units.
+
+### The Hardware Challenge
+
+**Blackwell's** performance characteristics create new bottlenecks:
+- **Tensor Cores**: 2× faster than Hopper (2 PFLOPs for FP8)
+- **Special Function Units (SFU)**: Only modest gains (~5 TFLOPs for exp/log)
+- **TMA**: Slightly improved bandwidth
+
+The gap between matmul (2000 TFLOPs) and softmax (5 TFLOPs) is now **400×**. FA3's tricks aren't enough—we need more aggressive parallelism.
+
+### Five Warp Roles
+
+FA4 splits the attention kernel into a **microservices architecture**:
+
+```
+1. Load Warp (1 warp):
+   - Issues all TMA loads for Q, K, V
+   - Pure memory orchestration, zero compute
+
+2. MMA Warp (1 warp):
+   - Executes WGMMA for QK^T and PV
+   - Maximizes tensor core utilization
+   - Never waits on barriers
+
+3. Softmax Warps (8 warps):
+   - Parallel softmax reduction across multiple warps
+   - Each warp handles a slice of the attention scores
+   - Coordination via shared memory atomics
+
+4. Correction Warps (4 warps):
+   - Rescale output when max changes (online softmax)
+   - Parallel correction across output dimensions
+   - Previously a major bottleneck
+
+5. Epilogue Warps (1-2 warps):
+   - Write final output to global memory
+   - Handle output buffering and staging
+```
+
+**Total**: 15-16 warps per thread block, each with a specialized role.
+
+### Key Innovation: Selective Rescaling
+
+**FA3 problem**: Rescale output every time a new maximum is encountered. For long sequences, this happens frequently, wasting cycles on unnecessary corrections.
+
+**FA4 solution**: Only rescale when the maximum changes **significantly enough to affect numerical accuracy**.
+
+```mojo
+// FA3: Rescale on every new max
+if m_new > m_old:
+    correction_factor = exp(m_old - m_new)
+    output *= correction_factor
+
+// FA4: Rescale only when necessary
+if m_new - m_old > RESCALE_THRESHOLD:  // Typically 1.0-2.0
+    correction_factor = exp(m_old - m_new)
+    output *= correction_factor
+```
+
+**Why it works**: If `m_new - m_old < 1.0`, then `exp(m_old - m_new) ≈ 0.37-1.0`, which is close enough that skipping the correction has <0.01% accuracy impact.
+
+**Result**: **10× reduction** in correction operations for typical workloads.
+
+### Innovation 2: Fast Polynomial Exponentials
+
+**The bottleneck**: Special Function Units (SFUs) compute exp/log via hardware lookup tables. On Blackwell, SFUs have **wave quantization effects**—when many warps request exponentials simultaneously, they queue up.
+
+**FA4's trick**: For small head dimensions (≤128), use **polynomial approximation** instead of SFU:
+
+$$
+2^x \approx c_0 + c_1 x + c_2 x^2 + c_3 x^3 \quad \text{for } x \in [0, 1]
+$$
+
+Implemented via **Horner's method** (3 fused multiply-adds):
+```mojo
+fn fast_exp2(x: Float32) -> Float32:
+    // Coefficients for cubic polynomial (minimax approximation)
+    alias c3 = 0.0733664036
+    alias c2 = 0.226894881
+    alias c1 = 0.693058145
+    alias c0 = 0.999999881
+
+    // Horner's method: 3 FMAs instead of 1 SFU call
+    return c0 + x * (c1 + x * (c2 + x * c3))
+```
+
+**Trade-off**:
+- Error: <0.0001 absolute error over [0, 1]
+- Cost: 3 FMA operations (3-6 cycles) vs. 1 SFU (20-50 cycles when queued)
+- **Net win**: 3-8× faster exponentials for attention-heavy workloads
+
+### The Pipeline
+
+FA4's execution resembles a factory assembly line:
+
+```
+Cycle 1-10:   Load Warp fetches tile 0 (Q, K, V)
+Cycle 11-40:  MMA Warp computes QK^T for tile 0
+Cycle 41-60:  Softmax Warps normalize scores (8-way parallel)
+Cycle 61-90:  MMA Warp computes PV for tile 0
+Cycle 91-100: Correction Warps rescale output (if needed)
+
+// All while Load Warp is fetching tile 1 in the background!
+```
+
+**Key insight**: With 5 independent stages, there's **always work available** for some warp. No stalls, near-100% utilization.
+
+### Memory Hierarchy Usage
+
+FA4 exploits every level of the memory hierarchy:
+
+| Memory | Usage | Size |
+|--------|-------|------|
+| **Global HBM** | Input Q/K/V, Output | 80-192 GB |
+| **Shared Memory** | Q/K/V tile buffers | 256 KB |
+| **Tensor Memory** | Accumulator storage (scores, output) | 512 KB |
+| **Registers** | Running statistics (m, d), temporary FMAs | 256 KB (per warp) |
+
+**Tensor Memory** is new in Blackwell: dedicated on-chip SRAM for accumulation, separate from shared memory. This doubles effective SRAM capacity.
+
+### Performance Results
+
+| Configuration | TFLOPs | Utilization | vs. cuDNN |
+|--------------|--------|-------------|-----------|
+| **cuDNN (Blackwell, FP8)** | ~1,500 | 75% | 1.0× |
+| **FA4 (Blackwell, FP8)** | ~1,800 | 90% | **1.2×** |
+
+*(NVIDIA Blackwell B100, sequence length 2048, head dimension 128)*
+
+**Key metric**: FA4 beats NVIDIA's own cuDNN library by 20%—a testament to the power of specialized kernels.
+
+### Implementation Complexity
+
+**Lines of code:**
+- FA2: ~500 (simple tiled loop)
+- FA3: ~1,500 (warp specialization)
+- FA4: ~3,000 (five-way specialization + polynomial exp + selective rescaling)
+
+**Barrier count per iteration:**
+- FA2: 2-3 barriers
+- FA3: 5-7 barriers (producer/consumer coordination)
+- FA4: 12-15 barriers (five-way coordination)
+
+The complexity is staggering. FA4 resembles a distributed system more than a GPU kernel:
+
+```mojo
+// FA4 coordination (simplified)
+
+struct FA4Barriers:
+    var tile_loaded: barrier_t      # Load → MMA
+    var qk_done: barrier_t          # MMA → Softmax
+    var softmax_done: barrier_t     # Softmax → MMA (PV)
+    var pv_done: barrier_t          # MMA → Correction
+    var correction_done: barrier_t  # Correction → Epilogue
+    var output_staged: barrier_t    # Epilogue → Load (next tile)
+
+fn fa4_kernel(...):
+    barriers = FA4Barriers()
+
+    @parameter
+    if warp_role == LOAD:
+        load_tiles(barriers.tile_loaded)
+    elif warp_role == MMA:
+        compute_qk(barriers.tile_loaded, barriers.qk_done)
+        compute_pv(barriers.softmax_done, barriers.pv_done)
+    elif warp_role == SOFTMAX:
+        normalize_scores(barriers.qk_done, barriers.softmax_done)
+    # ... and so on
+```
+
+**Every warp must hit every barrier in the correct order**, or the kernel deadlocks. Debugging is a nightmare.
+
+### When FA4 Makes Sense
+
+| Scenario | FA4 Benefit | Why |
+|----------|-------------|-----|
+| **Blackwell hardware** | **Essential** | FA4 is tuned for SM100 |
+| **Very long sequences (N > 4k)** | **Very high** | Amortizes 5-way coordination overhead |
+| **Large batch (>32)** | **Very high** | Multiple thread blocks run concurrently |
+| **Small head dim (≤128)** | **Very high** | Polynomial exp wins big |
+| **Hopper or older** | **None** | FA3 is better (less overhead) |
+| **Short sequences (N < 1k)** | **Low** | Overhead > benefit |
+
+**Production advice**: Use FA4 if you have Blackwell + long contexts. Otherwise, stick with FA3.
+
+### The Bigger Picture: Attention's Future
+
+FA1 → FA2 → FA3 → FA4 shows a clear trend:
+
+| Version | Key Innovation | Complexity | Speedup |
+|---------|---------------|------------|---------|
+| **FA1** | Online softmax + tiling | Medium | 3× vs. naive |
+| **FA2** | Better parallelization | Medium | 2× vs. FA1 |
+| **FA3** | Warp specialization (2-way) | High | 2× vs. FA2 |
+| **FA4** | Warp specialization (5-way) | Very High | 1.2× vs. FA3 |
+
+**Diminishing returns**: Each new version requires exponentially more complexity for smaller gains. FA4's 20% speedup cost 3,000 lines of intricate barrier coordination code.
+
+**The question**: Is this sustainable? Probably not. Future directions likely involve:
+
+1. **Compiler automation**: Generate FA4-style kernels automatically from high-level specs
+2. **Sparsity**: Exploit attention patterns (most attention scores are near-zero)
+3. **Approximation**: Linear attention, kernel methods, state-space models
+4. **Hardware co-design**: GPUs with dedicated attention units (like Tensor Cores for matmul)
+
+For now, FA4 represents the pinnacle of hand-tuned attention kernels. It's a masterpiece of low-level optimization—and a cautionary tale about the limits of manual tuning.
+
+### Beyond Flash Attention
+
+The core principle—**tiling + online algorithms + hardware exploitation**—extends beyond attention:
+
+- **Sparse operations**: Same tiling approach for sparse matmul, graph neural nets
+- **Other sequence models**: Mamba, RWKV, Retentive Networks use similar tricks
+- **Quantization**: FP4, INT4 attention following FA3's mixed-precision playbook
+- **Multi-GPU**: Sharding attention across GPUs with pipeline parallelism
+
+The algorithmic insights from Flash Attention—keep data in fast memory, never materialize quadratic structures, hide latency with async execution—are **universal principles** for GPU programming.
+
+# Blackwell Matrix Multiplication: The Foundation of FA4 {#blackwell-matmul}
+
+Flash Attention 4's performance on Blackwell depends critically on efficient matrix multiplication. The QK^T and PV operations dominate runtime—understanding Blackwell's matmul capabilities reveals why FA4 achieves its impressive speedups.
+
+## Blackwell Hardware Architecture
+
+NVIDIA's Blackwell architecture (SM100) introduces significant improvements over Hopper:
+
+| Feature | Hopper (H100) | Blackwell (B200) | Improvement |
+|---------|---------------|------------------|-------------|
+| **SMs** | 132 | 148 | 12% more |
+| **HBM Bandwidth** | 3.35 TB/s | 7.67 TB/s | 2.3× |
+| **L2 Cache** | 50 MB | 192 MB | 3.8× |
+| **Shared Memory** | 256 KB/SM | 228 KB/SM | Similar |
+| **Tensor Memory** | 0 KB | **256 KB** | New! |
+| **Tensor Core Shape** | 64×256×16 | **256×256×16** | 4× larger |
+
+The two game-changing features for FA4:
+
+1. **Tensor Memory (TMEM)**: 256KB dedicated storage for MMA results, separate from registers
+2. **tcgen05 Tensor Cores**: 5th generation supporting 2-SM cooperative operations
+
+## The Naive Baseline: 5 TFLOPs
+
+A straightforward Mojo implementation computes one output element per thread:
+
+```mojo
+fn naive_matmul[M: Int, N: Int, K: Int](
+    c: LayoutTensor[mut=True, dtype, Layout.row_major(M, N)],
+    a: LayoutTensor[mut=False, dtype, Layout.row_major(M, K)],
+    b: LayoutTensor[mut=False, dtype, Layout.row_major(K, N)],
+):
+    row = block_idx.y * block_dim.y + thread_idx.y
+    col = block_idx.x * block_dim.x + thread_idx.x
+
+    if row < M and col < N:
+        var acc = Float32(0)
+        for k in range(K):
+            acc += a[row, k].cast[DType.float32]() * b[k, col].cast[DType.float32]()
+        c[row, col] = acc.cast[DType.bfloat16]()
+```
+
+**Performance**: ~5 TFLOPs on B200 (0.2% of peak 2250 TFLOPs). Why so slow?
+
+- Each thread reads `2K` elements from global memory (high latency)
+- Zero data reuse between threads
+- Tensor cores sit idle
+- Memory bandwidth completely wasted
+
+## Optimization 1: Tensor Cores (155 TFLOPs, 31× faster)
+
+Blackwell's tensor cores execute massive matrix operations in single instructions. The key: **cooperative computation** across warps.
+
+### tcgen05.mma Instruction
+
+```mojo
+// Computes: C (in TMEM) += A @ B
+// A: 128×16 tile in shared memory
+// B: 16×256 tile in shared memory
+// C: 128×256 accumulator in tensor memory
+
+tcgen05.mma.cta_group::1(
+    a_smem_desc,      // Descriptor for A tile
+    b_smem_desc,      // Descriptor for B tile
+    c_tmem_addr,      // Address in tensor memory
+    initial_c_desc,   // Optional initial C values
+    c_scale=1.0       // Scaling factor
+)
+```
+
+**What's different from earlier GPUs?**
+
+| Aspect | Hopper (WGMMA) | Blackwell (tcgen05) |
+|--------|----------------|---------------------|
+| Max shape (1 SM) | 64×256×16 | 128×256×16 |
+| Max shape (2 SM) | Not supported | **256×256×16** |
+| Output storage | Registers (limited) | **Tensor Memory (256KB)** |
+| Throughput | 989 TFLOPs | 1125 TFLOPs (FP16) |
+
+### Tensor Memory: Breaking Register Pressure
+
+Prior architectures stored MMA results in registers. With limited registers per thread (255), this constrained:
+- Tile sizes (smaller tiles = more kernel launches = overhead)
+- Pipelining depth (can't overlap many stages)
+- Occupancy (large register usage = fewer active warps)
+
+Blackwell's **tensor memory** is a separate 256KB on-chip buffer. Results accumulate there, freeing registers for other work.
+
+```mojo
+// Allocate tensor memory for output accumulator
+var c_tmem = TMEMBuffer[DType.float32, 128, 256]()  # 128KB
+
+// MMA directly into TMEM (doesn't touch registers!)
+tcgen05.mma(..., c_tmem.address, ...)
+
+// Later: Load from TMEM to registers for post-processing
+tcgen05.ld[layout, repeat](c_tmem.address, c_reg_tile)
+```
+
+## Optimization 2: Shared Memory Swizzling (288 TFLOPs, 1.9× faster)
+
+Shared memory has **32 banks** serving requests in parallel. Without swizzling, multiple threads hit the same bank—causing sequential access (bank conflicts).
+
+### The Bank Conflict Problem
+
+```
+// Without swizzling: 8-way bank conflict
+Thread 0: reads shared[0][0]   → Bank 0
+Thread 1: reads shared[0][1]   → Bank 0  # conflict!
+Thread 2: reads shared[0][2]   → Bank 0  # conflict!
+...
+Thread 7: reads shared[0][7]   → Bank 0  # conflict!
+```
+
+Result: Takes 8 cycles instead of 1 cycle.
+
+### Swizzle Pattern: <3,4,3> (128-byte swizzle)
+
+The swizzle uses **bitwise XOR** to distribute data:
+
+```mojo
+fn apply_swizzle[bits_y: Int, bits_x: Int, bits_z: Int](offset: Int) -> Int:
+    # Extract bit fields
+    let shift = bits_y + bits_x
+    let mask = (1 << bits_y) - 1
+
+    # XOR the middle bits with upper bits
+    return offset ^ ((offset >> shift) & mask) << bits_x
+```
+
+For <3,4,3> swizzle:
+- 2³ = 8 rows per pattern
+- 2⁴ = 16 bytes per row
+- 2³ = 8 patterns cycling through 32 banks
+
+**Result**: Adjacent threads access different banks. **Zero bank conflicts**.
+
+![Swizzled shared memory layout avoids bank conflicts](mojo_gpu_puzzles/blackwell_swizzle.png){fig-align='center'}
+
+## Optimization 3: TMA Async Loads (293 TFLOPs)
+
+**Tensor Memory Accelerator (TMA)** is dedicated hardware for memory transfers. Key benefits:
+
+1. **Asynchronous**: Issue load, continue computing, check later
+2. **Hardware-managed**: GPU handles address calculation, bounds checking
+3. **Frees registers**: No need to track indices/pointers in threads
+
+```mojo
+fn tma_load_tile[BM: Int, BK: Int](
+    smem_tile: SharedMemoryTensor[DType.bfloat16, BM, BK],
+    gmem_base: Pointer[DType.bfloat16],
+    barrier: Barrier,
+    tile_row: Int,
+    tile_col: Int,
+):
+    # Create TMA descriptor (once, outside kernel)
+    tma_desc = create_tma_descriptor(gmem_base, shape=(M, K), tile_shape=(BM, BK))
+
+    # Async load (non-blocking)
+    tma_desc.async_copy(
+        dst=smem_tile,
+        barrier=barrier,
+        coordinates=(tile_row * BM, tile_col * BK)
+    )
+
+    # Do other work here...
+
+    # Wait for completion
+    barrier.wait()
+```
+
+**Phase tracking**: Barriers use phase bits to distinguish "tile N loaded" from "tile N+1 loaded" without separate barriers.
+
+## Optimization 4: 2-SM Cooperative MMA (360 TFLOPs)
+
+Blackwell allows **two SMs to collaborate** on a single 256×256×16 MMA operation.
+
+### Why This Helps
+
+Standard approach with 1-SM operations:
+```
+SM 0: Loads full A tile (128×16) + full B tile (16×256) = 6KB
+SM 1: Loads full A tile (128×16) + full B tile (16×256) = 6KB
+Total: 12KB loaded for 2 independent operations
+```
+
+2-SM approach:
+```
+SM 0: Loads A_top (128×16) + B_left (16×128) = 4KB
+SM 1: Loads A_bottom (128×16) + B_right (16×128) = 4KB
+Both SMs: Compute full 256×256 output together
+Total: 8KB loaded for larger operation (1.5× memory efficiency)
+```
+
+**Cluster configuration**:
+```mojo
+@__llvm_metadata(`nvvm.cluster_dim`=(2, 1, 1))  # 2 SMs per cluster
+fn matmul_2sm(...):
+    # TMA multicast to both SMs
+    if cluster_idx.x == 0:
+        tma_load[multicast_mask=0b11](a_tile, ...)  # Both SMs receive A
+
+    # Each SM loads half of B
+    tma_load(b_tile_half, offset=cluster_idx.x * half_size)
+
+    # 2-SM MMA
+    tcgen05.mma.cta_group::2(a_desc, b_desc, c_tmem, ...)
+```
+
+## Optimization 5: Pipelining (1429 TFLOPs, 4× faster)
+
+**The problem**: Sequential execution wastes time.
+
+```
+Stage 1: Load tile → Wait → Compute → Wait → Write
+Stage 2:              Load tile → Wait → Compute → Wait → Write
+```
+
+**The solution**: Overlap operations with a **5-stage pipeline**.
+
+```
+Cycle 1-5:   Load tile 0
+Cycle 6-25:  Compute tile 0 | Load tile 1
+Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
+...
+```
+
+### Warp Specialization for Pipelining
+
+Assign different warps to different tasks:
+
+```mojo
+enum WarpRole:
+    LOAD_A      # Issues TMA for A tiles
+    LOAD_B      # Issues TMA for B tiles
+    MMA_EARLY   # Launches MMA on stage N
+    MMA_LATE    # Launches MMA on stage N+1
+    EPILOGUE    # Writes results to global memory
+
+fn pipelined_kernel[pipeline_stages: Int = 5](...):
+    var role = assign_warp_role(thread_idx.x // 32)
+
+    @parameter
+    if role == WarpRole.LOAD_A:
+        for stage in range(num_iterations):
+            # Wait for TMEM to be free
+            mma_barrier[stage % pipeline_stages].wait(phase)
+
+            # Load next A tile
+            tma_a.async_copy(a_smem[stage % pipeline_stages], ...)
+
+            # Signal data ready
+            tma_barrier[stage % pipeline_stages].arrive()
+
+    @parameter
+    if role == WarpRole.MMA_EARLY:
+        for stage in range(num_iterations):
+            # Wait for data
+            tma_barrier[stage % pipeline_stages].wait(phase)
+
+            # Launch MMA
+            tcgen05.mma(a_desc, b_desc, c_tmem, ...)
+
+            # Signal TMEM consumed
+            mma_barrier[stage % pipeline_stages].arrive()
+```
+
+**Result**: Load warps continuously feed data while MMA warps continuously compute. **Near-100% utilization**.
+
+## Optimization 6: Cluster Launch Control (1773 TFLOPs, SOTA!)
+
+**Final bottleneck**: Kernel relaunch overhead. Traditional approach launches a kernel per batch of tiles, wasting cycles on:
+- Initializing shared memory
+- Scheduling CTAs to SMs
+- Synchronizing across launches
+
+**Cluster Launch Control (CLC)**: Hardware scheduler assigns work dynamically. A single persistent kernel runs continuously, with a scheduler warp distributing tiles.
+
+```mojo
+fn persistent_kernel_with_clc(...):
+    var scheduler_warp = (thread_idx.x // 32) == 0
+    var num_tiles = (M / BM) * (N / BN) * (K / BK)
+
+    if scheduler_warp:
+        # Scheduler warp: Assign tiles to idle clusters
+        var tile_idx = cluster_id()  # Start with own ID
+
+        while tile_idx < num_tiles:
+            # Write coordinates to shared memory
+            shared_tile_coords[0] = tile_idx
+
+            # Signal work ready
+            work_barrier.arrive()
+
+            # Try to claim next tile (atomic)
+            tile_idx = atomic_add(global_tile_counter, num_clusters)
+    else:
+        # Worker warps: Process assigned tiles
+        while True:
+            # Wait for work assignment
+            work_barrier.wait()
+
+            var tile_idx = shared_tile_coords[0]
+            if tile_idx >= num_tiles:
+                break
+
+            # Process this tile (normal matmul)
+            ...
+```
+
+**Benefit**: Eliminates inter-kernel gaps. GPU stays saturated with work.
+
+## Performance Summary
+
+| Kernel | Optimization | TFLOPs | % of Peak | Speedup |
+|--------|-------------|---------|-----------|---------|
+| Naive | Element-per-thread | 5 | 0.2% | 1× |
+| K2 | Tensor cores + TMA | 155 | 6.9% | 31× |
+| K3 | + Swizzling | 288 | 12.8% | 58× |
+| K4 | + TMA stores | 294 | 13.1% | 59× |
+| K5 | + 2-SM MMA | 360 | 16.0% | 72× |
+| K6 | + Pipelining | 1429 | 63.5% | 286× |
+| K7 | + CLC | **1773** | **78.8%** | **355×** |
+| **cuBLAS** | NVIDIA's library | 1763 | 78.4% | 353× |
+
+**Final result**: Modular's Mojo implementation **beats cuBLAS** by 0.6% on Blackwell!
+
+## Connection to Flash Attention 4
+
+FA4's performance depends on these matmul techniques:
+
+### QK^T Computation (Scores)
+
+```mojo
+# Shape: Q (seq_len, head_dim) @ K^T (head_dim, seq_len) = (seq_len, seq_len)
+# Uses: 2-SM MMA, pipelining, tensor memory
+
+for tile_q in range(0, seq_len, 128):
+    for tile_k in range(0, seq_len, 256):
+        # Load Q, K tiles via TMA
+        tma_load(q_tile, ...)
+        tma_load(k_tile, ...)
+
+        # 2-SM MMA: 256×256×128 (if head_dim=128)
+        tcgen05.mma.cta_group::2(q_desc, k_desc, scores_tmem, ...)
+
+        # Softmax on scores (in separate warps, overlapped)
+        online_softmax_update(scores_tmem, m, d)
+```
+
+### PV Computation (Weighted Output)
+
+```mojo
+# Shape: P (seq_len, seq_len) @ V (seq_len, head_dim) = (seq_len, head_dim)
+# Uses: Same techniques, different tile sizes
+
+for tile_p in range(0, seq_len, 256):
+    for tile_v in range(0, seq_len, 128):
+        # Swizzled loads for P (attention weights)
+        tma_load[swizzle=<3,4,3>](p_tile, ...)
+        tma_load(v_tile, ...)
+
+        # MMA into same output accumulator (online softmax merge)
+        tcgen05.mma(p_desc, v_desc, output_tmem, scale=rescale_factor)
+```
+
+### Why FA4 Achieves 1.2× Over FA3
+
+1. **Tensor Memory**: Frees registers for deeper pipelining (5-way warp specialization possible)
+2. **2-SM MMA**: Larger tiles = fewer iterations = less overhead
+3. **CLC**: Eliminates per-tile kernel launch gaps
+4. **Swizzling**: Zero bank conflicts on attention weight access (critical for softmax)
+
+The matmul insights directly enable FA4's performance. Without efficient Blackwell matmul, FA4's algorithmic innovations (selective rescaling, polynomial exp) would be bottlenecked by memory.
+
+## Mojo's Advantage
+
+All these techniques require **PTX-level programming**—CUDA doesn't expose tcgen05, TMA multicast, or CLC. Mojo provides:
+
+1. **Direct PTX access**: `tcgen05.mma.cta_group::2` maps to hardware instruction
+2. **Zero-cost abstractions**: `LayoutTensor` optimizes away at compile time
+3. **Memory safety**: Type system catches descriptor/layout mismatches
+4. **Portability**: Same code targets AMD (CDNA), Apple (Metal), CPUs
+
+This is why Modular can match or beat vendor libraries—full hardware access with high-level ergonomics.
+
+# Conclusion {#conclusion}
+
+We've journeyed from basic softmax to state-of-the-art attention implementations. Let's recap the key insights:
+
+## Memory: The Defining Constraint
+
+| Method | Memory Complexity | Peak Memory (N=2048, d=64) |
+|--------|------------------|---------------------------|
+| Naive Attention | O(N²) | 33.5 MB |
+| Flash Attention 1-3 | O(N) | 2.0 MB |
+| **Savings** | **16× reduction** | **94% less memory** |
+
+For longer sequences (N=8192), naive attention needs **537 MB** per head—impossible for models with hundreds of heads. Flash Attention makes this tractable.
+
+## Speed: Memory Bandwidth Is the Bottleneck
+
+Flash Attention is faster *because* it uses less memory:
+
+- **Naive**: Limited by HBM bandwidth (~2 TB/s on H100)
+- **Flash**: Operates mostly in SRAM (~20 TB/s effective)
+- **Result**: 2-3× faster despite doing more arithmetic
+
+This validates the [Roofline Model](./2025-07-20-gpu-puzzles-p2.qmd#puzzle-14) intuition: on modern GPUs, moving data costs more than computing on it.
+
+## The Power of Tiling
+
+Every optimization we've seen—from [matmul](./2025-07-20-gpu-puzzles-p2.qmd#puzzle-14) to convolution to attention—relies on **tiling**:
+
+1. Divide problem into blocks that fit in fast memory
+2. Load each block once
+3. Maximize reuse within the block
+4. Minimize slow memory traffic
+
+Flash Attention adds one more ingredient: **online algorithms** that let us process tiles sequentially without storing intermediate results.
+
+## Online Softmax: The Key Innovation
+
+The mathematical trick that makes Flash Attention possible:
+
+$$
+\text{softmax}(\text{concat}(x, y)) = \text{merge}(\text{softmax}(x), \text{softmax}(y))
+$$
+
+By maintaining running statistics (max, sum, output) and rescaling when we see new maximums, we can compute exact softmax in a single pass over tiles. This is **not an approximation**—the result is bit-identical to standard softmax.
+
+## Hardware Evolution
+
+The progression Flash Attention 1 → 2 → 3 mirrors GPU architecture evolution:
+
+- **FA1 (2022)**: Algorithmic innovation (tiling + online softmax)
+- **FA2 (2023)**: Software optimization (better parallelism, less overhead)
+- **FA3 (2024)**: Hardware exploitation (Hopper TMA, WGMMA, FP8)
+
+Each generation maintained backward compatibility (same API, same correctness) while adapting to new hardware capabilities. This is systems programming at its best.
+
+## What We Built
+
+Starting from first principles, we implemented:
+
+1. ✅ Numerically stable softmax with parallel reduction
+2. ✅ Attention via kernel composition (transpose, matmul, softmax)
+3. ✅ Online softmax for incremental updates
+4. ✅ Flash Attention 1 with tiled computation
+5. ✅ Understanding of FA2/FA3 optimizations
+
+All in Mojo, with explicit memory management and zero-cost abstractions.
+
+## Performance Checklist
+
+When optimizing GPU kernels, remember:
+
+- [ ] **Measure first**: Profile to find actual bottlenecks (don't guess!)
+- [ ] **Memory hierarchy**: SRAM >> HBM. Keep hot data in fast memory.
+- [ ] **Coalescing**: Ensure adjacent threads access adjacent memory.
+- [ ] **Occupancy**: Launch enough warps to hide latency.
+- [ ] **Arithmetic intensity**: Maximize FLOPs per byte moved.
+- [ ] **Roofline**: Know if you're memory- or compute-bound.
+- [ ] **Tiling**: Process data in blocks that fit in cache/SRAM.
+
+Flash Attention checks every box.
+
+# NOTE: CHECK VIDEO FOR FLASH ATTENTION EXPLANATION [Youtube](https://youtu.be/HXpw--AY57c?si=RpyvHVwEE7AZKRYP&t=2946)
+
+# FLASH ATTENTION VISUALS FROM HERE: [YOutube](https://www.youtube.com/watch?v=LKwyHWYEIMQ). Good visuals [here as well](https://www.youtube.com/watch?v=gBMO1JZav44&t=372s)jj
+
+## MLA Performance Characteristics
+
+| Phase | Memory | Compute | Bottleneck |
+|-------|--------|---------|------------|
+| **Prefill** | 7× savings | 2× overhead (compression/decompression) | Still compute-bound |
+| **Decode** | 7× savings | Minimal overhead (work in latent space) | Memory-bound (as usual) |
+
+The compute overhead during prefill is acceptable because prefill is already compute-bound (large batch of matmuls). The decode path is nearly free—we avoid decompression entirely by staying in latent space.
+
+## When to Use Each
+
+| Method | Use Case | Memory | Quality | Complexity |
+|--------|----------|--------|---------|------------|
+| **MHA** | Research, small models | Highest | Best | Simple |
+| **GQA** | Production (GPT-4, Llama 3) | 4-8× savings | Great | Simple |
+| **MQA** | Memory-critical (PaLM) | 32× savings | Good | Simple |
+| **MLA** | Ultra-long context (DeepSeek-V3) | 28× savings | Great | Complex |
+
+**Rule of thumb:**
+- Start with **GQA** (best quality/memory trade-off)
+- Use **MQA** if memory is critical and quality is acceptable
+- Use **MLA** for extremely long contexts (100k+ tokens)
+
+# Production Attention: Modular's Implementation
+
+Modular's MAX platform includes production-ready implementations of all these attention variants. Let's examine the key optimizations.
+
+## AMD GPU Kernel: Architecture-Specific Tuning
+
+From `max/kernels/src/nn/attention/gpu/amd/mha_gfx942.mojo`:
+
+```mojo
+# Hardware-specific MMA tile selection
+@parameter
+if is_gfx942():
+    alias MMA_SHAPE = (32, 32, 16)  # CDNA 4 optimized
+elif is_gfx950():
+    alias MMA_SHAPE = (16, 16, 16)  # RDNA 3 optimized
+```
+
+### Key Optimizations
+
+**1. Swizzled Shared Memory**
+```mojo
+alias K_SWIZZLE = Swizzle(2, 0, 2)  # Reduces bank conflicts
+
+var k_buffer = SharedMemoryBuffer[
+    dtype,
+    Layout.row_major(BLOCK_N, BLOCK_K),
+    swizzle=K_SWIZZLE
+]()
+```
+
+Bank conflicts occur when multiple threads access different addresses in the same memory bank. Swizzling permutes the address pattern to spread accesses across banks.
+
+**2. Pipelined Loading**
+```mojo
+# Prefetch next V tile while computing QK
+fn prefetch_v_tile():
+    v_next_buffer.load_async(v_ptr_next)
+
+mma[prefetch_function=prefetch_v_tile](
+    qk_accumulator, q_buffer, k_buffer
+)
+```
+
+While tensor cores compute Q@K, DMA engines load the next V tile. This overlaps compute and memory transfer.
+
+**3. Explicit Synchronization**
+```mojo
+# Post-QK barrier (required on AMD hardware)
+barrier()
+
+# Apply softmax
+online_softmax(qk_buffer, m, d)
+
+# Pre-PV barrier (empirically necessary for correctness)
+barrier()
+
+# PV accumulation
+mma(output, p_buffer, v_buffer)
+```
+
+AMD GPUs have different memory ordering guarantees than NVIDIA—explicit barriers ensure correctness.
+
+## CPU vs GPU: Same Algorithm, Different Hardware
+
+| Aspect | CPU (Modular Flash Attn) | GPU (Puzzle Implementation) |
+|--------|-------------------------|---------------------------|
+| **Parallelism** | `sync_parallelize` over heads | Thread blocks + warps |
+| **Memory** | L1/L2 cache (stack alloc) | Shared memory (explicit) |
+| **SIMD** | AVX512/NEON (4-64 wide) | Implicit warp (32/64 wide) |
+| **Synchronization** | Not needed (cache coherent) | `barrier()` required |
+| **Tile Size** | Dynamic (64-128) | Static (16-32) |
+| **Matmul** | BLAS (MKL/Accelerate) | Tiled shared memory |
+
+**The Algorithm is Identical:**
+
+- Online softmax with rescaling
+- Tiling to fit in fast memory
+- O(N) memory complexity
+- Never materialize full attention matrix
+
+**The Implementation Differs:**
+
+- CPU: Exploit large caches, use BLAS libraries
+- GPU: Explicit memory hierarchy, maximize parallelism
+
+This demonstrates the power of **algorithm/hardware separation**. Flash Attention's mathematical insight (online softmax + tiling) applies to any memory hierarchy—CPU cache, GPU SRAM, even TPU HBM.
+
+The core Flash Attention algorithm adapts to all these patterns—the tiling structure and online softmax remain unchanged, but each variant optimizes different aspects of the memory/compute trade-off.
+
+# Conclusion
+
+The journey highlights a powerful idea: **abstractions that map to hardware**. Mojo's LayoutTensor lets us write high-level code (`q @ kt`) that compiles to the same assembly as hand-tuned CUDA. The GPU's SIMT model exposes parallelism directly to the programmer. Flash Attention's tiling aligns well with the memory hierarchy.
+
+When abstractions and hardware co-design, you get both productivity *and* performance.
+
+Thanks for following along! Found a bug? Have a faster implementation? Open an issue in the [repo](https://github.com/goodhamgupta/mojo-gpu-puzzles) or yell at me on [Twitter/X](https://twitter.com/shubhamg2208).
+
+Happy hacking!
+
+---
+
+## References
+
+::: {#refs}
+:::

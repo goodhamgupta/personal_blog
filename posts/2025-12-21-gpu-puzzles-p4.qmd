@@ -1,0 +1,429 @@
+---
+title: "GPUs go brrr with Mojo: Moar Attention!"
+lightbox: true
+draft: true
+image: mojo_gpu_puzzles/attention_header.png
+date: '2025-12-21'
+author: Shubham Gupta
+description: "Attention variants in Mojo"
+toc: true
+bibliography: citations/mojo_citations.bib
+csl: citations/ieee.csl
+footnotes-hover: false
+execute:
+  echo: false
+format:
+  html:
+    highlight-style: gruvbox
+    code-overflow: wrap
+    code-fold: true
+    code-summary: "Solution"
+    syntax-definitions:
+      - mojo_gpu_puzzles/mojo.xml
+categories:
+- programming
+- gpu
+- mojo
+- attention
+---
+
+## Beyond Single-Query Attention
+
+Real transformers use more complex attention patterns. Let's implement the three most important variants used in production LLMs.
+
+# Multi-Head Attention (MHA): Parallel Attention Streams {#multi-head-attention}
+
+Multi-Head Attention runs multiple attention operations in parallel, each with its own learned query, key, and value projections. Instead of one attention mechanism, we have `num_heads` independent attention heads that can learn different relationships.
+
+## The Architecture
+
+Given hidden dimension $d_{model}$ and $h$ heads:
+
+$$
+\begin{aligned}
+d_{head} &= d_{model} / h \\
+Q_i, K_i, V_i &= X W^Q_i, X W^K_i, X W^V_i \quad \text{for } i \in [1, h] \\
+\text{head}_i &= \text{Attention}(Q_i, K_i, V_i) \\
+\text{MHA}(X) &= \text{Concat}(\text{head}_1, \ldots, \text{head}_h) W^O
+\end{aligned}
+$$
+
+Each head has dimension $d_{head} = 64$ or $128$ typically, allowing the model to attend to different aspects simultaneously:
+- Head 1: Syntactic relationships
+- Head 2: Semantic similarity
+- Head 3: Positional patterns
+- etc.
+
+## Why Multiple Heads?
+
+Single-head attention learns one similarity function. Multi-head lets the model learn $h$ different similarity functions in parallel. Empirically, this captures richer representations—one head might focus on local context, another on long-range dependencies.
+
+The cost: $h×$ more memory and compute for the Q/K/V projections, but each head operates on smaller dimensions so it's a good trade-off.
+
+## GPU Implementation Strategy
+
+The key insight: each attention head is **independent**. Perfect for parallelism!
+
+### Memory Layout
+
+```
+Q: (batch, seq_len, num_heads, head_dim)
+K: (batch, seq_len_kv, num_heads, head_dim)
+V: (batch, seq_len_kv, num_heads, head_dim)
+Output: (batch, seq_len, num_heads, head_dim)
+```
+
+We can reshape to `(batch * num_heads, seq_len, head_dim)` and run batched attention.
+
+### Parallelization Strategy
+
+**Option 1: Batch Parallelism**
+- Treat each (batch, head) pair as an independent problem
+- Launch `batch_size × num_heads` parallel attention computations
+- Simple but doesn't exploit shared K/V across heads
+
+**Option 2: Head-Parallel with Shared KV**
+- Load K/V tiles once, shared across all heads
+- Each head processes Q independently
+- Better memory efficiency
+
+<details open>
+<parameter name="summary"> **MHA Flash Attention Implementation** </summary>
+
+```{.mojo filename=mha_flash_attention.mojo}
+alias NUM_HEADS = 8
+alias HEAD_DIM = 64
+alias SEQ_LEN = 128
+alias BLOCK_SIZE = 64
+
+fn mha_flash_attention(
+    output: LayoutTensor[mut=True, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+    q: LayoutTensor[mut=False, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+    k: LayoutTensor[mut=False, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+    v: LayoutTensor[mut=False, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+):
+    # Each head is independent - parallelize over heads
+    @parameter
+    for head in range(NUM_HEADS):
+        # Extract this head's Q/K/V
+        var q_head = q.slice[head, :, :]
+        var k_head = k.slice[head, :, :]
+        var v_head = v.slice[head, :, :]
+        var o_head = output.slice[head, :, :]
+
+        # Run Flash Attention for this head (same as before!)
+        flash_attention_single_head(o_head, q_head, k_head, v_head)
+
+fn flash_attention_single_head(...):
+    # Same implementation as Flash Attention 1
+    # Initialize running statistics
+    var m = LayoutTensor[dtype, Layout.row_major(SEQ_LEN)](Float32(-inf))
+    var d = LayoutTensor[dtype, Layout.row_major(SEQ_LEN)](0.0)
+    var O = LayoutTensor[dtype, Layout.row_major(SEQ_LEN, HEAD_DIM)](0.0)
+
+    # Tile over K, V
+    for kv_block in range(0, SEQ_LEN, BLOCK_SIZE):
+        # Load K, V tiles into SRAM
+        var K_tile = load_tile(k, kv_block, BLOCK_SIZE)
+        var V_tile = load_tile(v, kv_block, BLOCK_SIZE)
+
+        # Compute Q @ K^T for this tile
+        var S = matmul(q, K_tile.transpose())
+
+        # Find local max
+        var m_new = max(S, axis=1)
+
+        # Local softmax numerators
+        var P = exp(S - m_new[:, None])
+        var d_new = sum(P, axis=1)
+
+        # Weighted output
+        var O_new = matmul(P, V_tile)
+
+        # === Online Softmax Update ===
+        var m_global = maximum(m, m_new)
+        var scale_old = exp(m - m_global)
+        var scale_new = exp(m_new - m_global)
+
+        d = d * scale_old + d_new * scale_new
+        O = O * scale_old[:, None] + O_new * scale_new[:, None]
+        m = m_global
+
+    # Final normalization
+    output[:, :] = O / d[:, None]
+```
+
+</details>
+
+## Multi-Query Attention (MQA): Sharing Keys and Values
+
+MQA is a memory optimization: use **one set of K/V** shared across all query heads, but keep separate Q projections.
+
+### Memory Savings
+
+**Standard MHA:**
+```
+KV cache: batch × seq_len × num_heads × head_dim × 2 (K and V)
+```
+
+**MQA:**
+```
+KV cache: batch × seq_len × 1 × head_dim × 2
+```
+
+For 32 heads: **32× memory reduction** in KV cache!
+
+### Why Does This Work?
+
+Keys and values determine "what information is available." Queries determine "what to look for." Sharing K/V means all heads see the same information pool, but can query it differently.
+
+Empirically, minimal quality degradation with massive memory savings—critical for serving large models.
+
+<details open>
+<parameter name="summary"> **MQA Implementation** </summary>
+
+```{.mojo filename=mqa.mojo}
+fn mqa_flash_attention(
+    output: LayoutTensor[mut=True, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+    q: LayoutTensor[mut=False, dtype, Layout.row_major(NUM_HEADS, SEQ_LEN, HEAD_DIM)],
+    k: LayoutTensor[mut=False, dtype, Layout.row_major(1, SEQ_LEN, HEAD_DIM)],  # Single head!
+    v: LayoutTensor[mut=False, dtype, Layout.row_major(1, SEQ_LEN, HEAD_DIM)],  # Single head!
+):
+    # K, V are shared - load once, use for all heads
+    for kv_block in range(0, SEQ_LEN, BLOCK_SIZE):
+        # Load shared K, V tiles into SRAM (loaded once per iteration)
+        var K_tile = load_tile(k, kv_block, BLOCK_SIZE)
+        var V_tile = load_tile(v, kv_block, BLOCK_SIZE)
+
+        # Process all query heads with this K/V tile
+        @parameter
+        for head in range(NUM_HEADS):
+            var q_head = q.slice[head, :, :]
+            var o_head = output.slice[head, :, :]
+
+            # Compute attention with shared K/V
+            var S = matmul(q_head, K_tile.transpose())
+            # ... rest of Flash Attention (same as before)
+```
+
+</details>
+
+## Grouped-Query Attention (GQA): The Middle Ground
+
+GQA splits the difference: divide heads into **groups**, each group shares K/V.
+
+```
+num_heads = 32
+num_kv_heads = 4  # 8 query heads per KV head
+```
+
+| Method | KV Heads | Memory | Quality |
+|--------|----------|--------|---------|
+| MHA | 32 | High | Best |
+| GQA | 4 | Medium | Good |
+| MQA | 1 | Low | Acceptable |
+
+GQA gives 8× memory savings with minimal quality loss—the sweet spot for many production systems.
+
+# Multi-Latent Attention (MLA): Compression via Low-Rank Decomposition {#multi-latent-attention}
+
+MLA is the newest innovation: compress the KV cache using **learned low-rank projections**. Instead of storing full-dimensional K/V, store compressed representations and decompress on-the-fly during attention.
+
+## The Key Idea: LoRA for KV Cache
+
+Standard attention stores:
+```
+K: (seq_len, d_model)  # Full dimension
+V: (seq_len, d_model)
+```
+
+MLA stores:
+```
+K_compressed: (seq_len, d_latent)  # d_latent << d_model
+V_compressed: (seq_len, d_latent)
+
+# Decompress during attention:
+K = K_compressed @ W_k_up  # (d_latent, d_model)
+V = V_compressed @ W_v_up  # (d_latent, d_model)
+```
+
+If `d_model = 4096` and `d_latent = 576`, we get **7× compression**!
+
+## Architecture Details
+
+MLA splits keys into two components:
+
+1. **Base keys** (576-dim): Compressed representation, learned compression
+2. **RoPE keys** (flexible): Rotary position embeddings, not compressed
+
+```
+K_full = [K_base || K_rope]
+     = [K_compressed @ W_up || RoPE(q)]
+```
+
+Why separate RoPE? Position embeddings need full precision for long-range reasoning. Semantic content compresses well.
+
+## Memory Comparison
+
+For DeepSeek-V3 (236B parameters, 128 KV heads):
+
+**Standard MHA:**
+```
+KV cache = 2 × seq_len × 128 × 128 × 2 bytes
+         = 2048 × 128 × 128 × 2 = 67 MB per token
+```
+
+**MLA (576-dim compression):**
+```
+KV cache = 2 × seq_len × 1 × 576 × 2 bytes
+         = 2048 × 576 × 2 = 2.4 MB per token
+```
+
+**28× memory reduction** enables much longer contexts or larger batch sizes.
+
+## Implementation: The Prefill/Decode Split
+
+MLA has two paths:
+
+### Prefill Path
+Process initial sequence with causal masking. The challenge: can't decompress all cached KV at once (too big!). Solution: **buffer-based iteration**.
+
+```python
+# Pseudocode for MLA prefill
+compressed_kv = kv_a_proj(input)  # Compress to 576-dim
+compressed_kv = rms_norm(compressed_kv)
+
+output = zeros_like(query)
+m = full(-inf)
+d = zeros()
+
+# Process KV in manageable buffer chunks
+for buffer_start in range(0, seq_len, BUFFER_SIZE):
+    # Decompress this chunk
+    k_buffer = compressed_kv[buffer_start:] @ W_k_up
+    v_buffer = compressed_kv[buffer_start:] @ W_v_up
+
+    # Add RoPE to keys
+    k_buffer = concat([k_base_buffer, k_rope_buffer])
+
+    # Run Flash Attention on this buffer
+    output, m, d = flash_attention_update(
+        query, k_buffer, v_buffer, output, m, d
+    )
+```
+
+### Decode Path
+Single-token generation. All previous KV is cached in compressed form:
+
+```python
+# Decompress query
+q_latent = q @ W_q_down  # Compress query to match cached KV
+q_full = [q_latent @ W_q_up || q_rope]
+
+# Attention over cached compressed KV (no decompression!)
+scores = q_latent @ cached_kv_compressed.T  # Already compressed!
+weights = softmax(scores)
+output = weights @ v_cached_compressed @ W_v_up  # Decompress only output
+```
+
+The clever bit: during decode, we **never decompress the entire KV cache**. We work in latent space.
+
+<details open>
+<parameter name="summary"> **MLA Implementation Sketch** </summary>
+
+```{.mojo filename=mla.mojo}
+alias D_MODEL = 4096
+alias D_LATENT = 576
+alias D_ROPE = 64
+alias SEQ_LEN = 2048
+alias BUFFER_SIZE = 512
+
+struct MLAAttention:
+    # Compression/decompression matrices
+    var W_kv_down: LayoutTensor[dtype, Layout.row_major(D_MODEL, D_LATENT)]
+    var W_k_up: LayoutTensor[dtype, Layout.row_major(D_LATENT, D_MODEL - D_ROPE)]
+    var W_v_up: LayoutTensor[dtype, Layout.row_major(D_LATENT, D_MODEL)]
+
+    fn prefill(
+        self,
+        q: LayoutTensor[dtype, Layout.row_major(SEQ_LEN, D_MODEL)],
+        k_input: LayoutTensor[dtype, Layout.row_major(SEQ_LEN, D_MODEL)],
+        v_input: LayoutTensor[dtype, Layout.row_major(SEQ_LEN, D_MODEL)],
+    ) -> LayoutTensor[dtype, Layout.row_major(SEQ_LEN, D_MODEL)]:
+        # Compress K, V to latent space
+        var k_compressed = matmul(k_input, self.W_kv_down)  # (seq_len, 576)
+        var v_compressed = matmul(v_input, self.W_kv_down)
+
+        # Initialize output and statistics
+        var output = zeros[SEQ_LEN, D_MODEL]()
+        var m = full[SEQ_LEN](-Float32.MAX)
+        var d = zeros[SEQ_LEN]()
+
+        # Process in buffer chunks to manage memory
+        for buffer_start in range(0, SEQ_LEN, BUFFER_SIZE):
+            let buffer_end = min(buffer_start + BUFFER_SIZE, SEQ_LEN)
+
+            # Decompress this buffer chunk
+            var k_base_buffer = matmul(
+                k_compressed[buffer_start:buffer_end],
+                self.W_k_up
+            )
+            var v_buffer = matmul(
+                v_compressed[buffer_start:buffer_end],
+                self.W_v_up
+            )
+
+            # Compute RoPE component for keys
+            var k_rope_buffer = apply_rope(q[:, -D_ROPE:])
+            var k_full_buffer = concat([k_base_buffer, k_rope_buffer], axis=1)
+
+            # Flash Attention update with online softmax
+            flash_attention_buffer_update(
+                q, k_full_buffer, v_buffer,
+                output, m, d,
+                buffer_start
+            )
+
+        # Final normalization
+        output = output / d[:, None]
+
+        # Cache compressed K, V for decode
+        self.kv_cache_compressed = (k_compressed, v_compressed)
+
+        return output
+
+    fn decode(
+        self,
+        q_token: LayoutTensor[dtype, Layout.row_major(1, D_MODEL)],
+    ) -> LayoutTensor[dtype, Layout.row_major(1, D_MODEL)]:
+        # Split query into base and RoPE components
+        var q_base = q_token[:, :D_MODEL - D_ROPE]
+        var q_rope = q_token[:, -D_ROPE:]
+
+        # Project to latent space (matches cached compressed KV)
+        var q_latent = matmul(q_base, self.W_kv_down)  # (1, 576)
+
+        # Attention directly in latent space!
+        var scores = matmul(
+            q_latent,
+            self.kv_cache_compressed[0].transpose()  # Compressed K
+        )
+
+        # Add RoPE similarity (full precision)
+        var rope_scores = matmul(q_rope, k_rope_cache.transpose())
+        scores = scores + rope_scores
+
+        # Softmax
+        var weights = softmax(scores)  # (1, cached_seq_len)
+
+        # Weighted sum in latent space, then decompress
+        var output_latent = matmul(
+            weights,
+            self.kv_cache_compressed[1]  # Compressed V
+        )
+        var output = matmul(output_latent, self.W_v_up)
+
+        return output
+```
+
+</details>
