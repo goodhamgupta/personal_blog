@@ -87,11 +87,13 @@ softmax = exp_x / exp_x.sum()  # [0.09, 0.244, 0.665] ✓
 Computing softmax on GPU requires two parallel reductions (recall [Puzzle 10](./2025-07-20-gpu-puzzles-p2.qmd#puzzle-10)'s dot product reduction):
 
 **Pass 1: Find maximum**
+
 - Each thread loads one element into shared memory
 - Parallel tree reduction to find `max(x)`
 - Result stored in `shared[0]`
 
 **Pass 2: Compute exponentials and sum**
+
 - Each thread computes `exp(x[i] - max_val)`
 - Store in shared memory
 - Parallel reduction to find sum of exponentials
@@ -470,29 +472,26 @@ The standard softmax implementation we built in Puzzle 18 requires two passes ov
 
 This works when all values fit in memory, but Flash Attention processes attention scores in chunks. We need to compute softmax **incrementally**—updating our statistics as new values stream in, without storing everything.
 
-## The Mathematical Foundation
-
 Recall the numerically stable softmax formula:
 
 $$
 \text{softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max(x)
 $$
 
-The key insight: we can maintain **running statistics** (max and sum) and **rescale** previous results when we see a new maximum.
+The key insight[@milakov_online_normalizer_calculation]: we can maintain **running statistics** (max and sum) and **rescale** previous results when we see a new maximum.
 
-### Notation
+For a partial sequence $x^{(1)}$ processed so far, we track:
+- $m^{(1)}$ : current maximum seen
+- $d^{(1)}$ : current sum of exponentials (the normalizer/denominator)
 
-For a partial sequence processed so far, we track:
-- $m$ : current maximum seen
-- $d$ : current sum of exponentials (denominator)
-- $o$ : current weighted output (numerator)
+When we process a new block $x^{(2)}$ with local max $m^{(2)}$ and local sum $d^{(2)}$:
 
-When we process a new block with local max $m'$ and sum $d'$:
+1. **Update maximum**: $m^{(1,2)} = \max(m^{(1)}, m^{(2)})$
+2. **Rescale and combine sums**: 
+   $$d^{(1,2)} = e^{m^{(1)} - m^{(1,2)}} \cdot d^{(1)} + e^{m^{(2)} - m^{(1,2)}} \cdot d^{(2)}$$
 
-1. **Compare maximums**: The new global maximum is $m_{new} = \max(m, m')$
-2. **Rescale old statistics**: Scale the old sum by $e^{m - m_{new}}$ to account for the change in maximum
-3. **Update sum**: $d_{new} = d \cdot e^{m - m_{new}} + d' \cdot e^{m' - m_{new}}$
-4. **Update output**: $o_{new} = o \cdot e^{m - m_{new}} + o' \cdot e^{m' - m_{new}}$
+For the output values, we apply the same rescaling:
+$$o^{(1,2)} = e^{m^{(1)} - m^{(1,2)}} \cdot o^{(1)} + e^{m^{(2)} - m^{(1,2)}} \cdot o^{(2)}$$
 
 The beauty: this update is **exact**, not an approximation. The final result is identical to computing softmax over the entire sequence at once.
 
@@ -600,6 +599,9 @@ fn online_softmax_update(
     # Update maximum
     m = m_global
 ```
+
+Idea from [Jay shah](https://youtu.be/JwUcZwPOCpA?si=vEBDsfyPanMInR4a&t=364) talk: 
+ - Key idea of flash attention was to exploit the memory hierachy in order to speed up algorithm. In particular, not materialize the intermediate scores matrix to HBM. Leverage tiling and recomputation in order to speed up attention calculation.
 
 This is the core of Flash Attention. Instead of materializing the full `seq_len × seq_len` attention matrix, we process it in tiles, maintaining running statistics and updating them online.
 
@@ -744,6 +746,134 @@ During backpropagation:
 3. Still O(N) memory, but ~2× compute
 
 The net result: **training uses O(N) memory instead of O(N²)** while being faster than naive attention.
+
+## Implementation
+
+Here is the complete Flash Attention 1 implementation in Mojo. We use a fused kernel that handles tiling and online softmax.
+
+<details>
+<summary> **Solution** </summary>
+
+```{.mojo filename=flash_attention_v1.mojo}
+alias N = 256
+alias D = 64
+alias BLOCK_SIZE = 16  # Br and Bc
+alias dtype = DType.float32
+
+# Layouts
+alias q_layout = Layout.row_major(N, D)
+alias k_layout = Layout.row_major(N, D)
+alias v_layout = Layout.row_major(N, D)
+alias out_layout = Layout.row_major(N, D)
+
+fn flash_attention_1_kernel[
+    grid_dims: Tuple[Int, Int, Int],
+    block_dims: Tuple[Int, Int, Int]
+](
+    output: LayoutTensor[mut=True, dtype, out_layout],
+    q: LayoutTensor[mut=False, dtype, q_layout],
+    k: LayoutTensor[mut=False, dtype, k_layout],
+    v: LayoutTensor[mut=False, dtype, v_layout],
+):
+    # 1. Setup indices
+    var bx = block_idx.x  # Query block index
+    var tx = thread_idx.x # Row index within block (0 to BLOCK_SIZE-1)
+    
+    # Global row index for this thread
+    var q_row_idx = bx * BLOCK_SIZE + tx
+    
+    # 2. Allocate Shared Memory
+    # K and V tiles: (BLOCK_SIZE, D)
+    var k_shared = tb[dtype]().row_major[BLOCK_SIZE, D]().shared().alloc()
+    var v_shared = tb[dtype]().row_major[BLOCK_SIZE, D]().shared().alloc()
+    
+    # 3. Initialize Running Statistics (Registers)
+    # Each thread processes one query row, so we keep stats in registers
+    var m_running = -SIMD[dtype, 1].MAX # Running max
+    var l_running = SIMD[dtype, 1](0.0) # Running sum of exp
+    var acc = SIMD[dtype, D](0.0)       # Running output accumulator
+    
+    # Load Q row into registers (optimization)
+    var q_val = SIMD[dtype, D](0.0)
+    if q_row_idx < N:
+        for i in range(D):
+            q_val[i] = q[q_row_idx, i]
+            
+    # 4. Loop over K, V blocks
+    for kv_start in range(0, N, BLOCK_SIZE):
+        
+        # Cooperative Load K and V tiles
+        # Each thread loads one row of K and V
+        # (Assuming BLOCK_SIZE threads match BLOCK_SIZE rows)
+        var kv_row_idx = kv_start + tx
+        if kv_row_idx < N:
+            for i in range(D):
+                k_shared[tx, i] = k[kv_row_idx, i]
+                v_shared[tx, i] = v[kv_row_idx, i]
+        
+        barrier() # Wait for load
+        
+        # Compute Attention for this tile
+        if q_row_idx < N:
+            # a. Compute Scores S_ij = Q_i . K_j^T
+            # We compute dot product of q_val with all rows in k_shared
+            var m_block = -SIMD[dtype, 1].MAX
+            
+            # Pass 1: Find local max (m_block)
+            for j in range(BLOCK_SIZE):
+                # Manual dot product
+                var dot: Scalar[dtype] = 0.0
+                for d_idx in range(D):
+                    dot += q_val[d_idx] * k_shared[j, d_idx]
+                
+                if dot > m_block:
+                    m_block = dot
+            
+            # b. Online Softmax Update Logic
+            var m_new = max(m_running, m_block)
+            var scale_running = exp(m_running - m_new)
+            # scale_block is implicit in p calculation below (exp(dot - m_new))
+            
+            # Update Accumulator (rescale old)
+            acc = acc * scale_running
+            
+            # c. Compute P_ij and update Accumulator and Sum
+            var l_block = SIMD[dtype, 1](0.0)
+            
+            for j in range(BLOCK_SIZE):
+                # Recompute score (to save SRAM/Regs)
+                var dot: Scalar[dtype] = 0.0
+                for d_idx in range(D):
+                    dot += q_val[d_idx] * k_shared[j, d_idx]
+                
+                var p = exp(dot - m_new)
+                l_block += p
+                
+                # Accumulate: acc += p * V_j
+                for d_idx in range(D):
+                    acc[d_idx] += p * v_shared[j, d_idx]
+            
+            # Update Running Sum
+            l_running = l_running * scale_running + l_block
+            m_running = m_new
+            
+        barrier() # Wait before overwriting shared mem
+        
+    # 5. Finalize and Write Output
+    if q_row_idx < N:
+        var final_val = acc / l_running
+        for i in range(D):
+            output[q_row_idx, i] = final_val[i]
+```
+
+```bash
+pixi run flash_attention_v1
+# Output matches naive attention ✓
+# Memory usage: O(N) ✓
+```
+
+</details>
+
 
 # Bonus Puzzles: Scaling Up {#bonus-puzzles}
 

@@ -321,10 +321,6 @@ window.Quarto = {
   </ul></li>
   <li><a href="#online-softmax" id="toc-online-softmax" class="nav-link" data-scroll-target="#online-softmax">Online Softmax: The Missing Piece</a>
   <ul class="collapse">
-  <li><a href="#the-mathematical-foundation" id="toc-the-mathematical-foundation" class="nav-link" data-scroll-target="#the-mathematical-foundation">The Mathematical Foundation</a>
-  <ul class="collapse">
-  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Notation</a></li>
-  </ul></li>
   <li><a href="#worked-example" id="toc-worked-example" class="nav-link" data-scroll-target="#worked-example">Worked Example</a>
   <ul class="collapse">
   <li><a href="#block-1-process-1.0-3.0" id="toc-block-1-process-1.0-3.0" class="nav-link" data-scroll-target="#block-1-process-1.0-3.0">Block 1: Process [1.0, 3.0]</a></li>
@@ -345,6 +341,7 @@ window.Quarto = {
   <li><a href="#the-algorithm" id="toc-the-algorithm" class="nav-link" data-scroll-target="#the-algorithm">The Algorithm</a></li>
   <li><a href="#why-is-it-faster" id="toc-why-is-it-faster" class="nav-link" data-scroll-target="#why-is-it-faster">Why Is It Faster?</a></li>
   <li><a href="#backward-pass-recomputation" id="toc-backward-pass-recomputation" class="nav-link" data-scroll-target="#backward-pass-recomputation">Backward Pass: Recomputation</a></li>
+  <li><a href="#implementation-1" id="toc-implementation-1" class="nav-link" data-scroll-target="#implementation-1">Implementation</a></li>
   </ul></li>
   <li><a href="#bonus-puzzles" id="toc-bonus-puzzles" class="nav-link" data-scroll-target="#bonus-puzzles">Bonus Puzzles: Scaling Up</a>
   <ul class="collapse">
@@ -361,8 +358,8 @@ window.Quarto = {
   </ul></li>
   <li><a href="#flash-attention-evolution" id="toc-flash-attention-evolution" class="nav-link" data-scroll-target="#flash-attention-evolution">Flash Attention Evolution: 2, 3, and Beyond</a>
   <ul class="collapse">
-  <li><a href="#flash-attention-2-better-parallelism-dao_flash_attention_2" id="toc-flash-attention-2-better-parallelism-dao_flash_attention_2" class="nav-link" data-scroll-target="#flash-attention-2-better-parallelism-dao_flash_attention_2">Flash Attention 2: Better Parallelism <span class="citation" data-cites="dao_flash_attention_2">[4]</span></a></li>
-  <li><a href="#flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3" id="toc-flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3" class="nav-link" data-scroll-target="#flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3">Flash Attention 3: Exploiting Hopper’s Asynchrony <span class="citation" data-cites="dao_flash_attention_3">[5]</span></a>
+  <li><a href="#flash-attention-2-better-parallelism-dao_flash_attention_2" id="toc-flash-attention-2-better-parallelism-dao_flash_attention_2" class="nav-link" data-scroll-target="#flash-attention-2-better-parallelism-dao_flash_attention_2">Flash Attention 2: Better Parallelism <span class="citation" data-cites="dao_flash_attention_2">[5]</span></a></li>
+  <li><a href="#flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3" id="toc-flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3" class="nav-link" data-scroll-target="#flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3">Flash Attention 3: Exploiting Hopper’s Asynchrony <span class="citation" data-cites="dao_flash_attention_3">[6]</span></a>
   <ul class="collapse">
   <li><a href="#the-hardware-tma-and-wgmma" id="toc-the-hardware-tma-and-wgmma" class="nav-link" data-scroll-target="#the-hardware-tma-and-wgmma">The Hardware: TMA and WGMMA</a></li>
   <li><a href="#innovation-1-warp-specialization" id="toc-innovation-1-warp-specialization" class="nav-link" data-scroll-target="#innovation-1-warp-specialization">Innovation 1: Warp Specialization</a></li>
@@ -475,7 +472,7 @@ y_i = \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}
 <p>Each output is positive, between the range [0,1], and they sum to 1.0.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p18_softmax.png" class="lightbox" data-glightbox="description: .lightbox-desc-1" data-gallery="quarto-lightbox-gallery-1" title="Source: 3Blue1Brown"><img src="mojo_gpu_puzzles/p18_softmax.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: 3Blue1Brown"></a></p>
+<p><a href="mojo_gpu_puzzles/p18_softmax.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" data-glightbox="description: .lightbox-desc-1" title="Source: 3Blue1Brown"><img src="mojo_gpu_puzzles/p18_softmax.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Source: 3Blue1Brown"></a></p>
 <figcaption>Source: <a href="https://youtu.be/wjZofJX0v4M?si=sKSJDVHE0FO1gmUI&amp;t=1406">3Blue1Brown</a></figcaption>
 </figure>
 </div>
@@ -507,11 +504,22 @@ y_i = \frac{e^{x_i}}{\sum_{j=1}^{N} e^{x_j}}
 <section id="parallel-softmax-two-pass-reduction" class="level2">
 <h2 class="anchored" data-anchor-id="parallel-softmax-two-pass-reduction">Parallel Softmax: Two-Pass Reduction</h2>
 <p>Computing softmax on GPU requires two parallel reductions (recall <a href="../posts/2025-07-20-gpu-puzzles-p2.html#puzzle-10">Puzzle 10</a>’s dot product reduction):</p>
-<p><strong>Pass 1: Find maximum</strong> - Each thread loads one element into shared memory - Parallel tree reduction to find <code>max(x)</code> - Result stored in <code>shared[0]</code></p>
-<p><strong>Pass 2: Compute exponentials and sum</strong> - Each thread computes <code>exp(x[i] - max_val)</code> - Store in shared memory - Parallel reduction to find sum of exponentials - Each thread divides by the sum to get final softmax value</p>
+<p><strong>Pass 1: Find maximum</strong></p>
+<ul>
+<li>Each thread loads one element into shared memory</li>
+<li>Parallel tree reduction to find <code>max(x)</code></li>
+<li>Result stored in <code>shared[0]</code></li>
+</ul>
+<p><strong>Pass 2: Compute exponentials and sum</strong></p>
+<ul>
+<li>Each thread computes <code>exp(x[i] - max_val)</code></li>
+<li>Store in shared memory</li>
+<li>Parallel reduction to find sum of exponentials</li>
+<li>Each thread divides by the sum to get final softmax value</li>
+</ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p18_softmax_reduction.png" class="lightbox" data-glightbox="description: .lightbox-desc-2" data-gallery="quarto-lightbox-gallery-2" title="Two-pass softmax reduction: first find max (left), then sum exponentials (right)"><img src="mojo_gpu_puzzles/p18_softmax_reduction.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two-pass softmax reduction: first find max (left), then sum exponentials (right)"></a></p>
+<p><a href="mojo_gpu_puzzles/p18_softmax_reduction.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" data-glightbox="description: .lightbox-desc-2" title="Two-pass softmax reduction: first find max (left), then sum exponentials (right)"><img src="mojo_gpu_puzzles/p18_softmax_reduction.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Two-pass softmax reduction: first find max (left), then sum exponentials (right)"></a></p>
 <figcaption>Two-pass softmax reduction: first find max (left), then sum exponentials (right)</figcaption>
 </figure>
 </div>
@@ -631,7 +639,7 @@ I = \frac{3N \text{ FLOPs}}{8N \text{ bytes}} = 0.375 \text{ FLOP/byte}
 <h2 class="anchored" data-anchor-id="three-step-computation">Three-Step Computation</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/p19_attention_flow.png" class="lightbox" data-glightbox="description: .lightbox-desc-3" data-gallery="quarto-lightbox-gallery-3" title="Attention computation flow: scores → weights → output"><img src="mojo_gpu_puzzles/p19_attention_flow.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Attention computation flow: scores → weights → output"></a></p>
+<p><a href="mojo_gpu_puzzles/p19_attention_flow.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" data-glightbox="description: .lightbox-desc-3" title="Attention computation flow: scores → weights → output"><img src="mojo_gpu_puzzles/p19_attention_flow.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Attention computation flow: scores → weights → output"></a></p>
 <figcaption>Attention computation flow: scores → weights → output</figcaption>
 </figure>
 </div>
@@ -851,26 +859,19 @@ I = \frac{3N \text{ FLOPs}}{8N \text{ bytes}} = 0.375 \text{ FLOP/byte}
 <li>Compute exponentials and their sum</li>
 </ol>
 <p>This works when all values fit in memory, but Flash Attention processes attention scores in chunks. We need to compute softmax <strong>incrementally</strong>—updating our statistics as new values stream in, without storing everything.</p>
-<section id="the-mathematical-foundation" class="level2">
-<h2 class="anchored" data-anchor-id="the-mathematical-foundation">The Mathematical Foundation</h2>
 <p>Recall the numerically stable softmax formula:</p>
 <p><span class="math display">\[
 \text{softmax}(x_i) = \frac{e^{x_i - m}}{\sum_{j} e^{x_j - m}} \quad \text{where } m = \max(x)
 \]</span></p>
-<p>The key insight: we can maintain <strong>running statistics</strong> (max and sum) and <strong>rescale</strong> previous results when we see a new maximum.</p>
-<section id="notation" class="level3">
-<h3 class="anchored" data-anchor-id="notation">Notation</h3>
-<p>For a partial sequence processed so far, we track: - <span class="math inline">\(m\)</span> : current maximum seen - <span class="math inline">\(d\)</span> : current sum of exponentials (denominator) - <span class="math inline">\(o\)</span> : current weighted output (numerator)</p>
-<p>When we process a new block with local max <span class="math inline">\(m'\)</span> and sum <span class="math inline">\(d'\)</span>:</p>
+<p>The key insight<span class="citation" data-cites="milakov_online_normalizer_calculation"><a href="#ref-milakov_online_normalizer_calculation" role="doc-biblioref">[3]</a></span>: we can maintain <strong>running statistics</strong> (max and sum) and <strong>rescale</strong> previous results when we see a new maximum.</p>
+<p>For a partial sequence <span class="math inline">\(x^{(1)}\)</span> processed so far, we track: - <span class="math inline">\(m^{(1)}\)</span> : current maximum seen - <span class="math inline">\(d^{(1)}\)</span> : current sum of exponentials (the normalizer/denominator)</p>
+<p>When we process a new block <span class="math inline">\(x^{(2)}\)</span> with local max <span class="math inline">\(m^{(2)}\)</span> and local sum <span class="math inline">\(d^{(2)}\)</span>:</p>
 <ol type="1">
-<li><strong>Compare maximums</strong>: The new global maximum is <span class="math inline">\(m_{new} = \max(m, m')\)</span></li>
-<li><strong>Rescale old statistics</strong>: Scale the old sum by <span class="math inline">\(e^{m - m_{new}}\)</span> to account for the change in maximum</li>
-<li><strong>Update sum</strong>: <span class="math inline">\(d_{new} = d \cdot e^{m - m_{new}} + d' \cdot e^{m' - m_{new}}\)</span></li>
-<li><strong>Update output</strong>: <span class="math inline">\(o_{new} = o \cdot e^{m - m_{new}} + o' \cdot e^{m' - m_{new}}\)</span></li>
+<li><strong>Update maximum</strong>: <span class="math inline">\(m^{(1,2)} = \max(m^{(1)}, m^{(2)})\)</span></li>
+<li><strong>Rescale and combine sums</strong>: <span class="math display">\[d^{(1,2)} = e^{m^{(1)} - m^{(1,2)}} \cdot d^{(1)} + e^{m^{(2)} - m^{(1,2)}} \cdot d^{(2)}\]</span></li>
 </ol>
+<p>For the output values, we apply the same rescaling: <span class="math display">\[o^{(1,2)} = e^{m^{(1)} - m^{(1,2)}} \cdot o^{(1)} + e^{m^{(2)} - m^{(1,2)}} \cdot o^{(2)}\]</span></p>
 <p>The beauty: this update is <strong>exact</strong>, not an approximation. The final result is identical to computing softmax over the entire sequence at once.</p>
-</section>
-</section>
 <section id="worked-example" class="level2">
 <h2 class="anchored" data-anchor-id="worked-example">Worked Example</h2>
 <p>Let’s compute <code>softmax([1.0, 3.0, 2.0, 4.0])</code> in two blocks: <code>[1.0, 3.0]</code> and <code>[2.0, 4.0]</code>.</p>
@@ -957,13 +958,14 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update maximum</span></span>
 <span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    m <span class="op">=</span> m_global</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Idea from <a href="https://youtu.be/JwUcZwPOCpA?si=vEBDsfyPanMInR4a&amp;t=364">Jay shah</a> talk: - Key idea of flash attention was to exploit the memory hierachy in order to speed up algorithm. In particular, not materialize the intermediate scores matrix to HBM. Leverage tiling and recomputation in order to speed up attention calculation.</p>
 <p>This is the core of Flash Attention. Instead of materializing the full <code>seq_len × seq_len</code> attention matrix, we process it in tiles, maintaining running statistics and updating them online.</p>
 <p>The memory usage drops from <strong>O(seq_len²)</strong> to <strong>O(seq_len)</strong>, storing only the current tile and running statistics.</p>
 </section>
 </section>
 <section id="flash-attention-1" class="level1">
 <h1>Flash Attention 1: Tiled Attention with Online Softmax</h1>
-<p>Now we can understand the Flash Attention algorithm <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[3]</a></span>. The key idea: <strong>never materialize the full attention matrix</strong>. Instead:</p>
+<p>Now we can understand the Flash Attention algorithm <span class="citation" data-cites="dao_flashattention"><a href="#ref-dao_flashattention" role="doc-biblioref">[4]</a></span>. The key idea: <strong>never materialize the full attention matrix</strong>. Instead:</p>
 <ol type="1">
 <li>Divide K and V into blocks</li>
 <li>Process one block at a time, computing partial attention outputs</li>
@@ -1177,6 +1179,132 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <p>During backpropagation: 1. Recompute scores for each tile (same forward tiling pattern) 2. Compute gradients using stored output and running statistics 3. Still O(N) memory, but ~2× compute</p>
 <p>The net result: <strong>training uses O(N) memory instead of O(N²)</strong> while being faster than naive attention.</p>
 </section>
+<section id="implementation-1" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-1">Implementation</h2>
+<p>Here is the complete Flash Attention 1 implementation in Mojo. We use a fused kernel that handles tiling and online softmax.</p>
+<details>
+<summary>
+<strong>Solution</strong>
+</summary>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>flash_attention_v1.mojo</strong></pre>
+</div>
+<div class="sourceCode" id="cb19" data-filename="flash_attention_v1.mojo"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> N <span class="op">=</span> <span class="dv">256</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> D <span class="op">=</span> <span class="dv">64</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> BLOCK_SIZE <span class="op">=</span> <span class="dv">16</span>  <span class="co"># Br and Bc</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> dtype <span class="op">=</span> DType.float32</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Layouts</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> q_layout <span class="op">=</span> Layout.row_major(N, D)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> k_layout <span class="op">=</span> Layout.row_major(N, D)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> v_layout <span class="op">=</span> Layout.row_major(N, D)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> out_layout <span class="op">=</span> Layout.row_major(N, D)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> flash_attention_1_kernel[</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    grid_dims: Tuple[Int, Int, Int],</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    block_dims: Tuple[Int, Int, Int]</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>](</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    output: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, out_layout],</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    q: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, q_layout],</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    k: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, k_layout],</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    v: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, v_layout],</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Setup indices</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> bx <span class="op">=</span> block_idx.x  <span class="co"># Query block index</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tx <span class="op">=</span> thread_idx.x <span class="co"># Row index within block (0 to BLOCK_SIZE-1)</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Global row index for this thread</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> q_row_idx <span class="op">=</span> bx <span class="op">*</span> BLOCK_SIZE <span class="op">+</span> tx</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Allocate Shared Memory</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># K and V tiles: (BLOCK_SIZE, D)</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> k_shared <span class="op">=</span> tb[dtype]().row_major[BLOCK_SIZE, D]().shared().alloc()</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> v_shared <span class="op">=</span> tb[dtype]().row_major[BLOCK_SIZE, D]().shared().alloc()</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Initialize Running Statistics (Registers)</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each thread processes one query row, so we keep stats in registers</span></span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> m_running <span class="op">=</span> <span class="op">-</span>SIMD[dtype, <span class="dv">1</span>].MAX <span class="co"># Running max</span></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> l_running <span class="op">=</span> SIMD[dtype, <span class="dv">1</span>](<span class="fl">0.0</span>) <span class="co"># Running sum of exp</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> acc <span class="op">=</span> SIMD[dtype, D](<span class="fl">0.0</span>)       <span class="co"># Running output accumulator</span></span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Load Q row into registers (optimization)</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> q_val <span class="op">=</span> SIMD[dtype, D](<span class="fl">0.0</span>)</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> q_row_idx <span class="op">&lt;</span> N:</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>            q_val[i] <span class="op">=</span> q[q_row_idx, i]</span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Loop over K, V blocks</span></span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> kv_start <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, N, BLOCK_SIZE):</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Cooperative Load K and V tiles</span></span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Each thread loads one row of K and V</span></span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>        <span class="co"># (Assuming BLOCK_SIZE threads match BLOCK_SIZE rows)</span></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> kv_row_idx <span class="op">=</span> kv_start <span class="op">+</span> tx</span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> kv_row_idx <span class="op">&lt;</span> N:</span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>                k_shared[tx, i] <span class="op">=</span> k[kv_row_idx, i]</span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>                v_shared[tx, i] <span class="op">=</span> v[kv_row_idx, i]</span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>        barrier() <span class="co"># Wait for load</span></span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute Attention for this tile</span></span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> q_row_idx <span class="op">&lt;</span> N:</span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>            <span class="co"># a. Compute Scores S_ij = Q_i . K_j^T</span></span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>            <span class="co"># We compute dot product of q_val with all rows in k_shared</span></span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> m_block <span class="op">=</span> <span class="op">-</span>SIMD[dtype, <span class="dv">1</span>].MAX</span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Pass 1: Find local max (m_block)</span></span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(BLOCK_SIZE):</span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Manual dot product</span></span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>                <span class="kw">var</span> dot: Scalar[dtype] <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> d_idx <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>                    dot <span class="op">+=</span> q_val[d_idx] <span class="op">*</span> k_shared[j, d_idx]</span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> dot <span class="op">&gt;</span> m_block:</span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>                    m_block <span class="op">=</span> dot</span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>            <span class="co"># b. Online Softmax Update Logic</span></span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> m_new <span class="op">=</span> <span class="bu">max</span>(m_running, m_block)</span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> scale_running <span class="op">=</span> exp(m_running <span class="op">-</span> m_new)</span>
+<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a>            <span class="co"># scale_block is implicit in p calculation below (exp(dot - m_new))</span></span>
+<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Update Accumulator (rescale old)</span></span>
+<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">=</span> acc <span class="op">*</span> scale_running</span>
+<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-83"><a href="#cb19-83" aria-hidden="true" tabindex="-1"></a>            <span class="co"># c. Compute P_ij and update Accumulator and Sum</span></span>
+<span id="cb19-84"><a href="#cb19-84" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> l_block <span class="op">=</span> SIMD[dtype, <span class="dv">1</span>](<span class="fl">0.0</span>)</span>
+<span id="cb19-85"><a href="#cb19-85" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-86"><a href="#cb19-86" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(BLOCK_SIZE):</span>
+<span id="cb19-87"><a href="#cb19-87" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Recompute score (to save SRAM/Regs)</span></span>
+<span id="cb19-88"><a href="#cb19-88" aria-hidden="true" tabindex="-1"></a>                <span class="kw">var</span> dot: Scalar[dtype] <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb19-89"><a href="#cb19-89" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> d_idx <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-90"><a href="#cb19-90" aria-hidden="true" tabindex="-1"></a>                    dot <span class="op">+=</span> q_val[d_idx] <span class="op">*</span> k_shared[j, d_idx]</span>
+<span id="cb19-91"><a href="#cb19-91" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb19-92"><a href="#cb19-92" aria-hidden="true" tabindex="-1"></a>                <span class="kw">var</span> p <span class="op">=</span> exp(dot <span class="op">-</span> m_new)</span>
+<span id="cb19-93"><a href="#cb19-93" aria-hidden="true" tabindex="-1"></a>                l_block <span class="op">+=</span> p</span>
+<span id="cb19-94"><a href="#cb19-94" aria-hidden="true" tabindex="-1"></a>                </span>
+<span id="cb19-95"><a href="#cb19-95" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Accumulate: acc += p * V_j</span></span>
+<span id="cb19-96"><a href="#cb19-96" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> d_idx <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-97"><a href="#cb19-97" aria-hidden="true" tabindex="-1"></a>                    acc[d_idx] <span class="op">+=</span> p <span class="op">*</span> v_shared[j, d_idx]</span>
+<span id="cb19-98"><a href="#cb19-98" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-99"><a href="#cb19-99" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Update Running Sum</span></span>
+<span id="cb19-100"><a href="#cb19-100" aria-hidden="true" tabindex="-1"></a>            l_running <span class="op">=</span> l_running <span class="op">*</span> scale_running <span class="op">+</span> l_block</span>
+<span id="cb19-101"><a href="#cb19-101" aria-hidden="true" tabindex="-1"></a>            m_running <span class="op">=</span> m_new</span>
+<span id="cb19-102"><a href="#cb19-102" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb19-103"><a href="#cb19-103" aria-hidden="true" tabindex="-1"></a>        barrier() <span class="co"># Wait before overwriting shared mem</span></span>
+<span id="cb19-104"><a href="#cb19-104" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-105"><a href="#cb19-105" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. Finalize and Write Output</span></span>
+<span id="cb19-106"><a href="#cb19-106" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> q_row_idx <span class="op">&lt;</span> N:</span>
+<span id="cb19-107"><a href="#cb19-107" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> final_val <span class="op">=</span> acc <span class="op">/</span> l_running</span>
+<span id="cb19-108"><a href="#cb19-108" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(D):</span>
+<span id="cb19-109"><a href="#cb19-109" aria-hidden="true" tabindex="-1"></a>            output[q_row_idx, i] <span class="op">=</span> final_val[i]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pixi</span> run flash_attention_v1</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output matches naive attention ✓</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Memory usage: O(N) ✓</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
 </section>
 <section id="bonus-puzzles" class="level1">
 <h1>Bonus Puzzles: Scaling Up</h1>
@@ -1194,15 +1322,15 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <section id="batched-softmax" class="level3">
 <h3 class="anchored" data-anchor-id="batched-softmax">Batched Softmax</h3>
 <p>Process multiple independent softmax operations in parallel:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Input: (batch_size, seq_len)</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: (batch_size, seq_len)</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row gets its own softmax independently</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> batched_softmax_rowwise(...):</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    batch_idx <span class="op">=</span> block_idx.y</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each block processes one row</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parallel reduction within block</span></span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># No synchronization needed between rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Input: (batch_size, seq_len)</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: (batch_size, seq_len)</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row gets its own softmax independently</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> batched_softmax_rowwise(...):</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    batch_idx <span class="op">=</span> block_idx.y</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each block processes one row</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parallel reduction within block</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># No synchronization needed between rows</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Performance note</strong>: Row-wise batching is memory-friendly (coalesced reads). Column-wise batching requires transpose or strided access.</p>
 </section>
 </section>
@@ -1216,14 +1344,14 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <section id="batched-multi-query-attention" class="level3">
 <h3 class="anchored" data-anchor-id="batched-multi-query-attention">Batched Multi-Query Attention</h3>
 <p>Process multiple queries simultaneously:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Q: (batch_size, d)</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># K: (seq_len, d)</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># V: (seq_len, d)</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: (batch_size, d)</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Each query gets its own thread/warp</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># K, V tiles shared across all queries</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximizes K, V reuse</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Q: (batch_size, d)</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="co"># K: (seq_len, d)</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co"># V: (seq_len, d)</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Output: (batch_size, d)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Each query gets its own thread/warp</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a><span class="co"># K, V tiles shared across all queries</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Maximizes K, V reuse</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This is the pattern used in <strong>Multi-Query Attention (MQA)</strong> and <strong>Grouped-Query Attention (GQA)</strong>, which reduce KV cache size in LLM inference by sharing keys/values across query heads.</p>
 <p>The online softmax update happens independently per query, with each maintaining its own (m, d, O) statistics.</p>
 </section>
@@ -1233,7 +1361,7 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <h1>Flash Attention Evolution: 2, 3, and Beyond</h1>
 <p>Flash Attention 1 proved that tiling + online softmax could eliminate the O(N²) memory bottleneck. But the story doesn’t end there. Each subsequent version optimized for specific hardware and workload characteristics.</p>
 <section id="flash-attention-2-better-parallelism-dao_flash_attention_2" class="level2">
-<h2 class="anchored" data-anchor-id="flash-attention-2-better-parallelism-dao_flash_attention_2">Flash Attention 2: Better Parallelism <span class="citation" data-cites="dao_flash_attention_2"><a href="#ref-dao_flash_attention_2" role="doc-biblioref">[4]</a></span></h2>
+<h2 class="anchored" data-anchor-id="flash-attention-2-better-parallelism-dao_flash_attention_2">Flash Attention 2: Better Parallelism <span class="citation" data-cites="dao_flash_attention_2"><a href="#ref-dao_flash_attention_2" role="doc-biblioref">[5]</a></span></h2>
 <p><strong>Key Improvements:</strong></p>
 <ol type="1">
 <li><strong>Reduced non-matmul FLOPs</strong>: Restructured the algorithm to minimize overhead from rescaling operations</li>
@@ -1245,7 +1373,7 @@ softmax = [0.050/1.553, 0.368/1.553, 0.135/1.553, 1.0/1.553]
 <p>The core algorithm remains the same, but careful restructuring reduced the non-matmul overhead from ~30% to ~10% of runtime.</p>
 </section>
 <section id="flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3" class="level2">
-<h2 class="anchored" data-anchor-id="flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3">Flash Attention 3: Exploiting Hopper’s Asynchrony <span class="citation" data-cites="dao_flash_attention_3"><a href="#ref-dao_flash_attention_3" role="doc-biblioref">[5]</a></span></h2>
+<h2 class="anchored" data-anchor-id="flash-attention-3-exploiting-hoppers-asynchrony-dao_flash_attention_3">Flash Attention 3: Exploiting Hopper’s Asynchrony <span class="citation" data-cites="dao_flash_attention_3"><a href="#ref-dao_flash_attention_3" role="doc-biblioref">[6]</a></span></h2>
 <p>Flash Attention 3, released in 2024, is purpose-built for NVIDIA’s Hopper architecture (H100 GPUs). The key insight: <strong>Hopper’s new hardware units enable asynchronous execution</strong>, allowing us to overlap computation with data movement.</p>
 <section id="the-hardware-tma-and-wgmma" class="level3">
 <h3 class="anchored" data-anchor-id="the-hardware-tma-and-wgmma">The Hardware: TMA and WGMMA</h3>
@@ -1270,34 +1398,34 @@ Consumer Warps (remaining warps):
 </section>
 <section id="the-pipelining-strategy" class="level3">
 <h3 class="anchored" data-anchor-id="the-pipelining-strategy">The Pipelining Strategy</h3>
-<div class="sourceCode" id="cb22"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Pseudocode <span class="cf">for</span> FA3 warp specialization</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> warp_role <span class="op">==</span> PRODUCER:</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Producer loop: just move data</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile <span class="kw">in</span> <span class="bu">range</span>(num_tiles):</span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        tma_load_async(Q_tile[tile], Q_ptr <span class="op">+</span> tile_offset)</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        tma_load_async(K_tile[tile], K_ptr <span class="op">+</span> tile_offset)</span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        tma_load_async(V_tile[tile], V_ptr <span class="op">+</span> tile_offset)</span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Signal consumers: data ready</span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        arrive_on_barrier(tile)</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> warp_role <span class="op">==</span> CONSUMER:</span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Consumer loop: just compute</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile <span class="kw">in</span> <span class="bu">range</span>(num_tiles):</span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Wait <span class="cf">for</span> producers</span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>        wait_on_barrier(tile)</span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Compute QK<span class="op">^</span>T (overlapped <span class="cf">with</span> <span class="bu">next</span> tile<span class="st">'s TMA load!)</span></span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a><span class="er">        wgmma</span>(QK_scores, Q_shared[tile], K_shared[tile])</span>
-<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Softmax (low utilization, but that<span class="st">'s okay)</span></span>
-<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a><span class="er">        online_softmax</span>(QK_scores, m, d)</span>
-<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Compute PV (overlapped <span class="cf">with</span> <span class="bu">next</span> tile<span class="st">'s TMA load!)</span></span>
-<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a><span class="er">        wgmma</span>(Output, P_scores, V_shared[tile])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Pseudocode <span class="cf">for</span> FA3 warp specialization</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> warp_role <span class="op">==</span> PRODUCER:</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Producer loop: just move data</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile <span class="kw">in</span> <span class="bu">range</span>(num_tiles):</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        tma_load_async(Q_tile[tile], Q_ptr <span class="op">+</span> tile_offset)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        tma_load_async(K_tile[tile], K_ptr <span class="op">+</span> tile_offset)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        tma_load_async(V_tile[tile], V_ptr <span class="op">+</span> tile_offset)</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Signal consumers: data ready</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        arrive_on_barrier(tile)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> warp_role <span class="op">==</span> CONSUMER:</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Consumer loop: just compute</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile <span class="kw">in</span> <span class="bu">range</span>(num_tiles):</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Wait <span class="cf">for</span> producers</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>        wait_on_barrier(tile)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Compute QK<span class="op">^</span>T (overlapped <span class="cf">with</span> <span class="bu">next</span> tile<span class="st">'s TMA load!)</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="er">        wgmma</span>(QK_scores, Q_shared[tile], K_shared[tile])</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Softmax (low utilization, but that<span class="st">'s okay)</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="er">        online_softmax</span>(QK_scores, m, d)</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">//</span> Compute PV (overlapped <span class="cf">with</span> <span class="bu">next</span> tile<span class="st">'s TMA load!)</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="er">        wgmma</span>(Output, P_scores, V_shared[tile])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Result</strong>: The slow softmax operations are completely hidden behind fast WGMMA operations. Effective utilization jumps from 35% (FA2) to <strong>75%</strong> (FA3).</p>
 </section>
 <section id="innovation-2-gemm-softmax-interleaving" class="level3">
@@ -1357,11 +1485,11 @@ Consumer Warps (remaining warps):
 <p><strong>Quality preservation techniques:</strong></p>
 <p><strong>Block Quantization</strong>: Split Q, K, V tensors into blocks (e.g., 64×64 tiles) and quantize each block independently with its own scaling factor. This prevents outliers in one region from degrading precision everywhere.</p>
 <p><strong>Incoherent Processing</strong>: Multiply Q and K by a random Hadamard transform (orthogonal matrix with random signs). This “spreads out” outlier values that would otherwise cause large quantization errors.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Pseudocode <span class="cf">for</span> incoherent processing</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> apply_hadamard_transform(x: Tensor) <span class="op">-&gt;</span> Tensor:</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Random sign flips + Hadamard matrix multiplication</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> signs <span class="op">=</span> random_signs(x.shape)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> hadamard_matrix <span class="op">@</span> (signs <span class="op">*</span> x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Pseudocode <span class="cf">for</span> incoherent processing</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> apply_hadamard_transform(x: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Random sign flips + Hadamard matrix multiplication</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> signs <span class="op">=</span> random_signs(x.shape)</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> hadamard_matrix <span class="op">@</span> (signs <span class="op">*</span> x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Accuracy results:</strong> - Naive FP8: 2.4e-2 RMSE vs FP16 baseline - FA3 FP8 (block quantization + incoherent processing): <strong>9.1e-3 RMSE</strong> - <strong>2.6× accuracy improvement</strong> with same memory savings</p>
 <p>The combination of techniques enables <strong>&lt;0.1% quality degradation</strong> with <strong>2× speedup</strong>.</p>
 </section>
@@ -1404,18 +1532,18 @@ Consumer Warps (remaining warps):
 <h3 class="anchored" data-anchor-id="implementation-complexity">Implementation Complexity</h3>
 <p>The cost of these gains: <strong>significantly increased complexity</strong>.</p>
 <p><strong>FA2 kernel:</strong> ~500 lines, straightforward loop over tiles <strong>FA3 kernel:</strong> ~1500 lines, intricate warp coordination</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA3 synchronization pattern (simplified)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Producer<span class="op">-</span>consumer handshake</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>__shared__ barrier_t barriers[NUM_STAGES]<span class="op">;</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Producer</span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>tma_load_async(shared_mem, global_ptr)<span class="op">;</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>arrive_on(barriers[stage])<span class="op">;</span>  <span class="op">//</span> Signal: data ready</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Consumer</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>wait_on(barriers[stage])<span class="op">;</span>    <span class="op">//</span> Wait <span class="cf">for</span> data</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>wgmma(...)<span class="op">;</span>                  <span class="op">//</span> Compute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA3 synchronization pattern (simplified)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Producer<span class="op">-</span>consumer handshake</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>__shared__ barrier_t barriers[NUM_STAGES]<span class="op">;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Producer</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>tma_load_async(shared_mem, global_ptr)<span class="op">;</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>arrive_on(barriers[stage])<span class="op">;</span>  <span class="op">//</span> Signal: data ready</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Consumer</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>wait_on(barriers[stage])<span class="op">;</span>    <span class="op">//</span> Wait <span class="cf">for</span> data</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>wgmma(...)<span class="op">;</span>                  <span class="op">//</span> Compute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Each stage requires careful barrier management. Miss one <code>arrive_on</code> or <code>wait_on</code> and you get deadlock or incorrect results.</p>
 </section>
 <section id="when-fa3-wins" class="level3">
@@ -1498,15 +1626,15 @@ Consumer Warps (remaining warps):
 <h3 class="anchored" data-anchor-id="key-innovation-selective-rescaling">Key Innovation: Selective Rescaling</h3>
 <p><strong>FA3 problem</strong>: Rescale output every time a new maximum is encountered. For long sequences, this happens frequently, wasting cycles on unnecessary corrections.</p>
 <p><strong>FA4 solution</strong>: Only rescale when the maximum changes <strong>significantly enough to affect numerical accuracy</strong>.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA3: Rescale on every new <span class="bu">max</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> m_new <span class="op">&gt;</span> m_old:</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    correction_factor <span class="op">=</span> exp(m_old <span class="op">-</span> m_new)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    output <span class="op">*=</span> correction_factor</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA4: Rescale only when necessary</span>
-<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> m_new <span class="op">-</span> m_old <span class="op">&gt;</span> RESCALE_THRESHOLD:  <span class="op">//</span> Typically <span class="fl">1.0</span><span class="op">-</span><span class="fl">2.0</span></span>
-<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    correction_factor <span class="op">=</span> exp(m_old <span class="op">-</span> m_new)</span>
-<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    output <span class="op">*=</span> correction_factor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA3: Rescale on every new <span class="bu">max</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> m_new <span class="op">&gt;</span> m_old:</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    correction_factor <span class="op">=</span> exp(m_old <span class="op">-</span> m_new)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    output <span class="op">*=</span> correction_factor</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA4: Rescale only when necessary</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> m_new <span class="op">-</span> m_old <span class="op">&gt;</span> RESCALE_THRESHOLD:  <span class="op">//</span> Typically <span class="fl">1.0</span><span class="op">-</span><span class="fl">2.0</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    correction_factor <span class="op">=</span> exp(m_old <span class="op">-</span> m_new)</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    output <span class="op">*=</span> correction_factor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Why it works</strong>: If <code>m_new - m_old &lt; 1.0</code>, then <code>exp(m_old - m_new) ≈ 0.37-1.0</code>, which is close enough that skipping the correction has &lt;0.01% accuracy impact.</p>
 <p><strong>Result</strong>: <strong>10× reduction</strong> in correction operations for typical workloads.</p>
 </section>
@@ -1518,15 +1646,15 @@ Consumer Warps (remaining warps):
 2^x \approx c_0 + c_1 x + c_2 x^2 + c_3 x^3 \quad \text{for } x \in [0, 1]
 \]</span></p>
 <p>Implemented via <strong>Horner’s method</strong> (3 fused multiply-adds):</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> fast_exp2(x: Float32) <span class="op">-&gt;</span> Float32:</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Coefficients <span class="cf">for</span> cubic polynomial (minimax approximation)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c3 <span class="op">=</span> <span class="fl">0.0733664036</span></span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c2 <span class="op">=</span> <span class="fl">0.226894881</span></span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c1 <span class="op">=</span> <span class="fl">0.693058145</span></span>
-<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c0 <span class="op">=</span> <span class="fl">0.999999881</span></span>
-<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Horner<span class="st">'s method: 3 FMAs instead of 1 SFU call</span></span>
-<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="er">    return c0 + x * </span>(c1 <span class="op">+</span> x <span class="op">*</span> (c2 <span class="op">+</span> x <span class="op">*</span> c3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> fast_exp2(x: Float32) <span class="op">-&gt;</span> Float32:</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Coefficients <span class="cf">for</span> cubic polynomial (minimax approximation)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c3 <span class="op">=</span> <span class="fl">0.0733664036</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c2 <span class="op">=</span> <span class="fl">0.226894881</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c1 <span class="op">=</span> <span class="fl">0.693058145</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> c0 <span class="op">=</span> <span class="fl">0.999999881</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">//</span> Horner<span class="st">'s method: 3 FMAs instead of 1 SFU call</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="er">    return c0 + x * </span>(c1 <span class="op">+</span> x <span class="op">*</span> (c2 <span class="op">+</span> x <span class="op">*</span> c3))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Trade-off</strong>: - Error: &lt;0.0001 absolute error over [0, 1] - Cost: 3 FMA operations (3-6 cycles) vs.&nbsp;1 SFU (20-50 cycles when queued) - <strong>Net win</strong>: 3-8× faster exponentials for attention-heavy workloads</p>
 </section>
 <section id="the-pipeline" class="level3">
@@ -1616,28 +1744,28 @@ Cycle 91-100: Correction Warps rescale output (if needed)
 <p><strong>Lines of code:</strong> - FA2: ~500 (simple tiled loop) - FA3: ~1,500 (warp specialization) - FA4: ~3,000 (five-way specialization + polynomial exp + selective rescaling)</p>
 <p><strong>Barrier count per iteration:</strong> - FA2: 2-3 barriers - FA3: 5-7 barriers (producer/consumer coordination) - FA4: 12-15 barriers (five-way coordination)</p>
 <p>The complexity is staggering. FA4 resembles a distributed system more than a GPU kernel:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA4 coordination (simplified)</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> FA4Barriers:</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tile_loaded: barrier_t      <span class="co"># Load → MMA</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> qk_done: barrier_t          <span class="co"># MMA → Softmax</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> softmax_done: barrier_t     <span class="co"># Softmax → MMA (PV)</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> pv_done: barrier_t          <span class="co"># MMA → Correction</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> correction_done: barrier_t  <span class="co"># Correction → Epilogue</span></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> output_staged: barrier_t    <span class="co"># Epilogue → Load (next tile)</span></span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> fa4_kernel(...):</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    barriers <span class="op">=</span> FA4Barriers()</span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> warp_role <span class="op">==</span> LOAD:</span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>        load_tiles(barriers.tile_loaded)</span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> warp_role <span class="op">==</span> MMA:</span>
-<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>        compute_qk(barriers.tile_loaded, barriers.qk_done)</span>
-<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>        compute_pv(barriers.softmax_done, barriers.pv_done)</span>
-<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> warp_role <span class="op">==</span> SOFTMAX:</span>
-<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>        normalize_scores(barriers.qk_done, barriers.softmax_done)</span>
-<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... and so on</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> FA4 coordination (simplified)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="kw">struct</span> FA4Barriers:</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> tile_loaded: barrier_t      <span class="co"># Load → MMA</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> qk_done: barrier_t          <span class="co"># MMA → Softmax</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> softmax_done: barrier_t     <span class="co"># Softmax → MMA (PV)</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> pv_done: barrier_t          <span class="co"># MMA → Correction</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> correction_done: barrier_t  <span class="co"># Correction → Epilogue</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> output_staged: barrier_t    <span class="co"># Epilogue → Load (next tile)</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> fa4_kernel(...):</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    barriers <span class="op">=</span> FA4Barriers()</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> warp_role <span class="op">==</span> LOAD:</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>        load_tiles(barriers.tile_loaded)</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> warp_role <span class="op">==</span> MMA:</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>        compute_qk(barriers.tile_loaded, barriers.qk_done)</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>        compute_pv(barriers.softmax_done, barriers.pv_done)</span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">elif</span> warp_role <span class="op">==</span> SOFTMAX:</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>        normalize_scores(barriers.qk_done, barriers.softmax_done)</span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... and so on</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Every warp must hit every barrier in the correct order</strong>, or the kernel deadlocks. Debugging is a nightmare.</p>
 </section>
 <section id="when-fa4-makes-sense" class="level3">
@@ -1815,19 +1943,19 @@ Cycle 91-100: Correction Warps rescale output (if needed)
 <section id="the-naive-baseline-5-tflops" class="level2">
 <h2 class="anchored" data-anchor-id="the-naive-baseline-5-tflops">The Naive Baseline: 5 TFLOPs</h2>
 <p>A straightforward Mojo implementation computes one output element per thread:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> naive_matmul[M: Int, N: Int, K: Int](</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    c: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, Layout.row_major(M, N)],</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, Layout.row_major(M, K)],</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, Layout.row_major(K, N)],</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> acc <span class="op">=</span> Float32(<span class="dv">0</span>)</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K):</span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">+=</span> a[row, k].cast[DType.float32]() <span class="op">*</span> b[k, col].cast[DType.float32]()</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>        c[row, col] <span class="op">=</span> acc.cast[DType.bfloat16]()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> naive_matmul[M: Int, N: Int, K: Int](</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    c: LayoutTensor[mut<span class="op">=</span><span class="va">True</span>, dtype, Layout.row_major(M, N)],</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    a: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, Layout.row_major(M, K)],</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    b: LayoutTensor[mut<span class="op">=</span><span class="va">False</span>, dtype, Layout.row_major(K, N)],</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    row <span class="op">=</span> block_idx.y <span class="op">*</span> block_dim.y <span class="op">+</span> thread_idx.y</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    col <span class="op">=</span> block_idx.x <span class="op">*</span> block_dim.x <span class="op">+</span> thread_idx.x</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> row <span class="op">&lt;</span> M <span class="kw">and</span> col <span class="op">&lt;</span> N:</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> acc <span class="op">=</span> Float32(<span class="dv">0</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(K):</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>            acc <span class="op">+=</span> a[row, k].cast[DType.float32]() <span class="op">*</span> b[k, col].cast[DType.float32]()</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>        c[row, col] <span class="op">=</span> acc.cast[DType.bfloat16]()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Performance</strong>: ~5 TFLOPs on B200 (0.2% of peak 2250 TFLOPs). Why so slow?</p>
 <ul>
 <li>Each thread reads <code>2K</code> elements from global memory (high latency)</li>
@@ -1841,18 +1969,18 @@ Cycle 91-100: Correction Warps rescale output (if needed)
 <p>Blackwell’s tensor cores execute massive matrix operations in single instructions. The key: <strong>cooperative computation</strong> across warps.</p>
 <section id="tcgen05.mma-instruction" class="level3">
 <h3 class="anchored" data-anchor-id="tcgen05.mma-instruction">tcgen05.mma Instruction</h3>
-<div class="sourceCode" id="cb33"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Computes: C (<span class="kw">in</span> TMEM) <span class="op">+=</span> A <span class="op">@</span> B</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> A: <span class="dv">128</span>×<span class="dv">16</span> tile <span class="kw">in</span> shared memory</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> B: <span class="dv">16</span>×<span class="dv">256</span> tile <span class="kw">in</span> shared memory</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> C: <span class="dv">128</span>×<span class="dv">256</span> accumulator <span class="kw">in</span> tensor memory</span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>tcgen05.mma.cta_group::<span class="dv">1</span>(</span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    a_smem_desc,      <span class="op">//</span> Descriptor <span class="cf">for</span> A tile</span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    b_smem_desc,      <span class="op">//</span> Descriptor <span class="cf">for</span> B tile</span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    c_tmem_addr,      <span class="op">//</span> Address <span class="kw">in</span> tensor memory</span>
-<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    initial_c_desc,   <span class="op">//</span> Optional initial C values</span>
-<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    c_scale<span class="op">=</span><span class="fl">1.0</span>       <span class="op">//</span> Scaling factor</span>
-<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Computes: C (<span class="kw">in</span> TMEM) <span class="op">+=</span> A <span class="op">@</span> B</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> A: <span class="dv">128</span>×<span class="dv">16</span> tile <span class="kw">in</span> shared memory</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> B: <span class="dv">16</span>×<span class="dv">256</span> tile <span class="kw">in</span> shared memory</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> C: <span class="dv">128</span>×<span class="dv">256</span> accumulator <span class="kw">in</span> tensor memory</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>tcgen05.mma.cta_group::<span class="dv">1</span>(</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    a_smem_desc,      <span class="op">//</span> Descriptor <span class="cf">for</span> A tile</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    b_smem_desc,      <span class="op">//</span> Descriptor <span class="cf">for</span> B tile</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    c_tmem_addr,      <span class="op">//</span> Address <span class="kw">in</span> tensor memory</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    initial_c_desc,   <span class="op">//</span> Optional initial C values</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    c_scale<span class="op">=</span><span class="fl">1.0</span>       <span class="op">//</span> Scaling factor</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>What’s different from earlier GPUs?</strong></p>
 <table class="table">
 <thead>
@@ -1890,14 +2018,14 @@ Cycle 91-100: Correction Warps rescale output (if needed)
 <h3 class="anchored" data-anchor-id="tensor-memory-breaking-register-pressure">Tensor Memory: Breaking Register Pressure</h3>
 <p>Prior architectures stored MMA results in registers. With limited registers per thread (255), this constrained: - Tile sizes (smaller tiles = more kernel launches = overhead) - Pipelining depth (can’t overlap many stages) - Occupancy (large register usage = fewer active warps)</p>
 <p>Blackwell’s <strong>tensor memory</strong> is a separate 256KB on-chip buffer. Results accumulate there, freeing registers for other work.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Allocate tensor memory <span class="cf">for</span> output accumulator</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> c_tmem <span class="op">=</span> TMEMBuffer[DType.float32, <span class="dv">128</span>, <span class="dv">256</span>]()  <span class="co"># 128KB</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> MMA directly into TMEM (doesn<span class="st">'t touch registers!)</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="er">tcgen05.mma</span>(..., c_tmem.address, ...)</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Later: Load <span class="im">from</span> TMEM to registers <span class="cf">for</span> post<span class="op">-</span>processing</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>tcgen05.ld[layout, repeat](c_tmem.address, c_reg_tile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Allocate tensor memory <span class="cf">for</span> output accumulator</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> c_tmem <span class="op">=</span> TMEMBuffer[DType.float32, <span class="dv">128</span>, <span class="dv">256</span>]()  <span class="co"># 128KB</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> MMA directly into TMEM (doesn<span class="st">'t touch registers!)</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="er">tcgen05.mma</span>(..., c_tmem.address, ...)</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="op">//</span> Later: Load <span class="im">from</span> TMEM to registers <span class="cf">for</span> post<span class="op">-</span>processing</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>tcgen05.ld[layout, repeat](c_tmem.address, c_reg_tile)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="optimization-2-shared-memory-swizzling-288-tflops-1.9-faster" class="level2">
@@ -1916,18 +2044,18 @@ Thread 7: reads shared[0][7]   → Bank 0  # conflict!</code></pre>
 <section id="swizzle-pattern-343-128-byte-swizzle" class="level3">
 <h3 class="anchored" data-anchor-id="swizzle-pattern-343-128-byte-swizzle">Swizzle Pattern: &lt;3,4,3&gt; (128-byte swizzle)</h3>
 <p>The swizzle uses <strong>bitwise XOR</strong> to distribute data:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> apply_swizzle[bits_y: Int, bits_x: Int, bits_z: Int](offset: Int) <span class="op">-&gt;</span> Int:</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract bit fields</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> shift <span class="op">=</span> bits_y <span class="op">+</span> bits_x</span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> mask <span class="op">=</span> (<span class="dv">1</span> <span class="op">&lt;&lt;</span> bits_y) <span class="op">-</span> <span class="dv">1</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># XOR the middle bits with upper bits</span></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> offset <span class="op">^</span> ((offset <span class="op">&gt;&gt;</span> shift) <span class="op">&amp;</span> mask) <span class="op">&lt;&lt;</span> bits_x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> apply_swizzle[bits_y: Int, bits_x: Int, bits_z: Int](offset: Int) <span class="op">-&gt;</span> Int:</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Extract bit fields</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> shift <span class="op">=</span> bits_y <span class="op">+</span> bits_x</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> mask <span class="op">=</span> (<span class="dv">1</span> <span class="op">&lt;&lt;</span> bits_y) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># XOR the middle bits with upper bits</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> offset <span class="op">^</span> ((offset <span class="op">&gt;&gt;</span> shift) <span class="op">&amp;</span> mask) <span class="op">&lt;&lt;</span> bits_x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>For &lt;3,4,3&gt; swizzle: - 2³ = 8 rows per pattern - 2⁴ = 16 bytes per row - 2³ = 8 patterns cycling through 32 banks</p>
 <p><strong>Result</strong>: Adjacent threads access different banks. <strong>Zero bank conflicts</strong>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><a href="mojo_gpu_puzzles/blackwell_swizzle.png" class="lightbox" data-glightbox="description: .lightbox-desc-4" data-gallery="quarto-lightbox-gallery-4" title="Swizzled shared memory layout avoids bank conflicts"><img src="mojo_gpu_puzzles/blackwell_swizzle.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Swizzled shared memory layout avoids bank conflicts"></a></p>
+<p><a href="mojo_gpu_puzzles/blackwell_swizzle.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" data-glightbox="description: .lightbox-desc-4" title="Swizzled shared memory layout avoids bank conflicts"><img src="mojo_gpu_puzzles/blackwell_swizzle.png" class="img-fluid quarto-figure quarto-figure-center figure-img" alt="Swizzled shared memory layout avoids bank conflicts"></a></p>
 <figcaption>Swizzled shared memory layout avoids bank conflicts</figcaption>
 </figure>
 </div>
@@ -1941,27 +2069,27 @@ Thread 7: reads shared[0][7]   → Bank 0  # conflict!</code></pre>
 <li><strong>Hardware-managed</strong>: GPU handles address calculation, bounds checking</li>
 <li><strong>Frees registers</strong>: No need to track indices/pointers in threads</li>
 </ol>
-<div class="sourceCode" id="cb37"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> tma_load_tile[BM: Int, BK: Int](</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    smem_tile: SharedMemoryTensor[DType.bfloat16, BM, BK],</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    gmem_base: Pointer[DType.bfloat16],</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    barrier: Barrier,</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    tile_row: Int,</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    tile_col: Int,</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>):</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create TMA descriptor (once, outside kernel)</span></span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    tma_desc <span class="op">=</span> create_tma_descriptor(gmem_base, shape<span class="op">=</span>(M, K), tile_shape<span class="op">=</span>(BM, BK))</span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Async load (non-blocking)</span></span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    tma_desc.async_copy(</span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>        dst<span class="op">=</span>smem_tile,</span>
-<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>        barrier<span class="op">=</span>barrier,</span>
-<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>        coordinates<span class="op">=</span>(tile_row <span class="op">*</span> BM, tile_col <span class="op">*</span> BK)</span>
-<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Do other work here...</span></span>
-<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wait for completion</span></span>
-<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>    barrier.wait()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb39"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> tma_load_tile[BM: Int, BK: Int](</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    smem_tile: SharedMemoryTensor[DType.bfloat16, BM, BK],</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    gmem_base: Pointer[DType.bfloat16],</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    barrier: Barrier,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    tile_row: Int,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    tile_col: Int,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create TMA descriptor (once, outside kernel)</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    tma_desc <span class="op">=</span> create_tma_descriptor(gmem_base, shape<span class="op">=</span>(M, K), tile_shape<span class="op">=</span>(BM, BK))</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Async load (non-blocking)</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>    tma_desc.async_copy(</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>        dst<span class="op">=</span>smem_tile,</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>        barrier<span class="op">=</span>barrier,</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>        coordinates<span class="op">=</span>(tile_row <span class="op">*</span> BM, tile_col <span class="op">*</span> BK)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Do other work here...</span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Wait for completion</span></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>    barrier.wait()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Phase tracking</strong>: Barriers use phase bits to distinguish “tile N loaded” from “tile N+1 loaded” without separate barriers.</p>
 </section>
 <section id="optimization-4-2-sm-cooperative-mma-360-tflops" class="level2">
@@ -1979,17 +2107,17 @@ SM 1: Loads A_bottom (128×16) + B_right (16×128) = 4KB
 Both SMs: Compute full 256×256 output together
 Total: 8KB loaded for larger operation (1.5× memory efficiency)</code></pre>
 <p><strong>Cluster configuration</strong>:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="at">@__llvm_metadata</span>(<span class="st">`nvvm.cluster_dim`</span><span class="op">=</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>))  <span class="co"># 2 SMs per cluster</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> matmul_2sm(...):</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># TMA multicast to both SMs</span></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cluster_idx.x <span class="op">==</span> <span class="dv">0</span>:</span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        tma_load[multicast_mask<span class="op">=</span><span class="bn">0b11</span>](a_tile, ...)  <span class="co"># Both SMs receive A</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each SM loads half of B</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    tma_load(b_tile_half, offset<span class="op">=</span>cluster_idx.x <span class="op">*</span> half_size)</span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2-SM MMA</span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    tcgen05.mma.cta_group::<span class="dv">2</span>(a_desc, b_desc, c_tmem, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="at">@__llvm_metadata</span>(<span class="st">`nvvm.cluster_dim`</span><span class="op">=</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>))  <span class="co"># 2 SMs per cluster</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> matmul_2sm(...):</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># TMA multicast to both SMs</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cluster_idx.x <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        tma_load[multicast_mask<span class="op">=</span><span class="bn">0b11</span>](a_tile, ...)  <span class="co"># Both SMs receive A</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each SM loads half of B</span></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>    tma_load(b_tile_half, offset<span class="op">=</span>cluster_idx.x <span class="op">*</span> half_size)</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2-SM MMA</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    tcgen05.mma.cta_group::<span class="dv">2</span>(a_desc, b_desc, c_tmem, ...)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="optimization-5-pipelining-1429-tflops-4-faster" class="level2">
@@ -2005,39 +2133,39 @@ Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
 <section id="warp-specialization-for-pipelining" class="level3">
 <h3 class="anchored" data-anchor-id="warp-specialization-for-pipelining">Warp Specialization for Pipelining</h3>
 <p>Assign different warps to different tasks:</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>enum WarpRole:</span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    LOAD_A      <span class="co"># Issues TMA for A tiles</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    LOAD_B      <span class="co"># Issues TMA for B tiles</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    MMA_EARLY   <span class="co"># Launches MMA on stage N</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    MMA_LATE    <span class="co"># Launches MMA on stage N+1</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    EPILOGUE    <span class="co"># Writes results to global memory</span></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> pipelined_kernel[pipeline_stages: Int <span class="op">=</span> <span class="dv">5</span>](...):</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> role <span class="op">=</span> assign_warp_role(thread_idx.x <span class="op">//</span> <span class="dv">32</span>)</span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> role <span class="op">==</span> WarpRole.LOAD_A:</span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> stage <span class="kw">in</span> <span class="bu">range</span>(num_iterations):</span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for TMEM to be free</span></span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>            mma_barrier[stage <span class="op">%</span> pipeline_stages].wait(phase)</span>
-<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Load next A tile</span></span>
-<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>            tma_a.async_copy(a_smem[stage <span class="op">%</span> pipeline_stages], ...)</span>
-<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal data ready</span></span>
-<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>            tma_barrier[stage <span class="op">%</span> pipeline_stages].arrive()</span>
-<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
-<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> role <span class="op">==</span> WarpRole.MMA_EARLY:</span>
-<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> stage <span class="kw">in</span> <span class="bu">range</span>(num_iterations):</span>
-<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for data</span></span>
-<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>            tma_barrier[stage <span class="op">%</span> pipeline_stages].wait(phase)</span>
-<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Launch MMA</span></span>
-<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>            tcgen05.mma(a_desc, b_desc, c_tmem, ...)</span>
-<span id="cb43-31"><a href="#cb43-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb43-32"><a href="#cb43-32" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal TMEM consumed</span></span>
-<span id="cb43-33"><a href="#cb43-33" aria-hidden="true" tabindex="-1"></a>            mma_barrier[stage <span class="op">%</span> pipeline_stages].arrive()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>enum WarpRole:</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    LOAD_A      <span class="co"># Issues TMA for A tiles</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    LOAD_B      <span class="co"># Issues TMA for B tiles</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    MMA_EARLY   <span class="co"># Launches MMA on stage N</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    MMA_LATE    <span class="co"># Launches MMA on stage N+1</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    EPILOGUE    <span class="co"># Writes results to global memory</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> pipelined_kernel[pipeline_stages: Int <span class="op">=</span> <span class="dv">5</span>](...):</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> role <span class="op">=</span> assign_warp_role(thread_idx.x <span class="op">//</span> <span class="dv">32</span>)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> role <span class="op">==</span> WarpRole.LOAD_A:</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> stage <span class="kw">in</span> <span class="bu">range</span>(num_iterations):</span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for TMEM to be free</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>            mma_barrier[stage <span class="op">%</span> pipeline_stages].wait(phase)</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Load next A tile</span></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>            tma_a.async_copy(a_smem[stage <span class="op">%</span> pipeline_stages], ...)</span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal data ready</span></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>            tma_barrier[stage <span class="op">%</span> pipeline_stages].arrive()</span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">@parameter</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> role <span class="op">==</span> WarpRole.MMA_EARLY:</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> stage <span class="kw">in</span> <span class="bu">range</span>(num_iterations):</span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for data</span></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>            tma_barrier[stage <span class="op">%</span> pipeline_stages].wait(phase)</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Launch MMA</span></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>            tcgen05.mma(a_desc, b_desc, c_tmem, ...)</span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal TMEM consumed</span></span>
+<span id="cb45-33"><a href="#cb45-33" aria-hidden="true" tabindex="-1"></a>            mma_barrier[stage <span class="op">%</span> pipeline_stages].arrive()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Result</strong>: Load warps continuously feed data while MMA warps continuously compute. <strong>Near-100% utilization</strong>.</p>
 </section>
 </section>
@@ -2045,35 +2173,35 @@ Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
 <h2 class="anchored" data-anchor-id="optimization-6-cluster-launch-control-1773-tflops-sota">Optimization 6: Cluster Launch Control (1773 TFLOPs, SOTA!)</h2>
 <p><strong>Final bottleneck</strong>: Kernel relaunch overhead. Traditional approach launches a kernel per batch of tiles, wasting cycles on: - Initializing shared memory - Scheduling CTAs to SMs - Synchronizing across launches</p>
 <p><strong>Cluster Launch Control (CLC)</strong>: Hardware scheduler assigns work dynamically. A single persistent kernel runs continuously, with a scheduler warp distributing tiles.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> persistent_kernel_with_clc(...):</span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> scheduler_warp <span class="op">=</span> (thread_idx.x <span class="op">//</span> <span class="dv">32</span>) <span class="op">==</span> <span class="dv">0</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> num_tiles <span class="op">=</span> (M <span class="op">/</span> BM) <span class="op">*</span> (N <span class="op">/</span> BN) <span class="op">*</span> (K <span class="op">/</span> BK)</span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> scheduler_warp:</span>
-<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Scheduler warp: Assign tiles to idle clusters</span></span>
-<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> tile_idx <span class="op">=</span> cluster_id()  <span class="co"># Start with own ID</span></span>
-<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> tile_idx <span class="op">&lt;</span> num_tiles:</span>
-<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Write coordinates to shared memory</span></span>
-<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>            shared_tile_coords[<span class="dv">0</span>] <span class="op">=</span> tile_idx</span>
-<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal work ready</span></span>
-<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>            work_barrier.arrive()</span>
-<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Try to claim next tile (atomic)</span></span>
-<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>            tile_idx <span class="op">=</span> atomic_add(global_tile_counter, num_clusters)</span>
-<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
-<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Worker warps: Process assigned tiles</span></span>
-<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
-<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for work assignment</span></span>
-<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>            work_barrier.wait()</span>
-<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> tile_idx <span class="op">=</span> shared_tile_coords[<span class="dv">0</span>]</span>
-<span id="cb44-25"><a href="#cb44-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tile_idx <span class="op">&gt;=</span> num_tiles:</span>
-<span id="cb44-26"><a href="#cb44-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
-<span id="cb44-27"><a href="#cb44-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-28"><a href="#cb44-28" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Process this tile (normal matmul)</span></span>
-<span id="cb44-29"><a href="#cb44-29" aria-hidden="true" tabindex="-1"></a>            ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> persistent_kernel_with_clc(...):</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> scheduler_warp <span class="op">=</span> (thread_idx.x <span class="op">//</span> <span class="dv">32</span>) <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">var</span> num_tiles <span class="op">=</span> (M <span class="op">/</span> BM) <span class="op">*</span> (N <span class="op">/</span> BN) <span class="op">*</span> (K <span class="op">/</span> BK)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> scheduler_warp:</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Scheduler warp: Assign tiles to idle clusters</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">var</span> tile_idx <span class="op">=</span> cluster_id()  <span class="co"># Start with own ID</span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> tile_idx <span class="op">&lt;</span> num_tiles:</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Write coordinates to shared memory</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>            shared_tile_coords[<span class="dv">0</span>] <span class="op">=</span> tile_idx</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Signal work ready</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>            work_barrier.arrive()</span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Try to claim next tile (atomic)</span></span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>            tile_idx <span class="op">=</span> atomic_add(global_tile_counter, num_clusters)</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Worker warps: Process assigned tiles</span></span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Wait for work assignment</span></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>            work_barrier.wait()</span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>            <span class="kw">var</span> tile_idx <span class="op">=</span> shared_tile_coords[<span class="dv">0</span>]</span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tile_idx <span class="op">&gt;=</span> num_tiles:</span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>                <span class="cf">break</span></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Process this tile (normal matmul)</span></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>            ...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Benefit</strong>: Eliminates inter-kernel gaps. GPU stays saturated with work.</p>
 </section>
 <section id="performance-summary" class="level2">
@@ -2154,34 +2282,34 @@ Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
 <p>FA4’s performance depends on these matmul techniques:</p>
 <section id="qkt-computation-scores" class="level3">
 <h3 class="anchored" data-anchor-id="qkt-computation-scores">QK^T Computation (Scores)</h3>
-<div class="sourceCode" id="cb45"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: Q (seq_len, head_dim) @ K^T (head_dim, seq_len) = (seq_len, seq_len)</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Uses: 2-SM MMA, pipelining, tensor memory</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tile_q <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">128</span>):</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile_k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">256</span>):</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Load Q, K tiles via TMA</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>        tma_load(q_tile, ...)</span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>        tma_load(k_tile, ...)</span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2-SM MMA: 256×256×128 (if head_dim=128)</span></span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>        tcgen05.mma.cta_group::<span class="dv">2</span>(q_desc, k_desc, scores_tmem, ...)</span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Softmax on scores (in separate warps, overlapped)</span></span>
-<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>        online_softmax_update(scores_tmem, m, d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: Q (seq_len, head_dim) @ K^T (head_dim, seq_len) = (seq_len, seq_len)</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Uses: 2-SM MMA, pipelining, tensor memory</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tile_q <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">128</span>):</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile_k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">256</span>):</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Load Q, K tiles via TMA</span></span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>        tma_load(q_tile, ...)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>        tma_load(k_tile, ...)</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2-SM MMA: 256×256×128 (if head_dim=128)</span></span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>        tcgen05.mma.cta_group::<span class="dv">2</span>(q_desc, k_desc, scores_tmem, ...)</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Softmax on scores (in separate warps, overlapped)</span></span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>        online_softmax_update(scores_tmem, m, d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="pv-computation-weighted-output" class="level3">
 <h3 class="anchored" data-anchor-id="pv-computation-weighted-output">PV Computation (Weighted Output)</h3>
-<div class="sourceCode" id="cb46"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: P (seq_len, seq_len) @ V (seq_len, head_dim) = (seq_len, head_dim)</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Uses: Same techniques, different tile sizes</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tile_p <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">256</span>):</span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile_v <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">128</span>):</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Swizzled loads for P (attention weights)</span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>        tma_load[swizzle<span class="op">=&lt;</span><span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span><span class="op">&gt;</span>](p_tile, ...)</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>        tma_load(v_tile, ...)</span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># MMA into same output accumulator (online softmax merge)</span></span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>        tcgen05.mma(p_desc, v_desc, output_tmem, scale<span class="op">=</span>rescale_factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Shape: P (seq_len, seq_len) @ V (seq_len, head_dim) = (seq_len, head_dim)</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Uses: Same techniques, different tile sizes</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tile_p <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">256</span>):</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tile_v <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, seq_len, <span class="dv">128</span>):</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Swizzled loads for P (attention weights)</span></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>        tma_load[swizzle<span class="op">=&lt;</span><span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span><span class="op">&gt;</span>](p_tile, ...)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>        tma_load(v_tile, ...)</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># MMA into same output accumulator (online softmax merge)</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>        tcgen05.mma(p_desc, v_desc, output_tmem, scale<span class="op">=</span>rescale_factor)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="why-fa4-achieves-1.2-over-fa3" class="level3">
 <h3 class="anchored" data-anchor-id="why-fa4-achieves-1.2-over-fa3">Why FA4 Achieves 1.2× Over FA3</h3>
@@ -2403,44 +2531,44 @@ Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
 <section id="amd-gpu-kernel-architecture-specific-tuning" class="level2">
 <h2 class="anchored" data-anchor-id="amd-gpu-kernel-architecture-specific-tuning">AMD GPU Kernel: Architecture-Specific Tuning</h2>
 <p>From <code>max/kernels/src/nn/attention/gpu/amd/mha_gfx942.mojo</code>:</p>
-<div class="sourceCode" id="cb47"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardware-specific MMA tile selection</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> is_gfx942():</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> MMA_SHAPE <span class="op">=</span> (<span class="dv">32</span>, <span class="dv">32</span>, <span class="dv">16</span>)  <span class="co"># CDNA 4 optimized</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> is_gfx950():</span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> MMA_SHAPE <span class="op">=</span> (<span class="dv">16</span>, <span class="dv">16</span>, <span class="dv">16</span>)  <span class="co"># RDNA 3 optimized</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardware-specific MMA tile selection</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="at">@parameter</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> is_gfx942():</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> MMA_SHAPE <span class="op">=</span> (<span class="dv">32</span>, <span class="dv">32</span>, <span class="dv">16</span>)  <span class="co"># CDNA 4 optimized</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> is_gfx950():</span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">alias</span> MMA_SHAPE <span class="op">=</span> (<span class="dv">16</span>, <span class="dv">16</span>, <span class="dv">16</span>)  <span class="co"># RDNA 3 optimized</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="key-optimizations" class="level3">
 <h3 class="anchored" data-anchor-id="key-optimizations">Key Optimizations</h3>
 <p><strong>1. Swizzled Shared Memory</strong></p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> K_SWIZZLE <span class="op">=</span> Swizzle(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>)  <span class="co"># Reduces bank conflicts</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> k_buffer <span class="op">=</span> SharedMemoryBuffer[</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    dtype,</span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    Layout.row_major(BLOCK_N, BLOCK_K),</span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    swizzle<span class="op">=</span>K_SWIZZLE</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>]()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="kw">alias</span> K_SWIZZLE <span class="op">=</span> Swizzle(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">2</span>)  <span class="co"># Reduces bank conflicts</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> k_buffer <span class="op">=</span> SharedMemoryBuffer[</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    dtype,</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    Layout.row_major(BLOCK_N, BLOCK_K),</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    swizzle<span class="op">=</span>K_SWIZZLE</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>]()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Bank conflicts occur when multiple threads access different addresses in the same memory bank. Swizzling permutes the address pattern to spread accesses across banks.</p>
 <p><strong>2. Pipelined Loading</strong></p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefetch next V tile while computing QK</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefetch_v_tile():</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    v_next_buffer.load_async(v_ptr_next)</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>mma[prefetch_function<span class="op">=</span>prefetch_v_tile](</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    qk_accumulator, q_buffer, k_buffer</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prefetch next V tile while computing QK</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> prefetch_v_tile():</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    v_next_buffer.load_async(v_ptr_next)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>mma[prefetch_function<span class="op">=</span>prefetch_v_tile](</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    qk_accumulator, q_buffer, k_buffer</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>While tensor cores compute Q@K, DMA engines load the next V tile. This overlaps compute and memory transfer.</p>
 <p><strong>3. Explicit Synchronization</strong></p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Post-QK barrier (required on AMD hardware)</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>barrier()</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply softmax</span></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>online_softmax(qk_buffer, m, d)</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-PV barrier (empirically necessary for correctness)</span></span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>barrier()</span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="co"># PV accumulation</span></span>
-<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>mma(output, p_buffer, v_buffer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode mojo code-with-copy"><code class="sourceCode mojo"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Post-QK barrier (required on AMD hardware)</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>barrier()</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply softmax</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>online_softmax(qk_buffer, m, d)</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-PV barrier (empirically necessary for correctness)</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>barrier()</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a><span class="co"># PV accumulation</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>mma(output, p_buffer, v_buffer)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>AMD GPUs have different memory ordering guarantees than NVIDIA—explicit barriers ensure correctness.</p>
 </section>
 </section>
@@ -2524,14 +2652,17 @@ Cycle 26-30: Write tile 0    | Compute tile 1 | Load tile 2
 <div id="ref-gaohongnan_softmax_translation_invariance" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">H. Gao, <span>“Why softmax preserves order: Translation invariant, not invariant to scaling.”</span> 2022. Available: <a href="https://tinyurl.com/translation-invariance">https://tinyurl.com/translation-invariance</a></div>
 </div>
+<div id="ref-milakov_online_normalizer_calculation" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">M. Milakov and N. Gimelshein, <span>“Online normalizer calculation for softmax,”</span> <em>arXiv preprint arXiv:1805.02867</em>, 2018, Available: <a href="https://arxiv.org/abs/1805.02867">https://arxiv.org/abs/1805.02867</a></div>
+</div>
 <div id="ref-dao_flashattention" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">T. Dao, D. Y. Fu, S. Ermon, A. Rudra, and C. Ré, <span>“FlashAttention: Fast and memory-efficient exact attention with IO-awareness,”</span> <em>arXiv preprint arXiv:2205.14135</em>, 2022, Available: <a href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a></div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">T. Dao, D. Y. Fu, S. Ermon, A. Rudra, and C. Ré, <span>“FlashAttention: Fast and memory-efficient exact attention with IO-awareness,”</span> <em>arXiv preprint arXiv:2205.14135</em>, 2022, Available: <a href="https://arxiv.org/abs/2205.14135">https://arxiv.org/abs/2205.14135</a></div>
 </div>
 <div id="ref-dao_flash_attention_2" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">T. Dao, <span>“FlashAttention-2: Faster attention with better parallelism and work partitioning,”</span> <em>arXiv preprint arXiv:2307.08691</em>, 2023, Available: <a href="https://arxiv.org/abs/2307.08691">https://arxiv.org/abs/2307.08691</a></div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">T. Dao, <span>“FlashAttention-2: Faster attention with better parallelism and work partitioning,”</span> <em>arXiv preprint arXiv:2307.08691</em>, 2023, Available: <a href="https://arxiv.org/abs/2307.08691">https://arxiv.org/abs/2307.08691</a></div>
 </div>
 <div id="ref-dao_flash_attention_3" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">T. Dao <em>et al.</em>, <span>“Flash attention 3: Faster large-context attention using work partition, streaming, and quantization,”</span> <em>arXiv preprint arXiv:2407.08608</em>, 2024, Available: <a href="https://arxiv.org/abs/2407.08608">https://arxiv.org/abs/2407.08608</a></div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">T. Dao <em>et al.</em>, <span>“Flash attention 3: Faster large-context attention using work partition, streaming, and quantization,”</span> <em>arXiv preprint arXiv:2407.08608</em>, 2024, Available: <a href="https://arxiv.org/abs/2407.08608">https://arxiv.org/abs/2407.08608</a></div>
 </div>
 </div>
 
@@ -3070,7 +3201,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <input type="hidden" id="giscus-base-theme" value="light">
 <input type="hidden" id="giscus-alt-theme" value="dark">
 </div> <!-- /content -->
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","descPosition":"bottom","openEffect":"zoom","loop":false,"closeEffect":"zoom"});
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/goodhamgupta/personal_blog/issues/new" class="toc-action"><i class="bi bi-github"></i>Report an issue</a></li></ul></div></div></div></footer><script>var lightboxQuarto = GLightbox({"selector":".lightbox","closeEffect":"zoom","loop":false,"descPosition":"bottom","openEffect":"zoom"});
 window.onload = () => {
   lightboxQuarto.on('slide_before_load', (data) => {
     const { slideIndex, slideNode, slideConfig, player, trigger } = data;
