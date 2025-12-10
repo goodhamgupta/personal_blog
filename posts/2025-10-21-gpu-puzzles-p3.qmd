@@ -1838,6 +1838,8 @@ Flash Attention checks every box.
 
 # FLASH ATTENTION VISUALS FROM HERE: [YOutube](https://www.youtube.com/watch?v=LKwyHWYEIMQ). Good visuals [here as well](https://www.youtube.com/watch?v=gBMO1JZav44&t=372s)jj
 
+# LinkedIn Multi-Item recommendation talks about creating a new kind of attention mask. Contributed to SGland and FlashInfer: [Link](https://www.linkedin.com/blog/engineering/ai/turbocharging-linkedins-recommendation-systems-with-sglang)
+
 ## MLA Performance Characteristics
 
 | Phase | Memory | Compute | Bottleneck |
