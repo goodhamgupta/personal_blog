@@ -8,3 +8,7 @@ venv/*
 
 # Specific files with MLFlow widget issues
 docs/posts/2025-09-01-cl-dspy-modelling/_2025-09-01-cl-dspy-modelling.html
+
+**/*.quarto_ipynb
+
+.cachebro/*
